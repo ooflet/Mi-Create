@@ -135,6 +135,7 @@ class MainWindow(QMainWindow):
         self.ui.actionshowAboutWindow.triggered.connect(self.showAboutWindow)
         self.ui.actionshowDefaultInfoDialog.triggered.connect(lambda: self.showDialogue("error", "Default Info Dialog", "No cause for alarm, this is a test dialogue!"))
         self.ui.actionshowToast.triggered.connect(lambda: notification.show_toast("Test", "This is a test notification!", duration = 5, threaded = False))
+        self.ui.actionshowColorDialog.connect(self.showColorDialog)
         self.ui.actionInstaller.triggered.connect(self.launchUpdater)
 
         # preferences
@@ -168,6 +169,11 @@ class MainWindow(QMainWindow):
 
     def compileProject(self):
         location = QFileDialog.getSaveFileName(self, 'Compile Project To...', "CompiledWatchface.bin", "Binary file (*.bin)")
+
+    def showColorDialog(self):
+        options_value = self._color_options.value()
+        options = QColorDialog.ColorDialogOptions(options_value)
+        color = QColorDialog.getColor(Qt.green, self, "Select Color", options)
 
     def showPreferences(self):
         self.loadSettings()

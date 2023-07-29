@@ -171,9 +171,8 @@
      </property>
      <addaction name="actionshowAboutWindow"/>
      <addaction name="actionshowDefaultInfoDialog"/>
-     <addaction name="actionshowOpenFile"/>
-     <addaction name="actionshowSaveFile"/>
      <addaction name="actionshowToast"/>
+     <addaction name="actionshowColorDialog"/>
     </widget>
     <widget class="QMenu" name="menuRun">
      <property name="title">
@@ -699,6 +698,11 @@
   <action name="actionAbout_Qt">
    <property name="text">
     <string>About Qt</string>
+   </property>
+  </action>
+  <action name="actionshowColorDialog">
+   <property name="text">
+    <string>showColorDialog</string>
    </property>
   </action>
  </widget>
