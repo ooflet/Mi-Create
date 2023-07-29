@@ -16,38 +16,12 @@ from window_ui import Ui_MainWindow
 from about_ui import Ui_Dialog as Ui_AboutDialog
 from credit_ui import Ui_Dialog as Ui_ThirdPartyNoticesDialog
 from preferences_ui import Ui_Dialog as Ui_Preferences
-from newVersion_ui import Ui_Dialog as Ui_NewVersionDialog
 
 currentVersion = '0.0.1b'
 notification = ToastNotifier()
 
 class Canvas(QGraphicsView):
-        def __init__(self, parent=None):
-            super().__init__(parent)
-            self.setAcceptDrops(True)
-
-        def dragEnterEvent(self, event):
-            if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
-                event.acceptProposedAction()
-
-        def dragMoveEvent(self, event):
-            if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
-                event.acceptProposedAction()
-
-        def dropEvent(self, event):
-            if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
-                data = event.mimeData()
-                model_data = data.data('application/x-qabstractitemmodeldatalist')
-                ba = QByteArray(model_data)
-                stream = QDataStream(ba)
-                while not stream.atEnd():
-                    row = stream.readInt32()
-                    col = stream.readInt32()
-                    item_data = stream.readQVariant()
-                    item = QTreeWidgetItem()
-                    item.setData(0, Qt.DisplayRole, item_data)
-                    self.addTopLevelItem(item)
-                event.acceptProposedAction()
+    pass
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -65,6 +39,8 @@ class MainWindow(QMainWindow):
 
         self.loadSettings()
         self.loadTheme()
+
+        self.statusBar().showMessage("Ready", 3000)
 
     def closeEvent(self, event):
         quit_msg = "Are you sure you want to exit the program?"
@@ -170,28 +146,28 @@ class MainWindow(QMainWindow):
         self.loadTheme()
 
     def newProject(self):
-        file = QFileDialog.getSaveFileName(self, 'New Project...', "myProject.mifp", "Mi Face project files (*.mifp);;Face project files (*.fprj)")
+        file = QFileDialog.getSaveFileName(self, 'New Project...', "", "Watch dial project (*.dial);;Legacy Face project files (*.fprj)")
         file_extension = QFileInfo(file[0]).suffix()
 
         if file_extension == "fprj":
-            self.showDialogue('warning', file[0], 'The project was created using the .fprj format. Elements such as shapes will be rendered as .png objects, and some features will not be available.')
+            self.showDialogue('warning', file[0], 'The project was created using the legacy .fprj format. To preserve compatibility, some features will not be available.')
             pass
         else:
             pass
 
     def openProject(self):
-        file = QFileDialog.getOpenFileName(self, 'Open Project...', "%userprofile%\\", "Watch Face project files (*.mifp *.fprj)")
+        file = QFileDialog.getOpenFileName(self, 'Open Project...', "%userprofile%\\", "Watchface project files (*.mifp *.fprj)")
         file_extension = QFileInfo(file[0]).suffix()
 
         if file_extension == "fprj":
-            self.showDialogue('warning', file[0], 'The selected file uses the .fprj format. Some features will not be available.')
+            self.showDialogue('warning', file[0], 'The selected file uses the legacy .fprj format. To preserve compatibility, some features will not be available.')
             pass
         else:
             pass
 
 
     def compileProject(self):
-        location = QFileDialog.getSaveFileName(self, 'Compile Project To...', "myCompiledProject.FACE", "Compiled face project (*.FACE)")
+        location = QFileDialog.getSaveFileName(self, 'Compile Project To...', "CompiledWatchface.bin", "Binary file (*.bin)")
 
     def showPreferences(self):
         self.loadSettings()
@@ -201,7 +177,7 @@ class MainWindow(QMainWindow):
         dialog = QDialog()
         about = Ui_AboutDialog()
         about.setupUi(dialog)
-        about.label_2.setText(f'<html><head/><body><p>Mi Face Studio v{currentVersion}<br/><a href="https://github.com/ooflet/Mi-Face-Studio/"><span style=" text-decoration: underline; color:#55aaff;">https://github.com/ooflet/Mi-Face-Studio/</span></a></p><p>made with <img src=":/Dark/heart.png"/> by tostr</p></body></html>')
+        about.label_2.setText(f'<html><head/><body><p>Mi Face Studio v{currentVersion}<br/><a href="https://github.com/ooflet/Mi-Face-Studio/"><span style=" text-decoration: underline; color:#55aaff;">https://github.com/ooflet/Mi-Face-Studio/</span></a></p><p>made with ❤️ by tostr</p></body></html>')
         dialog.exec()
 
     def showThirdPartyNotices(self):
@@ -228,13 +204,6 @@ class MainWindow(QMainWindow):
             MessageBox.warning(self, title, text, QMessageBox.Ok)
         elif type == "error":
             MessageBox.critical(self, title, text, QMessageBox.Ok)
-
-    def showNewVersionPopup(self, version):
-        dialog = QDialog()
-        about = Ui_NewVersionDialog()
-        about.Body.setText(f"A new version ({version}) is ready to download! Install now?")
-        about.setupUi(dialog)
-        dialog.exec()
 
 if __name__ == "__main__":
     import sys

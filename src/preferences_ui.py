@@ -17,9 +17,8 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QAbstractButton, QApplication, QComboBox, QDialog,
     QDialogButtonBox, QFontComboBox, QFrame, QGridLayout,
-    QGroupBox, QHBoxLayout, QLabel, QLayout,
-    QPushButton, QSizePolicy, QSpacerItem, QTabWidget,
-    QVBoxLayout, QWidget)
+    QGroupBox, QLabel, QLayout, QSizePolicy,
+    QSpacerItem, QTabWidget, QVBoxLayout, QWidget)
 import icons_rc
 
 class Ui_Dialog(object):
@@ -32,8 +31,15 @@ class Ui_Dialog(object):
         icon = QIcon()
         icon.addFile(u":/Dark/MiFaceStudioFavicon.png", QSize(), QIcon.Normal, QIcon.Off)
         Dialog.setWindowIcon(icon)
-        self.vboxLayout = QVBoxLayout(Dialog)
-        self.vboxLayout.setObjectName(u"vboxLayout")
+        self.gridLayout_3 = QGridLayout(Dialog)
+        self.gridLayout_3.setObjectName(u"gridLayout_3")
+        self.buttonBox = QDialogButtonBox(Dialog)
+        self.buttonBox.setObjectName(u"buttonBox")
+        self.buttonBox.setOrientation(Qt.Horizontal)
+        self.buttonBox.setStandardButtons(QDialogButtonBox.Cancel|QDialogButtonBox.Save)
+
+        self.gridLayout_3.addWidget(self.buttonBox, 1, 1, 1, 1)
+
         self.tabWidget = QTabWidget(Dialog)
         self.tabWidget.setObjectName(u"tabWidget")
         self.tabWidget.setElideMode(Qt.ElideNone)
@@ -43,6 +49,13 @@ class Ui_Dialog(object):
         self.Interface.setObjectName(u"Interface")
         self.gridLayout = QGridLayout(self.Interface)
         self.gridLayout.setObjectName(u"gridLayout")
+        self.frame_2 = QFrame(self.Interface)
+        self.frame_2.setObjectName(u"frame_2")
+        self.frame_2.setFrameShape(QFrame.StyledPanel)
+        self.frame_2.setFrameShadow(QFrame.Raised)
+
+        self.gridLayout.addWidget(self.frame_2, 1, 1, 1, 1)
+
         self.groupBox = QGroupBox(self.Interface)
         self.groupBox.setObjectName(u"groupBox")
         self.gridLayout_2 = QGridLayout(self.groupBox)
@@ -93,102 +106,6 @@ class Ui_Dialog(object):
 
         self.verticalLayout_3.addWidget(self.fontComboBox)
 
-        self.frame = QFrame(self.Property)
-        self.frame.setObjectName(u"frame")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
-        sizePolicy2.setHorizontalStretch(0)
-        sizePolicy2.setVerticalStretch(0)
-        sizePolicy2.setHeightForWidth(self.frame.sizePolicy().hasHeightForWidth())
-        self.frame.setSizePolicy(sizePolicy2)
-        self.frame.setMinimumSize(QSize(0, 30))
-        self.frame.setFrameShape(QFrame.NoFrame)
-        self.frame.setFrameShadow(QFrame.Raised)
-        self.horizontalLayout = QHBoxLayout(self.frame)
-        self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.horizontalLayout.setContentsMargins(0, -1, -1, -1)
-        self.accentColorRed = QPushButton(self.frame)
-        self.accentColorRed.setObjectName(u"accentColorRed")
-        sizePolicy3 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
-        sizePolicy3.setHorizontalStretch(0)
-        sizePolicy3.setVerticalStretch(0)
-        sizePolicy3.setHeightForWidth(self.accentColorRed.sizePolicy().hasHeightForWidth())
-        self.accentColorRed.setSizePolicy(sizePolicy3)
-        self.accentColorRed.setMinimumSize(QSize(20, 20))
-        self.accentColorRed.setStyleSheet(u"background-color: rgb(242, 85, 85);\n"
-"border: 0px solid black;\n"
-"\n"
-"\n"
-"")
-
-        self.horizontalLayout.addWidget(self.accentColorRed)
-
-        self.accentColorOrange = QPushButton(self.frame)
-        self.accentColorOrange.setObjectName(u"accentColorOrange")
-        sizePolicy3.setHeightForWidth(self.accentColorOrange.sizePolicy().hasHeightForWidth())
-        self.accentColorOrange.setSizePolicy(sizePolicy3)
-        self.accentColorOrange.setMinimumSize(QSize(20, 20))
-        self.accentColorOrange.setStyleSheet(u"background-color: rgb(225, 114, 11);\n"
-"border: 0px solid black;")
-
-        self.horizontalLayout.addWidget(self.accentColorOrange)
-
-        self.accentColorYellow = QPushButton(self.frame)
-        self.accentColorYellow.setObjectName(u"accentColorYellow")
-        sizePolicy3.setHeightForWidth(self.accentColorYellow.sizePolicy().hasHeightForWidth())
-        self.accentColorYellow.setSizePolicy(sizePolicy3)
-        self.accentColorYellow.setMinimumSize(QSize(20, 20))
-        self.accentColorYellow.setStyleSheet(u"background-color: rgb(255, 205, 39);\n"
-"border: 0px solid black;")
-
-        self.horizontalLayout.addWidget(self.accentColorYellow)
-
-        self.accentColorGreen = QPushButton(self.frame)
-        self.accentColorGreen.setObjectName(u"accentColorGreen")
-        sizePolicy3.setHeightForWidth(self.accentColorGreen.sizePolicy().hasHeightForWidth())
-        self.accentColorGreen.setSizePolicy(sizePolicy3)
-        self.accentColorGreen.setMinimumSize(QSize(20, 20))
-        self.accentColorGreen.setStyleSheet(u"background-color: rgb(39, 163, 65);\n"
-"border: 0px solid black;")
-
-        self.horizontalLayout.addWidget(self.accentColorGreen)
-
-        self.accentColorBlue_3 = QPushButton(self.frame)
-        self.accentColorBlue_3.setObjectName(u"accentColorBlue_3")
-        sizePolicy3.setHeightForWidth(self.accentColorBlue_3.sizePolicy().hasHeightForWidth())
-        self.accentColorBlue_3.setSizePolicy(sizePolicy3)
-        self.accentColorBlue_3.setMinimumSize(QSize(20, 20))
-        self.accentColorBlue_3.setStyleSheet(u"background-color: rgb(85, 170, 255);\n"
-"border: 0px solid black;")
-
-        self.horizontalLayout.addWidget(self.accentColorBlue_3)
-
-        self.accentColorBlue_6 = QPushButton(self.frame)
-        self.accentColorBlue_6.setObjectName(u"accentColorBlue_6")
-        sizePolicy3.setHeightForWidth(self.accentColorBlue_6.sizePolicy().hasHeightForWidth())
-        self.accentColorBlue_6.setSizePolicy(sizePolicy3)
-        self.accentColorBlue_6.setMinimumSize(QSize(20, 20))
-        self.accentColorBlue_6.setStyleSheet(u"background-color: rgb(146, 107, 255);\n"
-"border: 0px solid black;")
-
-        self.horizontalLayout.addWidget(self.accentColorBlue_6)
-
-        self.accentColorBlue_7 = QPushButton(self.frame)
-        self.accentColorBlue_7.setObjectName(u"accentColorBlue_7")
-        sizePolicy3.setHeightForWidth(self.accentColorBlue_7.sizePolicy().hasHeightForWidth())
-        self.accentColorBlue_7.setSizePolicy(sizePolicy3)
-        self.accentColorBlue_7.setMinimumSize(QSize(20, 20))
-        self.accentColorBlue_7.setStyleSheet(u"background-color: rgb(228, 84, 196);\n"
-"border: 0px solid black;")
-
-        self.horizontalLayout.addWidget(self.accentColorBlue_7)
-
-        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-
-        self.horizontalLayout.addItem(self.horizontalSpacer)
-
-
-        self.verticalLayout_3.addWidget(self.frame)
-
         self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
         self.verticalLayout_3.addItem(self.verticalSpacer)
@@ -198,11 +115,11 @@ class Ui_Dialog(object):
 
         self.PropertyLabel = QFrame(self.groupBox)
         self.PropertyLabel.setObjectName(u"PropertyLabel")
-        sizePolicy4 = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Minimum)
-        sizePolicy4.setHorizontalStretch(0)
-        sizePolicy4.setVerticalStretch(0)
-        sizePolicy4.setHeightForWidth(self.PropertyLabel.sizePolicy().hasHeightForWidth())
-        self.PropertyLabel.setSizePolicy(sizePolicy4)
+        sizePolicy2 = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Minimum)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(self.PropertyLabel.sizePolicy().hasHeightForWidth())
+        self.PropertyLabel.setSizePolicy(sizePolicy2)
         self.PropertyLabel.setMinimumSize(QSize(100, 0))
         self.PropertyLabel.setMaximumSize(QSize(100, 16777215))
         self.PropertyLabel.setFrameShape(QFrame.NoFrame)
@@ -212,11 +129,11 @@ class Ui_Dialog(object):
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
         self.Theme = QLabel(self.PropertyLabel)
         self.Theme.setObjectName(u"Theme")
-        sizePolicy5 = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
-        sizePolicy5.setHorizontalStretch(0)
-        sizePolicy5.setVerticalStretch(0)
-        sizePolicy5.setHeightForWidth(self.Theme.sizePolicy().hasHeightForWidth())
-        self.Theme.setSizePolicy(sizePolicy5)
+        sizePolicy3 = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        sizePolicy3.setHorizontalStretch(0)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(self.Theme.sizePolicy().hasHeightForWidth())
+        self.Theme.setSizePolicy(sizePolicy3)
         self.Theme.setMinimumSize(QSize(0, 22))
 
         self.verticalLayout_2.addWidget(self.Theme)
@@ -229,17 +146,14 @@ class Ui_Dialog(object):
 
         self.label = QLabel(self.PropertyLabel)
         self.label.setObjectName(u"label")
-        sizePolicy3.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
-        self.label.setSizePolicy(sizePolicy3)
+        sizePolicy4 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
+        sizePolicy4.setHorizontalStretch(0)
+        sizePolicy4.setVerticalStretch(0)
+        sizePolicy4.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
+        self.label.setSizePolicy(sizePolicy4)
         self.label.setMinimumSize(QSize(0, 22))
 
         self.verticalLayout_2.addWidget(self.label)
-
-        self.Color = QLabel(self.PropertyLabel)
-        self.Color.setObjectName(u"Color")
-        self.Color.setMinimumSize(QSize(0, 40))
-
-        self.verticalLayout_2.addWidget(self.Color)
 
         self.verticalSpacer_4 = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
@@ -249,14 +163,7 @@ class Ui_Dialog(object):
         self.gridLayout_2.addWidget(self.PropertyLabel, 0, 0, 1, 1)
 
 
-        self.gridLayout.addWidget(self.groupBox, 0, 0, 1, 1)
-
-        self.frame_2 = QFrame(self.Interface)
-        self.frame_2.setObjectName(u"frame_2")
-        self.frame_2.setFrameShape(QFrame.StyledPanel)
-        self.frame_2.setFrameShadow(QFrame.Raised)
-
-        self.gridLayout.addWidget(self.frame_2, 1, 0, 1, 1)
+        self.gridLayout.addWidget(self.groupBox, 0, 1, 1, 1)
 
         self.tabWidget.addTab(self.Interface, "")
         self.Keyboard = QWidget()
@@ -273,14 +180,7 @@ class Ui_Dialog(object):
         self.Behaviour.setObjectName(u"Behaviour")
         self.tabWidget.addTab(self.Behaviour, "")
 
-        self.vboxLayout.addWidget(self.tabWidget)
-
-        self.buttonBox = QDialogButtonBox(Dialog)
-        self.buttonBox.setObjectName(u"buttonBox")
-        self.buttonBox.setOrientation(Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QDialogButtonBox.Cancel|QDialogButtonBox.Save)
-
-        self.vboxLayout.addWidget(self.buttonBox)
+        self.gridLayout_3.addWidget(self.tabWidget, 0, 1, 1, 1)
 
 
         self.retranslateUi(Dialog)
@@ -304,17 +204,9 @@ class Ui_Dialog(object):
         self.languageComboBox.setItemText(2, QCoreApplication.translate("Dialog", u"\u7b80\u4f53\u4e2d\u6587", None))
         self.languageComboBox.setItemText(3, QCoreApplication.translate("Dialog", u"\u0420\u0443\u0441\u0441\u043a\u0438\u0439", None))
 
-        self.accentColorRed.setText("")
-        self.accentColorOrange.setText("")
-        self.accentColorYellow.setText("")
-        self.accentColorGreen.setText("")
-        self.accentColorBlue_3.setText("")
-        self.accentColorBlue_6.setText("")
-        self.accentColorBlue_7.setText("")
         self.Theme.setText(QCoreApplication.translate("Dialog", u"Theme:", None))
         self.Language.setText(QCoreApplication.translate("Dialog", u"Language:", None))
         self.label.setText(QCoreApplication.translate("Dialog", u"Font:", None))
-        self.Color.setText(QCoreApplication.translate("Dialog", u"Accent Color:", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.Interface), QCoreApplication.translate("Dialog", u"Interface", None))
         self.groupBox_2.setTitle(QCoreApplication.translate("Dialog", u"GroupBox", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.Keyboard), QCoreApplication.translate("Dialog", u"Keyboard", None))

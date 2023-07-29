@@ -17,11 +17,12 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
 from PySide6.QtWidgets import (QAbstractItemView, QApplication, QDockWidget, QFrame,
-    QGraphicsView, QGridLayout, QHeaderView, QListView,
-    QListWidget, QListWidgetItem, QMainWindow, QMenu,
-    QMenuBar, QScrollArea, QSizePolicy, QTabWidget,
-    QToolBar, QTreeWidget, QTreeWidgetItem, QVBoxLayout,
-    QWidget)
+    QGridLayout, QHeaderView, QListView, QListWidget,
+    QListWidgetItem, QMainWindow, QMenu, QMenuBar,
+    QSizePolicy, QStatusBar, QTabWidget, QToolBar,
+    QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget)
+
+from canvas_widget import Canvas
 import icons_rc
 
 class Ui_MainWindow(object):
@@ -96,7 +97,7 @@ class Ui_MainWindow(object):
         self.actionOpenFile = QAction(MainWindow)
         self.actionOpenFile.setObjectName(u"actionOpenFile")
         icon2 = QIcon()
-        icon2.addFile(u"resources/folder-open.png", QSize(), QIcon.Normal, QIcon.Off)
+        icon2.addFile(u":/Dark/folder-open.png", QSize(), QIcon.Normal, QIcon.Off)
         self.actionOpenFile.setIcon(icon2)
         self.actionUndo = QAction(MainWindow)
         self.actionUndo.setObjectName(u"actionUndo")
@@ -135,33 +136,15 @@ class Ui_MainWindow(object):
         self.tab.setObjectName(u"tab")
         self.tab.setStyleSheet(u"")
         self.verticalLayout_2 = QVBoxLayout(self.tab)
-        self.verticalLayout_2.setSpacing(0)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
         self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
-        self.scrollArea = QScrollArea(self.tab)
-        self.scrollArea.setObjectName(u"scrollArea")
-        self.scrollArea.setStyleSheet(u"")
-        self.scrollArea.setFrameShape(QFrame.NoFrame)
-        self.scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
-        self.scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
-        self.scrollArea.setWidgetResizable(True)
-        self.scrollAreaWidgetContents = QWidget()
-        self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 707, 454))
-        self.gridLayout_3 = QGridLayout(self.scrollAreaWidgetContents)
-        self.gridLayout_3.setObjectName(u"gridLayout_3")
-        self.gridLayout_3.setContentsMargins(0, 0, 0, 0)
-        self.canvas = QGraphicsView(self.scrollAreaWidgetContents)
+        self.canvas = Canvas(self.tab)
         self.canvas.setObjectName(u"canvas")
         self.canvas.setAutoFillBackground(False)
         self.canvas.setStyleSheet(u"background-color: transparent")
         self.canvas.setFrameShape(QFrame.NoFrame)
 
-        self.gridLayout_3.addWidget(self.canvas, 0, 0, 1, 1)
-
-        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
-
-        self.verticalLayout_2.addWidget(self.scrollArea)
+        self.verticalLayout_2.addWidget(self.canvas)
 
         self.tabWidget.addTab(self.tab, "")
         self.tab_2 = QWidget()
@@ -234,7 +217,7 @@ class Ui_MainWindow(object):
         sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.resourceWidget.sizePolicy().hasHeightForWidth())
         self.resourceWidget.setSizePolicy(sizePolicy1)
-        self.resourceWidget.setMinimumSize(QSize(300, 115))
+        self.resourceWidget.setMinimumSize(QSize(300, 162))
         self.resourceWidget.setMaximumSize(QSize(524287, 200))
         self.resourceWidget.setStyleSheet(u"")
         self.dockWidgetContents_3 = QWidget()
@@ -273,6 +256,7 @@ class Ui_MainWindow(object):
         __qlistwidgetitem = QListWidgetItem(self.ToolboxList)
         __qlistwidgetitem.setIcon(icon5);
         self.ToolboxList.setObjectName(u"ToolboxList")
+        self.ToolboxList.setEnabled(True)
         self.ToolboxList.setStyleSheet(u"background-color: transparent;")
         self.ToolboxList.setFrameShape(QFrame.NoFrame)
         self.ToolboxList.setDragEnabled(True)
@@ -287,10 +271,13 @@ class Ui_MainWindow(object):
         MainWindow.addDockWidget(Qt.LeftDockWidgetArea, self.toolboxWidget)
         self.FileToolBar = QToolBar(MainWindow)
         self.FileToolBar.setObjectName(u"FileToolBar")
-        self.FileToolBar.setMovable(True)
+        self.FileToolBar.setMovable(False)
         self.FileToolBar.setIconSize(QSize(18, 18))
         self.FileToolBar.setToolButtonStyle(Qt.ToolButtonIconOnly)
         MainWindow.addToolBar(Qt.TopToolBarArea, self.FileToolBar)
+        self.statusBar = QStatusBar(MainWindow)
+        self.statusBar.setObjectName(u"statusBar")
+        MainWindow.setStatusBar(self.statusBar)
 
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuEdit.menuAction())
