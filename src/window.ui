@@ -173,6 +173,7 @@
      <addaction name="actionshowDefaultInfoDialog"/>
      <addaction name="actionshowToast"/>
      <addaction name="actionshowColorDialog"/>
+     <addaction name="actionshowSelectFont"/>
     </widget>
     <widget class="QMenu" name="menuRun">
      <property name="title">
@@ -703,6 +704,11 @@
   <action name="actionshowColorDialog">
    <property name="text">
     <string>showColorDialog</string>
+   </property>
+  </action>
+  <action name="actionshowSelectFont">
+   <property name="text">
+    <string>showSelectFont</string>
    </property>
   </action>
  </widget>
