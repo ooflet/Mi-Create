@@ -12,7 +12,7 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>1250</width>
+    <width>750</width>
     <height>750</height>
    </size>
   </property>
@@ -157,6 +157,7 @@
      </property>
      <addaction name="actionAbout_MiFaceStudio"/>
      <addaction name="actionAbout_Qt"/>
+     <addaction name="actionAbout_Cairo"/>
      <addaction name="actionThirdPartyNotice"/>
     </widget>
     <addaction name="menuAbout"/>
@@ -302,22 +303,10 @@
   </widget>
   <widget class="QDockWidget" name="resourceWidget">
    <property name="sizePolicy">
-    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
-   </property>
-   <property name="minimumSize">
-    <size>
-     <width>300</width>
-     <height>162</height>
-    </size>
-   </property>
-   <property name="maximumSize">
-    <size>
-     <width>524287</width>
-     <height>200</height>
-    </size>
    </property>
    <property name="styleSheet">
     <string notr="true"/>
@@ -456,7 +445,7 @@
   </widget>
   <widget class="QToolBar" name="FileToolBar">
    <property name="windowTitle">
-    <string>toolBar</string>
+    <string>File Toolbar</string>
    </property>
    <property name="movable">
     <bool>false</bool>
@@ -482,6 +471,63 @@
    <addaction name="actionRedo"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QDockWidget" name="consoleWidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="windowTitle">
+    <string>Console</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>8</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_5">
+    <layout class="QVBoxLayout" name="verticalLayout_4">
+     <property name="leftMargin">
+      <number>0</number>
+     </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QTextEdit" name="consoleText">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="styleSheet">
+        <string notr="true"/>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+       <property name="html">
+        <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;This is some example text&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
   <action name="actionSave">
    <property name="text">
     <string>Save...</string>
@@ -527,21 +573,6 @@
   <action name="actionshowDefaultInfoDialog">
    <property name="text">
     <string>showDefaultCriticalDialog</string>
-   </property>
-  </action>
-  <action name="actionshowOpenFile">
-   <property name="text">
-    <string>showOpenFile</string>
-   </property>
-  </action>
-  <action name="actionshowSaveFile">
-   <property name="text">
-    <string>showSaveFile</string>
-   </property>
-  </action>
-  <action name="actionThirdPartyNotice">
-   <property name="text">
-    <string>Third Party Notices</string>
    </property>
   </action>
   <action name="actionExplorer">
@@ -709,6 +740,16 @@
   <action name="actionshowSelectFont">
    <property name="text">
     <string>showSelectFont</string>
+   </property>
+  </action>
+  <action name="actionAbout_Cairo">
+   <property name="text">
+    <string>About Cairo</string>
+   </property>
+  </action>
+  <action name="actionThirdPartyNotice">
+   <property name="text">
+    <string>Third Party Notices</string>
    </property>
   </action>
  </widget>

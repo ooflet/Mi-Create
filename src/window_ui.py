@@ -19,8 +19,9 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
 from PySide6.QtWidgets import (QAbstractItemView, QApplication, QDockWidget, QFrame,
     QGridLayout, QHeaderView, QListView, QListWidget,
     QListWidgetItem, QMainWindow, QMenu, QMenuBar,
-    QSizePolicy, QStatusBar, QTabWidget, QToolBar,
-    QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget)
+    QSizePolicy, QStatusBar, QTabWidget, QTextEdit,
+    QToolBar, QTreeWidget, QTreeWidgetItem, QVBoxLayout,
+    QWidget)
 
 from canvas_widget import Canvas
 import icons_rc
@@ -30,7 +31,7 @@ class Ui_MainWindow(object):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
         MainWindow.resize(1250, 750)
-        MainWindow.setMinimumSize(QSize(1250, 750))
+        MainWindow.setMinimumSize(QSize(750, 750))
         icon = QIcon()
         icon.addFile(u":/Dark/MiFaceStudioFavicon.png", QSize(), QIcon.Normal, QIcon.Off)
         icon.addFile(u":/Dark/MiFaceStudioFavicon.png", QSize(), QIcon.Normal, QIcon.On)
@@ -51,12 +52,6 @@ class Ui_MainWindow(object):
         self.actionshowAboutWindow.setObjectName(u"actionshowAboutWindow")
         self.actionshowDefaultInfoDialog = QAction(MainWindow)
         self.actionshowDefaultInfoDialog.setObjectName(u"actionshowDefaultInfoDialog")
-        self.actionshowOpenFile = QAction(MainWindow)
-        self.actionshowOpenFile.setObjectName(u"actionshowOpenFile")
-        self.actionshowSaveFile = QAction(MainWindow)
-        self.actionshowSaveFile.setObjectName(u"actionshowSaveFile")
-        self.actionThirdPartyNotice = QAction(MainWindow)
-        self.actionThirdPartyNotice.setObjectName(u"actionThirdPartyNotice")
         self.actionExplorer = QAction(MainWindow)
         self.actionExplorer.setObjectName(u"actionExplorer")
         self.actionExplorer.setCheckable(True)
@@ -119,6 +114,10 @@ class Ui_MainWindow(object):
         self.actionshowColorDialog.setObjectName(u"actionshowColorDialog")
         self.actionshowSelectFont = QAction(MainWindow)
         self.actionshowSelectFont.setObjectName(u"actionshowSelectFont")
+        self.actionAbout_Cairo = QAction(MainWindow)
+        self.actionAbout_Cairo.setObjectName(u"actionAbout_Cairo")
+        self.actionThirdPartyNotice = QAction(MainWindow)
+        self.actionThirdPartyNotice.setObjectName(u"actionThirdPartyNotice")
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         sizePolicy = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
@@ -216,13 +215,11 @@ class Ui_MainWindow(object):
         MainWindow.addDockWidget(Qt.RightDockWidgetArea, self.attributesWidget)
         self.resourceWidget = QDockWidget(MainWindow)
         self.resourceWidget.setObjectName(u"resourceWidget")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Preferred)
         sizePolicy1.setHorizontalStretch(0)
         sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.resourceWidget.sizePolicy().hasHeightForWidth())
         self.resourceWidget.setSizePolicy(sizePolicy1)
-        self.resourceWidget.setMinimumSize(QSize(300, 162))
-        self.resourceWidget.setMaximumSize(QSize(524287, 200))
         self.resourceWidget.setStyleSheet(u"")
         self.dockWidgetContents_3 = QWidget()
         self.dockWidgetContents_3.setObjectName(u"dockWidgetContents_3")
@@ -282,6 +279,26 @@ class Ui_MainWindow(object):
         self.statusBar = QStatusBar(MainWindow)
         self.statusBar.setObjectName(u"statusBar")
         MainWindow.setStatusBar(self.statusBar)
+        self.consoleWidget = QDockWidget(MainWindow)
+        self.consoleWidget.setObjectName(u"consoleWidget")
+        sizePolicy1.setHeightForWidth(self.consoleWidget.sizePolicy().hasHeightForWidth())
+        self.consoleWidget.setSizePolicy(sizePolicy1)
+        self.dockWidgetContents_5 = QWidget()
+        self.dockWidgetContents_5.setObjectName(u"dockWidgetContents_5")
+        self.verticalLayout_4 = QVBoxLayout(self.dockWidgetContents_5)
+        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
+        self.verticalLayout_4.setContentsMargins(0, 0, 0, 0)
+        self.consoleText = QTextEdit(self.dockWidgetContents_5)
+        self.consoleText.setObjectName(u"consoleText")
+        self.consoleText.setEnabled(True)
+        self.consoleText.setStyleSheet(u"")
+        self.consoleText.setFrameShape(QFrame.NoFrame)
+        self.consoleText.setReadOnly(True)
+
+        self.verticalLayout_4.addWidget(self.consoleText)
+
+        self.consoleWidget.setWidget(self.dockWidgetContents_5)
+        MainWindow.addDockWidget(Qt.BottomDockWidgetArea, self.consoleWidget)
 
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuEdit.menuAction())
@@ -300,6 +317,7 @@ class Ui_MainWindow(object):
         self.menuHelp.addAction(self.menuAbout.menuAction())
         self.menuAbout.addAction(self.actionAbout_MiFaceStudio)
         self.menuAbout.addAction(self.actionAbout_Qt)
+        self.menuAbout.addAction(self.actionAbout_Cairo)
         self.menuAbout.addAction(self.actionThirdPartyNotice)
         self.menuTest.addAction(self.menuDialog.menuAction())
         self.menuTest.addAction(self.menuRun.menuAction())
@@ -356,9 +374,6 @@ class Ui_MainWindow(object):
 #endif // QT_CONFIG(shortcut)
         self.actionshowAboutWindow.setText(QCoreApplication.translate("MainWindow", u"showAboutWindow", None))
         self.actionshowDefaultInfoDialog.setText(QCoreApplication.translate("MainWindow", u"showDefaultCriticalDialog", None))
-        self.actionshowOpenFile.setText(QCoreApplication.translate("MainWindow", u"showOpenFile", None))
-        self.actionshowSaveFile.setText(QCoreApplication.translate("MainWindow", u"showSaveFile", None))
-        self.actionThirdPartyNotice.setText(QCoreApplication.translate("MainWindow", u"Third Party Notices", None))
         self.actionExplorer.setText(QCoreApplication.translate("MainWindow", u"Explorer", None))
         self.actionAttributes.setText(QCoreApplication.translate("MainWindow", u"Attributes", None))
         self.actionResources.setText(QCoreApplication.translate("MainWindow", u"Resources", None))
@@ -394,6 +409,8 @@ class Ui_MainWindow(object):
         self.actionAbout_Qt.setText(QCoreApplication.translate("MainWindow", u"About Qt", None))
         self.actionshowColorDialog.setText(QCoreApplication.translate("MainWindow", u"showColorDialog", None))
         self.actionshowSelectFont.setText(QCoreApplication.translate("MainWindow", u"showSelectFont", None))
+        self.actionAbout_Cairo.setText(QCoreApplication.translate("MainWindow", u"About Cairo", None))
+        self.actionThirdPartyNotice.setText(QCoreApplication.translate("MainWindow", u"Third Party Notices", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), QCoreApplication.translate("MainWindow", u"Tab 1", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QCoreApplication.translate("MainWindow", u"Tab 2", None))
         self.menuFile.setTitle(QCoreApplication.translate("MainWindow", u"File", None))
@@ -435,6 +452,16 @@ class Ui_MainWindow(object):
         ___qlistwidgetitem1.setText(QCoreApplication.translate("MainWindow", u"Element", None));
         self.ToolboxList.setSortingEnabled(__sortingEnabled2)
 
-        self.FileToolBar.setWindowTitle(QCoreApplication.translate("MainWindow", u"toolBar", None))
+        self.FileToolBar.setWindowTitle(QCoreApplication.translate("MainWindow", u"File Toolbar", None))
+        self.consoleWidget.setWindowTitle(QCoreApplication.translate("MainWindow", u"Console", None))
+        self.consoleText.setHtml(QCoreApplication.translate("MainWindow", u"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><meta charset=\"utf-8\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"hr { height: 1px; border-width: 0; }\n"
+"li.unchecked::marker { content: \"\\2610\"; }\n"
+"li.checked::marker { content: \"\\2612\"; }\n"
+"</style></head><body style=\" font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">This is some example text</p>\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>", None))
     # retranslateUi
 

@@ -15,6 +15,9 @@
     <file>plus.png</file>
     <file>heart.png</file>
   </qresource>
+  <qresource prefix="Fonts">
+    <file>CascadiaMono.ttf</file>
+  </qresource>
   <qresource prefix="Light"/>
   <qresource prefix="Images">
     <file>MiFaceStudio48x48.png</file>

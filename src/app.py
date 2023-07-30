@@ -20,9 +20,6 @@ from preferences_ui import Ui_Dialog as Ui_Preferences
 currentVersion = '0.0.1b'
 notification = ToastNotifier()
 
-class Canvas(QGraphicsView):
-    pass
-
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -33,7 +30,6 @@ class MainWindow(QMainWindow):
 
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.ui.canvas = Canvas()
         self.setupWidgets()
         self.setupWorkspace()
 
@@ -95,26 +91,16 @@ class MainWindow(QMainWindow):
         else:
             qtmodern.styles.dark(app=app)
 
-    
-
     def setupWorkspace(self):
-        # ...
-        # Connect the drag and drop events to the canvas
-        self.ui.canvas.dragEnterEvent = self.canvas_dragEnterEvent
-        self.ui.canvas.dragMoveEvent = self.canvas_dragMoveEvent
-        self.ui.canvas.dropEvent = self.canvas_dropEvent
-
-    def canvas_dragEnterEvent(self, event):
-        # Call the dragEnterEvent of the Canvas class
-        self.ui.canvas.dragEnterEvent(event)
-
-    def canvas_dragMoveEvent(self, event):
-        # Call the dragMoveEvent of the Canvas class
-        self.ui.canvas.dragMoveEvent(event)
-
-    def canvas_dropEvent(self, event):
-        # Call the dropEvent of the Canvas class
-        self.ui.canvas.dropEvent(event)
+        font_id = QFontDatabase.addApplicationFont(":/Fonts/CascadiaMono.ttf")
+        if font_id != -1:
+            font_family = QFontDatabase.applicationFontFamilies(font_id)[0]
+            print("Loaded font family:", font_family)
+            font = QFont(font_family)
+            font.setPointSize(12)
+            self.ui.consoleText.setFont(font)
+        else:
+            self.showDialogue('warning', 'Console', "Console font was unable to load. Your installation may be corrupted.")
 
     def setupWidgets(self):
         # file
@@ -129,6 +115,7 @@ class MainWindow(QMainWindow):
         # help
         self.ui.actionAbout_MiFaceStudio.triggered.connect(self.showAboutWindow)
         self.ui.actionAbout_Qt.triggered.connect(lambda: QMessageBox.aboutQt(self))
+        self.ui.actionAbout_Cairo.triggered.connect(lambda: self.showDialogue('info', 'About Cairo', 'Version 1.24.0'))
         self.ui.actionThirdPartyNotice.triggered.connect(self.showThirdPartyNotices)
 
         # test
@@ -167,13 +154,11 @@ class MainWindow(QMainWindow):
         else:
             pass
 
-
     def compileProject(self):
         location = QFileDialog.getSaveFileName(self, 'Compile Project To...', "", "Binary file (*.bin)")
 
     def showColorDialog(self):
-        options = QColorDialog.ColorDialogOptions()
-        color = QColorDialog.getColor(Qt.green, self, "Select Color", options)
+        color = QColorDialog.getColor(Qt.white, self, "Select Color")
 
     def showFontSelect(self):
         font = QFontDialog.getFont(self, "Select Font")

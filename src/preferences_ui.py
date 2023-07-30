@@ -16,9 +16,9 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QAbstractButton, QApplication, QComboBox, QDialog,
-    QDialogButtonBox, QFontComboBox, QFrame, QGridLayout,
-    QGroupBox, QLabel, QLayout, QSizePolicy,
-    QSpacerItem, QTabWidget, QVBoxLayout, QWidget)
+    QDialogButtonBox, QFrame, QGridLayout, QGroupBox,
+    QLabel, QLayout, QSizePolicy, QSpacerItem,
+    QTabWidget, QVBoxLayout, QWidget)
 import icons_rc
 
 class Ui_Dialog(object):
@@ -99,13 +99,6 @@ class Ui_Dialog(object):
 
         self.verticalLayout_3.addWidget(self.languageComboBox)
 
-        self.fontComboBox = QFontComboBox(self.Property)
-        self.fontComboBox.setObjectName(u"fontComboBox")
-        sizePolicy1.setHeightForWidth(self.fontComboBox.sizePolicy().hasHeightForWidth())
-        self.fontComboBox.setSizePolicy(sizePolicy1)
-
-        self.verticalLayout_3.addWidget(self.fontComboBox)
-
         self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
         self.verticalLayout_3.addItem(self.verticalSpacer)
@@ -143,17 +136,6 @@ class Ui_Dialog(object):
         self.Language.setMinimumSize(QSize(0, 22))
 
         self.verticalLayout_2.addWidget(self.Language)
-
-        self.label = QLabel(self.PropertyLabel)
-        self.label.setObjectName(u"label")
-        sizePolicy4 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
-        sizePolicy4.setHorizontalStretch(0)
-        sizePolicy4.setVerticalStretch(0)
-        sizePolicy4.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
-        self.label.setSizePolicy(sizePolicy4)
-        self.label.setMinimumSize(QSize(0, 22))
-
-        self.verticalLayout_2.addWidget(self.label)
 
         self.verticalSpacer_4 = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
@@ -206,7 +188,6 @@ class Ui_Dialog(object):
 
         self.Theme.setText(QCoreApplication.translate("Dialog", u"Theme:", None))
         self.Language.setText(QCoreApplication.translate("Dialog", u"Language:", None))
-        self.label.setText(QCoreApplication.translate("Dialog", u"Font:", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.Interface), QCoreApplication.translate("Dialog", u"Interface", None))
         self.groupBox_2.setTitle(QCoreApplication.translate("Dialog", u"GroupBox", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.Keyboard), QCoreApplication.translate("Dialog", u"Keyboard", None))
