@@ -22,8 +22,6 @@ from PySide6.QtWidgets import (QAbstractItemView, QApplication, QDockWidget, QFr
     QSizePolicy, QStatusBar, QTabWidget, QTextEdit,
     QToolBar, QTreeWidget, QTreeWidgetItem, QVBoxLayout,
     QWidget)
-
-from canvas_widget import Canvas
 import icons_rc
 
 class Ui_MainWindow(object):
@@ -130,32 +128,6 @@ class Ui_MainWindow(object):
         self.gridLayout_2.setSpacing(0)
         self.gridLayout_2.setObjectName(u"gridLayout_2")
         self.gridLayout_2.setContentsMargins(0, 4, 0, 0)
-        self.tabWidget = QTabWidget(self.centralwidget)
-        self.tabWidget.setObjectName(u"tabWidget")
-        self.tabWidget.setStyleSheet(u"")
-        self.tabWidget.setTabsClosable(True)
-        self.tabWidget.setMovable(True)
-        self.tab = QWidget()
-        self.tab.setObjectName(u"tab")
-        self.tab.setStyleSheet(u"")
-        self.verticalLayout_2 = QVBoxLayout(self.tab)
-        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
-        self.canvas = Canvas(self.tab)
-        self.canvas.setObjectName(u"canvas")
-        self.canvas.setAutoFillBackground(False)
-        self.canvas.setStyleSheet(u"background-color: transparent")
-        self.canvas.setFrameShape(QFrame.NoFrame)
-
-        self.verticalLayout_2.addWidget(self.canvas)
-
-        self.tabWidget.addTab(self.tab, "")
-        self.tab_2 = QWidget()
-        self.tab_2.setObjectName(u"tab_2")
-        self.tabWidget.addTab(self.tab_2, "")
-
-        self.gridLayout_2.addWidget(self.tabWidget, 0, 0, 1, 1)
-
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
@@ -347,9 +319,6 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.tabWidget.setCurrentIndex(0)
-
-
         QMetaObject.connectSlotsByName(MainWindow)
     # setupUi
 
@@ -411,8 +380,6 @@ class Ui_MainWindow(object):
         self.actionshowSelectFont.setText(QCoreApplication.translate("MainWindow", u"showSelectFont", None))
         self.actionAbout_Cairo.setText(QCoreApplication.translate("MainWindow", u"About Cairo", None))
         self.actionThirdPartyNotice.setText(QCoreApplication.translate("MainWindow", u"Third Party Notices", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), QCoreApplication.translate("MainWindow", u"Tab 1", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QCoreApplication.translate("MainWindow", u"Tab 2", None))
         self.menuFile.setTitle(QCoreApplication.translate("MainWindow", u"File", None))
         self.menuCompile.setTitle(QCoreApplication.translate("MainWindow", u"Compile", None))
         self.menuHelp.setTitle(QCoreApplication.translate("MainWindow", u"Help", None))

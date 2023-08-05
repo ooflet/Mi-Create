@@ -1,8 +1,6 @@
 from qtpy.QtGui import QPalette, QColor
 from ._utils import QT_VERSION, resource_path
 
-accent_color = QColor(42, 42, 42)
-
 _STYLESHEET = resource_path('resources/style.qss')
 """ str: Main stylesheet. """
 

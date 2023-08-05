@@ -1,35 +1,57 @@
 import os
 
-from PySide6 import QtWidgets
+import PySide6.QtWidgets as QtWidgets
 from PySide6.QtWidgets import *
 from PySide6.QtGui import *
+from PySide6.QtUiTools import *
 from PySide6.QtCore import *
+
 from win10toast import ToastNotifier
 from threading import Thread
+import PySide6QtAds as QtAds
 import qtmodern.styles
 import qtmodern.windows
 import winsound
 import traceback
 import subprocess
 
-from window_ui import Ui_MainWindow
-from about_ui import Ui_Dialog as Ui_AboutDialog
-from credit_ui import Ui_Dialog as Ui_ThirdPartyNoticesDialog
-from preferences_ui import Ui_Dialog as Ui_Preferences
+from dialog.about_ui import Ui_Dialog as Ui_AboutDialog
+from dialog.credit_ui import Ui_Dialog as Ui_ThirdPartyNoticesDialog
+from dialog.preferences_ui import Ui_Dialog as Ui_Preferences
 
 currentVersion = '0.0.1b'
 notification = ToastNotifier()
 
+class Compile(QThread):
+    complete = Signal()
+    def __init__(self, source, output, name):
+        super().__init__()
+        self.source = source
+        self.output = output
+        self.name = name+".bin"
+
+    def run(self):
+        dir = os.getcwd()
+        subprocess.run(f'{dir}\compiler.exe compile "{self.source}" "{self.output}" "{self.name}" ')
+        self.complete.emit()
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.closeWithoutWarning = False
 
         self.preferences_dialog = QDialog()
         self.preferences = Ui_Preferences()
         self.preferences.setupUi(self.preferences_dialog)
 
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self)
+        ui_file = QFile("window.ui")
+        ui_file.open(QFile.ReadOnly)
+        self.ui = QtWidgets.QWidget()
+        self.ui.setLayout(QtWidgets.QVBoxLayout())
+        loader = QUiLoader()
+        loader.load(ui_file, self.ui)
+        ui_file.close()
+
         self.setupWidgets()
         self.setupWorkspace()
 
@@ -39,13 +61,16 @@ class MainWindow(QMainWindow):
         self.statusBar().showMessage("Ready", 3000)
 
     def closeEvent(self, event):
-        quit_msg = "Are you sure you want to exit the program?"
-        reply = QMessageBox.question(self, 'Message', quit_msg, QMessageBox.Yes, QMessageBox.No)
+        if self.closeWithoutWarning == False:
+            quit_msg = "Are you sure you want to exit the program?"
+            reply = QMessageBox.question(self, 'Message', quit_msg, QMessageBox.Yes, QMessageBox.No)
 
-        if reply == QMessageBox.Yes:
-            event.accept()
+            if reply == QMessageBox.Yes:
+                event.accept()
+            else:
+                event.ignore()
         else:
-            event.ignore()
+            event.accept()
 
     def saveSettings(self):
         settings = QSettings("Tostr.inc", "MiFaceStudio")
@@ -63,9 +88,11 @@ class MainWindow(QMainWindow):
         def execute_installer_script():
             # Path to the installer script
             current_path = os.getcwd()
-            installer_script = current_path+"\\updater\\updater.py"
+            installer_script = current_path+"\\src\\updater\\updater.py"
             subprocess.run(["python", installer_script])
 
+        self.closeWithoutWarning = True
+        self.close()
         execute_installer_script()
         sys.exit()
 
@@ -88,19 +115,15 @@ class MainWindow(QMainWindow):
         if themeName == "Light":
             qtmodern.styles.light(app=app)
             self.showDialogue('info', 'Message', 'Icons in light theme have not been implemented yet. Sorry!')
-        else:
+        elif themeName == "Dark":
             qtmodern.styles.dark(app=app)
+        else:
+            app.setStyle("windowsvista")
 
     def setupWorkspace(self):
-        font_id = QFontDatabase.addApplicationFont(":/Fonts/CascadiaMono.ttf")
-        if font_id != -1:
-            font_family = QFontDatabase.applicationFontFamilies(font_id)[0]
-            print("Loaded font family:", font_family)
-            font = QFont(font_family)
-            font.setPointSize(12)
-            self.ui.consoleText.setFont(font)
-        else:
-            self.showDialogue('warning', 'Console', "Console font was unable to load. Your installation may be corrupted.")
+        self.dockManager = QtAds.CDockManager(self)
+        self.ui.actionSave.setDisabled(True)
+        self.ui.actionSave_as.setDisabled(True)
 
     def setupWidgets(self):
         # file
@@ -222,7 +245,8 @@ if __name__ == "__main__":
         QMessageBox.critical(None, 'Error', error_message, QMessageBox.Ok)
         sys.exit(1)
 
-    main_window.showMaximized()
     splash.finish(main_window)
+    main_window.showMaximized()
+    main_window.checkForUpdates()
 
     sys.exit(app.exec())
