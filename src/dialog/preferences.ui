@@ -26,7 +26,7 @@
    <string>Preferences</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="resources/icons.qrc">
+   <iconset resource="../resources/icons.qrc">
     <normaloff>:/Dark/MiFaceStudioFavicon.png</normaloff>:/Dark/MiFaceStudioFavicon.png</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout_3">
@@ -59,16 +59,6 @@
        <string>Interface</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout">
-       <item row="1" column="1">
-        <widget class="QFrame" name="frame_2">
-         <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
-         </property>
-        </widget>
-       </item>
        <item row="0" column="1">
         <widget class="QGroupBox" name="groupBox">
          <property name="title">
@@ -298,7 +288,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="resources/icons.qrc"/>
+  <include location="../resources/icons.qrc"/>
  </resources>
  <connections>
   <connection>

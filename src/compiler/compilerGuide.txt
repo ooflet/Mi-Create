@@ -4,6 +4,7 @@ Guide for compiler usage. Mi Face Studio uses a slightly modified version of m0t
 -- Modifications
 - Simplified to 3 arguments, removed redundant ones.
 - Will not produce a .INFO file.
+- Watch names are correct
 - Output slightly modified.
 
 --------- Command --------------------------------------------------

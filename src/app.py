@@ -1,3 +1,7 @@
+# Mi Face Studio
+# tostr
+# 2023
+
 import os
 
 import PySide6.QtWidgets as QtWidgets
@@ -20,7 +24,7 @@ from dialog.about_ui import Ui_Dialog as Ui_AboutDialog
 from dialog.credit_ui import Ui_Dialog as Ui_ThirdPartyNoticesDialog
 from dialog.preferences_ui import Ui_Dialog as Ui_Preferences
 
-currentdir = os.getcwd()
+currentDir = os.getcwd()
 currentVersion = '0.0.1b'
 notification = ToastNotifier()
 
@@ -33,7 +37,7 @@ class Compile(QThread):
         self.name = name+".bin"
 
     def run(self):
-        subprocess.run(f'{currentdir}\compiler.exe compile "{self.source}" "{self.output}" "{self.name}" ')
+        subprocess.run(f'{currentDir}\compiler.exe compile "{self.source}" "{self.output}" "{self.name}" ')
         self.complete.emit()
 
 class MainWindow(QMainWindow):
@@ -92,7 +96,7 @@ class MainWindow(QMainWindow):
         sys.exit()
 
     def checkForUpdates(self):
-        version = '1.0.1b'
+        version = '0.0.1b'
         if version > currentVersion:
             if version[-1] == 'u':
                 self.showDialogue('info', 'Message', f'An urgent update {version} was released! The app will now update.')
@@ -112,8 +116,6 @@ class MainWindow(QMainWindow):
             self.showDialogue('info', 'Message', 'Icons in light theme have not been implemented yet. Sorry!')
         elif themeName == "Dark":
             qtmodern.styles.dark(app=app)
-        else:
-            app.setStyle("windowsvista")
 
     def setupWorkspace(self):
         self.dockManager = QtAds.CDockManager(self)

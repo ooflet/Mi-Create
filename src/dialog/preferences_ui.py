@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'preferences.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.5.1
+## Created by: Qt User Interface Compiler version 6.5.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -19,7 +19,7 @@ from PySide6.QtWidgets import (QAbstractButton, QApplication, QComboBox, QDialog
     QDialogButtonBox, QFrame, QGridLayout, QGroupBox,
     QLabel, QLayout, QSizePolicy, QSpacerItem,
     QTabWidget, QVBoxLayout, QWidget)
-import resources.icons_rc as icons_rc
+import icons_rc
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
@@ -49,13 +49,6 @@ class Ui_Dialog(object):
         self.Interface.setObjectName(u"Interface")
         self.gridLayout = QGridLayout(self.Interface)
         self.gridLayout.setObjectName(u"gridLayout")
-        self.frame_2 = QFrame(self.Interface)
-        self.frame_2.setObjectName(u"frame_2")
-        self.frame_2.setFrameShape(QFrame.StyledPanel)
-        self.frame_2.setFrameShadow(QFrame.Raised)
-
-        self.gridLayout.addWidget(self.frame_2, 1, 1, 1, 1)
-
         self.groupBox = QGroupBox(self.Interface)
         self.groupBox.setObjectName(u"groupBox")
         self.gridLayout_2 = QGridLayout(self.groupBox)
