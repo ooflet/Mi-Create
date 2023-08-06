@@ -14,7 +14,6 @@ from win10toast import ToastNotifier
 from threading import Thread
 import PySide6QtAds as QtAds
 import qtmodern.styles
-import qtmodern.windows
 import winsound
 import traceback
 import subprocess
@@ -118,7 +117,23 @@ class MainWindow(QMainWindow):
             qtmodern.styles.dark(app=app)
 
     def setupWorkspace(self):
-        self.dockManager = QtAds.CDockManager(self)
+        self.dock_manager = QtAds.CDockManager(self)
+        self.dock_manager.setStyleSheet("")
+        QtAds.CDockManager.setConfigFlag(QtAds.CDockManager.OpaqueSplitterResize, True)
+        QtAds.CDockManager.setConfigFlag(QtAds.CDockManager.MiddleMouseButtonClosesTab, True)
+
+        projectWidget = QtAds.CDockWidget("Project")
+        toolboxWidget = QtAds.CDockWidget("Toolbox")
+        explorerWidget = QtAds.CDockWidget("Explorer")
+        propertiesWidget = QtAds.CDockWidget("Properties")
+        resoucesWidget = QtAds.CDockWidget("Resources")
+
+        self.dock_manager.addDockWidget(QtAds.CenterDockWidgetArea, projectWidget)
+        self.dock_manager.addDockWidget(QtAds.LeftDockWidgetArea, toolboxWidget)
+        self.dock_manager.addDockWidget(QtAds.RightDockWidgetArea, explorerWidget)
+        self.dock_manager.addDockWidget(QtAds.RightDockWidgetArea, propertiesWidget)
+        self.dock_manager.addDockWidget(QtAds.BottomDockWidgetArea, resoucesWidget)
+
         self.ui.actionSave.setDisabled(True)
         self.ui.actionSave_as.setDisabled(True)
 
@@ -140,7 +155,7 @@ class MainWindow(QMainWindow):
 
         # test
         self.ui.actionshowAboutWindow.triggered.connect(self.showAboutWindow)
-        self.ui.actionshowDefaultInfoDialog.triggered.connect(lambda: self.showDialogue("error", "Default Info Dialog", "No cause for alarm, this is a test dialogue!"))
+        self.ui.actionshowDefaultInfoDialog.triggered.connect(lambda: self.showDialogue("error", "Default Critical Dialog", "No cause for alarm, this is a test dialogue!"))
         self.ui.actionshowToast.triggered.connect(lambda: notification.show_toast("Test", "This is a test notification!", duration = 5, threaded = False))
         self.ui.actionshowColorDialog.triggered.connect(self.showColorDialog)
         self.ui.actionshowSelectFont.triggered.connect(self.showFontSelect)
@@ -176,6 +191,7 @@ class MainWindow(QMainWindow):
 
     def compileProject(self):
         location = QFileDialog.getSaveFileName(self, 'Compile Project To...', "", "Binary file (*.bin)")
+        self.showDialogue('info', 'Compile', location[0])
 
     def showColorDialog(self):
         color = QColorDialog.getColor(Qt.white, self, "Select Color")

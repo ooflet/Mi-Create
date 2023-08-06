@@ -19,7 +19,7 @@ from PySide6.QtWidgets import (QAbstractButton, QApplication, QComboBox, QDialog
     QDialogButtonBox, QFrame, QGridLayout, QGroupBox,
     QLabel, QLayout, QSizePolicy, QSpacerItem,
     QTabWidget, QVBoxLayout, QWidget)
-import icons_rc
+import resources.icons_rc as icons_rc
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
@@ -70,7 +70,6 @@ class Ui_Dialog(object):
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
         self.verticalLayout_3.setSizeConstraint(QLayout.SetDefaultConstraint)
         self.themeComboBox = QComboBox(self.Property)
-        self.themeComboBox.addItem("")
         self.themeComboBox.addItem("")
         self.themeComboBox.addItem("")
         self.themeComboBox.setObjectName(u"themeComboBox")
@@ -181,7 +180,6 @@ class Ui_Dialog(object):
         self.groupBox.setTitle(QCoreApplication.translate("Dialog", u"User Interface", None))
         self.themeComboBox.setItemText(0, QCoreApplication.translate("Dialog", u"Dark", None))
         self.themeComboBox.setItemText(1, QCoreApplication.translate("Dialog", u"Light", None))
-        self.themeComboBox.setItemText(2, QCoreApplication.translate("Dialog", u"Native", None))
 
         self.languageComboBox.setItemText(0, QCoreApplication.translate("Dialog", u"English", None))
         self.languageComboBox.setItemText(1, QCoreApplication.translate("Dialog", u"\u7e41\u9ad4\u4e2d\u6587", None))

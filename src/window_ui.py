@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'window.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.5.1
+## Created by: Qt User Interface Compiler version 6.5.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -16,12 +16,9 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QIcon, QImage, QKeySequence, QLinearGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
-from PySide6.QtWidgets import (QAbstractItemView, QApplication, QDockWidget, QFrame,
-    QGridLayout, QHeaderView, QListView, QListWidget,
-    QListWidgetItem, QMainWindow, QMenu, QMenuBar,
-    QSizePolicy, QStatusBar, QTabWidget, QTextEdit,
-    QToolBar, QTreeWidget, QTreeWidgetItem, QVBoxLayout,
-    QWidget)
+from PySide6.QtWidgets import (QApplication, QGridLayout, QMainWindow, QMenu,
+    QMenuBar, QSizePolicy, QStatusBar, QTabWidget,
+    QToolBar, QWidget)
 import resources.icons_rc as icons_rc
 
 class Ui_MainWindow(object):
@@ -154,94 +151,6 @@ class Ui_MainWindow(object):
         self.menuEdit = QMenu(self.menubar)
         self.menuEdit.setObjectName(u"menuEdit")
         MainWindow.setMenuBar(self.menubar)
-        self.explorerWidget = QDockWidget(MainWindow)
-        self.explorerWidget.setObjectName(u"explorerWidget")
-        self.explorerWidget.setMinimumSize(QSize(250, 250))
-        self.explorerWidget.setStyleSheet(u"")
-        self.dockWidgetContents = QWidget()
-        self.dockWidgetContents.setObjectName(u"dockWidgetContents")
-        self.verticalLayout = QVBoxLayout(self.dockWidgetContents)
-        self.verticalLayout.setSpacing(0)
-        self.verticalLayout.setObjectName(u"verticalLayout")
-        self.verticalLayout.setContentsMargins(0, 0, 0, 0)
-        self.treeWidget = QTreeWidget(self.dockWidgetContents)
-        __qtreewidgetitem = QTreeWidgetItem(self.treeWidget)
-        QTreeWidgetItem(__qtreewidgetitem)
-        self.treeWidget.setObjectName(u"treeWidget")
-        self.treeWidget.setStyleSheet(u"")
-        self.treeWidget.setFrameShape(QFrame.NoFrame)
-
-        self.verticalLayout.addWidget(self.treeWidget)
-
-        self.explorerWidget.setWidget(self.dockWidgetContents)
-        MainWindow.addDockWidget(Qt.RightDockWidgetArea, self.explorerWidget)
-        self.attributesWidget = QDockWidget(MainWindow)
-        self.attributesWidget.setObjectName(u"attributesWidget")
-        self.attributesWidget.setMinimumSize(QSize(250, 250))
-        self.attributesWidget.setStyleSheet(u"")
-        self.dockWidgetContents_2 = QWidget()
-        self.dockWidgetContents_2.setObjectName(u"dockWidgetContents_2")
-        self.gridLayout = QGridLayout(self.dockWidgetContents_2)
-        self.gridLayout.setObjectName(u"gridLayout")
-        self.attributesWidget.setWidget(self.dockWidgetContents_2)
-        MainWindow.addDockWidget(Qt.RightDockWidgetArea, self.attributesWidget)
-        self.resourceWidget = QDockWidget(MainWindow)
-        self.resourceWidget.setObjectName(u"resourceWidget")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Preferred)
-        sizePolicy1.setHorizontalStretch(0)
-        sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(self.resourceWidget.sizePolicy().hasHeightForWidth())
-        self.resourceWidget.setSizePolicy(sizePolicy1)
-        self.resourceWidget.setStyleSheet(u"")
-        self.dockWidgetContents_3 = QWidget()
-        self.dockWidgetContents_3.setObjectName(u"dockWidgetContents_3")
-        self.gridLayout_4 = QGridLayout(self.dockWidgetContents_3)
-        self.gridLayout_4.setSpacing(0)
-        self.gridLayout_4.setObjectName(u"gridLayout_4")
-        self.gridLayout_4.setContentsMargins(0, 0, 0, 0)
-        self.listWidget_2 = QListWidget(self.dockWidgetContents_3)
-        QListWidgetItem(self.listWidget_2)
-        self.listWidget_2.setObjectName(u"listWidget_2")
-        self.listWidget_2.setStyleSheet(u"background-color: transparent")
-        self.listWidget_2.setFrameShape(QFrame.NoFrame)
-        self.listWidget_2.setDragEnabled(True)
-        self.listWidget_2.setFlow(QListView.LeftToRight)
-        self.listWidget_2.setViewMode(QListView.ListMode)
-
-        self.gridLayout_4.addWidget(self.listWidget_2, 0, 0, 1, 1)
-
-        self.resourceWidget.setWidget(self.dockWidgetContents_3)
-        MainWindow.addDockWidget(Qt.BottomDockWidgetArea, self.resourceWidget)
-        self.toolboxWidget = QDockWidget(MainWindow)
-        self.toolboxWidget.setObjectName(u"toolboxWidget")
-        self.toolboxWidget.setMinimumSize(QSize(250, 500))
-        self.toolboxWidget.setMaximumSize(QSize(524287, 524287))
-        self.toolboxWidget.setStyleSheet(u"")
-        self.dockWidgetContents_4 = QWidget()
-        self.dockWidgetContents_4.setObjectName(u"dockWidgetContents_4")
-        self.verticalLayout_3 = QVBoxLayout(self.dockWidgetContents_4)
-        self.verticalLayout_3.setSpacing(0)
-        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
-        self.verticalLayout_3.setContentsMargins(0, 0, 0, 0)
-        self.ToolboxList = QListWidget(self.dockWidgetContents_4)
-        icon5 = QIcon()
-        icon5.addFile(u":/Dark/package.png", QSize(), QIcon.Normal, QIcon.Off)
-        __qlistwidgetitem = QListWidgetItem(self.ToolboxList)
-        __qlistwidgetitem.setIcon(icon5);
-        self.ToolboxList.setObjectName(u"ToolboxList")
-        self.ToolboxList.setEnabled(True)
-        self.ToolboxList.setStyleSheet(u"background-color: transparent;")
-        self.ToolboxList.setFrameShape(QFrame.NoFrame)
-        self.ToolboxList.setDragEnabled(True)
-        self.ToolboxList.setDragDropMode(QAbstractItemView.DragOnly)
-        self.ToolboxList.setDefaultDropAction(Qt.MoveAction)
-        self.ToolboxList.setGridSize(QSize(0, 19))
-        self.ToolboxList.setViewMode(QListView.ListMode)
-
-        self.verticalLayout_3.addWidget(self.ToolboxList)
-
-        self.toolboxWidget.setWidget(self.dockWidgetContents_4)
-        MainWindow.addDockWidget(Qt.LeftDockWidgetArea, self.toolboxWidget)
         self.FileToolBar = QToolBar(MainWindow)
         self.FileToolBar.setObjectName(u"FileToolBar")
         self.FileToolBar.setMovable(False)
@@ -251,26 +160,6 @@ class Ui_MainWindow(object):
         self.statusBar = QStatusBar(MainWindow)
         self.statusBar.setObjectName(u"statusBar")
         MainWindow.setStatusBar(self.statusBar)
-        self.consoleWidget = QDockWidget(MainWindow)
-        self.consoleWidget.setObjectName(u"consoleWidget")
-        sizePolicy1.setHeightForWidth(self.consoleWidget.sizePolicy().hasHeightForWidth())
-        self.consoleWidget.setSizePolicy(sizePolicy1)
-        self.dockWidgetContents_5 = QWidget()
-        self.dockWidgetContents_5.setObjectName(u"dockWidgetContents_5")
-        self.verticalLayout_4 = QVBoxLayout(self.dockWidgetContents_5)
-        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
-        self.verticalLayout_4.setContentsMargins(0, 0, 0, 0)
-        self.consoleText = QTextEdit(self.dockWidgetContents_5)
-        self.consoleText.setObjectName(u"consoleText")
-        self.consoleText.setEnabled(True)
-        self.consoleText.setStyleSheet(u"")
-        self.consoleText.setFrameShape(QFrame.NoFrame)
-        self.consoleText.setReadOnly(True)
-
-        self.verticalLayout_4.addWidget(self.consoleText)
-
-        self.consoleWidget.setWidget(self.dockWidgetContents_5)
-        MainWindow.addDockWidget(Qt.BottomDockWidgetArea, self.consoleWidget)
 
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuEdit.menuAction())
@@ -390,45 +279,6 @@ class Ui_MainWindow(object):
         self.menuView.setTitle(QCoreApplication.translate("MainWindow", u"View", None))
         self.menuToolbars.setTitle(QCoreApplication.translate("MainWindow", u"Toolbars", None))
         self.menuEdit.setTitle(QCoreApplication.translate("MainWindow", u"Edit", None))
-        self.explorerWidget.setWindowTitle(QCoreApplication.translate("MainWindow", u"Explorer", None))
-        ___qtreewidgetitem = self.treeWidget.headerItem()
-        ___qtreewidgetitem.setText(0, QCoreApplication.translate("MainWindow", u"project.fprj", None));
-
-        __sortingEnabled = self.treeWidget.isSortingEnabled()
-        self.treeWidget.setSortingEnabled(False)
-        ___qtreewidgetitem1 = self.treeWidget.topLevelItem(0)
-        ___qtreewidgetitem1.setText(0, QCoreApplication.translate("MainWindow", u"Watchface", None));
-        ___qtreewidgetitem2 = ___qtreewidgetitem1.child(0)
-        ___qtreewidgetitem2.setText(0, QCoreApplication.translate("MainWindow", u"bg.png", None));
-        self.treeWidget.setSortingEnabled(__sortingEnabled)
-
-        self.attributesWidget.setWindowTitle(QCoreApplication.translate("MainWindow", u"Attributes", None))
-        self.resourceWidget.setWindowTitle(QCoreApplication.translate("MainWindow", u"Resources", None))
-
-        __sortingEnabled1 = self.listWidget_2.isSortingEnabled()
-        self.listWidget_2.setSortingEnabled(False)
-        ___qlistwidgetitem = self.listWidget_2.item(0)
-        ___qlistwidgetitem.setText(QCoreApplication.translate("MainWindow", u"test", None));
-        self.listWidget_2.setSortingEnabled(__sortingEnabled1)
-
-        self.toolboxWidget.setWindowTitle(QCoreApplication.translate("MainWindow", u"Toolbox", None))
-
-        __sortingEnabled2 = self.ToolboxList.isSortingEnabled()
-        self.ToolboxList.setSortingEnabled(False)
-        ___qlistwidgetitem1 = self.ToolboxList.item(0)
-        ___qlistwidgetitem1.setText(QCoreApplication.translate("MainWindow", u"Element", None));
-        self.ToolboxList.setSortingEnabled(__sortingEnabled2)
-
         self.FileToolBar.setWindowTitle(QCoreApplication.translate("MainWindow", u"File Toolbar", None))
-        self.consoleWidget.setWindowTitle(QCoreApplication.translate("MainWindow", u"Console", None))
-        self.consoleText.setHtml(QCoreApplication.translate("MainWindow", u"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><meta charset=\"utf-8\" /><style type=\"text/css\">\n"
-"p, li { white-space: pre-wrap; }\n"
-"hr { height: 1px; border-width: 0; }\n"
-"li.unchecked::marker { content: \"\\2610\"; }\n"
-"li.checked::marker { content: \"\\2612\"; }\n"
-"</style></head><body style=\" font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">This is some example text</p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>", None))
     # retranslateUi
 

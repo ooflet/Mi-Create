@@ -1,21 +1,13 @@
-from qtpy.QtGui import QPalette, QColor
-from ._utils import QT_VERSION, resource_path
+from PySide6.QtGui import QPalette, QColor
+from ._utils import resource_path
 
 _STYLESHEET = resource_path('resources/style.qss')
 """ str: Main stylesheet. """
 
 
 def _apply_base_theme(app):
-    """ Apply base theme to the application.
 
-        Args:
-            app (QApplication): QApplication instance.
-    """
-
-    if QT_VERSION < (5,):
-        app.setStyle('plastique')
-    else:
-        app.setStyle('Fusion')
+    app.setStyle('Fusion')
 
     with open(_STYLESHEET) as stylesheet:
         app.setStyleSheet(stylesheet.read())

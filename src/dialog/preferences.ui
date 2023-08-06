@@ -119,11 +119,6 @@
                  <string>Light</string>
                 </property>
                </item>
-               <item>
-                <property name="text">
-                 <string>Native</string>
-                </property>
-               </item>
               </widget>
              </item>
              <item>
