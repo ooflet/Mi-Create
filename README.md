@@ -12,4 +12,6 @@ Easy to use watchface editor for the Xiaomi Smart Band 8.
 Download the latest installer from the [releases](https://github.com/ooflet/Mi-Face-Studio/releases) tab.
 
 ### Licensing:
-Mi Face Studio is licensed under the GPL licence.
+Mi Face Studio is licensed under the GPL-3 licence. [View what you can and can't do](https://gist.github.com/kn9ts/cbe95340d29fc1aaeaa5dd5c059d2e60)
+
+### Roadmap: https://trello.com/b/u9NEkmzC/mi-face-studio-roadmap
