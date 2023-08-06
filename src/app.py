@@ -15,10 +15,12 @@ import winsound
 import traceback
 import subprocess
 
+from window_ui import Ui_MainWindow
 from dialog.about_ui import Ui_Dialog as Ui_AboutDialog
 from dialog.credit_ui import Ui_Dialog as Ui_ThirdPartyNoticesDialog
 from dialog.preferences_ui import Ui_Dialog as Ui_Preferences
 
+currentdir = os.getcwd()
 currentVersion = '0.0.1b'
 notification = ToastNotifier()
 
@@ -31,8 +33,7 @@ class Compile(QThread):
         self.name = name+".bin"
 
     def run(self):
-        dir = os.getcwd()
-        subprocess.run(f'{dir}\compiler.exe compile "{self.source}" "{self.output}" "{self.name}" ')
+        subprocess.run(f'{currentdir}\compiler.exe compile "{self.source}" "{self.output}" "{self.name}" ')
         self.complete.emit()
 
 class MainWindow(QMainWindow):
@@ -44,14 +45,8 @@ class MainWindow(QMainWindow):
         self.preferences = Ui_Preferences()
         self.preferences.setupUi(self.preferences_dialog)
 
-        ui_file = QFile("window.ui")
-        ui_file.open(QFile.ReadOnly)
-        self.ui = QtWidgets.QWidget()
-        self.ui.setLayout(QtWidgets.QVBoxLayout())
-        loader = QUiLoader()
-        loader.load(ui_file, self.ui)
-        ui_file.close()
-
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self)
         self.setupWidgets()
         self.setupWorkspace()
 
@@ -97,10 +92,10 @@ class MainWindow(QMainWindow):
         sys.exit()
 
     def checkForUpdates(self):
-        version = '0.0.2b'
+        version = '1.0.1b'
         if version > currentVersion:
             if version[-1] == 'u':
-                self.showDialogue('info', f'An urgent update {version} was released! The app will now update.')
+                self.showDialogue('info', 'Message', f'An urgent update {version} was released! The app will now update.')
                 self.launchUpdater()
             else:
                 reply = QMessageBox.question(self, 'Message', f'A new update has been found ({version}). Would you like to update now?', QMessageBox.Yes, QMessageBox.No)
@@ -168,11 +163,11 @@ class MainWindow(QMainWindow):
             pass
 
     def openProject(self):
-        file = QFileDialog.getOpenFileName(self, 'Open Project...', "%userprofile%\\", "Watchface project files (*.mifp *.fprj)")
+        file = QFileDialog.getOpenFileName(self, 'Open Project...', "%userprofile%\\", "Watchface project files (*.dial *.fprj)")
         file_extension = QFileInfo(file[0]).suffix()
 
         if file_extension == "fprj":
-            self.showDialogue('warning', file[0], 'The selected file uses the legacy .fprj format. To preserve compatibility, some features will not be available.')
+            self.showDialogue('warning', file[0], 'You are opening a .fprj file. To preserve compatibility, some features will not be available.')
             pass
         else:
             pass
@@ -245,8 +240,8 @@ if __name__ == "__main__":
         QMessageBox.critical(None, 'Error', error_message, QMessageBox.Ok)
         sys.exit(1)
 
-    splash.finish(main_window)
     main_window.showMaximized()
+    splash.finish(main_window)
     main_window.checkForUpdates()
 
     sys.exit(app.exec())
