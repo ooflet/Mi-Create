@@ -4,6 +4,7 @@ Easy to use watchface editor for the Xiaomi Smart Band 8.
 
 ### 🇬🇧 EN
 ### Supports:
+- Intuitive user interface
 - Simple creation of watchface applets powered by the [Monaco Editor](https://github.com/microsoft/monaco-editor)
 - Easy to compile & decompile watch faces
 - Multiple languages (currently English, Simplified & Traditional Chinese, Russian)
