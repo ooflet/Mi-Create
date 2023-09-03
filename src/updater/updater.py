@@ -29,7 +29,7 @@ class DownloadThread(QThread):
     succeeded = Signal()
     failed = Signal(str)  # Define a custom signal for download failure
 
-    def __init__(self, url, filename, chunkSize=1058):
+    def __init__(self, url, filename, chunkSize=8192):
         super().__init__()
         self.url = url
         self.filename = filename
@@ -137,7 +137,7 @@ class MainWindow(QMainWindow):
         sys.exit(1)
 
 app = QtWidgets.QApplication(sys.argv)
-app.setStyle('Fusion')
+#app.setStyle('Fusion')
 main_window = MainWindow()
 main_window.setWindowFlags(Qt.FramelessWindowHint)
 main_window.show()

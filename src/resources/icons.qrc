@@ -1,12 +1,21 @@
 <RCC>
   <qresource prefix="Dark">
+    <file>folder-clock.png</file>
+    <file>file-clock.png</file>
+    <file>file-box.png</file>
+    <file>clipboard-paste.png</file>
+    <file>file-plus.png</file>
+    <file>clipboard-paste.png</file>
+    <file>copy(1).png</file>
+    <file>scissors.png</file>
+    <file>save.png</file>
     <file>x_dim.png</file>
     <file>x.png</file>
     <file>copy.png</file>
     <file>redo-2.png</file>
     <file>undo-2.png</file>
-    <file>file-plus-2.png</file>
     <file>MiFaceStudioFavicon.png</file>
+    <file>save.png</file>
     <file>folder-open.png</file>
     <file>package.png</file>
     <file>package-open.png</file>

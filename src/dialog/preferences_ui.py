@@ -16,10 +16,9 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QAbstractButton, QApplication, QComboBox, QDialog,
-    QDialogButtonBox, QFrame, QGridLayout, QGroupBox,
-    QLabel, QLayout, QSizePolicy, QSpacerItem,
-    QTabWidget, QVBoxLayout, QWidget)
-import resources.icons_rc as icons_rc
+    QDialogButtonBox, QFormLayout, QGridLayout, QGroupBox,
+    QLabel, QSizePolicy, QTabWidget, QVBoxLayout,
+    QWidget)
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
@@ -51,25 +50,23 @@ class Ui_Dialog(object):
         self.gridLayout.setObjectName(u"gridLayout")
         self.groupBox = QGroupBox(self.Interface)
         self.groupBox.setObjectName(u"groupBox")
-        self.gridLayout_2 = QGridLayout(self.groupBox)
-        self.gridLayout_2.setObjectName(u"gridLayout_2")
-        self.gridLayout_2.setHorizontalSpacing(0)
-        self.gridLayout_2.setVerticalSpacing(5)
-        self.gridLayout_2.setContentsMargins(-1, 5, 5, 5)
-        self.Property = QFrame(self.groupBox)
-        self.Property.setObjectName(u"Property")
-        sizePolicy = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)
+        self.formLayout = QFormLayout(self.groupBox)
+        self.formLayout.setObjectName(u"formLayout")
+        self.formLayout.setHorizontalSpacing(0)
+        self.formLayout.setVerticalSpacing(5)
+        self.formLayout.setContentsMargins(20, 9, 9, 9)
+        self.Theme = QLabel(self.groupBox)
+        self.Theme.setObjectName(u"Theme")
+        sizePolicy = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.Property.sizePolicy().hasHeightForWidth())
-        self.Property.setSizePolicy(sizePolicy)
-        self.Property.setFrameShape(QFrame.NoFrame)
-        self.Property.setFrameShadow(QFrame.Raised)
-        self.verticalLayout_3 = QVBoxLayout(self.Property)
-        self.verticalLayout_3.setSpacing(5)
-        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
-        self.verticalLayout_3.setSizeConstraint(QLayout.SetDefaultConstraint)
-        self.themeComboBox = QComboBox(self.Property)
+        sizePolicy.setHeightForWidth(self.Theme.sizePolicy().hasHeightForWidth())
+        self.Theme.setSizePolicy(sizePolicy)
+        self.Theme.setMinimumSize(QSize(0, 22))
+
+        self.formLayout.setWidget(0, QFormLayout.LabelRole, self.Theme)
+
+        self.themeComboBox = QComboBox(self.groupBox)
         self.themeComboBox.addItem("")
         self.themeComboBox.addItem("")
         self.themeComboBox.setObjectName(u"themeComboBox")
@@ -79,9 +76,9 @@ class Ui_Dialog(object):
         sizePolicy1.setHeightForWidth(self.themeComboBox.sizePolicy().hasHeightForWidth())
         self.themeComboBox.setSizePolicy(sizePolicy1)
 
-        self.verticalLayout_3.addWidget(self.themeComboBox)
+        self.formLayout.setWidget(0, QFormLayout.FieldRole, self.themeComboBox)
 
-        self.languageComboBox = QComboBox(self.Property)
+        self.languageComboBox = QComboBox(self.groupBox)
         self.languageComboBox.addItem("")
         self.languageComboBox.addItem("")
         self.languageComboBox.addItem("")
@@ -90,55 +87,16 @@ class Ui_Dialog(object):
         sizePolicy1.setHeightForWidth(self.languageComboBox.sizePolicy().hasHeightForWidth())
         self.languageComboBox.setSizePolicy(sizePolicy1)
 
-        self.verticalLayout_3.addWidget(self.languageComboBox)
+        self.formLayout.setWidget(1, QFormLayout.FieldRole, self.languageComboBox)
 
-        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
-
-        self.verticalLayout_3.addItem(self.verticalSpacer)
-
-
-        self.gridLayout_2.addWidget(self.Property, 0, 1, 1, 1)
-
-        self.PropertyLabel = QFrame(self.groupBox)
-        self.PropertyLabel.setObjectName(u"PropertyLabel")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Minimum)
-        sizePolicy2.setHorizontalStretch(0)
-        sizePolicy2.setVerticalStretch(0)
-        sizePolicy2.setHeightForWidth(self.PropertyLabel.sizePolicy().hasHeightForWidth())
-        self.PropertyLabel.setSizePolicy(sizePolicy2)
-        self.PropertyLabel.setMinimumSize(QSize(100, 0))
-        self.PropertyLabel.setMaximumSize(QSize(100, 16777215))
-        self.PropertyLabel.setFrameShape(QFrame.NoFrame)
-        self.PropertyLabel.setFrameShadow(QFrame.Raised)
-        self.verticalLayout_2 = QVBoxLayout(self.PropertyLabel)
-        self.verticalLayout_2.setSpacing(5)
-        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.Theme = QLabel(self.PropertyLabel)
-        self.Theme.setObjectName(u"Theme")
-        sizePolicy3 = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
-        sizePolicy3.setHorizontalStretch(0)
-        sizePolicy3.setVerticalStretch(0)
-        sizePolicy3.setHeightForWidth(self.Theme.sizePolicy().hasHeightForWidth())
-        self.Theme.setSizePolicy(sizePolicy3)
-        self.Theme.setMinimumSize(QSize(0, 22))
-
-        self.verticalLayout_2.addWidget(self.Theme)
-
-        self.Language = QLabel(self.PropertyLabel)
+        self.Language = QLabel(self.groupBox)
         self.Language.setObjectName(u"Language")
-        self.Language.setMinimumSize(QSize(0, 22))
+        self.Language.setMinimumSize(QSize(100, 22))
 
-        self.verticalLayout_2.addWidget(self.Language)
-
-        self.verticalSpacer_4 = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
-
-        self.verticalLayout_2.addItem(self.verticalSpacer_4)
+        self.formLayout.setWidget(1, QFormLayout.LabelRole, self.Language)
 
 
-        self.gridLayout_2.addWidget(self.PropertyLabel, 0, 0, 1, 1)
-
-
-        self.gridLayout.addWidget(self.groupBox, 0, 1, 1, 1)
+        self.gridLayout.addWidget(self.groupBox, 0, 0, 1, 1)
 
         self.tabWidget.addTab(self.Interface, "")
         self.Keyboard = QWidget()
@@ -178,6 +136,7 @@ class Ui_Dialog(object):
     def retranslateUi(self, Dialog):
         Dialog.setWindowTitle(QCoreApplication.translate("Dialog", u"Preferences", None))
         self.groupBox.setTitle(QCoreApplication.translate("Dialog", u"User Interface", None))
+        self.Theme.setText(QCoreApplication.translate("Dialog", u"Theme:", None))
         self.themeComboBox.setItemText(0, QCoreApplication.translate("Dialog", u"Dark", None))
         self.themeComboBox.setItemText(1, QCoreApplication.translate("Dialog", u"Light", None))
 
@@ -186,7 +145,6 @@ class Ui_Dialog(object):
         self.languageComboBox.setItemText(2, QCoreApplication.translate("Dialog", u"\u7b80\u4f53\u4e2d\u6587", None))
         self.languageComboBox.setItemText(3, QCoreApplication.translate("Dialog", u"\u0420\u0443\u0441\u0441\u043a\u0438\u0439", None))
 
-        self.Theme.setText(QCoreApplication.translate("Dialog", u"Theme:", None))
         self.Language.setText(QCoreApplication.translate("Dialog", u"Language:", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.Interface), QCoreApplication.translate("Dialog", u"Interface", None))
         self.groupBox_2.setTitle(QCoreApplication.translate("Dialog", u"Keyboard Shortcuts", None))

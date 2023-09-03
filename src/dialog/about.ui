@@ -73,7 +73,7 @@
       <item row="1" column="2">
        <widget class="QLabel" name="label_2">
         <property name="text">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Mi Face Studio v0.1b&lt;br/&gt;&lt;a href=&quot;https://github.com/ooflet/Mi-Face-Studio/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#55aaff;&quot;&gt;https://github.com/ooflet/Mi-Face-Studio/&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p&gt;made with &lt;img src=&quot;:/Dark/heart.png&quot;/&gt; by tostr&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Mi Face Studio v0.1b&lt;br/&gt;&lt;a href=&quot;\&amp;quot;\&amp;quot;&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#55aaff;&quot;&gt;https://github.com/ooflet/Mi-Face-Studio/&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p&gt;made with &lt;img src=&quot;:/Dark/heart.png&quot;/&gt; by tostr&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="openExternalLinks">
          <bool>true</bool>

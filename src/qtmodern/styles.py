@@ -1,3 +1,6 @@
+# QModernStyle
+
+
 from PySide6.QtGui import QPalette, QColor
 from ._utils import resource_path
 
@@ -7,7 +10,7 @@ _STYLESHEET = resource_path('resources/style.qss')
 
 def _apply_base_theme(app):
 
-    app.setStyle('Fusion')
+    app.setStyle('fusion')
 
     with open(_STYLESHEET) as stylesheet:
         app.setStyleSheet(stylesheet.read())

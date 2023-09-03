@@ -141,3 +141,7 @@ QTableView {
   background-color: palette(link-visited);
   alternate-background-color: palette(midlight);
 }
+
+QTreeView {
+  background-color: palette(window);
+}

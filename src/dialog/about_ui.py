@@ -18,7 +18,6 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
 from PySide6.QtWidgets import (QAbstractButton, QApplication, QDialog, QDialogButtonBox,
     QFrame, QGridLayout, QLabel, QSizePolicy,
     QSpacerItem, QVBoxLayout, QWidget)
-import resources.icons_rc as icons_rc
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
@@ -89,7 +88,7 @@ class Ui_Dialog(object):
 
     def retranslateUi(self, Dialog):
         Dialog.setWindowTitle(QCoreApplication.translate("Dialog", u"About", None))
-        self.label_2.setText(QCoreApplication.translate("Dialog", u"<html><head/><body><p>Mi Face Studio v0.1b<br/><a href=\"https://github.com/ooflet/Mi-Face-Studio/\"><span style=\" text-decoration: underline; color:#55aaff;\">https://github.com/ooflet/Mi-Face-Studio/</span></a></p><p>made with <img src=\":/Dark/heart.png\"/> by tostr</p></body></html>", None))
+        self.label_2.setText(QCoreApplication.translate("Dialog", u"<html><head/><body><p>Mi Face Studio v0.1b<br/><a href=\"\\&quot;\\&quot;\"><span style=\" text-decoration: underline; color:#55aaff;\">https://github.com/ooflet/Mi-Face-Studio/</span></a></p><p>made with <img src=\":/Dark/heart.png\"/> by tostr</p></body></html>", None))
         self.label.setText(QCoreApplication.translate("Dialog", u"<html><head/><body><p><img src=\":/Images/MiFaceStudio48x48.png\"/></p></body></html>", None))
     # retranslateUi
 
