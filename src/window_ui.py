@@ -446,7 +446,7 @@ class Ui_MainWindow(object):
         self.actionshowColorDialog.setText(QCoreApplication.translate("MainWindow", u"showColorDialog", None))
         self.actionshowSelectFont.setText(QCoreApplication.translate("MainWindow", u"showSelectFont", None))
         self.actionThirdPartyNotice.setText(QCoreApplication.translate("MainWindow", u"Third Party Notices", None))
-        self.actionDecompile.setText(QCoreApplication.translate("MainWindow", u"Decompile...", None))
+        self.actionDecompile.setText(QCoreApplication.translate("MainWindow", u"Unpack...", None))
         self.actionCut.setText(QCoreApplication.translate("MainWindow", u"Cut", None))
         self.actionCopy.setText(QCoreApplication.translate("MainWindow", u"Copy", None))
         self.actionPaste.setText(QCoreApplication.translate("MainWindow", u"Paste", None))

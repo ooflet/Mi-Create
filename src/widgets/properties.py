@@ -36,7 +36,7 @@ class PropertiesWidget(QWidget):
         self.tree_widget = QTreeWidget(self)
         #self.tree_widget.setItemDelegate(VerticalLineDelegate())
         self.tree_widget.setRootIsDecorated(False)
-        #self.tree_widget.setAlternatingRowColors(True)
+        self.tree_widget.setHeaderHidden(True)
         self.tree_widget.setEditTriggers(QTreeWidget.NoEditTriggers)
         self.tree_widget.setUniformRowHeights(True)
 

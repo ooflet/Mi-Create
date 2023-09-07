@@ -1,0 +1,12 @@
+import { IntersectionType } from "../../../models";
+import { TypeSerializerComponent } from "../../components";
+import type { IntersectionType as JSONIntersectionType } from "../../schema";
+export declare class IntersectionTypeSerializer extends TypeSerializerComponent<IntersectionType> {
+    supports(t: unknown): boolean;
+    /**
+     * Will be run after {@link TypeSerializer} so `type` will already be set.
+     * @param type
+     * @param obj
+     */
+    toObject(type: IntersectionType, obj: Pick<JSONIntersectionType, "type">): JSONIntersectionType;
+}

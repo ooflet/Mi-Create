@@ -82,7 +82,7 @@ class Canvas(QGraphicsView):
         # determine selection, for example using QRect::intersects()
         # and QRect::contains().
 
-class Rectangle(QGraphicsRectItem):
+class RectangleWidget(QGraphicsRectItem):
 
     handleTopLeft = 1
     handleTopMiddle = 2
@@ -373,7 +373,7 @@ def main():
     scene.addPixmap(QPixmap('01.png'))
     grview.setScene(scene)
 
-    item = Rectangle(0, 0, 300, 150, QColor(255, 255, 255, 255))
+    item = RectangleWidget(0, 0, 300, 150, QColor(255, 255, 255, 255))
     scene.addItem(item)
 
     grview.fitInView(scene.sceneRect(), Qt.KeepAspectRatio)

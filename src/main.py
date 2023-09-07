@@ -9,15 +9,16 @@ from PySide6.QtGui import *
 from PySide6.QtUiTools import *
 from PySide6.QtCore import *
 
-from win10toast import ToastNotifier
-import qtmodern.styles
+#from win10toast import ToastNotifier
+import theme.styles as theme
 import winsound
 import traceback
 import subprocess
 
 from project.projectManager import dialProject, fprjProject
-from widgets.canvas import Canvas, Rectangle
+from widgets.canvas import Canvas, RectangleWidget
 from widgets.properties import PropertiesWidget
+from widgets.monaco.monaco_widget import MonacoWidget
 
 from window_ui import Ui_MainWindow
 from dialog.about_ui import Ui_Dialog as Ui_AboutDialog
@@ -26,7 +27,7 @@ from dialog.preferences_ui import Ui_Dialog as Ui_Preferences
 
 currentDir = os.getcwd()
 currentVersion = '0.0.1-pre-alpha-1'
-notification = ToastNotifier()
+#notification = ToastNotifier()
 
 languages = ["English", "繁體中文", "简体中文", "Русский"]
 models = ["Mi Band 8"]
@@ -46,7 +47,6 @@ class Compile(QThread):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        #self.language = QInputDialog.getItem(self, "Language", "Set Language:", languages, 0, False)
 
         self.closeWithoutWarning = False
 
@@ -128,10 +128,12 @@ class MainWindow(QMainWindow):
         themeName = self.preferences.themeComboBox.currentText()
         app = QApplication.instance()
         if themeName == "Light":
-            qtmodern.styles.light(app=app)
+            #qdarktheme.setup_theme("light")
+            theme.light(app)
             self.showDialogue('info', 'Message', 'Icons in light theme have not been implemented yet. Sorry!')
         elif themeName == "Dark":
-            qtmodern.styles.dark(app=app)
+            #qdarktheme.setup_theme()
+            theme.dark(app)
 
     def createNewWorkspace(self, name, isFprj, data):
             viewport = Canvas()
@@ -140,7 +142,7 @@ class MainWindow(QMainWindow):
             self.viewports[name] = viewport
             viewport.setAcceptDrops(True)
 
-            testObject = Rectangle(0, 0, 50, 50, QColor(255,255,255,255))
+            testObject = RectangleWidget(0, 0, 50, 50, QColor(255,255,255,255))
 
             viewport.scene.addItem(testObject)
 
@@ -157,6 +159,13 @@ class MainWindow(QMainWindow):
             else:
                 self.showDialogue("error", "Message", "Cannot render project! Check that files are valid")
 
+    def createNewCodespace(self, name, text):
+        editor = MonacoWidget()
+        editor.setTheme("vs-dark")
+        editor.setText(text)
+        icon = QPixmap(":/Dark/file-box.png")
+        index = self.ui.workspace.addTab(editor, icon, name)
+        self.ui.workspace.setCurrentIndex(index)
 
     def initializePropertiesWidget(self):
         properties_widget = PropertiesWidget()
@@ -169,9 +178,11 @@ class MainWindow(QMainWindow):
                 self.ui.workspace.removeTab(index)
 
         self.ui.workspace.removeTab(1)
+        self.ui.workspace.addTab(MonacoWidget(), "init")
+        self.ui.workspace.removeTab(1)
         self.ui.NewProject.linkActivated.connect(lambda: self.ui.actionNewFile.trigger())
         self.ui.OpenProject.linkActivated.connect(lambda: self.ui.actionOpenFile.trigger())
-        self.ui.actionNewTab.triggered.connect(lambda: self.createNewWorkspace("test", False))
+        self.ui.actionNewTab.triggered.connect(lambda: self.createNewCodespace("test", "work?"))
         self.ui.workspace.tabCloseRequested.connect(handleTabClose)
 
         self.initializePropertiesWidget()
@@ -195,7 +206,7 @@ class MainWindow(QMainWindow):
         # test
         self.ui.actionshowAboutWindow.triggered.connect(self.showAboutWindow)
         self.ui.actionshowDefaultInfoDialog.triggered.connect(lambda: self.showDialogue("error", "Default Critical Dialog", "No cause for alarm, this is a test dialogue!"))
-        self.ui.actionshowToast.triggered.connect(lambda: notification.show_toast("Test", "This is a test notification!", duration = 5, threaded = False))
+        #self.ui.actionshowToast.triggered.connect(lambda: notification.show_toast("Test", "This is a test notification!", duration = 5, threaded = False))
         self.ui.actionshowColorDialog.triggered.connect(self.showColorDialog)
         self.ui.actionshowSelectFont.triggered.connect(self.showFontSelect)
         self.ui.actionInstaller.triggered.connect(self.launchUpdater)
@@ -253,8 +264,8 @@ class MainWindow(QMainWindow):
             self.showDialogue('info', 'Compile', location[0])
 
     def decompileProject(self):
-        self.showDialogue("warning", "Message", "The decompiler does not fully support Mi Band 8 watch faces, so elements such as watch face applets do not work, and some elements may be slightly glitched.")
-        file = QFileDialog.getOpenFileName(self, 'Decompile File...', "%userprofile%\\", "Compiled Watchface Binaries (*.bin *.FACE)")
+        self.showDialogue("warning", "Message", "Please note that images may be glitched when unpacking.")
+        file = QFileDialog.getOpenFileName(self, 'Unpack File...', "%userprofile%\\", "Compiled Watchface Binaries (*.bin *.FACE)")
 
         subprocess.run(f'{currentDir}\compiler\decompile.exe  "{file[0]}"')
         self.showDialogue("info", "Message", "Decompile success! Would you like to open")

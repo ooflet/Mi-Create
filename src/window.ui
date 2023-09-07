@@ -783,7 +783,7 @@
      <normaloff>:/Dark/package-open.png</normaloff>:/Dark/package-open.png</iconset>
    </property>
    <property name="text">
-    <string>Decompile...</string>
+    <string>Unpack...</string>
    </property>
   </action>
   <action name="actionCut">

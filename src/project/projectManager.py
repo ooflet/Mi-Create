@@ -58,6 +58,8 @@ class dialProject:
             faceData.write(xmltodict.unparse(watchData().watchFileTemplate))
             faceData.close()
             os.mkdir(os.path.join(tempdir, "images"))
+            if os.path.isfile(path):
+                os.remove(path)
             try:
                 output = shutil.make_archive(path, 'zip', tempdir)
                 os.rename(output, path)
