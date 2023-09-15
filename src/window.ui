@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1266</width>
-    <height>789</height>
+    <height>785</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -137,11 +137,6 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_2">
-       <attribute name="title">
-        <string>Tab 2</string>
-       </attribute>
-      </widget>
      </widget>
     </item>
    </layout>
@@ -152,7 +147,7 @@
      <x>0</x>
      <y>0</y>
      <width>1266</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="contextMenuPolicy">
@@ -241,6 +236,8 @@
     <addaction name="actionUndo"/>
     <addaction name="actionRedo"/>
     <addaction name="separator"/>
+    <addaction name="actionProject_XML_File"/>
+    <addaction name="separator"/>
     <addaction name="actionPreferences"/>
    </widget>
    <addaction name="menuFile"/>
@@ -285,42 +282,32 @@
      </property>
      <item>
       <widget class="QTreeWidget" name="Explorer">
-       <property name="styleSheet">
-        <string notr="true"/>
-       </property>
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
        </property>
        <property name="uniformRowHeights">
         <bool>true</bool>
        </property>
-       <property name="animated">
-        <bool>false</bool>
-       </property>
        <property name="headerHidden">
         <bool>true</bool>
        </property>
        <column>
         <property name="text">
-         <string>project.fprj</string>
+         <string>Project</string>
         </property>
        </column>
-       <item>
-        <property name="text">
-         <string>Watchface</string>
-        </property>
-        <item>
-         <property name="text">
-          <string>bg.png</string>
-         </property>
-        </item>
-       </item>
       </widget>
      </item>
     </layout>
    </widget>
   </widget>
   <widget class="QDockWidget" name="attributesWidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
    <property name="minimumSize">
     <size>
      <width>250</width>
@@ -342,10 +329,16 @@
   </widget>
   <widget class="QDockWidget" name="resourceWidget">
    <property name="sizePolicy">
-    <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>250</width>
+     <height>200</height>
+    </size>
    </property>
    <property name="styleSheet">
     <string notr="true"/>
@@ -374,109 +367,10 @@
       <number>0</number>
      </property>
      <item row="0" column="0">
-      <widget class="QListWidget" name="listWidget_2">
-       <property name="styleSheet">
-        <string notr="true">background-color: transparent</string>
-       </property>
+      <widget class="QListWidget" name="Resources">
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
        </property>
-       <property name="dragEnabled">
-        <bool>true</bool>
-       </property>
-       <property name="flow">
-        <enum>QListView::LeftToRight</enum>
-       </property>
-       <property name="viewMode">
-        <enum>QListView::ListMode</enum>
-       </property>
-       <item>
-        <property name="text">
-         <string>test</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-    </layout>
-   </widget>
-  </widget>
-  <widget class="QDockWidget" name="toolboxWidget">
-   <property name="minimumSize">
-    <size>
-     <width>250</width>
-     <height>500</height>
-    </size>
-   </property>
-   <property name="maximumSize">
-    <size>
-     <width>524287</width>
-     <height>524287</height>
-    </size>
-   </property>
-   <property name="styleSheet">
-    <string notr="true"/>
-   </property>
-   <property name="windowTitle">
-    <string>Toolbox</string>
-   </property>
-   <attribute name="dockWidgetArea">
-    <number>1</number>
-   </attribute>
-   <widget class="QWidget" name="dockWidgetContents_4">
-    <layout class="QVBoxLayout" name="verticalLayout_3">
-     <property name="spacing">
-      <number>0</number>
-     </property>
-     <property name="leftMargin">
-      <number>0</number>
-     </property>
-     <property name="topMargin">
-      <number>0</number>
-     </property>
-     <property name="rightMargin">
-      <number>0</number>
-     </property>
-     <property name="bottomMargin">
-      <number>0</number>
-     </property>
-     <item>
-      <widget class="QListWidget" name="ToolboxList">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">background-color: transparent;</string>
-       </property>
-       <property name="frameShape">
-        <enum>QFrame::NoFrame</enum>
-       </property>
-       <property name="dragEnabled">
-        <bool>true</bool>
-       </property>
-       <property name="dragDropMode">
-        <enum>QAbstractItemView::DragOnly</enum>
-       </property>
-       <property name="defaultDropAction">
-        <enum>Qt::CopyAction</enum>
-       </property>
-       <property name="gridSize">
-        <size>
-         <width>0</width>
-         <height>19</height>
-        </size>
-       </property>
-       <property name="viewMode">
-        <enum>QListView::ListMode</enum>
-       </property>
-       <item>
-        <property name="text">
-         <string>Element</string>
-        </property>
-        <property name="icon">
-         <iconset resource="resources/icons.qrc">
-          <normaloff>:/Dark/package.png</normaloff>:/Dark/package.png</iconset>
-        </property>
-       </item>
       </widget>
      </item>
     </layout>
@@ -531,7 +425,37 @@
    <addaction name="actionCopy"/>
    <addaction name="actionPaste"/>
   </widget>
-  <widget class="QToolBar" name="compileToolbar">
+  <widget class="QDockWidget" name="toolboxWidget">
+   <property name="floating">
+    <bool>false</bool>
+   </property>
+   <property name="features">
+    <set>QDockWidget::AllDockWidgetFeatures</set>
+   </property>
+   <property name="windowTitle">
+    <string>Toolbox</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_4">
+    <layout class="QVBoxLayout" name="verticalLayout_2">
+     <property name="leftMargin">
+      <number>0</number>
+     </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QToolBar" name="toolBar">
    <property name="windowTitle">
     <string>toolBar</string>
    </property>
@@ -816,6 +740,107 @@
   <action name="actionNewTab">
    <property name="text">
     <string>NewTab</string>
+   </property>
+  </action>
+  <action name="actionProject_XML_File">
+   <property name="icon">
+    <iconset resource="resources/icons.qrc">
+     <normaloff>:/Dark/file-code-2.png</normaloff>:/Dark/file-code-2.png</iconset>
+   </property>
+   <property name="text">
+    <string>Edit Project XML</string>
+   </property>
+  </action>
+  <action name="actionAdd_Element">
+   <property name="icon">
+    <iconset resource="resources/icons.qrc">
+     <normaloff>:/Dark/plus.png</normaloff>:/Dark/plus.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add Element</string>
+   </property>
+   <property name="toolTip">
+    <string>Add Element</string>
+   </property>
+  </action>
+  <action name="actionText">
+   <property name="icon">
+    <iconset resource="resources/icons.qrc">
+     <normaloff>:/Dark/text.png</normaloff>:/Dark/text.png</iconset>
+   </property>
+   <property name="text">
+    <string>Text</string>
+   </property>
+  </action>
+  <action name="actionImage">
+   <property name="icon">
+    <iconset resource="resources/icons.qrc">
+     <normaloff>:/Dark/image.png</normaloff>:/Dark/image.png</iconset>
+   </property>
+   <property name="text">
+    <string>Image</string>
+   </property>
+  </action>
+  <action name="actionImage_List">
+   <property name="text">
+    <string>Image List</string>
+   </property>
+  </action>
+  <action name="actionImage_List_2">
+   <property name="icon">
+    <iconset resource="resources/icons.qrc">
+     <normaloff>:/Dark/gallery-horizontal.png</normaloff>:/Dark/gallery-horizontal.png</iconset>
+   </property>
+   <property name="text">
+    <string>Image List</string>
+   </property>
+  </action>
+  <action name="actionAnalog">
+   <property name="icon">
+    <iconset resource="resources/icons.qrc">
+     <normaloff>:/Dark/analog.png</normaloff>:/Dark/analog.png</iconset>
+   </property>
+   <property name="text">
+    <string>Analog Clock</string>
+   </property>
+  </action>
+  <action name="actionRectangle">
+   <property name="text">
+    <string>Rectangle</string>
+   </property>
+  </action>
+  <action name="actionOval">
+   <property name="text">
+    <string>Elipse</string>
+   </property>
+  </action>
+  <action name="actionTime">
+   <property name="text">
+    <string>Time</string>
+   </property>
+  </action>
+  <action name="actionDate">
+   <property name="text">
+    <string>Date</string>
+   </property>
+  </action>
+  <action name="actionTap_Zone">
+   <property name="text">
+    <string>Tap Zone</string>
+   </property>
+  </action>
+  <action name="actionDigital_Number_2">
+   <property name="icon">
+    <iconset resource="resources/icons.qrc">
+     <normaloff>:/Dark/numbers.png</normaloff>:/Dark/numbers.png</iconset>
+   </property>
+   <property name="text">
+    <string>Digital Number</string>
+   </property>
+  </action>
+  <action name="actionAnimation">
+   <property name="text">
+    <string>Animation</string>
    </property>
   </action>
  </widget>

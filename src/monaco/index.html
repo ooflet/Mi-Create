@@ -18,10 +18,15 @@ html, body {
 </head>
 <body>
 
-<div id="container" style="width:400px;height:400px;border:1px solid grey"></div>
+<div id="container" style="width:400px;height:400px;border:0px solid grey"></div>
 
 <script src="monaco-editor/min/vs/loader.js"></script>
 <script type="text/javascript" src="qrc:///qtwebchannel/qwebchannel.js"></script>
 <script type="text/javascript" src="index.js"></script>
+<script>
+function setColorize(color) {
+    monaco.editor.colorize(color);
+}
+</script>
 </body>
 </html>

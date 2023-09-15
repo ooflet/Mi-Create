@@ -1,8 +1,41 @@
 {
+    "Image": [
+        {
+            "Shape":"30",
+            "properties": [
+                {
+                    "Name":["Name","text",""],
+                    "Bitmap":["Image","reslist",""],
+                    "X":["X","int",""],
+                    "Y":["Y","int",""],
+                    "Width":["Width","int",""],
+                    "Height":["Height","int",""],
+                    "Alpha":["Transparency","aint",""],
+                    "Visible_Src":["hide","bool",""]
+                }
+            ]
+        }
+    ],
     "ImageList": [
         {
-            "id":"idk",
-            "properties":
+            "Shape":"32",
+            "properties": [
+                {
+                    "Name":["Name","text",""],
+                    "BitmapList":["Images","reslist",""],
+                    "X":["X","int",""],
+                    "Y":["Y","int",""],
+                    "Width":["Width","int",""],
+                    "Height":["Height","int",""],
+                    "Alpha":["Transparency","aint",""],
+                    "Digits":["Digits","int",""],
+                    "Alignment":["Alignment","int",""],
+                    "Value_Src":["Data Source","source",""],
+                    "Spacing":["Spacing","bool",""],
+                    "Blanking":["Blanking","bool",""],
+                    "Visible_Src":["hide","bool",""]
+                }
+            ]
         }
     ]
 }

@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'window.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.5.2
+## Created by: Qt User Interface Compiler version 6.4.3
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -16,18 +16,17 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QIcon, QImage, QKeySequence, QLinearGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
-from PySide6.QtWidgets import (QAbstractItemView, QApplication, QDockWidget, QFrame,
-    QGridLayout, QHeaderView, QLabel, QListView,
-    QListWidget, QListWidgetItem, QMainWindow, QMenu,
-    QMenuBar, QSizePolicy, QSpacerItem, QStatusBar,
-    QTabWidget, QToolBar, QTreeWidget, QTreeWidgetItem,
-    QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QApplication, QDockWidget, QFrame, QGridLayout,
+    QHeaderView, QLabel, QListWidget, QListWidgetItem,
+    QMainWindow, QMenu, QMenuBar, QSizePolicy,
+    QSpacerItem, QStatusBar, QTabWidget, QToolBar,
+    QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(1266, 789)
+        MainWindow.resize(1266, 785)
         MainWindow.setMinimumSize(QSize(750, 750))
         icon = QIcon()
         icon.addFile(u":/Dark/MiFaceStudioFavicon.png", QSize(), QIcon.Normal, QIcon.Off)
@@ -141,6 +140,55 @@ class Ui_MainWindow(object):
         self.actionPaste.setIcon(icon10)
         self.actionNewTab = QAction(MainWindow)
         self.actionNewTab.setObjectName(u"actionNewTab")
+        self.actionProject_XML_File = QAction(MainWindow)
+        self.actionProject_XML_File.setObjectName(u"actionProject_XML_File")
+        icon11 = QIcon()
+        icon11.addFile(u":/Dark/file-code-2.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.actionProject_XML_File.setIcon(icon11)
+        self.actionAdd_Element = QAction(MainWindow)
+        self.actionAdd_Element.setObjectName(u"actionAdd_Element")
+        icon12 = QIcon()
+        icon12.addFile(u":/Dark/plus.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.actionAdd_Element.setIcon(icon12)
+        self.actionText = QAction(MainWindow)
+        self.actionText.setObjectName(u"actionText")
+        icon13 = QIcon()
+        icon13.addFile(u":/Dark/text.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.actionText.setIcon(icon13)
+        self.actionImage = QAction(MainWindow)
+        self.actionImage.setObjectName(u"actionImage")
+        icon14 = QIcon()
+        icon14.addFile(u":/Dark/image.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.actionImage.setIcon(icon14)
+        self.actionImage_List = QAction(MainWindow)
+        self.actionImage_List.setObjectName(u"actionImage_List")
+        self.actionImage_List_2 = QAction(MainWindow)
+        self.actionImage_List_2.setObjectName(u"actionImage_List_2")
+        icon15 = QIcon()
+        icon15.addFile(u":/Dark/gallery-horizontal.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.actionImage_List_2.setIcon(icon15)
+        self.actionAnalog = QAction(MainWindow)
+        self.actionAnalog.setObjectName(u"actionAnalog")
+        icon16 = QIcon()
+        icon16.addFile(u":/Dark/analog.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.actionAnalog.setIcon(icon16)
+        self.actionRectangle = QAction(MainWindow)
+        self.actionRectangle.setObjectName(u"actionRectangle")
+        self.actionOval = QAction(MainWindow)
+        self.actionOval.setObjectName(u"actionOval")
+        self.actionTime = QAction(MainWindow)
+        self.actionTime.setObjectName(u"actionTime")
+        self.actionDate = QAction(MainWindow)
+        self.actionDate.setObjectName(u"actionDate")
+        self.actionTap_Zone = QAction(MainWindow)
+        self.actionTap_Zone.setObjectName(u"actionTap_Zone")
+        self.actionDigital_Number_2 = QAction(MainWindow)
+        self.actionDigital_Number_2.setObjectName(u"actionDigital_Number_2")
+        icon17 = QIcon()
+        icon17.addFile(u":/Dark/numbers.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.actionDigital_Number_2.setIcon(icon17)
+        self.actionAnimation = QAction(MainWindow)
+        self.actionAnimation.setObjectName(u"actionAnimation")
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         sizePolicy = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
@@ -187,19 +235,16 @@ class Ui_MainWindow(object):
 
         self.gridLayout_3.addItem(self.verticalSpacer_2, 0, 0, 1, 1)
 
-        icon11 = QIcon()
-        icon11.addFile(u":/Dark/MiFaceStudioFavicon.png", QSize(), QIcon.Normal, QIcon.Off)
-        self.workspace.addTab(self.Welcome, icon11, "")
-        self.tab_2 = QWidget()
-        self.tab_2.setObjectName(u"tab_2")
-        self.workspace.addTab(self.tab_2, "")
+        icon18 = QIcon()
+        icon18.addFile(u":/Dark/MiFaceStudioFavicon.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.workspace.addTab(self.Welcome, icon18, "")
 
         self.gridLayout_2.addWidget(self.workspace, 0, 0, 1, 1)
 
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 1266, 22))
+        self.menubar.setGeometry(QRect(0, 0, 1266, 21))
         self.menubar.setContextMenuPolicy(Qt.NoContextMenu)
         self.menuFile = QMenu(self.menubar)
         self.menuFile.setObjectName(u"menuFile")
@@ -233,13 +278,9 @@ class Ui_MainWindow(object):
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.Explorer = QTreeWidget(self.dockWidgetContents)
-        __qtreewidgetitem = QTreeWidgetItem(self.Explorer)
-        QTreeWidgetItem(__qtreewidgetitem)
         self.Explorer.setObjectName(u"Explorer")
-        self.Explorer.setStyleSheet(u"")
         self.Explorer.setFrameShape(QFrame.NoFrame)
         self.Explorer.setUniformRowHeights(True)
-        self.Explorer.setAnimated(False)
         self.Explorer.setHeaderHidden(True)
 
         self.verticalLayout.addWidget(self.Explorer)
@@ -248,6 +289,11 @@ class Ui_MainWindow(object):
         MainWindow.addDockWidget(Qt.RightDockWidgetArea, self.explorerWidget)
         self.attributesWidget = QDockWidget(MainWindow)
         self.attributesWidget.setObjectName(u"attributesWidget")
+        sizePolicy1 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.attributesWidget.sizePolicy().hasHeightForWidth())
+        self.attributesWidget.setSizePolicy(sizePolicy1)
         self.attributesWidget.setMinimumSize(QSize(250, 250))
         self.attributesWidget.setStyleSheet(u"")
         self.dockWidgetContents_2 = QWidget()
@@ -258,11 +304,9 @@ class Ui_MainWindow(object):
         MainWindow.addDockWidget(Qt.RightDockWidgetArea, self.attributesWidget)
         self.resourceWidget = QDockWidget(MainWindow)
         self.resourceWidget.setObjectName(u"resourceWidget")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Preferred)
-        sizePolicy1.setHorizontalStretch(0)
-        sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.resourceWidget.sizePolicy().hasHeightForWidth())
         self.resourceWidget.setSizePolicy(sizePolicy1)
+        self.resourceWidget.setMinimumSize(QSize(250, 200))
         self.resourceWidget.setStyleSheet(u"")
         self.dockWidgetContents_3 = QWidget()
         self.dockWidgetContents_3.setObjectName(u"dockWidgetContents_3")
@@ -270,47 +314,14 @@ class Ui_MainWindow(object):
         self.gridLayout_4.setSpacing(0)
         self.gridLayout_4.setObjectName(u"gridLayout_4")
         self.gridLayout_4.setContentsMargins(0, 0, 0, 0)
-        self.listWidget_2 = QListWidget(self.dockWidgetContents_3)
-        QListWidgetItem(self.listWidget_2)
-        self.listWidget_2.setObjectName(u"listWidget_2")
-        self.listWidget_2.setStyleSheet(u"background-color: transparent")
-        self.listWidget_2.setFrameShape(QFrame.NoFrame)
-        self.listWidget_2.setDragEnabled(True)
-        self.listWidget_2.setFlow(QListView.LeftToRight)
-        self.listWidget_2.setViewMode(QListView.ListMode)
+        self.Resources = QListWidget(self.dockWidgetContents_3)
+        self.Resources.setObjectName(u"Resources")
+        self.Resources.setFrameShape(QFrame.NoFrame)
 
-        self.gridLayout_4.addWidget(self.listWidget_2, 0, 0, 1, 1)
+        self.gridLayout_4.addWidget(self.Resources, 0, 0, 1, 1)
 
         self.resourceWidget.setWidget(self.dockWidgetContents_3)
         MainWindow.addDockWidget(Qt.BottomDockWidgetArea, self.resourceWidget)
-        self.toolboxWidget = QDockWidget(MainWindow)
-        self.toolboxWidget.setObjectName(u"toolboxWidget")
-        self.toolboxWidget.setMinimumSize(QSize(250, 500))
-        self.toolboxWidget.setMaximumSize(QSize(524287, 524287))
-        self.toolboxWidget.setStyleSheet(u"")
-        self.dockWidgetContents_4 = QWidget()
-        self.dockWidgetContents_4.setObjectName(u"dockWidgetContents_4")
-        self.verticalLayout_3 = QVBoxLayout(self.dockWidgetContents_4)
-        self.verticalLayout_3.setSpacing(0)
-        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
-        self.verticalLayout_3.setContentsMargins(0, 0, 0, 0)
-        self.ToolboxList = QListWidget(self.dockWidgetContents_4)
-        __qlistwidgetitem = QListWidgetItem(self.ToolboxList)
-        __qlistwidgetitem.setIcon(icon2);
-        self.ToolboxList.setObjectName(u"ToolboxList")
-        self.ToolboxList.setEnabled(True)
-        self.ToolboxList.setStyleSheet(u"background-color: transparent;")
-        self.ToolboxList.setFrameShape(QFrame.NoFrame)
-        self.ToolboxList.setDragEnabled(True)
-        self.ToolboxList.setDragDropMode(QAbstractItemView.DragOnly)
-        self.ToolboxList.setDefaultDropAction(Qt.CopyAction)
-        self.ToolboxList.setGridSize(QSize(0, 19))
-        self.ToolboxList.setViewMode(QListView.ListMode)
-
-        self.verticalLayout_3.addWidget(self.ToolboxList)
-
-        self.toolboxWidget.setWidget(self.dockWidgetContents_4)
-        MainWindow.addDockWidget(Qt.LeftDockWidgetArea, self.toolboxWidget)
         self.fileToolbar = QToolBar(MainWindow)
         self.fileToolbar.setObjectName(u"fileToolbar")
         self.fileToolbar.setMovable(True)
@@ -324,10 +335,20 @@ class Ui_MainWindow(object):
         self.actionsToolbar.setObjectName(u"actionsToolbar")
         self.actionsToolbar.setIconSize(QSize(18, 18))
         MainWindow.addToolBar(Qt.TopToolBarArea, self.actionsToolbar)
-        self.compileToolbar = QToolBar(MainWindow)
-        self.compileToolbar.setObjectName(u"compileToolbar")
-        self.compileToolbar.setIconSize(QSize(18, 18))
-        MainWindow.addToolBar(Qt.TopToolBarArea, self.compileToolbar)
+        self.toolboxWidget = QDockWidget(MainWindow)
+        self.toolboxWidget.setObjectName(u"toolboxWidget")
+        self.toolboxWidget.setFloating(False)
+        self.dockWidgetContents_4 = QWidget()
+        self.dockWidgetContents_4.setObjectName(u"dockWidgetContents_4")
+        self.verticalLayout_2 = QVBoxLayout(self.dockWidgetContents_4)
+        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
+        self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
+        self.toolboxWidget.setWidget(self.dockWidgetContents_4)
+        MainWindow.addDockWidget(Qt.LeftDockWidgetArea, self.toolboxWidget)
+        self.toolBar = QToolBar(MainWindow)
+        self.toolBar.setObjectName(u"toolBar")
+        self.toolBar.setIconSize(QSize(18, 18))
+        MainWindow.addToolBar(Qt.TopToolBarArea, self.toolBar)
 
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuEdit.menuAction())
@@ -369,6 +390,8 @@ class Ui_MainWindow(object):
         self.menuEdit.addAction(self.actionUndo)
         self.menuEdit.addAction(self.actionRedo)
         self.menuEdit.addSeparator()
+        self.menuEdit.addAction(self.actionProject_XML_File)
+        self.menuEdit.addSeparator()
         self.menuEdit.addAction(self.actionPreferences)
         self.fileToolbar.addAction(self.actionNewFile)
         self.fileToolbar.addAction(self.actionOpenFile)
@@ -378,8 +401,8 @@ class Ui_MainWindow(object):
         self.actionsToolbar.addAction(self.actionCut)
         self.actionsToolbar.addAction(self.actionCopy)
         self.actionsToolbar.addAction(self.actionPaste)
-        self.compileToolbar.addAction(self.actionCompile)
-        self.compileToolbar.addAction(self.actionDecompile)
+        self.toolBar.addAction(self.actionCompile)
+        self.toolBar.addAction(self.actionDecompile)
 
         self.retranslateUi(MainWindow)
 
@@ -451,11 +474,27 @@ class Ui_MainWindow(object):
         self.actionCopy.setText(QCoreApplication.translate("MainWindow", u"Copy", None))
         self.actionPaste.setText(QCoreApplication.translate("MainWindow", u"Paste", None))
         self.actionNewTab.setText(QCoreApplication.translate("MainWindow", u"NewTab", None))
+        self.actionProject_XML_File.setText(QCoreApplication.translate("MainWindow", u"Edit Project XML", None))
+        self.actionAdd_Element.setText(QCoreApplication.translate("MainWindow", u"Add Element", None))
+#if QT_CONFIG(tooltip)
+        self.actionAdd_Element.setToolTip(QCoreApplication.translate("MainWindow", u"Add Element", None))
+#endif // QT_CONFIG(tooltip)
+        self.actionText.setText(QCoreApplication.translate("MainWindow", u"Text", None))
+        self.actionImage.setText(QCoreApplication.translate("MainWindow", u"Image", None))
+        self.actionImage_List.setText(QCoreApplication.translate("MainWindow", u"Image List", None))
+        self.actionImage_List_2.setText(QCoreApplication.translate("MainWindow", u"Image List", None))
+        self.actionAnalog.setText(QCoreApplication.translate("MainWindow", u"Analog Clock", None))
+        self.actionRectangle.setText(QCoreApplication.translate("MainWindow", u"Rectangle", None))
+        self.actionOval.setText(QCoreApplication.translate("MainWindow", u"Elipse", None))
+        self.actionTime.setText(QCoreApplication.translate("MainWindow", u"Time", None))
+        self.actionDate.setText(QCoreApplication.translate("MainWindow", u"Date", None))
+        self.actionTap_Zone.setText(QCoreApplication.translate("MainWindow", u"Tap Zone", None))
+        self.actionDigital_Number_2.setText(QCoreApplication.translate("MainWindow", u"Digital Number", None))
+        self.actionAnimation.setText(QCoreApplication.translate("MainWindow", u"Animation", None))
         self.WelcomeText.setText(QCoreApplication.translate("MainWindow", u"Welcome", None))
         self.OpenProject.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><img src=\":/Dark/folder-open.png\"/> <a href=\"\\&quot;\\&quot;\"><span style=\" text-decoration: underline; color:#55aaff;\">Open Project...</span></a></p></body></html>", None))
         self.NewProject.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><img src=\":/Dark/file-plus.png\"/> <a href=\"\\&quot;\\&quot;\"><span style=\" text-decoration: underline; color:#55aaff;\">New Project...</span></a></p></body></html>", None))
         self.workspace.setTabText(self.workspace.indexOf(self.Welcome), QCoreApplication.translate("MainWindow", u"Welcome", None))
-        self.workspace.setTabText(self.workspace.indexOf(self.tab_2), QCoreApplication.translate("MainWindow", u"Tab 2", None))
         self.menuFile.setTitle(QCoreApplication.translate("MainWindow", u"File", None))
         self.menuCompile.setTitle(QCoreApplication.translate("MainWindow", u"Compile", None))
         self.menuHelp.setTitle(QCoreApplication.translate("MainWindow", u"Help", None))
@@ -468,35 +507,12 @@ class Ui_MainWindow(object):
         self.menuEdit.setTitle(QCoreApplication.translate("MainWindow", u"Edit", None))
         self.explorerWidget.setWindowTitle(QCoreApplication.translate("MainWindow", u"Explorer", None))
         ___qtreewidgetitem = self.Explorer.headerItem()
-        ___qtreewidgetitem.setText(0, QCoreApplication.translate("MainWindow", u"project.fprj", None));
-
-        __sortingEnabled = self.Explorer.isSortingEnabled()
-        self.Explorer.setSortingEnabled(False)
-        ___qtreewidgetitem1 = self.Explorer.topLevelItem(0)
-        ___qtreewidgetitem1.setText(0, QCoreApplication.translate("MainWindow", u"Watchface", None));
-        ___qtreewidgetitem2 = ___qtreewidgetitem1.child(0)
-        ___qtreewidgetitem2.setText(0, QCoreApplication.translate("MainWindow", u"bg.png", None));
-        self.Explorer.setSortingEnabled(__sortingEnabled)
-
+        ___qtreewidgetitem.setText(0, QCoreApplication.translate("MainWindow", u"Project", None));
         self.attributesWidget.setWindowTitle(QCoreApplication.translate("MainWindow", u"Attributes", None))
         self.resourceWidget.setWindowTitle(QCoreApplication.translate("MainWindow", u"Resources", None))
-
-        __sortingEnabled1 = self.listWidget_2.isSortingEnabled()
-        self.listWidget_2.setSortingEnabled(False)
-        ___qlistwidgetitem = self.listWidget_2.item(0)
-        ___qlistwidgetitem.setText(QCoreApplication.translate("MainWindow", u"test", None));
-        self.listWidget_2.setSortingEnabled(__sortingEnabled1)
-
-        self.toolboxWidget.setWindowTitle(QCoreApplication.translate("MainWindow", u"Toolbox", None))
-
-        __sortingEnabled2 = self.ToolboxList.isSortingEnabled()
-        self.ToolboxList.setSortingEnabled(False)
-        ___qlistwidgetitem1 = self.ToolboxList.item(0)
-        ___qlistwidgetitem1.setText(QCoreApplication.translate("MainWindow", u"Element", None));
-        self.ToolboxList.setSortingEnabled(__sortingEnabled2)
-
         self.fileToolbar.setWindowTitle(QCoreApplication.translate("MainWindow", u"File Toolbar", None))
         self.actionsToolbar.setWindowTitle(QCoreApplication.translate("MainWindow", u"toolBar_2", None))
-        self.compileToolbar.setWindowTitle(QCoreApplication.translate("MainWindow", u"toolBar", None))
+        self.toolboxWidget.setWindowTitle(QCoreApplication.translate("MainWindow", u"Toolbox", None))
+        self.toolBar.setWindowTitle(QCoreApplication.translate("MainWindow", u"toolBar", None))
     # retranslateUi
 

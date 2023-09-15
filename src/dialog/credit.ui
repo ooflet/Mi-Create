@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>395</width>
-    <height>115</height>
+    <height>125</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -22,13 +22,13 @@
   <property name="minimumSize">
    <size>
     <width>395</width>
-    <height>115</height>
+    <height>125</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>395</width>
-    <height>115</height>
+    <height>125</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -65,7 +65,7 @@
       <item row="0" column="1">
        <widget class="QLabel" name="label_2">
         <property name="text">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; text-decoration: underline;&quot;&gt;Third Party Notices&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;a href=&quot;https://lucide.dev&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#55aaff;&quot;&gt;Lucide Icons&lt;/span&gt;&lt;/a&gt; - Under MIT License&lt;br/&gt;&lt;a href=&quot;https://github.com/gmarull/qtmodern/tree/master&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#55aaff;&quot;&gt;qtmodern&lt;/span&gt;&lt;/a&gt; - Under MIT License&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; text-decoration: underline;&quot;&gt;Third Party Notices&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;a href=&quot;https://lucide.dev&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#55aaff;&quot;&gt;Lucide Icons&lt;/span&gt;&lt;/a&gt; - Under MIT License&lt;br/&gt;&lt;a href=&quot;https://github.com/gmarull/qtmodern/tree/master&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#55aaff;&quot;&gt;qtmodern&lt;/span&gt;&lt;/a&gt; - Under MIT License&lt;br/&gt;EasyFace Compiler - Under explicit permission&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="openExternalLinks">
          <bool>true</bool>

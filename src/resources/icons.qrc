@@ -1,5 +1,15 @@
 <RCC>
   <qresource prefix="Dark">
+    <file>analog.png</file>
+    <file>text.png</file>
+    <file>watch.png</file>
+    <file>numbers.png</file>
+    <file>arrow-up-right-from-circle.png</file>
+    <file>file-code-2.png</file>
+    <file>gallery-horizontal.png</file>
+    <file>image.png</file>
+    <file>rainbow.png</file>
+    <file>mountain-snow.png</file>
     <file>folder-clock.png</file>
     <file>file-clock.png</file>
     <file>file-box.png</file>

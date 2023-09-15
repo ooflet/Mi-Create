@@ -1,27 +1,4 @@
--- Compiler Usage
-Guide for compiler usage. Mi Face Studio uses a slightly modified version of m0tral's compiler
-
--- Modifications
-- Simplified to 3 arguments, removed redundant ones.
-- Will not produce a .INFO file.
-- Watch names are modified.
-- Output modified.
-
---------- Command --------------------------------------------------
-
--- Command Arguments
-args[0] - source XML file location
-args[1] - output folder location
-args[2] - output file name
-
-eg: compiler.exe "path\to\project.xml" "path\to\output" example.bin
-
 --------- XML File -------------------------------------------------
-
--- Header
-The project files use XML. In our case, it uses XML version 1.0, encoded in UTF-8
-
-eg: <?xml version="1.0" encoding="UTF-8" ?>
 
 -- Device Type
 The compiler uses numbers (0-9) to represent different devices:
@@ -35,6 +12,8 @@ The compiler uses numbers (0-9) to represent different devices:
 - 7: Redmi Watch 3
 - 8: Redmi Smart Band Pro
 - 9: Xiaomi Smart Band 8
+- 10: Redmi Watch 3 Active
+- 11: Xiaomi Smart Band 8 Pro
 
 eg: <FaceProject DeviceType="9">
 

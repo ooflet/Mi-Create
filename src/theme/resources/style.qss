@@ -145,3 +145,7 @@ QTableView {
 QTreeView {
   background-color: palette(window);
 }
+
+QListView {
+  background-color: palette(window);
+}

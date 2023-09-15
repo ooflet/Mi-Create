@@ -1,13 +1,24 @@
 # Project Manager for Mi Face Studio
 # tostr 2023
 
-# Responsible for saving and loading various formats, such as .dial & .fprj
+# Responsible for saving and loading various project formats, such as .dial & .fprj
+
+"""
+About the .dial format:
+- The .dial format is an improved version of .fprj.
+- The file itself is a zip archive, which means that you can rename it to .zip and extract its contents
+- While .fprj support was made for it to be cross-compatible with EasyFace, .dial was made so that its 
+  more convenient for creators and developers alike to use.
+- Also, you can convert the dial project into an fprj project (which is how it gets compiled).
+"""
 
 import os
 import tempfile
 import xmltodict
 import shutil
 import zipfile
+import base64
+from pprint import pprint
 
 """
 Usage: 
@@ -23,20 +34,30 @@ class watchData:
     def __init__(self):
         super().__init__()
     
-        self.watchID = {
-            0:"XiaomiWatchColor",
-            1:"XiaomiWatchColorSport",
-            3:"XiaomiWatchColor2/s1/s2",
-            4:"XiaomiWatchS1Pro",
-            5:"RedmiWatch2",
-            6:"XiaomiSmartBand7Pro",
-            7:"RedmiWatch3",
-            8:"RedmiSmartBandPro",
-            9:"XiaomiSmartBand8"
+        self.models = [
+            "Xiaomi Watch Color", "Xiaomi Watch Color Sport", "Xiaomi Watch Color 2/s1/s2", "Xiaomi Watch S1 Pro", "Redmi Watch 2", "Xiaomi Smart Band 7 Pro", "Redmi Watch 3", "Redmi Smart Band Pro", "Xiaomi Smart Band 8", "Redmi Watch 3 Active", "Xiaomi Smart Band 8 Pro"
+        ]
+        self.modelID = {
+            0:"Xiaomi Watch Color",
+            1:"Xiaomi Watch Color Sport",
+            3:"Xiaomi Watch Color 2/s1/s2",
+            4:"Xiaomi Watch S1 Pro",
+            5:"Redmi Watch 2",
+            6:"Xiaomi Smart Band 7 Pro",
+            7:"Redmi Watch 3",
+            8:"Redmi Smart Band Pro",
+            9:"Xiaomi Smart Band 8",
+            10:"Redmi Watch 3 Active",
+            11:"Xiaomi Smart Band 8 Pro"
+        }
+        self.shapeId = {
+            30:"Image",
+            31:"ImageList",
+            32:"DigitalNumbers"
         }
         self.watchFileTemplate = {
             "FaceProject": {
-                "@DeviceType": 9,
+                "@DeviceType": "",
                 "Screen": {
                     "@Title": "",
                     "@Bitmap": "",
@@ -50,12 +71,14 @@ class watchData:
 
 class dialProject:
     @staticmethod
-    def create(path):
+    def create(path, device):
+        # Make temporary directory to place data and zip them all up
         tempdir = tempfile.mkdtemp()
         try:
             faceData = open(os.path.join(tempdir, "face.xml"), "w")
-            print(xmltodict.unparse(watchData().watchFileTemplate))
-            faceData.write(xmltodict.unparse(watchData().watchFileTemplate))
+            template = watchData().watchFileTemplate
+            template["FaceProject"]["@DeviceType"] = str(device)
+            faceData.write(xmltodict.unparse(template))
             faceData.close()
             os.mkdir(os.path.join(tempdir, "images"))
             if os.path.isfile(path):
@@ -71,6 +94,7 @@ class dialProject:
 
     @staticmethod
     def load(path):
+        # Open a temp directory with zip file that will auto close once done
         if zipfile.is_zipfile(path):
             with zipfile.ZipFile(path, 'r') as zip:
                 with tempfile.TemporaryDirectory() as tempdir:
@@ -78,11 +102,23 @@ class dialProject:
                     xml_path = os.path.join(tempdir, "face.xml")
                     try:
                         with open(xml_path, 'r') as xml:
-                            parse = xmltodict.parse(xml.read())
+                            # Parse XML, then encode images in /images dir to Base64
+                            xmlsource = xml.read()
+                            parse = xmltodict.parse(xmlsource)
                             if parse["FaceProject"]:
-                                return True, tempdir, parse
+                                imagesDir = os.path.join(tempdir, "images")
+                                imagesData = {}
+                                for root, dirs, files in os.walk(imagesDir):
+                                    for filename in files:
+                                        file_path = os.path.join(root, filename)
+                                        with open(file_path, 'rb') as img_file:
+                                            imgData = img_file.read()
+                                            img_base64 = base64.b64encode(imgData).decode('utf-8')
+                                            imagesData[filename] = img_base64
+                                pprint(parse)
+                                return True, imagesData, parse, xmlsource
                             else:
-                                return False, "Invalid header! Check that the provided files are correct."
+                                return False, "Not a FaceProject! Check that the provided files are correct."
                     except Exception as e:
                         return False, str(e)
         else:
@@ -90,10 +126,11 @@ class dialProject:
 
     @staticmethod
     def pack(path, data):
+        # Pack data into a zip file
         tempdir = tempfile.mkdtemp()
         try:
             faceData = open(os.path.join(tempdir, "face.xml"), "w")
-            print(xmltodict.unparse(data))
+            #print(xmltodict.unparse(data))
             faceData.write(xmltodict.unparse(watchData().watchFileTemplate))
             faceData.close()
             os.mkdir(os.path.join(tempdir, "images"))

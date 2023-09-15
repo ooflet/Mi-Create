@@ -1,6 +1,8 @@
-from qtpy.QtCore import QObject, Signal, Slot, Property, QUrl
-from qtpy.QtWebEngineWidgets import * 
-from qtpy.QtWebChannel import *
+from PySide6.QtCore import QObject, Signal, Slot, Property, QUrl
+from PySide6.QtWidgets import QFrame
+from PySide6.QtWebEngineCore import *
+from PySide6.QtWebEngineWidgets import * 
+from PySide6.QtWebChannel import *
 
 from pathlib import Path
 import json
@@ -130,3 +132,10 @@ class MonacoWidget(QWebEngineView):
 
     def setTheme(self, theme):
         self._bridge.send_to_js("theme", theme)
+
+    def colorize(self, color):
+        # Call the JavaScript function to colorize
+        js_code = f"setColorize('{color}')"
+        self.page().runJavaScript(js_code)
+
+    

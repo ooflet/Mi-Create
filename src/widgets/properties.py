@@ -15,7 +15,7 @@ class GridDelegate(QStyledItemDelegate):
         bottom = rect.bottom()
 
         # Create a custom pen with a thickness of 1 pixel
-        pen = QPen(QColor(40,40,40))
+        pen = QPen(QColor(60,60,60))
         pen.setWidth(1)
         painter.setPen(pen)
 
@@ -35,6 +35,7 @@ class PropertiesWidget(QWidget):
 
         self.tree_widget = QTreeWidget(self)
         #self.tree_widget.setItemDelegate(VerticalLineDelegate())
+        self.tree_widget.setFrameShape(QFrame.NoFrame)
         self.tree_widget.setRootIsDecorated(False)
         self.tree_widget.setHeaderHidden(True)
         self.tree_widget.setEditTriggers(QTreeWidget.NoEditTriggers)

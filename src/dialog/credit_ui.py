@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'credit.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.5.2
+## Created by: Qt User Interface Compiler version 6.4.3
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -18,21 +18,20 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
 from PySide6.QtWidgets import (QAbstractButton, QApplication, QDialog, QDialogButtonBox,
     QFrame, QGridLayout, QLabel, QSizePolicy,
     QVBoxLayout, QWidget)
-import resources.icons_rc as icons_rc
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
         Dialog.setEnabled(True)
-        Dialog.resize(395, 115)
+        Dialog.resize(395, 125)
         sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(Dialog.sizePolicy().hasHeightForWidth())
         Dialog.setSizePolicy(sizePolicy)
-        Dialog.setMinimumSize(QSize(395, 115))
-        Dialog.setMaximumSize(QSize(395, 115))
+        Dialog.setMinimumSize(QSize(395, 125))
+        Dialog.setMaximumSize(QSize(395, 125))
         self.verticalLayout = QVBoxLayout(Dialog)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.frame = QFrame(Dialog)
@@ -73,6 +72,6 @@ class Ui_Dialog(object):
 
     def retranslateUi(self, Dialog):
         Dialog.setWindowTitle(QCoreApplication.translate("Dialog", u"Third Party Notices", None))
-        self.label_2.setText(QCoreApplication.translate("Dialog", u"<html><head/><body><p><span style=\" text-decoration: underline;\">Third Party Notices</span></p><p><a href=\"https://lucide.dev\"><span style=\" text-decoration: underline; color:#55aaff;\">Lucide Icons</span></a> - Under MIT License<br/><a href=\"https://github.com/gmarull/qtmodern/tree/master\"><span style=\" text-decoration: underline; color:#55aaff;\">qtmodern</span></a> - Under MIT License</p></body></html>", None))
+        self.label_2.setText(QCoreApplication.translate("Dialog", u"<html><head/><body><p><span style=\" text-decoration: underline;\">Third Party Notices</span></p><p><a href=\"https://lucide.dev\"><span style=\" text-decoration: underline; color:#55aaff;\">Lucide Icons</span></a> - Under MIT License<br/><a href=\"https://github.com/gmarull/qtmodern/tree/master\"><span style=\" text-decoration: underline; color:#55aaff;\">qtmodern</span></a> - Under MIT License<br/>EasyFace Compiler - Under explicit permission</p></body></html>", None))
     # retranslateUi
 

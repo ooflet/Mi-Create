@@ -1,36 +1,80 @@
-# Canvas for Mi Face Studio
+# Watchface Renderer for Mi Face Studio
 # tostr 2023
 
+# Responsible for rendering EasyFace XML projects via QGraphicsView library.
+
 import sys
+import base64
 
 from PySide6.QtCore import *
 from PySide6.QtGui import *
 from PySide6.QtWidgets import *
 
-class Background(QGraphicsPathItem):
+class ObjectIcon:
     def __init__(self):
         super().__init__()
+        self.icon = {
+            "30":":Dark/image.png",
+            "31":":Dark/gallery-horizontal.png",
+            "32":":Dark/numbers.png"
+        }
 
-        path = QPainterPath()
-        # Create the pill-shaped path
-        path.addRoundedRect(0, 0, 192, 490, 100, 100)
-        self.setPath(path)
-        self.setBrush(Qt.black)  # Set the fill color
+class DeviceSize:
+    def __init__(self):
+        super().__init__()
+        # Sizing goes [x, y, corner_radius]
+        self.device = {
+            "0":[454, 454, 400],
+            "1":[454, 454, 400],
+            "3":[466, 466, 450],
+            "4":[480, 480, 450],
+            "5":[360, 320, 300],
+            "6":[280, 456, 150],
+            "7":[450, 390, 250],
+            "8":[194, 368, 200],
+            "9":[192, 490, 95],
+            "10":[240, 280, 60],
+            "11":[336, 480, 100]
+        }
+
+class DeviceOutline(QGraphicsPathItem):
+    def __init__(self, size):
+        super().__init__()
+        thickness = 5
+        outline = QPainterPath()
+        outline.addRoundedRect(thickness/2, thickness/2, (size[0]-thickness), (size[1]-thickness), size[2], size[2])
+        self.setPath(outline)
+        self.setPen(QPen(QColor(200, 200, 200, 100), thickness, Qt.SolidLine))
+        self.setBrush(QColor(0,0,0,0))
+        self.setZValue(999)
 
 class Canvas(QGraphicsView):
-    def __init__(self, parent=None):
+    def __init__(self, device, antialiasingEnabled, deviceOutlineVisible, parent=None):
         super().__init__(parent)
-        #self.setScene(QGraphicsScene(self))
+        if antialiasingEnabled:
+            self.setRenderHint(QPainter.Antialiasing)
+
         self.rubberBand = None
         self.origin = None
         self.setAcceptDrops(True)
 
+        self.zoomValue = 0
+
+        deviceSize = DeviceSize().device[str(device)]
+
         self.scene = QGraphicsScene()
-        self.scene.setSceneRect(0,0,192,490)
+        self.scene.setSceneRect(0,0,deviceSize[0],deviceSize[1])
 
         self.setScene(self.scene)
 
-        self.scene.addItem(Background())
+        background = QGraphicsRectItem(0, 0, deviceSize[0], deviceSize[1])
+        background.setPen(QPen(Qt.NoPen))
+        background.setBrush(QColor(0, 0, 0, 255))
+        
+        self.scene.addItem(background)
+
+        if deviceOutlineVisible:
+            self.scene.addItem(DeviceOutline(deviceSize))
 
     def dragEnterEvent(self, event):
         print("enter")
@@ -59,31 +103,82 @@ class Canvas(QGraphicsView):
 
         event.acceptProposedAction()
 
-    def loadObjectsFromData(self, data):
-        try:
+    def wheelEvent(self, event):
+        modifiers = QApplication.keyboardModifiers()
+
+        if modifiers == Qt.ControlModifier:
+            delta = event.angleDelta().y()
+            zoom_factor = 1.25 if delta > 0 else 1 / 1.25
+            self.scale(zoom_factor, zoom_factor)
+
+        elif modifiers == Qt.AltModifier:
+            scroll_delta = event.angleDelta().x()
+            scroll_value = self.horizontalScrollBar().value() - scroll_delta
+            self.horizontalScrollBar().setValue(scroll_value)
+        else:
+            scroll_delta = event.angleDelta().y()
+            scroll_value = self.verticalScrollBar().value() - scroll_delta
+            self.verticalScrollBar().setValue(scroll_value)
+
+    def loadObjectsFromData(self, data, imageData, antialiasing):
+        #print(data)
+        if data["FaceProject"]["Screen"].get("Widget") != None:
             for i in data["FaceProject"]["Screen"]["Widget"]:
-                print(i)
+                match i["@Shape"]:
+                    case "30":
+                        # Convert base64 image to QPixmap
+                        base64Data = imageData[i["@Bitmap"]]
+                        decoded = base64.b64decode(base64Data)
+                        qByteArray = QByteArray(decoded)
+                        image = QPixmap()
+                        image.loadFromData(qByteArray)
+
+                        # Create imagewidget
+                        item = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), QColor(255,255,255,0))
+                        item.addImage(image, 0, 0, 1, antialiasing)
+                        self.scene.addItem(item)
+
+                    case "31":
+                        # Split image strings from the Bitmaplist
+                        imageList = i["@BitmapList"].split("|")
+                        firstImage = imageList[0].split(":")
+
+                        # Convert base64 image to QPixmap
+                        base64Data = imageData[firstImage[1]]
+                        decoded = base64.b64decode(base64Data)
+                        qByteArray = QByteArray(decoded)
+                        image = QPixmap()
+                        image.loadFromData(qByteArray)
+
+                        # Create imagewidget
+                        imageWidget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), QColor(255,255,255,0))
+                        imageWidget.addImage(image, 0, 0, 1, antialiasing)
+                        self.scene.addItem(imageWidget)
+
+                    case "32":
+                        # Split images from the Bitmaplist
+                        imageList = i["@BitmapList"].split("|")
+                        imageWidget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), QColor(255,255,255,0))
+
+                        # Loop through digits
+                        for x in range(int(i["@Digits"])):
+                            # Convert base64 image to QPixmap
+                            base64Data = imageData[imageList[x]]
+                            decoded = base64.b64decode(base64Data)
+                            qByteArray = QByteArray(decoded)
+                            image = QPixmap()
+                            image.loadFromData(qByteArray)
+
+                            # Create imagewidget
+                            imageWidget.addImage(image, image.size().width()*x, 0, int(i["@Digits"]), antialiasing)
+                            
+                        self.scene.addItem(imageWidget)
+                        
             return True
-        except:
-            return False
+        else:
+            return True
 
-    # def mousePressEvent(self, event):
-    #     self.origin = event.pos()
-    #     if not self.rubberBand:
-    #         self.rubberBand = QRubberBand(QRubberBand.Rectangle, self)
-    #     self.rubberBand.setGeometry(QRect(self.origin, QSize()))
-    #     self.rubberBand.show()
-
-    # def mouseMoveEvent(self, event):
-    #     self.rubberBand.setGeometry(QRect(self.origin, event.pos()).normalized())
-
-    # def mouseReleaseEvent(self, event):
-    #     self.rubberBand.hide()
-        # determine selection, for example using QRect::intersects()
-        # and QRect::contains().
-
-class RectangleWidget(QGraphicsRectItem):
-
+class ResizeableObject(QGraphicsRectItem):
     handleTopLeft = 1
     handleTopMiddle = 2
     handleTopRight = 3
@@ -219,10 +314,13 @@ class RectangleWidget(QGraphicsRectItem):
         self.handles[self.handleBottomMiddle] = QRectF(b.center().x() - s / 2, b.bottom() - s, s, s)
         self.handles[self.handleBottomRight] = QRectF(b.right() - s, b.bottom() - s, s, s)
 
+        for handle, rect in self.handles.items():
+            rect_item = QGraphicsRectItem(rect)
+            rect_item.setZValue(1000)  
+
     def interactiveResize(self, mousePos):
-        """
-        Perform shape interactive resize.
-        """
+        # Perform shape interactive resize.
+
         offset = self.handleSize + self.handleSpace
         boundingRect = self.boundingRect()
         rect = self.rect()
@@ -333,9 +431,8 @@ class RectangleWidget(QGraphicsRectItem):
         self.updateHandlesPos()
 
     def shape(self):
-        """
-        Returns the shape of this item as a QPainterPath in local coordinates.
-        """
+        # Returns the shape of this item as a QPainterPath in local coordinates.
+
         path = QPainterPath()
         path.addRect(self.rect())
         if self.isSelected():
@@ -344,14 +441,17 @@ class RectangleWidget(QGraphicsRectItem):
         return path
 
     def paint(self, painter, option, widget=None):
-        """
-        Paint the node in the graphic view.
-        """
+        # Paint the node in the graphic view.
+
         painter.setRenderHint(QPainter.Antialiasing)
         painter.setBrush(QBrush(self.color))
+        painter.setPen(QPen(QColor(0, 205, 255), 0, Qt.SolidLine))
 
         if self.isSelected():
             painter.setPen(QPen(QColor(0, 205, 255), 2.0, Qt.SolidLine))
+
+        if not self.isSelected():
+            painter.setPen(QPen(QColor(0, 0, 0, 0), 0, Qt.SolidLine))
 
         painter.drawRect(self.rect())
 
@@ -361,6 +461,69 @@ class RectangleWidget(QGraphicsRectItem):
             for handle, rect in self.handles.items():
                 if self.handleSelected is None or handle == self.handleSelected:
                     painter.drawRect(rect)
+
+class BaseObject(QGraphicsRectItem):
+    def __init__(self, posX, posY, sizeX, sizeY, color):
+        # Initialize the shape.
+
+        super().__init__(posX, posY, sizeX, sizeY)
+        self.color = color
+        self.setAcceptHoverEvents(True)
+        self.setFlag(QGraphicsItem.ItemIsMovable, True)
+        self.setFlag(QGraphicsItem.ItemIsSelectable, True)
+        self.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
+        self.setFlag(QGraphicsItem.ItemIsFocusable, True)
+
+    def contextMenuEvent(self, event):
+        scenePos = self.mapToScene(event.pos())
+        view = self.scene().views()[0]  # Get the first view
+        viewPos = view.mapToGlobal(view.mapFromScene(scenePos))
+
+        menu = QMenu()
+        deleteIcon = QIcon()
+        deleteIcon.addFile(u":/Dark/x_dim.png", QSize(), QIcon.Normal, QIcon.Off)
+        action1 = menu.addAction("Delete")
+        action1.setIcon(deleteIcon)
+
+        action = menu.exec(viewPos)
+
+        if action == action1:
+            self.scene().removeItem(self)
+
+    def paint(self, painter, option, widget=None):
+        # Paint the node in the graphic view.
+
+        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setBrush(QBrush(self.color))
+        painter.setPen(QPen(QColor(0, 205, 255), 0, Qt.SolidLine))
+
+        if self.isSelected():
+            painter.setPen(QPen(QColor(0, 205, 255), 2.0, Qt.SolidLine))
+
+        if not self.isSelected():
+            painter.setPen(QPen(QColor(0, 0, 0, 0), 0, Qt.SolidLine))
+
+        painter.drawRect(self.rect())
+
+class RectangleWidget(ResizeableObject):
+    def __init__(self, posX, posY, sizeX, sizeY, color):
+        super().__init__(posX, posY, sizeX, sizeY, color)
+
+
+class ImageWidget(BaseObject):
+    def __init__(self, posX, posY, sizeX, sizeY, color):
+        super().__init__(posX, posY, sizeX, sizeY, color)
+        self.setPos(posX, posY)
+
+    def addImage(self, qPixmap, posX, posY, digits, isAntialiased):
+        self.imageItem = QGraphicsPixmapItem(qPixmap, self)
+        self.imageItem.setPos(posX, posY)
+
+        if isAntialiased:
+            self.imageItem.setTransformationMode(Qt.SmoothTransformation)
+
+        self.setRect(0, 0, qPixmap.width()*digits, qPixmap.height())
+        
 
 def main():
 
@@ -373,7 +536,7 @@ def main():
     scene.addPixmap(QPixmap('01.png'))
     grview.setScene(scene)
 
-    item = RectangleWidget(0, 0, 300, 150, QColor(255, 255, 255, 255))
+    item = ImageWidget(0, 0, 300, 150, QColor(255, 255, 255, 255))
     scene.addItem(item)
 
     grview.fitInView(scene.sceneRect(), Qt.KeepAspectRatio)
