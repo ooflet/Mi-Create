@@ -22,7 +22,6 @@ import resources.icons_rc
 
 from window_ui import Ui_MainWindow
 from dialog.about_ui import Ui_Dialog as Ui_AboutDialog
-from dialog.credit_ui import Ui_Dialog as Ui_ThirdPartyNoticesDialog
 from dialog.preferences_ui import Ui_Dialog as Ui_Preferences
 
 currentDir = os.getcwd()
@@ -53,7 +52,7 @@ class MainWindow(QMainWindow):
         self.preferences.setupUi(self.preferences_dialog)
 
         # Setup Viewports (tabs)
-        self.viewports = {}
+        self.viewports = {'Welcome':[False]}
 
         # Setup Project
         self.project = None
@@ -121,10 +120,10 @@ class MainWindow(QMainWindow):
         version = currentVersion
         if version > currentVersion:
             if version[-1] == 'u':
-                self.showDialogue('info', 'Message', f'An urgent update {version} was released! The app will now update.')
+                self.showDialogue('info', f'An urgent update {version} was released! The app will now update.')
                 self.launchUpdater()
             else:
-                reply = QMessageBox.question(self, 'Message', f'A new update has been found (v{version}). Would you like to update now?', QMessageBox.Yes, QMessageBox.No)
+                reply = QMessageBox.question(self, f'A new update has been found (v{version}). Would you like to update now?', QMessageBox.Yes, QMessageBox.No)
 
                 if reply == QMessageBox.Yes:
                     self.launchUpdater()
@@ -136,52 +135,101 @@ class MainWindow(QMainWindow):
         app = QApplication.instance()
         if themeName == "Light":
             theme.light(app)
-            self.showDialogue('info', 'Message', 'Icons in light theme have not been implemented yet. Sorry!')
+            self.showDialogue('info', 'Icons in light theme have not been implemented yet. Sorry!')
         elif themeName == "Dark":
             theme.dark(app)
 
-    def setupExplorer(self, data, isFprj):
-        self.ui.Explorer.clear()
-        self.ui.Explorer.setAnimated(True)
-        icon = QIcon()
-        icon.addFile(u":/Dark/watch.png", QSize(), QIcon.Normal, QIcon.Off)
-        name = None
-        if data["FaceProject"]["Screen"]["@Title"] == "":
-            name = "Watchface"
-        else:
-            name = data["FaceProject"]["Screen"]["@Title"]
-        root = QTreeWidgetItem(self.ui.Explorer)
-        root.setText(0, name)
-        root.setIcon(0, icon)
-        if data["FaceProject"]["Screen"].get("Widget") != None:
-            for x in data["FaceProject"]["Screen"]["Widget"]:
-                objectIcon = QIcon()
+    def setupWorkspace(self):
+        # Fires when tab closes
+        def handleTabClose(index):
+            reply = QMessageBox.question(self, 'Are you sure you want to close this tab?', QMessageBox.Yes, QMessageBox.No)
+            if reply == QMessageBox.Yes:
+                currentWidget = self.ui.workspace.widget(index)
+                currentTabName = self.ui.workspace.tabText(index)
 
-                if not ObjectIcon().icon.get(x["@Shape"]):
-                    self.showDialogue("error", "Message", "Shape unsupported!")
+                if isinstance(currentWidget, MonacoWidget):
+                    currentWidget.setParent(None)
+                    currentWidget.close()
+                    currentWidget.deleteLater()
+                
+                del self.viewports[currentTabName]
+                self.ui.workspace.removeTab(index)
 
-                objectIcon.addFile(ObjectIcon().icon[x["@Shape"]], QSize(), QIcon.Normal, QIcon.Off)
-                object = QTreeWidgetItem(root)
-                object.setText(0, x["@Name"])
-                object.setIcon(0, objectIcon)
-                object.setFlags(object.flags() | Qt.ItemIsEditable)
-        self.ui.Explorer.expandAll()
+        # Fires when tab changes
+        def handleTabChange(index):
+            tabName = self.ui.workspace.tabText(index)
+            if not tabName == "Project XML":
+                tabData = self.viewports[tabName] 
+                if not tabData[0] == False:
+                    self.updateExplorer(tabData[1])
+                else:
+                    self.clearExplorer()
+            else:
+                self.clearExplorer()
+
+        # Initialize Monaco WebView. This also starts the app in "OpenGL mode".
+        self.monaco = MonacoWidget()
+        self.ui.workspace.addTab(self.monaco, "init")
+        self.ui.workspace.removeTab(1)
+
+        # Connect links in the welcome screen to actions
+        self.ui.NewProject.linkActivated.connect(lambda: self.ui.actionNewFile.trigger())
+        self.ui.OpenProject.linkActivated.connect(lambda: self.ui.actionOpenFile.trigger())
+
+        self.ui.actionNewTab.triggered.connect(lambda: self.createNewCodespace("test", "work?"))
+
+        # Connect tab changes
+        self.ui.workspace.tabCloseRequested.connect(handleTabClose)
+        self.ui.workspace.currentChanged.connect(handleTabChange)
+
+        self.initializePropertiesWidget()
 
     def clearExplorer(self):
         self.ui.Explorer.clear()
+
+    def updateExplorer(self, data):
+            self.ui.Explorer.clear()
+            self.ui.Explorer.setAnimated(True)
+            icon = QIcon()
+            icon.addFile(u":/Dark/watch.png", QSize(), QIcon.Normal, QIcon.Off)
+            name = None
+            if data["FaceProject"]["Screen"]["@Title"] == "":
+                name = "Watchface"
+            else:
+                name = data["FaceProject"]["Screen"]["@Title"]
+            root = QTreeWidgetItem(self.ui.Explorer)
+            root.setText(0, name)
+            root.setIcon(0, icon)
+            if data["FaceProject"]["Screen"].get("Widget") != None:
+                for x in data["FaceProject"]["Screen"]["Widget"]:
+                    objectIcon = QIcon()
+
+                    if not ObjectIcon().icon.get(x["@Shape"]):
+                        self.showDialogue("error", "Shape unsupported!")
+
+                    objectIcon.addFile(ObjectIcon().icon[x["@Shape"]], QSize(), QIcon.Normal, QIcon.Off)
+                    object = QTreeWidgetItem(root)
+                    object.setText(0, x["@Name"])
+                    object.setIcon(0, objectIcon)
+                    object.setFlags(object.flags() | Qt.ItemIsEditable)
+            self.ui.Explorer.expandAll()
+
+    def clearResourceWidget():
+        pass
+
+    def updateResourceWidget():
+        pass
 
     def createNewWorkspace(self, name, isFprj, data, xml):
         # Setup Project
         self.projectXML = xml
         self.ui.Explorer.clear()
-        self.setupExplorer(data[0], isFprj)
             
         # Create a Canvas (QGraphicsScene & QGraphicsView)
         viewport = Canvas(data[0]["FaceProject"]["@DeviceType"], self.preferences.AntialiasingEnabled.isChecked(), self.preferences.DeviceOutlineVisible.isChecked())
 
         # Create the viewport
-        setattr(self, name, viewport)
-        self.viewports[name] = viewport
+        self.viewports[name] = [viewport, data[0], data[1], isFprj]
         viewport.setAcceptDrops(True)
 
         # Add Icons
@@ -199,9 +247,10 @@ class MainWindow(QMainWindow):
         if success:
             index = self.ui.workspace.addTab(viewport, icon, name)
             self.ui.workspace.setCurrentIndex(index)
-            self.ui.workspace.currentWidget().setFrameShape(QFrame.NoFrame)
+            viewport.setFrameShape(QFrame.NoFrame)
+            viewport.scene.itemSelectionChanged.connect(lambda: print("changed"))
         else:
-            self.showDialogue("error", "Message", "Cannot render project! Your project files are most likely corrupted.")
+            self.showDialogue("error", "Cannot render project! Your project files are most likely corrupted.")
 
     def createNewCodespace(self, name, text):
         # Creates a new instance of Monaco in a Codespace (code workspace)
@@ -216,35 +265,6 @@ class MainWindow(QMainWindow):
         # Initializes properties widget
         properties_widget = PropertiesWidget()
         self.ui.attributesWidget.setWidget(properties_widget)
-
-    def setupWorkspace(self):
-        def handleTabChange(index):
-            print(self.viewports)
-
-        def handleTabClose(index):
-            reply = QMessageBox.question(self, 'Message', 'Are you sure you want to close this tab?', QMessageBox.Yes, QMessageBox.No)
-            if reply == QMessageBox.Yes:
-                currentWidget = self.ui.workspace.widget(index)
-                if isinstance(currentWidget, MonacoWidget):
-                    currentWidget.setParent(None)
-                    currentWidget.close()
-                    currentWidget.deleteLater()
-                self.ui.workspace.removeTab(index)
-
-        # Initialize Monaco WebView. This also starts the app in "OpenGL mode".
-        self.monaco = MonacoWidget()
-        self.ui.workspace.addTab(self.monaco, "init")
-        self.ui.workspace.removeTab(1)
-
-        # Connect links in the welcome screen to actions
-        self.ui.NewProject.linkActivated.connect(lambda: self.ui.actionNewFile.trigger())
-        self.ui.OpenProject.linkActivated.connect(lambda: self.ui.actionOpenFile.trigger())
-
-        self.ui.actionNewTab.triggered.connect(lambda: self.createNewCodespace("test", "work?"))
-        self.ui.workspace.currentChanged.connect(handleTabChange)
-        self.ui.workspace.tabCloseRequested.connect(handleTabClose)
-
-        self.initializePropertiesWidget()
 
     def setupWidgets(self):
         # Connect menu actions
@@ -269,7 +289,7 @@ class MainWindow(QMainWindow):
 
         # test
         self.ui.actionshowAboutWindow.triggered.connect(self.showAboutWindow)
-        self.ui.actionshowDefaultInfoDialog.triggered.connect(lambda: self.showDialogue("error", "Default Critical Dialog", "No cause for alarm, this is a test dialogue!"))
+        self.ui.actionshowDefaultInfoDialog.triggered.connect(lambda: self.showDialogue("error", "No cause for alarm, this is a test dialogue!"))
         self.ui.actionshowColorDialog.triggered.connect(self.showColorDialog)
         self.ui.actionshowToast.triggered.connect(lambda: self.setWindowState(Qt.WindowMinimized))
         self.ui.actionshowSelectFont.triggered.connect(self.showFontSelect)
@@ -311,10 +331,10 @@ class MainWindow(QMainWindow):
                         try:
                             self.createNewWorkspace(file[0], False, [project[2], project[1]], project[3])    
                         except Exception as e:
-                            self.showDialogue("error", "Message", f"Failed to createNewWorkspace: {e}.")
+                            self.showDialogue("error", f"Failed to createNewWorkspace: {e}.")
 
                 else:
-                    self.showDialogue("error", "Message", f"Failed to create a new project: {project[1]}. There's something seriously wrong.")
+                    self.showDialogue("error", f"Failed to create a new project: {project[1]}. There's something seriously wrong.")
 
     def openProject(self):
         # Get where to open the project from
@@ -336,29 +356,29 @@ class MainWindow(QMainWindow):
                     try:
                         self.createNewWorkspace(file[0], False, [project[2], project[1]], project[3])    
                     except Exception as e:
-                        self.showDialogue("error", "Message", f"Failed to open project: {e}.")
+                        self.showDialogue("error", f"Failed to open project: {e}.")
 
     def compileProject(self):
         # Check if there is a project open
         if self.project == None:
-            self.showDialogue('error', 'Message', 'Failed to compile project: No project open!')
+            self.showDialogue('error', 'Failed to compile project: No project open!')
         else:
             location = QFileDialog.getSaveFileName(self, 'Compile Project To...', "", "Binary file (*.bin)")
             subprocess.run(f'{currentDir}\\bin\\compiler.exe compile "{self.source}" "{location}" "{self.name}" ')
             self.showDialogue('info', 'Compile', location[0])
 
     def decompileProject(self):
-        self.showDialogue("warning", "Message", "Please note that images may be glitched when unpacking.")
+        self.showDialogue("warning", "Please note that images may be glitched when unpacking.")
         file = QFileDialog.getOpenFileName(self, 'Unpack File...', "%userprofile%\\", "Compiled Watchface Binaries (*.bin *.FACE)")
 
         subprocess.run(f'{currentDir}\\bin\\unpack.exe  "{file[0]}"')
-        self.showDialogue("info", "Message", "Decompile success! Would you like to open")
+        self.showDialogue("info", "Decompile success! Would you like to open")
 
     def editProjectXML(self):
         if self.projectXML:
             self.createNewCodespace("Project XML", str(self.projectXML))
         else:
-            self.showDialogue("error", "Message", "Failed to open project XML: No project is open!")
+            self.showDialogue("error", "Failed to open project XML: No project is open!")
 
     def showColorDialog(self):
         color = QColorDialog.getColor(Qt.white, self, "Select Color")
@@ -378,12 +398,11 @@ class MainWindow(QMainWindow):
         dialog.exec()
 
     def showThirdPartyNotices(self):
-        dialog = QDialog()
-        about = Ui_ThirdPartyNoticesDialog()
-        about.setupUi(dialog)
+        dialog = QMessageBox()
+        dialog.setText('<html><head/><body><p><span style=" text-decoration: underline;">Third Party Notices</span></p><p><a href="https://lucide.dev"><span style=" text-decoration: underline; color:#55aaff;">Lucide Icons</span></a> - Under MIT License<br/><a href="https://github.com/gmarull/qtmodern/tree/master"><span style=" text-decoration: underline; color:#55aaff;">qtmodern</span></a> - Under MIT License<br/>EasyFace Compiler - Under explicit permission</p></body></html>')
         dialog.exec()
 
-    def showDialogue(self, type, title, text):
+    def showDialogue(self, type, text, detailedText=""):
         sound_map = {
             "info": 'SystemAsterisk',
             "question": 'SystemAsterisk',
@@ -395,14 +414,31 @@ class MainWindow(QMainWindow):
         MessageBox = QMessageBox()
         match type:
             case "info":
-                MessageBox.information(self, title, text, QMessageBox.Ok)
+                MessageBox.setWindowTitle("Mi Face Studio")
+                MessageBox.setWindowIcon(QPixmap(":/Dark/MiFaceStudioFavicon"))
+                MessageBox.setIcon(QMessageBox.Information)
+                MessageBox.setText(text)
+                MessageBox.exec()
             case "question":
-                MessageBox.question(self, title, text, QMessageBox.Ok)
+                MessageBox.setWindowTitle("Mi Face Studio")
+                MessageBox.setWindowIcon(QPixmap(":/Dark/MiFaceStudioFavicon"))
+                MessageBox.setIcon(QMessageBox.Question)
+                MessageBox.setText(text)
+                MessageBox.exec()
             case "warning":
-                MessageBox.warning(self, title, text, QMessageBox.Ok)
+                MessageBox.setWindowTitle("Mi Face Studio")
+                MessageBox.setWindowIcon(QPixmap(":/Dark/MiFaceStudioFavicon"))
+                MessageBox.setIcon(QMessageBox.Warning)
+                MessageBox.setText(text)
+                MessageBox.exec()
             case "error":
-                MessageBox.critical(self, title, text, QMessageBox.Ok)
-
+                MessageBox.setWindowTitle("Mi Face Studio")
+                MessageBox.setWindowIcon(QPixmap(":/Dark/MiFaceStudioFavicon"))
+                MessageBox.setIcon(QMessageBox.Critical)
+                MessageBox.setText(text)
+                MessageBox.setDetailedText(detailedText)
+                MessageBox.exec()
+            
 if __name__ == "__main__":
     import sys
 

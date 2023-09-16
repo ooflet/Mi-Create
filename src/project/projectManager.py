@@ -9,7 +9,8 @@ About the .dial format:
 - The file itself is a zip archive, which means that you can rename it to .zip and extract its contents
 - While .fprj support was made for it to be cross-compatible with EasyFace, .dial was made so that its 
   more convenient for creators and developers alike to use.
-- Also, you can convert the dial project into an fprj project (which is how it gets compiled).
+- Converting a .fprj project is as easy as renaming the .fprj file to face.xml and adding it to a zip archive.
+  Rename the zip archive as a .dial file and you should be able to open it successfully.
 """
 
 import os
@@ -71,7 +72,14 @@ class watchData:
 
 class dialProject:
     @staticmethod
+    def unpack(path):
+        # Unpack and make a dial project
+        pass
+
+    @staticmethod
     def create(path, device):
+        # Create a dialproject
+
         # Make temporary directory to place data and zip them all up
         tempdir = tempfile.mkdtemp()
         try:
@@ -94,6 +102,8 @@ class dialProject:
 
     @staticmethod
     def load(path):
+        # Load data & images into a readable format for the program.
+
         # Open a temp directory with zip file that will auto close once done
         if zipfile.is_zipfile(path):
             with zipfile.ZipFile(path, 'r') as zip:
@@ -131,7 +141,7 @@ class dialProject:
         try:
             faceData = open(os.path.join(tempdir, "face.xml"), "w")
             #print(xmltodict.unparse(data))
-            faceData.write(xmltodict.unparse(watchData().watchFileTemplate))
+            faceData.write(xmltodict.unparse(data))
             faceData.close()
             os.mkdir(os.path.join(tempdir, "images"))
             try:
@@ -143,6 +153,10 @@ class dialProject:
         finally:
             shutil.rmtree(tempdir)
             return True, path
+        
+    @staticmethod
+    def compile(path, data):
+        pass
 
 class fprjProject:
     def load(self, path):

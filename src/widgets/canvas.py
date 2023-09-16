@@ -48,6 +48,16 @@ class DeviceOutline(QGraphicsPathItem):
         self.setBrush(QColor(0,0,0,0))
         self.setZValue(999)
 
+class Scene(QGraphicsScene):
+    itemSelectionChanged = Signal()
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+    def selectionChanged(self):
+        super().selectionChanged()
+        self.itemSelectionChanged.emit()
+
 class Canvas(QGraphicsView):
     def __init__(self, device, antialiasingEnabled, deviceOutlineVisible, parent=None):
         super().__init__(parent)
@@ -62,7 +72,7 @@ class Canvas(QGraphicsView):
 
         deviceSize = DeviceSize().device[str(device)]
 
-        self.scene = QGraphicsScene()
+        self.scene = Scene()
         self.scene.setSceneRect(0,0,deviceSize[0],deviceSize[1])
 
         self.setScene(self.scene)
@@ -119,6 +129,22 @@ class Canvas(QGraphicsView):
             scroll_delta = event.angleDelta().y()
             scroll_value = self.verticalScrollBar().value() - scroll_delta
             self.verticalScrollBar().setValue(scroll_value)
+
+    def handleObjectSelectionChange(self):
+        selected_object = self.getSelectedObject()
+        if selected_object:
+            print(f"Object '{selected_object}' selected")
+
+    def selectObject(self, obj):
+        if obj and isinstance(obj, BaseObject):
+            obj.setSelected(True)
+
+    def getSelectedObject(self):
+        selected_items = self.scene.selectedItems()
+        if selected_items:
+            return selected_items[0]  # Return the first selected item if any
+        else:
+            return None
 
     def loadObjectsFromData(self, data, imageData, antialiasing):
         #print(data)
@@ -463,6 +489,7 @@ class ResizeableObject(QGraphicsRectItem):
                     painter.drawRect(rect)
 
 class BaseObject(QGraphicsRectItem):
+
     def __init__(self, posX, posY, sizeX, sizeY, color):
         # Initialize the shape.
 
