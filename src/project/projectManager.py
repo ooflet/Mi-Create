@@ -6,16 +6,18 @@
 """
 About the .dial format:
 - The .dial format is an improved version of .fprj.
-- The file itself is a zip archive, which means that you can rename it to .zip and extract its contents
-- While .fprj support was made for it to be cross-compatible with EasyFace, .dial was made so that its 
-  more convenient for creators and developers alike to use.
-- Converting a .fprj project is as easy as renaming the .fprj file to face.xml and adding it to a zip archive.
-  Rename the zip archive as a .dial file and you should be able to open it successfully.
+- The file itself is encoded using json.
+- Some parts of the code reference a V1 & V2 version of .dial, this is because it used
+  to use a zip archive instead of a json file.
+- Once program has been fully released, V1 will have been fully removed.
 """
 
 import os
+import traceback
 import tempfile
 import xmltodict
+import xml.dom.minidom as minidom
+import json
 import shutil
 import zipfile
 import base64
@@ -30,6 +32,7 @@ Usage:
 """
 
 loadedProject = None
+supportedDialVersion = "1.0"
 
 class watchData:
     def __init__(self):
@@ -72,38 +75,9 @@ class watchData:
 
 class dialProject:
     @staticmethod
-    def unpack(path):
-        # Unpack and make a dial project
-        pass
-
-    @staticmethod
-    def create(path, device):
-        # Create a dialproject
-
-        # Make temporary directory to place data and zip them all up
-        tempdir = tempfile.mkdtemp()
-        try:
-            faceData = open(os.path.join(tempdir, "face.xml"), "w")
-            template = watchData().watchFileTemplate
-            template["FaceProject"]["@DeviceType"] = str(device)
-            faceData.write(xmltodict.unparse(template))
-            faceData.close()
-            os.mkdir(os.path.join(tempdir, "images"))
-            if os.path.isfile(path):
-                os.remove(path)
-            try:
-                output = shutil.make_archive(path, 'zip', tempdir)
-                os.rename(output, path)
-            except Exception as e:
-                return False, str(e)
-        finally:
-            shutil.rmtree(tempdir)
-            return True, path
-
-    @staticmethod
-    def load(path):
-        # Load data & images into a readable format for the program.
-
+    def convertFromV0ToV1(path):
+        # TODO: Convert function for use with .fprj
+        # Converts beta dial projects to dial standard V1
         # Open a temp directory with zip file that will auto close once done
         if zipfile.is_zipfile(path):
             with zipfile.ZipFile(path, 'r') as zip:
@@ -125,34 +99,72 @@ class dialProject:
                                             imgData = img_file.read()
                                             img_base64 = base64.b64encode(imgData).decode('utf-8')
                                             imagesData[filename] = img_base64
-                                pprint(parse)
-                                return True, imagesData, parse, xmlsource
+
+                                # Write into dial V2 standard
+                                file = {}
+
+                                try:
+                                    with open(path, "w") as dataFile:
+                                        file["version"] = "1.0"
+                                        file["data"] = parse
+                                        file["imgdata"] = imagesData
+                                        dataFile.write(json.dumps(file))
+                                except Exception as e:
+                                    return False, str(e), traceback.format_exc()
+
+                                return True
                             else:
-                                return False, "Not a FaceProject! Check that the provided files are correct."
+                                return False, "Not a FaceProject! Check that the provided files are correct.", "Invalid header (first tag was not FaceProject), check that face.xml is not corrupted"
                     except Exception as e:
-                        return False, str(e)
+                        return False, str(e), traceback.format_exc()
         else:
-            return False, "Project format is invalid!"
+            return False, "Project format is invalid!", "Running is_zipfile() onto the path returned False."
+
+
 
     @staticmethod
-    def pack(path, data):
-        # Pack data into a zip file
-        tempdir = tempfile.mkdtemp()
+    def create(path, device):
+        # Create a dialproject
+
+        template = watchData().watchFileTemplate
+        template["FaceProject"]["@DeviceType"] = str(device)
+
+        file = {}
+
         try:
-            faceData = open(os.path.join(tempdir, "face.xml"), "w")
-            #print(xmltodict.unparse(data))
-            faceData.write(xmltodict.unparse(data))
-            faceData.close()
-            os.mkdir(os.path.join(tempdir, "images"))
-            try:
-                output = shutil.make_archive(path, 'zip', tempdir)
-                os.rename(output, path)
-    
-            except Exception as e:
-                return False, str(e)
-        finally:
-            shutil.rmtree(tempdir)
-            return True, path
+            with open(path, "w") as dataFile:
+                file["version"] = "1.0"
+                file["data"] = template
+                file["imgdata"] = ""
+                dataFile.write(json.dumps(file))
+                return True, path
+        except Exception as e:
+            return False, str(e), traceback.format_exc()
+        
+
+    @staticmethod
+    def load(path):
+        # Load data & images into a readable format for the program.
+
+        try:
+            with open(path) as dataFile:
+                raw = str(dataFile.read())
+                data = json.loads(raw)
+                if str(data["version"]) <= supportedDialVersion:
+                    rawXml = xmltodict.unparse(data["data"])
+                    dom = minidom.parseString(rawXml)
+                    prettyXml = dom.toprettyxml()
+                    return True, data["imgdata"], data["data"], prettyXml
+                else:
+                    return False, ".dial format version unsupported!", f"Project version {data['version']} > Supported version {supportedDialVersion}"
+        except Exception as e:
+            return False, str(e), traceback.format_exc()
+
+    @staticmethod
+    def save(path, data):
+        # Pack data into a zip file
+        pass
+       
         
     @staticmethod
     def compile(path, data):

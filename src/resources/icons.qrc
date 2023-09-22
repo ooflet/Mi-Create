@@ -25,14 +25,12 @@
     <file>redo-2.png</file>
     <file>undo-2.png</file>
     <file>MiFaceStudioFavicon.png</file>
+    <file>MiFaceStudioFaviconWhite.png</file>
     <file>save.png</file>
     <file>folder-open.png</file>
     <file>package.png</file>
     <file>package-open.png</file>
     <file>plus.png</file>
-  </qresource>
-  <qresource prefix="Fonts">
-    <file>CascadiaMono.ttf</file>
   </qresource>
   <qresource prefix="Light"/>
   <qresource prefix="Images">

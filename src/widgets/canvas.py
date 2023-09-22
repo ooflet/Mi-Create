@@ -62,7 +62,7 @@ class Canvas(QGraphicsView):
     def __init__(self, device, antialiasingEnabled, deviceOutlineVisible, parent=None):
         super().__init__(parent)
         if antialiasingEnabled:
-            self.setRenderHint(QPainter.Antialiasing)
+            self.setRenderHints(QPainter.Antialiasing | QPainter.SmoothPixmapTransform)
 
         self.rubberBand = None
         self.origin = None
@@ -140,11 +140,7 @@ class Canvas(QGraphicsView):
             obj.setSelected(True)
 
     def getSelectedObject(self):
-        selected_items = self.scene.selectedItems()
-        if selected_items:
-            return selected_items[0]  # Return the first selected item if any
-        else:
-            return None
+        return self.scene.selectedItems()
 
     def loadObjectsFromData(self, data, imageData, antialiasing):
         #print(data)
@@ -160,8 +156,8 @@ class Canvas(QGraphicsView):
                         image.loadFromData(qByteArray)
 
                         # Create imagewidget
-                        item = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), QColor(255,255,255,0))
-                        item.addImage(image, 0, 0, 1, antialiasing)
+                        item = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), QColor(255,255,255,0), i["@Name"])
+                        item.addImage(image, 0, 0, 1)
                         self.scene.addItem(item)
 
                     case "31":
@@ -177,14 +173,14 @@ class Canvas(QGraphicsView):
                         image.loadFromData(qByteArray)
 
                         # Create imagewidget
-                        imageWidget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), QColor(255,255,255,0))
-                        imageWidget.addImage(image, 0, 0, 1, antialiasing)
+                        imageWidget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), QColor(255,255,255,0), i["@Name"])
+                        imageWidget.addImage(image, 0, 0, 1)
                         self.scene.addItem(imageWidget)
 
                     case "32":
                         # Split images from the Bitmaplist
                         imageList = i["@BitmapList"].split("|")
-                        imageWidget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), QColor(255,255,255,0))
+                        imageWidget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), QColor(255,255,255,0), i["@Name"])
 
                         # Loop through digits
                         for x in range(int(i["@Digits"])):
@@ -196,7 +192,7 @@ class Canvas(QGraphicsView):
                             image.loadFromData(qByteArray)
 
                             # Create imagewidget
-                            imageWidget.addImage(image, image.size().width()*x, 0, int(i["@Digits"]), antialiasing)
+                            imageWidget.addImage(image, image.size().width()*x, 0, int(i["@Digits"]))
                             
                         self.scene.addItem(imageWidget)
                         
@@ -228,7 +224,7 @@ class ResizeableObject(QGraphicsRectItem):
         handleBottomRight: Qt.SizeFDiagCursor,
     }
 
-    def __init__(self, posX, posY, sizeX, sizeY, color):
+    def __init__(self, posX, posY, sizeX, sizeY, color, name):
         """
         Initialize the shape.
         """
@@ -239,6 +235,7 @@ class ResizeableObject(QGraphicsRectItem):
         self.mousePressPos = None
         self.mousePressRect = None
         self.setAcceptHoverEvents(True)
+        self.setData(0, name)
         self.setFlag(QGraphicsItem.ItemIsMovable, True)
         self.setFlag(QGraphicsItem.ItemIsSelectable, True)
         self.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
@@ -490,12 +487,13 @@ class ResizeableObject(QGraphicsRectItem):
 
 class BaseObject(QGraphicsRectItem):
 
-    def __init__(self, posX, posY, sizeX, sizeY, color):
+    def __init__(self, posX, posY, sizeX, sizeY, color, name):
         # Initialize the shape.
 
         super().__init__(posX, posY, sizeX, sizeY)
         self.color = color
         self.setAcceptHoverEvents(True)
+        self.setData(0, name)
         self.setFlag(QGraphicsItem.ItemIsMovable, True)
         self.setFlag(QGraphicsItem.ItemIsSelectable, True)
         self.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
@@ -533,21 +531,19 @@ class BaseObject(QGraphicsRectItem):
         painter.drawRect(self.rect())
 
 class RectangleWidget(ResizeableObject):
-    def __init__(self, posX, posY, sizeX, sizeY, color):
-        super().__init__(posX, posY, sizeX, sizeY, color)
+    def __init__(self, posX, posY, sizeX, sizeY, color, name):
+        super().__init__(posX, posY, sizeX, sizeY, color, name)
 
 
 class ImageWidget(BaseObject):
-    def __init__(self, posX, posY, sizeX, sizeY, color):
-        super().__init__(posX, posY, sizeX, sizeY, color)
+    def __init__(self, posX, posY, sizeX, sizeY, color, name):
+        super().__init__(posX, posY, sizeX, sizeY, color, name)
         self.setPos(posX, posY)
 
-    def addImage(self, qPixmap, posX, posY, digits, isAntialiased):
+    def addImage(self, qPixmap, posX, posY, digits):
         self.imageItem = QGraphicsPixmapItem(qPixmap, self)
         self.imageItem.setPos(posX, posY)
 
-        if isAntialiased:
-            self.imageItem.setTransformationMode(Qt.SmoothTransformation)
 
         self.setRect(0, 0, qPixmap.width()*digits, qPixmap.height())
         

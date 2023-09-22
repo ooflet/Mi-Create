@@ -1,6 +1,8 @@
-# ![MiFaceStudio48x48](https://github.com/ooflet/Mi-Face-Studio/assets/104404175/95170a3b-3be6-446e-af6f-c265237eea1b)
+# ![MiFaceStudio48x48](https://raw.githubusercontent.com/ooflet/Mi-Face-Studio/main/src/resources/MiFaceStudio48x48.png)
 ### Mi Face Studio
-Easy to use watchface editor for:
+*Pronounced as **Me**-Face-Studio*   
+
+Easy to use and powerful watchface creator for:
 - Xiaomi Watch Color/Color Sport
 - Xiaomi Watch Color 2/S1/S2
 - Xiaomi Watch S1 Pro
@@ -10,17 +12,18 @@ Easy to use watchface editor for:
 - Xiaomi Smart Band 7 Pro
 - Xiaomi Smart Band 8
 - Xiaomi Smart Band 8 Pro
-- 70mai Saphir
 
 ### 🇬🇧 EN
-### Supports:
-- Intuitive user interface
-- Simple yet powerful creation of Xiaomi Smart Band 8 watchface applets powered by the [Monaco Editor](https://github.com/microsoft/monaco-editor)
-- Easy to compile & decompile watch faces
+### Features:
+- Intuitive and elegant user interface
+- Fast rendering engine
+- Quick creation of Mi Band 8 applets
+- Easy to build & unpack watch faces
+- Powerful integrated text editor via [Monaco Editor](https://github.com/microsoft/monaco-editor)
 - Multiple languages (English, Simplified & Traditional Chinese, Russian)
 
 ### Installation:
-Download the latest installer from the [releases](https://github.com/ooflet/Mi-Face-Studio/releases) tab. You may also manually compile the source code.
+Download the latest installer from the [releases](https://github.com/ooflet/Mi-Face-Studio/releases) tab. You may also manually build the source code.
 
 ### Licensing:
 Mi Face Studio is licensed under the GPL-3 licence. [View what you can and can't do](https://gist.github.com/kn9ts/cbe95340d29fc1aaeaa5dd5c059d2e60)   

@@ -76,7 +76,7 @@
       <widget class="QWidget" name="Welcome">
        <attribute name="icon">
         <iconset resource="resources/icons.qrc">
-         <normaloff>:/Dark/MiFaceStudioFavicon.png</normaloff>:/Dark/MiFaceStudioFavicon.png</iconset>
+         <normaloff>:/Dark/MiFaceStudioFaviconWhite.png</normaloff>:/Dark/MiFaceStudioFaviconWhite.png</iconset>
        </attribute>
        <attribute name="title">
         <string>Welcome</string>
@@ -147,7 +147,7 @@
      <x>0</x>
      <y>0</y>
      <width>1266</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <property name="contextMenuPolicy">
@@ -164,13 +164,6 @@
     <addaction name="actionSave_as"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
-   </widget>
-   <widget class="QMenu" name="menuCompile">
-    <property name="title">
-     <string>Compile</string>
-    </property>
-    <addaction name="actionCompile"/>
-    <addaction name="actionDecompile"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -240,10 +233,19 @@
     <addaction name="separator"/>
     <addaction name="actionPreferences"/>
    </widget>
+   <widget class="QMenu" name="menuTools">
+    <property name="title">
+     <string>Tools</string>
+    </property>
+    <addaction name="actionCompile"/>
+    <addaction name="actionDecompile"/>
+    <addaction name="separator"/>
+    <addaction name="actionResize_Images"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuView"/>
-   <addaction name="menuCompile"/>
+   <addaction name="menuTools"/>
    <addaction name="menuHelp"/>
    <addaction name="menuTest"/>
   </widget>
@@ -301,7 +303,7 @@
     </layout>
    </widget>
   </widget>
-  <widget class="QDockWidget" name="attributesWidget">
+  <widget class="QDockWidget" name="propertiesWidget">
    <property name="sizePolicy">
     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
      <horstretch>0</horstretch>
@@ -318,62 +320,13 @@
     <string notr="true"/>
    </property>
    <property name="windowTitle">
-    <string>Attributes</string>
+    <string>Properties</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>2</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents_2">
     <layout class="QGridLayout" name="gridLayout"/>
-   </widget>
-  </widget>
-  <widget class="QDockWidget" name="resourceWidget">
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="minimumSize">
-    <size>
-     <width>250</width>
-     <height>200</height>
-    </size>
-   </property>
-   <property name="styleSheet">
-    <string notr="true"/>
-   </property>
-   <property name="windowTitle">
-    <string>Resources</string>
-   </property>
-   <attribute name="dockWidgetArea">
-    <number>8</number>
-   </attribute>
-   <widget class="QWidget" name="dockWidgetContents_3">
-    <layout class="QGridLayout" name="gridLayout_4">
-     <property name="leftMargin">
-      <number>0</number>
-     </property>
-     <property name="topMargin">
-      <number>0</number>
-     </property>
-     <property name="rightMargin">
-      <number>0</number>
-     </property>
-     <property name="bottomMargin">
-      <number>0</number>
-     </property>
-     <property name="spacing">
-      <number>0</number>
-     </property>
-     <item row="0" column="0">
-      <widget class="QListWidget" name="Resources">
-       <property name="frameShape">
-        <enum>QFrame::NoFrame</enum>
-       </property>
-      </widget>
-     </item>
-    </layout>
    </widget>
   </widget>
   <widget class="QToolBar" name="fileToolbar">
@@ -426,11 +379,14 @@
    <addaction name="actionPaste"/>
   </widget>
   <widget class="QDockWidget" name="toolboxWidget">
+   <property name="minimumSize">
+    <size>
+     <width>250</width>
+     <height>250</height>
+    </size>
+   </property>
    <property name="floating">
     <bool>false</bool>
-   </property>
-   <property name="features">
-    <set>QDockWidget::AllDockWidgetFeatures</set>
    </property>
    <property name="windowTitle">
     <string>Toolbox</string>
@@ -841,6 +797,16 @@
   <action name="actionAnimation">
    <property name="text">
     <string>Animation</string>
+   </property>
+  </action>
+  <action name="actionConvert_from_V1">
+   <property name="text">
+    <string>Convert from V1</string>
+   </property>
+  </action>
+  <action name="actionResize_Images">
+   <property name="text">
+    <string>Resize Images</string>
    </property>
   </action>
  </widget>

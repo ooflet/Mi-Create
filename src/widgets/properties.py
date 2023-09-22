@@ -1,4 +1,5 @@
 import sys
+import json
 from PySide6.QtWidgets import *
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor, QPen
@@ -94,6 +95,9 @@ class PropertiesWidget(QWidget):
     def create_check_box(self):
         check_box = QCheckBox(self)
         return check_box
+    
+    def loadProperties(self, json):
+        pass
 
 class MainWindow(QMainWindow):
     def __init__(self):

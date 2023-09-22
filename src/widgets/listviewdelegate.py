@@ -5,5 +5,5 @@ from PySide6.QtWidgets import *
 class ListStyledItemDelegate(QStyledItemDelegate):
     def initStyleOption(self, option, index):
         super().initStyleOption(option, index)
-        option.displayAlignment = Qt.AlignCenter
+        option.displayAlignment = Qt.AlignTop
         option.decorationPosition = QStyleOptionViewItem.Top
