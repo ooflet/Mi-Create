@@ -1,4 +1,4 @@
-# ![MiFaceStudio48x48](https://raw.githubusercontent.com/ooflet/Mi-Create/main/src/resources/MiFaceStudio48x48.png)
+# ![MiCreate48x48](https://raw.githubusercontent.com/ooflet/Mi-Create/main/src/resources/MiCreate48x48.png)
 ### Mi Create
 Unofficial watchface and application creator for Xiaomi Wearables.
 
