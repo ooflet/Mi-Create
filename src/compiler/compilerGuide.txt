@@ -1,20 +1,14 @@
---------- XML File -------------------------------------------------
-
 -- Device Type
 The compiler uses numbers (0-9) to represent different devices:
 - 0: Xiaomi Watch Color
 - 1: Xiaomi Watch Color Sport
-- 2: Unused
+- 2: 70mai Sapphir
 - 3: Xiaomi Watch Color 2/s1/s2
 - 4: Xiaomi Watch S1 Pro
-- 5: Redmi Watch 2
+- 5: Redmi Watch 2/Poco Watch
 - 6: Xiaomi Smart Band 7 Pro
 - 7: Redmi Watch 3
 - 8: Redmi Smart Band Pro
 - 9: Xiaomi Smart Band 8
-- 10: Redmi Watch 3 Active
+- 10: Redmi Watch 3 Active/Redmi Watch 2 Lite
 - 11: Xiaomi Smart Band 8 Pro
-
-eg: <FaceProject DeviceType="9">
-
-

@@ -1,3 +1,6 @@
+# Context Menus
+# Scripts interface with this module for context menus
+
 from PySide6.QtWidgets import QMenu
 
 contextMenus = {

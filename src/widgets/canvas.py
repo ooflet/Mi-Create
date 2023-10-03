@@ -1,10 +1,12 @@
-# Watchface Renderer for Mi Face Studio
+# Canvas for Mi Create
 # tostr 2023
 
 # Responsible for rendering EasyFace XML projects via QGraphicsView library.
 
+import os
 import sys
 import base64
+import json
 
 from PySide6.QtCore import *
 from PySide6.QtGui import *
@@ -14,6 +16,7 @@ class ObjectIcon:
     def __init__(self):
         super().__init__()
         self.icon = {
+            "27":":Dark/analog.png",
             "30":":Dark/image.png",
             "31":":Dark/gallery-horizontal.png",
             "32":":Dark/numbers.png"
@@ -30,7 +33,7 @@ class DeviceSize:
             "4":[480, 480, 450],
             "5":[360, 320, 300],
             "6":[280, 456, 150],
-            "7":[450, 390, 250],
+            "7":[390, 450, 100],
             "8":[194, 368, 200],
             "9":[192, 490, 95],
             "10":[240, 280, 60],
@@ -46,10 +49,11 @@ class DeviceOutline(QGraphicsPathItem):
         self.setPath(outline)
         self.setPen(QPen(QColor(200, 200, 200, 100), thickness, Qt.SolidLine))
         self.setBrush(QColor(0,0,0,0))
-        self.setZValue(999)
+        self.setZValue(9999)
 
 class Scene(QGraphicsScene):
     itemSelectionChanged = Signal()
+    onObjectDeleted = Signal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -58,58 +62,66 @@ class Scene(QGraphicsScene):
         super().selectionChanged()
         self.itemSelectionChanged.emit()
 
-class Canvas(QGraphicsView):
-    def __init__(self, device, antialiasingEnabled, deviceOutlineVisible, parent=None):
-        super().__init__(parent)
-        if antialiasingEnabled:
-            self.setRenderHints(QPainter.Antialiasing | QPainter.SmoothPixmapTransform)
+    def objectDeleted(self, name):
+        self.onObjectDeleted.emit(name)
 
+class Canvas(QGraphicsView):
+    objectAdded = Signal(QPointF, str)
+    def __init__(self, device, antialiasingEnabled, deviceOutlineVisible, insertMenu, parent=None):
+        super().__init__(parent)
+
+        if antialiasingEnabled:
+            self.setRenderHints(QPainter.Antialiasing)
+
+        self.insertMenu = insertMenu
+        self.deviceOutlineVisible = deviceOutlineVisible
         self.rubberBand = None
         self.origin = None
         self.setAcceptDrops(True)
 
         self.zoomValue = 0
 
-        deviceSize = DeviceSize().device[str(device)]
+        self.deviceSize = DeviceSize().device[str(device)]
 
         self.scene = Scene()
-        self.scene.setSceneRect(0,0,deviceSize[0],deviceSize[1])
+        self.scene.setSceneRect(0,0,self.deviceSize[0],self.deviceSize[1])
+
+        self.drawDecorations(deviceOutlineVisible)
 
         self.setScene(self.scene)
 
-        background = QGraphicsRectItem(0, 0, deviceSize[0], deviceSize[1])
+    def drawDecorations(self, deviceOutlineVisible):
+        background = QGraphicsRectItem(0, 0, self.deviceSize[0], self.deviceSize[1])
         background.setPen(QPen(Qt.NoPen))
         background.setBrush(QColor(0, 0, 0, 255))
-        
+
         self.scene.addItem(background)
 
         if deviceOutlineVisible:
-            self.scene.addItem(DeviceOutline(deviceSize))
+            self.scene.addItem(DeviceOutline(self.deviceSize))
 
     def dragEnterEvent(self, event):
-        print("enter")
         if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
-            print("accept")
             event.acceptProposedAction()
 
     def dragMoveEvent(self, event):
-        print("move")
         if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
-            print("accept")
             event.acceptProposedAction()
 
     def dropEvent(self, event):
-        print("drop")
-        print(event.mimeData().formats())
-        if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
-            print("accept")
-            data = event.mimeData()
-            item_data = data.data('application/x-qgraphicsitemdata')
-            print(item_data)
+        scenePos = self.mapToScene(event.pos())  # Convert to scene coordinates
 
-            # Use the item_data to retrieve the name or other relevant information
-            item_name = item_data.decode('utf-8')  
-            print("Dropped item name:", item_name)
+        # Calculate the offset between the view's top-left corner and the rectangle's top-left corner
+        viewRect = self.viewport().rect()
+        sceneRect = self.sceneRect()
+        offset = QPointF(sceneRect.x() - viewRect.x(), sceneRect.y() - viewRect.y())
+
+        # Subtract the offset from the drop position to get the position relative to the rectangle
+        relativePos = scenePos - offset
+
+        model = QStandardItemModel()
+        model.dropMimeData(event.mimeData(), Qt.CopyAction, 0, 0, QModelIndex())
+        self.objectAdded.emit(relativePos, model.item(0, 0).data(99))
 
         event.acceptProposedAction()
 
@@ -135,19 +147,74 @@ class Canvas(QGraphicsView):
         if selected_object:
             print(f"Object '{selected_object}' selected")
 
-    def selectObject(self, obj):
-        if obj and isinstance(obj, BaseObject):
-            obj.setSelected(True)
+    def selectObject(self, name):
+        for x in self.items():
+            # data(0) is name
+            if x.data(0) == name:
+                print("set selected")
+                x.setSelected(True)
+            else:
+                x.setSelected(False)
 
     def getSelectedObject(self):
         return self.scene.selectedItems()
-
-    def loadObjectsFromData(self, data, imageData, antialiasing):
+    
+    def loadObjectsFromData(self, data, imageData, antialiasing, selectObject=""):
+        # Data is the json dump of the "data" section of the file
         #print(data)
-        if data["FaceProject"]["Screen"].get("Widget") != None:
-            for i in data["FaceProject"]["Screen"]["Widget"]:
+        if not data["FaceProject"]["Screen"].get("Widget") == None:
+            self.scene.clear()
+            self.drawDecorations(self.deviceOutlineVisible)
+            for index, i in enumerate(data["FaceProject"]["Screen"]["Widget"]):
                 match i["@Shape"]:
+                    case "27":
+                        # Seconds Image
+                        secImgRaw = imageData[i["@SecondHand_Image"]]
+                        secImgDecode = base64.b64decode(secImgRaw)
+                        secImgArray = QByteArray(secImgDecode)
+                        secImg = QPixmap()
+                        secImg.loadFromData(secImgArray)
+
+                        minImgRaw = imageData[i["@MinuteHand_Image"]]
+                        minImgDecode = base64.b64decode(minImgRaw)
+                        minImgArray = QByteArray(minImgDecode)
+                        minImg = QPixmap()
+                        minImg.loadFromData(minImgArray)
+
+                        hrImgRaw = imageData[i["@HourHand_ImageName"]]
+                        hrImgDecode = base64.b64decode(hrImgRaw)
+                        hrImgArray = QByteArray(hrImgDecode)
+                        hrImg = QPixmap()
+                        hrImg.loadFromData(hrImgArray)
+
+                        # Create analogwidget
+                        imageWidget = AnalogWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), QColor(255,255,255,0), i["@Name"], self.sceneRect().width(), self.sceneRect().height(), i["@Background_ImageName"], secImg, i["@SecondImage_rotate_xc"], i["@SecondImage_rotate_yc"], minImg, i["@MinuteImage_rotate_xc"], i["@MinuteImage_rotate_yc"], hrImg, i["@HourImage_rotate_xc"], i["@HourImage_rotate_yc"])
+                        imageWidget.setZValue(index)
+                        self.scene.addItem(imageWidget)
+
                     case "30":
+                        path = i["@Bitmap"].split("/")
+                        if path[0] == "resource":
+                            if getattr(sys, 'frozen', False):
+                                script_dir = os.path.dirname(os.path.abspath(__file__))
+                                imgPath = os.path.join(script_dir, 'resource_packs')
+                                imgFile = os.path.join(imgPath, f"{path[1]}.mres")
+                                with open(imgFile, 'r') as file:
+                                    imgData = json.loads(file.read())
+                                    i["@Bitmap"] = path[2]
+                                    imageData[path[2]] = imgData[path[2]]
+                                    
+                            else:
+                                script_dir = os.path.dirname(os.path.abspath(__file__))
+                                data_dir = os.path.join(script_dir, '..', 'data')
+                                imgPath = os.path.join(data_dir, "resource_packs")
+                                imgFile = os.path.join(imgPath, f"{path[1]}.mres")
+                                with open(imgFile, 'r') as file:
+                                    imgData = json.loads(file.read())
+                                    i["@Bitmap"] = path[2]
+                                    imageData[path[2]] = imgData[path[2]]
+                                    
+
                         # Convert base64 image to QPixmap
                         base64Data = imageData[i["@Bitmap"]]
                         decoded = base64.b64decode(base64Data)
@@ -156,15 +223,40 @@ class Canvas(QGraphicsView):
                         image.loadFromData(qByteArray)
 
                         # Create imagewidget
-                        item = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), QColor(255,255,255,0), i["@Name"])
-                        item.addImage(image, 0, 0, 1)
-                        self.scene.addItem(item)
+                        imageWidget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), QColor(255,255,255,0), i["@Name"])
+                        imageWidget.setZValue(index)
+                        imageWidget.addImage(image, 0, 0, 1)
+                        self.scene.addItem(imageWidget)
 
                     case "31":
                         # Split image strings from the Bitmaplist
                         imageList = i["@BitmapList"].split("|")
                         firstImage = imageList[0].split(":")
-
+                        
+                        for x in firstImage:
+                            index = firstImage.index(x)+1
+                            if (index % 2) == 0:
+                                path = x.split("/")
+                                if path[0] == "resource":
+                                    if getattr(sys, 'frozen', False):
+                                        script_dir = os.path.dirname(os.path.abspath(__file__))
+                                        imgPath = os.path.join(script_dir, 'resource_packs')
+                                        imgFile = os.path.join(imgPath, f"{path[1]}.mres")
+                                        with open(imgFile, 'r') as file:
+                                            imgData = json.loads(file.read())
+                                            firstImage[firstImage.index(x)] = path[2]
+                                            imageData[path[2]] = imgData[path[2]]
+                                            
+                                    else:
+                                        script_dir = os.path.dirname(os.path.abspath(__file__))
+                                        data_dir = os.path.join(script_dir, '..', 'data')
+                                        imgPath = os.path.join(data_dir, "resource_packs")
+                                        imgFile = os.path.join(imgPath, f"{path[1]}.mres")
+                                        with open(imgFile, 'r') as file:
+                                            imgData = json.loads(file.read())
+                                            firstImage[firstImage.index(x)] = path[2]
+                                            imageData[path[2]] = imgData[path[2]]
+                                            
                         # Convert base64 image to QPixmap
                         base64Data = imageData[firstImage[1]]
                         decoded = base64.b64decode(base64Data)
@@ -174,13 +266,36 @@ class Canvas(QGraphicsView):
 
                         # Create imagewidget
                         imageWidget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), QColor(255,255,255,0), i["@Name"])
+                        imageWidget.setZValue(index)
                         imageWidget.addImage(image, 0, 0, 1)
                         self.scene.addItem(imageWidget)
 
                     case "32":
                         # Split images from the Bitmaplist
                         imageList = i["@BitmapList"].split("|")
+                        if imageList[0] == "fontresource":
+                            if getattr(sys, 'frozen', False):
+                                script_dir = os.path.dirname(os.path.abspath(__file__))
+                                fontPath = os.path.join(script_dir, 'custom_fonts')
+                                fontFile = os.path.join(fontPath, f"{imageList[1]}.mfnt")
+                                with open(fontFile, 'r') as file:
+                                    fontData = json.loads(file.read())
+                                    imageList = fontData["data"].split("|")
+                                    for key, value in fontData["imgdata"].items():
+                                        imageData[key] = value
+                            else:
+                                script_dir = os.path.dirname(os.path.abspath(__file__))
+                                data_dir = os.path.join(script_dir, '..', 'data')
+                                fontPath = os.path.join(data_dir, "custom_fonts")
+                                fontFile = os.path.join(fontPath, f"{imageList[1]}.mfnt")
+                                with open(fontFile, 'r') as file:
+                                    fontData = json.loads(file.read())
+                                    imageList = fontData["data"].split("|")
+                                    for key, value in fontData["imgdata"].items():
+                                        imageData[key] = value
+                        
                         imageWidget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), QColor(255,255,255,0), i["@Name"])
+                        imageWidget.setZValue(index)
 
                         # Loop through digits
                         for x in range(int(i["@Digits"])):
@@ -195,7 +310,9 @@ class Canvas(QGraphicsView):
                             imageWidget.addImage(image, image.size().width()*x, 0, int(i["@Digits"]))
                             
                         self.scene.addItem(imageWidget)
-                        
+                    case _:
+                        return False
+            self.selectObject(selectObject)
             return True
         else:
             return True
@@ -494,6 +611,7 @@ class BaseObject(QGraphicsRectItem):
         self.color = color
         self.setAcceptHoverEvents(True)
         self.setData(0, name)
+        self.setData(0, name)
         self.setFlag(QGraphicsItem.ItemIsMovable, True)
         self.setFlag(QGraphicsItem.ItemIsSelectable, True)
         self.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
@@ -515,17 +633,27 @@ class BaseObject(QGraphicsRectItem):
         if action == action1:
             self.scene().removeItem(self)
 
+    def itemChange(self, change, value):
+        if change == QGraphicsItem.ItemSelectedChange:
+            # Force a repaint of the entire item when the selection state changes
+            self.update()
+        return super().itemChange(change, value)
+
+    def boundingRect(self):
+        # Ensure the bounding rectangle accounts for any changes that affect the item's appearance
+        outline_width = 2.0  # Adjust this value as needed
+        return self.rect().adjusted(-outline_width, -outline_width, outline_width, outline_width)
+
     def paint(self, painter, option, widget=None):
         # Paint the node in the graphic view.
 
         painter.setRenderHint(QPainter.Antialiasing)
         painter.setBrush(QBrush(self.color))
-        painter.setPen(QPen(QColor(0, 205, 255), 0, Qt.SolidLine))
 
         if self.isSelected():
-            painter.setPen(QPen(QColor(0, 205, 255), 2.0, Qt.SolidLine))
-
-        if not self.isSelected():
+            outline_width = 2.0  # Adjust this value as needed
+            painter.setPen(QPen(QColor(0, 205, 255), outline_width, Qt.SolidLine, Qt.SquareCap))
+        else:
             painter.setPen(QPen(QColor(0, 0, 0, 0), 0, Qt.SolidLine))
 
         painter.drawRect(self.rect())
@@ -543,29 +671,24 @@ class ImageWidget(BaseObject):
     def addImage(self, qPixmap, posX, posY, digits):
         self.imageItem = QGraphicsPixmapItem(qPixmap, self)
         self.imageItem.setPos(posX, posY)
-
-
         self.setRect(0, 0, qPixmap.width()*digits, qPixmap.height())
-        
 
-def main():
-
-    app = QApplication(sys.argv)
-
-    grview = Canvas()
-    scene = QGraphicsScene()
-    scene.setSceneRect(0, 0, 680, 459)
-
-    scene.addPixmap(QPixmap('01.png'))
-    grview.setScene(scene)
-
-    item = ImageWidget(0, 0, 300, 150, QColor(255, 255, 255, 255))
-    scene.addItem(item)
-
-    grview.fitInView(scene.sceneRect(), Qt.KeepAspectRatio)
-    grview.show()
-    sys.exit(app.exec())
-
-
-if __name__ == '__main__':
-    main()
+class AnalogWidget(BaseObject):
+    # hands pos X & Y are relative to anchor point 0,0 on the image
+    # secHand, minHand & hrHand are QPixmaps, do not send raw data otherwise I will explode!!!!!!!
+    def __init__(self, posX, posY, sizeX, sizeY, color, name, screenSizeX, screenSizeY, background, secHand, secHandX, secHandY, minHand, minHandX, minHandY, hrHand, hrHandX, hrHandY):
+        super().__init__(posX, posY, sizeX, sizeY, color, name)
+        self.setPos(posX, posY)
+        if not background == "":
+            self.background = QGraphicsPixmapItem(background, self)
+        self.hrHand = QGraphicsPixmapItem(hrHand, self)
+        self.hrHand.setOffset(-int(hrHandX), -int(hrHandY))
+        self.hrHand.setRotation(-60)
+        self.hrHand.setPos(screenSizeX/2, screenSizeY/2)
+        self.minHand = QGraphicsPixmapItem(minHand, self)
+        self.minHand.setOffset(-int(minHandX), -int(minHandY))
+        self.minHand.setRotation(60)
+        self.minHand.setPos(screenSizeX/2, screenSizeY/2)
+        self.secHand = QGraphicsPixmapItem(secHand, self)
+        self.secHand.setOffset(-int(secHandX), -int(secHandY))
+        self.secHand.setPos(screenSizeX/2, screenSizeY/2)

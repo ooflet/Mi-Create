@@ -1,0 +1,42 @@
+{
+    "30": {
+        "@Name":"",
+        "@Bitmap":"resource/default/default.png",
+        "@X":"",
+        "@Y":"",
+        "@Width":"48",
+        "@Height":"48",
+        "@Alpha":"255",
+        "@Visible_Src":""
+    },
+    "31": {
+        "@Name":"",
+        "@BitmapList":"(0):resource/default/default.png",
+        "@X":"",
+        "@Y":"",
+        "@Width":"48",
+        "@Height":"48",
+        "@Alpha":"255",
+        "@Alignment":"",
+        "@DefaultIndex":"0",
+        "@Value_Src":"",
+        "@Spacing":"",
+        "@Blanking":"",
+        "@Visible_Src":""
+    },
+    "32": {
+        "@Name":"",
+        "@BitmapList":"fontresource|Blueprint",
+        "@X":"",
+        "@Y":"",
+        "@Width":"48",
+        "@Height":"48",
+        "@Alpha":"255",
+        "@Digits":"1",
+        "@Alignment":"",
+        "@Value_Src":"",
+        "@Spacing":"",
+        "@Blanking":"",
+        "@Visible_Src":""
+    }
+}

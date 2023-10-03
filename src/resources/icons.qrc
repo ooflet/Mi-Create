@@ -34,7 +34,7 @@
   </qresource>
   <qresource prefix="Light"/>
   <qresource prefix="Images">
-    <file>MiFaceStudio48x48.png</file>
-    <file>MiFaceStudioSplash.png</file>
+    <file>MiCreate48x48.png</file>
+    <file>MiCreateSplash.png</file>
   </qresource>
 </RCC>

@@ -1,3 +1,6 @@
+# List Widget Delegates
+# Makes it so that text is below images
+
 from PySide6.QtCore import *
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import *

@@ -1,4 +1,27 @@
 /*
+
+Reserved for modernization of UI
+
+QPushButton {
+    background-color: rgb(76, 80, 82);
+    min-width: 3.5em;
+    border: 2px solid rgb(94, 96, 96);
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+QPushButton:default {
+    background-color: rgb(54, 88, 128);
+    min-width: 3.5em;
+    border: 2px solid rgb(76, 112, 140);
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+*/
+
+
+/*
  * QGroupBox
  */
 
@@ -46,15 +69,13 @@ QScrollBar:vertical {
   background: palette(base);
   border-top-right-radius: 2px;
   border-bottom-right-radius: 2px;
-  width: 16px;
+  width: 8px;
   margin: 0px;
 }
 
 QScrollBar::handle:vertical {
   background-color: palette(midlight);
-  border-radius: 2px;
   min-height: 20px;
-  margin: 2px 4px 2px 4px;
 }
 
 QScrollBar::handle:vertical:hover, QScrollBar::handle:horizontal:hover, QScrollBar::handle:vertical:pressed, QScrollBar::handle:horizontal:pressed {
@@ -77,15 +98,13 @@ QScrollBar::sub-line:vertical {
 
 QScrollBar:horizontal{
   background: palette(base);
-  height: 16px;
+  height: 8px;
   margin: 0px;
 }
 
 QScrollBar::handle:horizontal {
   background-color: palette(midlight);
-  border-radius: 2px;
-  min-width: 20px;
-  margin: 4px 2px 4px 2px;
+  min-width: 8px;
 }
 
 

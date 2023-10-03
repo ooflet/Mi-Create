@@ -1,8 +1,18 @@
+# Properties Widget for Mi Create
+# tostr 2023
+
 import sys
-import json
 from PySide6.QtWidgets import *
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QColor, QPen
+from pprint import pprint
+
+"""
+TODO:
+Properties.json will be a scaffold. Each property's third
+argument is the actual data.
+
+"""
 
 class GridDelegate(QStyledItemDelegate):
     def __init__(self, parent=None):
@@ -31,91 +41,108 @@ class GridDelegate(QStyledItemDelegate):
         super().paint(painter, option, index)
 
 class PropertiesWidget(QWidget):
+    propertyChanged = Signal(str, str)
     def __init__(self):
         super().__init__()
 
-        self.tree_widget = QTreeWidget(self)
-        #self.tree_widget.setItemDelegate(VerticalLineDelegate())
-        self.tree_widget.setFrameShape(QFrame.NoFrame)
-        self.tree_widget.setRootIsDecorated(False)
-        self.tree_widget.setHeaderHidden(True)
-        self.tree_widget.setEditTriggers(QTreeWidget.NoEditTriggers)
-        self.tree_widget.setUniformRowHeights(True)
+        self.treeWidget = QTreeWidget(self)
+        self.treeWidget.setFrameShape(QFrame.NoFrame)
+        self.treeWidget.setRootIsDecorated(False)
+        self.treeWidget.setHeaderHidden(True)
+        self.treeWidget.setEditTriggers(QTreeWidget.NoEditTriggers)
+        self.treeWidget.setUniformRowHeights(True)
 
-        self.tree_widget.setHeaderLabels(["Property", "Value"])
-        self.tree_widget.setItemDelegate(GridDelegate())
+        self.treeWidget.setHeaderLabels(["Property", "Value"])
+        self.treeWidget.setItemDelegate(GridDelegate())
 
         layout = QVBoxLayout(self)
-        layout.addWidget(self.tree_widget)
+        layout.addWidget(self.treeWidget)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
-        
-        line_edit_widget = self.create_line_edit()  # Create QLineEdit widget
-        spin_box_widget = self.create_spin_box()
-        combo_box_widget = self.create_combo_box()
-        check_box_widget = self.create_check_box()
-
-        self.add_property("TextProperty", line_edit_widget)  # Use the QLineEdit widget
-        self.add_property("DropdownProperty", combo_box_widget)
-        self.add_property("NumericalProperty", spin_box_widget)
-        self.add_property("BoolProperty", check_box_widget)
-
-    def deselect_and_unfocus(self):
-        line_edit_widget = self.sender()  # Get the sender of the signal
-        line_edit_widget.clearFocus()
-        self.deselect_item()
-
-    def create_line_edit(self):
-        line_edit = QLineEdit(self)
-        line_edit.setStyleSheet("background-color: rgba(0, 0, 0, 0);")
-        line_edit.editingFinished.connect(self.deselect_and_unfocus)
-        return line_edit
-
-    def deselect_item(self):
-        self.tree_widget.setCurrentItem(None)
-
-    def deselect_on_focus_out(self, event, line_edit):
-        if not line_edit.underMouse():
-            self.deselect_item()
-
-    def add_property(self, name, value_widget):
-        item = QTreeWidgetItem(self.tree_widget, [name, ""])
-        self.tree_widget.setItemWidget(item, 1, value_widget)
-
-    def create_spin_box(self):
-        spin_box = QSpinBox(self)
-        spin_box.setStyleSheet("background-color: rgba(0, 0, 0, 0);")
-        spin_box.editingFinished.connect(self.deselect_and_unfocus)
-        return spin_box
     
-    def create_combo_box(self):
-        combo_box = QComboBox(self)
-        return combo_box
+    def sendPropertyChangedSignal(self, property, value):
+        self.propertyChanged.emit(property, value)
+
+    def addProperty(self, name, valueWidget):
+        item = QTreeWidgetItem(self.treeWidget, [name, ""])
+        self.treeWidget.setItemWidget(item, 1, valueWidget)
+
+    def createLineEdit(self, text, disabled, srcProperty):
+        def onDeselect():
+            lineEdit.clearFocus()
+            self.treeWidget.setCurrentItem(None)
+            self.sendPropertyChangedSignal(srcProperty, lineEdit.text())
+
+        lineEdit = QLineEdit(self)
+        lineEdit.setStyleSheet("background-color: rgba(0, 0, 0, 0);")
+        lineEdit.setText(text)
+        lineEdit.setDisabled(disabled)
+        lineEdit.editingFinished.connect(onDeselect)
+        return lineEdit
+
+    def createSpinBox(self, text, disabled, srcProperty):
+        def onChanged():
+            self.sendPropertyChangedSignal(srcProperty, str(spinBox.value()))
+
+        def onDeselect():
+            spinBox.clearFocus()
+            self.treeWidget.setCurrentItem(None)
+
+        spinBox = QSpinBox(self)
+        spinBox.setStyleSheet("background-color: rgba(0, 0, 0, 0); ")
+        spinBox.setRange(0, 9999)
+        if text == None:
+            text = "0"
+        spinBox.setValue(int(text))
+        spinBox.setDisabled(disabled)
+        spinBox.valueChanged.connect(onChanged)
+        spinBox.editingFinished.connect(onDeselect)
+        return spinBox
     
-    def create_check_box(self):
-        check_box = QCheckBox(self)
-        return check_box
+    def createComboBox(self, srcProperty):
+        def onChanged():
+            self.sendPropertyChangedSignal(srcProperty, comboBox.currentText())
+
+        comboBox = QComboBox(self)
+        comboBox.currentTextChanged.connect(onChanged)
+        return comboBox
     
-    def loadProperties(self, json):
-        pass
+    def createCheckBox(self, checked, srcProperty):
+        def onChecked():
+            self.sendPropertyChangedSignal(srcProperty, checkBox.isChecked())
 
-class MainWindow(QMainWindow):
-    def __init__(self):
-        super().__init__()
+        if checked == "0":
+            checked = False
+        elif checked == "1":
+            checked = True
 
-        self.setWindowTitle("Properties Widget Example")
-        self.setGeometry(100, 100, 600, 400)
+        checkBox = QCheckBox(self)
+        checkBox.setStyleSheet("padding-left: 4px")
+        if checked == None:
+            checked = False
+        checkBox.setChecked(checked)
+        checkBox.stateChanged.connect(onChecked)
+        return checkBox
+    
+    def loadProperties(self, properties, data):
+        print("Loading properties")
+        self.treeWidget.clear()
+        objectName = self.createLineEdit(properties["Shape"], True, "")
+        self.addProperty("ObjectName", objectName)
+        print("Added property")
+        print("------------------------------------------------------")
+        for key, value in properties["properties"].items():
+            value[2] = data.get(key)
+            match value[1]:
+                case "text":
+                    input = self.createLineEdit(value[2], False, key)
+                    self.addProperty(value[0], input)
+                case "int":
+                    input = self.createSpinBox(value[2], False, key)
+                    self.addProperty(value[0], input)
+                case "bool":
+                    input = self.createCheckBox(value[2], key)
+                    self.addProperty(value[0], input)
 
-        self.central_widget = QWidget()
-        self.setCentralWidget(self.central_widget)
-
-        layout = QVBoxLayout(self.central_widget)
-        properties_widget = PropertiesWidget()
-        layout.addWidget(properties_widget)
-        
-
-if __name__ == "__main__":
-    app = QApplication([])
-    main_window = MainWindow()
-    main_window.show()
-    sys.exit(app.exec_())
+    def clearProperties(self):
+        self.treeWidget.clear()

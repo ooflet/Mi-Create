@@ -1,4 +1,6 @@
-from PySide6.QtCore import QObject, Signal, Slot, Property, QUrl
+# Monaco Editor for Mi Create
+
+from PySide6.QtCore import Qt, QObject, Signal, Slot, Property, QUrl
 from PySide6.QtWidgets import QFrame
 from PySide6.QtWebEngineCore import *
 from PySide6.QtWebEngineWidgets import * 
@@ -95,6 +97,8 @@ class MonacoWidget(QWebEngineView):
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
+        self.setStyleSheet("background-color: rgba(30, 30, 30, 255)")
+        self.setCursor(Qt.IBeamCursor)
 
         html = raw_html.replace('width:400px;', f'width:{self.size().width()}px;')
         html = raw_html.replace('height:400px;', f'height:{self.size().height()}px;')
@@ -126,6 +130,10 @@ class MonacoWidget(QWebEngineView):
 
     def setLanguage(self, language):
         self._bridge.send_to_js("language", language)
+
+    def setEditorOptions(self, options):
+        # Execute JavaScript to set the options
+        self.page().runJavaScript(f"monaco.editor.updateOptions({json.dumps(options)});")
 
     def handleThemeChange(self, theme):  # Implement the handleThemeChange method
         self.themeChanged.emit(theme)  # Emit the themeChanged signal with the new theme

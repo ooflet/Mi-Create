@@ -7,7 +7,8 @@ require(['vs/editor/editor.main'], function () {
     container.style.height = '100%'
     container.style.width = '100%'
     editor = monaco.editor.create(container, {
-        fontFamily: "Courier New",
+        fontFamily: "Consolas, 'Courier New', monospace",
+        theme: "vs-dark",
         automaticLayout: true,
     });
     editor.onDidChangeModelContent((event) => {
