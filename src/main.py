@@ -18,7 +18,6 @@ import threading
 import logging
 import json
 import theme.styles as theme
-import winsound
 import traceback
 import subprocess
 import locale
