@@ -419,47 +419,6 @@
    </attribute>
    <addaction name="actionCompile"/>
   </widget>
-  <widget class="QToolBar" name="sidebar">
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="windowTitle">
-    <string>toolBar_2</string>
-   </property>
-   <property name="layoutDirection">
-    <enum>Qt::LeftToRight</enum>
-   </property>
-   <property name="autoFillBackground">
-    <bool>false</bool>
-   </property>
-   <property name="movable">
-    <bool>false</bool>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>48</width>
-     <height>38</height>
-    </size>
-   </property>
-   <property name="toolButtonStyle">
-    <enum>Qt::ToolButtonTextUnderIcon</enum>
-   </property>
-   <attribute name="toolBarArea">
-    <enum>LeftToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
-   <addaction name="actionWelcomePage"/>
-   <addaction name="actionDesignPage"/>
-   <addaction name="actionDevelopPage"/>
-  </widget>
   <action name="actionSave">
    <property name="icon">
     <iconset resource="resources/icons.qrc">
@@ -799,42 +758,6 @@
    </property>
    <property name="text">
     <string>Text</string>
-   </property>
-  </action>
-  <action name="actionWelcomePage">
-   <property name="icon">
-    <iconset resource="resources/icons.qrc">
-     <normaloff>:/Dark/mountain-snow.png</normaloff>:/Dark/mountain-snow.png</iconset>
-   </property>
-   <property name="text">
-    <string>Welcome</string>
-   </property>
-   <property name="menuRole">
-    <enum>QAction::NoRole</enum>
-   </property>
-  </action>
-  <action name="actionDesignPage">
-   <property name="icon">
-    <iconset resource="resources/icons.qrc">
-     <normaloff>:/Dark/mountain-snow.png</normaloff>:/Dark/mountain-snow.png</iconset>
-   </property>
-   <property name="text">
-    <string>Design</string>
-   </property>
-   <property name="menuRole">
-    <enum>QAction::NoRole</enum>
-   </property>
-  </action>
-  <action name="actionDevelopPage">
-   <property name="icon">
-    <iconset resource="resources/icons.qrc">
-     <normaloff>:/Dark/mountain-snow.png</normaloff>:/Dark/mountain-snow.png</iconset>
-   </property>
-   <property name="text">
-    <string>Develop</string>
-   </property>
-   <property name="menuRole">
-    <enum>QAction::NoRole</enum>
    </property>
   </action>
  </widget>

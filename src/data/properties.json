@@ -1,4 +1,114 @@
 {
+    "27": {
+        "Shape": "AnalogDisplay",
+        "properties": {
+            "@Name": [
+                "Name",
+                "text",
+                ""
+            ],
+            "@X": [
+                "X",
+                "int",
+                ""
+            ],
+            "@Y": [
+                "Y",
+                "int",
+                ""
+            ],
+            "@Width": [
+                "Width",
+                "int",
+                "48"
+            ],
+            "@Height": [
+                "Height",
+                "int",
+                "48"
+            ],
+            "@Alpha": [
+                "Transparency",
+                "aint",
+                "255"
+            ],
+            "@HourhandCorrection_En": [
+                "HourHandSmoothMovement",
+                "bool",
+                "0"
+            ],
+            "@MinutehandCorrection_En": [
+                "MinuteHandSmoothMovement",
+                "bool",
+                "0"
+            ],
+            "@Visible_Src": [
+                "SourceVisibility",
+                "visrc",
+                ""
+            ],
+            "@Background_ImageName": [
+                "BackgroundImage",
+                "reslist",
+                ""
+            ],
+            "@BgImage_rotate_xc": [
+                "BackgroundPosX",
+                "int",
+                ""
+            ],
+            "@BgImage_rotate_yc": [
+                "BackgroundPosY",
+                "int",
+                ""
+            ],
+            "@HourHand_ImageName": [
+                "HourHandImage",
+                "reslist",
+                ""
+            ],
+            "@HourImage_rotate_xc": [
+                "HourHandOffset",
+                "int",
+                ""
+            ],
+            "@HourImage_rotate_yc": [
+                "HourHandOffset",
+                "int",
+                ""
+            ],
+            "@MinuteHand_Image": [
+                "HourHandImage",
+                "reslist",
+                ""
+            ],
+            "@MinuteImage_rotate_xc": [
+                "HourHandOffset",
+                "int",
+                ""
+            ],
+            "@MinuteImage_rotate_yc": [
+                "HourHandOffset",
+                "int",
+                ""
+            ],
+            "@SecondHand_Image": [
+                "HourHandImage",
+                "reslist",
+                ""
+            ],
+            "@SecondImage_rotate_xc": [
+                "HourHandOffset",
+                "int",
+                ""
+            ],
+            "@SecondImage_rotate_yc": [
+                "HourHandOffset",
+                "int",
+                ""
+            ]
+        }
+    },
     "30": {
         "Shape": "Image",
         "properties": {
@@ -43,8 +153,8 @@
                 "255"
             ],
             "@Visible_Src": [
-                "hide",
-                "bool",
+                "SourceVisibility",
+                "visrc",
                 ""
             ]
         }
@@ -74,12 +184,12 @@
             ],
             "@Width": [
                 "Width",
-                "int",
+                "disabled",
                 "48"
             ],
             "@Height": [
                 "Height",
-                "int",
+                "disabled",
                 "48"
             ],
             "@Alpha": [
@@ -113,8 +223,8 @@
                 ""
             ],
             "@Visible_Src": [
-                "hide",
-                "bool",
+                "SourceVisibility",
+                "visrc",
                 ""
             ]
         }
@@ -144,12 +254,12 @@
             ],
             "@Width": [
                 "Width",
-                "int",
+                "disabled",
                 ""
             ],
             "@Height": [
                 "Height",
-                "int",
+                "disabled",
                 ""
             ],
             "@Alpha": [
@@ -183,8 +293,8 @@
                 ""
             ],
             "@Visible_Src": [
-                "hide",
-                "bool",
+                "SourceVisibility",
+                "visrc",
                 ""
             ]
         }

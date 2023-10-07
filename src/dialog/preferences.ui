@@ -27,7 +27,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="../resources/icons.qrc">
-    <normaloff>:/Dark/MiFaceStudioFavicon.png</normaloff>:/Dark/MiFaceStudioFavicon.png</iconset>
+    <normaloff>:/Images/MiCreate48x48.png</normaloff>:/Images/MiCreate48x48.png</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout_3">
    <item row="1" column="1">

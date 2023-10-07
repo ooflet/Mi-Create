@@ -1,6 +1,8 @@
 # Mi Create
 # tostr 2023
 
+# code is still very shitty, sorry
+
 import os
 import time
 import pdb
@@ -23,11 +25,12 @@ import locale
 import ctypes
 
 from project.projectManager import watchData, mprjProject, fprjProject
-from widgets.canvas import Canvas, ObjectIcon
+from widgets.canvas import Canvas, ObjectIcon, ResizeableObject
 from widgets.properties import PropertiesWidget
 #from widgets.listviewdelegate import ListStyledItemDelegate
 from monaco.monaco_widget import MonacoWidget
 
+# resource import required because it sets up the icons initially
 import resources.icons_rc
 
 from window_ui import Ui_MainWindow
@@ -48,7 +51,7 @@ class MainWindow(QMainWindow):
         #self.showDialogue("info", "Thank you for beta testing! Please report any bugs using the bug report menu in the Help tab.")
 
         # Setup Preferences Dialog
-        self.preferences_dialog = QDialog()
+        self.preferences_dialog = QDialog(self)
         self.preferences = Ui_Preferences()
         self.preferences.setupUi(self.preferences_dialog)
 
@@ -88,22 +91,22 @@ class MainWindow(QMainWindow):
             event.accept()
 
     def saveWindowState(self):
-        settings = QSettings("tostr", "MiCreate")
+        settings = QSettings("Mi Create", "Preferences")
         settings.setValue("geometry", self.saveGeometry())
         settings.setValue("state", self.saveState())
 
     def loadWindowState(self):
-        settings = QSettings("tostr", "MiCreate")
+        settings = QSettings("Mi Create", "Preferences")
         self.restoreGeometry(settings.value("geometry"))
         self.restoreState(settings.value("state"))
 
     def saveSettings(self):
-        settings = QSettings("tostr", "MiCreate")
+        settings = QSettings("Mi Create", "Preferences")
         settings.setValue("theme", self.preferences.themeComboBox.currentText())
         settings.setValue("language", self.preferences.languageComboBox.currentText())
 
     def loadSettings(self):
-        settings = QSettings("tostr", "MiCreate")
+        settings = QSettings("Mi Create", "Preferences")
         theme = settings.value("theme", "Dark")
         language = settings.value("language", "English")
         self.preferences.themeComboBox.setCurrentText(theme)
@@ -170,6 +173,7 @@ class MainWindow(QMainWindow):
         # Fires when tab changes
         def handleTabChange(index): 
             tabName = self.ui.workspace.tabText(index)
+            self.setWindowTitle(tabName+" - Mi Create")
             if not tabName == "Project XML" and not tabName == "Welcome":
                 tabData = self.viewports[tabName] 
                 if not tabData[0] == False:
@@ -181,16 +185,10 @@ class MainWindow(QMainWindow):
                 self.clearExplorer()
                 self.updateProperties(False)
 
-        # Delete sidebar, reserved for future update
-        self.ui.sidebar.deleteLater()
-
-        # Hide insert menu
-        self.ui.menubar.setNativeMenuBar(True)
-
         # Initialize Monaco WebView. This also starts the app in "OpenGL mode".
         self.monaco = MonacoWidget()
         self.ui.workspace.addTab(self.monaco, "init")
-        self.ui.workspace.removeTab(1)
+        #self.ui.workspace.removeTab(1)
 
         # Connect objects in the Insert menu to actions
         self.ui.actionImage.triggered.connect(lambda: self.addObjectToCurrentCanvas("30"))
@@ -272,7 +270,7 @@ class MainWindow(QMainWindow):
             # Look for currently selected item to change properties for using a generator expression
             currentItem = next((item for item in currentViewport[1]["FaceProject"]["Screen"]["Widget"] if item["@Name"] == currentSelected.data(0,101)), None)
             currentItem[args[0]] = args[1]
-            currentViewport[0].loadObjectsFromData(currentViewport[1], currentViewport[2], self.preferences.AntialiasingEnabled.isChecked(), currentSelected.data(0,101))
+            currentViewport[0].setObjectProperty(currentSelected.data(0,101), args[0], args[1])
 
         # Setup properties widget
         with open(currentDir+"\\data\\properties.json") as raw:
@@ -641,7 +639,7 @@ if __name__ == "__main__":
         main_window.monaco.close()
         main_window.monaco.deleteLater()
     except Exception as e:
-        winsound.PlaySound('SystemHand', winsound.SND_ALIAS | winsound.SND_ASYNC)
+        threading.Thread(target=playsound, args=(os.path.join(currentDir, f'data\\resource_packs\\sounds\\error.wav'),), daemon=True).start()
         error_message = f"Critical error during initialization: {traceback.format_exc()}"
         logging.error(error_message)
         QMessageBox.critical(None, 'Error', error_message, QMessageBox.Ok)

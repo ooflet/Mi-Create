@@ -7,6 +7,7 @@ import os
 import sys
 import base64
 import json
+from typing import Any
 
 from PySide6.QtCore import *
 from PySide6.QtGui import *
@@ -67,6 +68,7 @@ class Scene(QGraphicsScene):
 
 class Canvas(QGraphicsView):
     objectAdded = Signal(QPointF, str)
+    objectChanged = Signal(str, tuple)
     def __init__(self, device, antialiasingEnabled, deviceOutlineVisible, insertMenu, parent=None):
         super().__init__(parent)
 
@@ -94,7 +96,7 @@ class Canvas(QGraphicsView):
         background = QGraphicsRectItem(0, 0, self.deviceSize[0], self.deviceSize[1])
         background.setPen(QPen(Qt.NoPen))
         background.setBrush(QColor(0, 0, 0, 255))
-
+        
         self.scene.addItem(background)
 
         if deviceOutlineVisible:
@@ -159,12 +161,18 @@ class Canvas(QGraphicsView):
     def getSelectedObject(self):
         return self.scene.selectedItems()
     
+    def setObjectProperty(self, name, property, value, data=""):
+        for x in self.items():
+            if x.data(0) == name:
+                x.setProperty(property, value, data)
+
     def loadObjectsFromData(self, data, imageData, antialiasing, selectObject=""):
         # Data is the json dump of the "data" section of the file
         #print(data)
         if not data["FaceProject"]["Screen"].get("Widget") == None:
             self.scene.clear()
             self.drawDecorations(self.deviceOutlineVisible)
+
             for index, i in enumerate(data["FaceProject"]["Screen"]["Widget"]):
                 match i["@Shape"]:
                     case "27":
@@ -188,7 +196,7 @@ class Canvas(QGraphicsView):
                         hrImg.loadFromData(hrImgArray)
 
                         # Create analogwidget
-                        imageWidget = AnalogWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), QColor(255,255,255,0), i["@Name"], self.sceneRect().width(), self.sceneRect().height(), i["@Background_ImageName"], secImg, i["@SecondImage_rotate_xc"], i["@SecondImage_rotate_yc"], minImg, i["@MinuteImage_rotate_xc"], i["@MinuteImage_rotate_yc"], hrImg, i["@HourImage_rotate_xc"], i["@HourImage_rotate_yc"])
+                        imageWidget = AnalogWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), QColor(255,255,255,0), i["@Name"], antialiasing, self.sceneRect().width(), self.sceneRect().height(), i["@Background_ImageName"], secImg, i["@SecondImage_rotate_xc"], i["@SecondImage_rotate_yc"], minImg, i["@MinuteImage_rotate_xc"], i["@MinuteImage_rotate_yc"], hrImg, i["@HourImage_rotate_xc"], i["@HourImage_rotate_yc"])
                         imageWidget.setZValue(index)
                         self.scene.addItem(imageWidget)
 
@@ -214,18 +222,22 @@ class Canvas(QGraphicsView):
                                     i["@Bitmap"] = path[2]
                                     imageData[path[2]] = imgData[path[2]]
                                     
-
-                        # Convert base64 image to QPixmap
-                        base64Data = imageData[i["@Bitmap"]]
-                        decoded = base64.b64decode(base64Data)
-                        qByteArray = QByteArray(decoded)
-                        image = QPixmap()
-                        image.loadFromData(qByteArray)
-
-                        # Create imagewidget
                         imageWidget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), QColor(255,255,255,0), i["@Name"])
                         imageWidget.setZValue(index)
-                        imageWidget.addImage(image, 0, 0, 1)
+
+                        # Convert base64 image to QPixmap
+                        if imageData.get(i["@Bitmap"]):
+                            base64Data = imageData[i["@Bitmap"]]
+                            decoded = base64.b64decode(base64Data)
+                            qByteArray = QByteArray(decoded)
+                            image = QPixmap()
+                            image.loadFromData(qByteArray)
+
+                            # Create imagewidget    
+                            imageWidget.addImage(i["@Bitmap"], image, 0, 0, 1, antialiasing)  
+                        else:
+                            imageWidget.representNoImage()
+
                         self.scene.addItem(imageWidget)
 
                     case "31":
@@ -267,7 +279,7 @@ class Canvas(QGraphicsView):
                         # Create imagewidget
                         imageWidget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), QColor(255,255,255,0), i["@Name"])
                         imageWidget.setZValue(index)
-                        imageWidget.addImage(image, 0, 0, 1)
+                        imageWidget.addImage(firstImage[1], image, 0, 0, 1, antialiasing)
                         self.scene.addItem(imageWidget)
 
                     case "32":
@@ -307,7 +319,7 @@ class Canvas(QGraphicsView):
                             image.loadFromData(qByteArray)
 
                             # Create imagewidget
-                            imageWidget.addImage(image, image.size().width()*x, 0, int(i["@Digits"]))
+                            imageWidget.addImage(imageList[x], image, image.size().width()*x, 0, int(i["@Digits"]), antialiasing)
                             
                         self.scene.addItem(imageWidget)
                     case _:
@@ -358,6 +370,7 @@ class ResizeableObject(QGraphicsRectItem):
         self.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
         self.setFlag(QGraphicsItem.ItemIsFocusable, True)
         self.updateHandlesPos()
+        self.setZValue(9999)
 
     def handleAt(self, point):
         """
@@ -603,10 +616,8 @@ class ResizeableObject(QGraphicsRectItem):
                     painter.drawRect(rect)
 
 class BaseObject(QGraphicsRectItem):
-
     def __init__(self, posX, posY, sizeX, sizeY, color, name):
         # Initialize the shape.
-
         super().__init__(posX, posY, sizeX, sizeY)
         self.color = color
         self.setAcceptHoverEvents(True)
@@ -631,7 +642,7 @@ class BaseObject(QGraphicsRectItem):
         action = menu.exec(viewPos)
 
         if action == action1:
-            self.scene().removeItem(self)
+            self.scene().removeItem(self)    
 
     def itemChange(self, change, value):
         if change == QGraphicsItem.ItemSelectedChange:
@@ -648,35 +659,133 @@ class BaseObject(QGraphicsRectItem):
         # Paint the node in the graphic view.
 
         painter.setRenderHint(QPainter.Antialiasing)
-        painter.setBrush(QBrush(self.color))
+        #painter.setBrush(QBrush(self.color))
 
         if self.isSelected():
             outline_width = 2.0  # Adjust this value as needed
-            painter.setPen(QPen(QColor(0, 205, 255), outline_width, Qt.SolidLine, Qt.SquareCap))
+            painter.setPen(QPen(QColor(0, 205, 255), outline_width, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin))
         else:
             painter.setPen(QPen(QColor(0, 0, 0, 0), 0, Qt.SolidLine))
 
         painter.drawRect(self.rect())
 
 class RectangleWidget(ResizeableObject):
+    objectMovementStopped = Signal(int, int)
     def __init__(self, posX, posY, sizeX, sizeY, color, name):
         super().__init__(posX, posY, sizeX, sizeY, color, name)
 
 
 class ImageWidget(BaseObject):
+    objectMovementStopped = Signal(int, int)
     def __init__(self, posX, posY, sizeX, sizeY, color, name):
         super().__init__(posX, posY, sizeX, sizeY, color, name)
+        self.imageItems = {}
         self.setPos(posX, posY)
 
-    def addImage(self, qPixmap, posX, posY, digits):
-        self.imageItem = QGraphicsPixmapItem(qPixmap, self)
-        self.imageItem.setPos(posX, posY)
+    def mouseReleaseEvent(self, mouseEvent):
+        super().mouseReleaseEvent(mouseEvent)
+        self.objectMovementStopped.emi
+        self.objectMovementStopped.emit(self.pos().x(), self.pos().y())
+
+    def addImage(self, name, qPixmap, posX, posY, digits, isAntialiased):
+        self.digits = digits
+        self.imageItems[name] = QGraphicsPixmapItem(qPixmap, self)
+        self.imageItems[name].setPos(posX, posY)
+        if isAntialiased:
+            self.imageItems[name].setTransformationMode(Qt.SmoothTransformation)
         self.setRect(0, 0, qPixmap.width()*digits, qPixmap.height())
+
+    def representNoImage(self):
+        self.setRect(0, 0, 100, 100)
+        brush = QBrush()
+        brush.setColor(QColor(42, 130, 218, 255))
+        brush.setStyle(Qt.BDiagPattern)
+        self.setBrush(brush)
+
+    def setProperty(self, property, value, imageData):
+        match property:
+            case "@Bitmap":
+                path = value.split("/")
+                if path[0] == "resource":
+                    if getattr(sys, 'frozen', False):
+                        script_dir = os.path.dirname(os.path.abspath(__file__))
+                        imgPath = os.path.join(script_dir, 'resource_packs')
+                        imgFile = os.path.join(imgPath, f"{path[1]}.mres")
+                        with open(imgFile, 'r') as file:
+                            imgData = json.loads(file.read())
+                            value = path[2]
+                            imageData[path[2]] = imgData[path[2]]
+                            
+                    else:
+                        script_dir = os.path.dirname(os.path.abspath(__file__))
+                        data_dir = os.path.join(script_dir, '..', 'data')
+                        imgPath = os.path.join(data_dir, "resource_packs")
+                        imgFile = os.path.join(imgPath, f"{path[1]}.mres")
+                        with open(imgFile, 'r') as file:
+                            imgData = json.loads(file.read())
+                            value = path[2]
+                            imageData[path[2]] = imgData[path[2]]
+
+                # Convert base64 image to QPixmap
+                base64Data = imageData[value]
+                decoded = base64.b64decode(base64Data)
+                qByteArray = QByteArray(decoded)
+                image = QPixmap()
+                image.loadFromData(qByteArray)
+                self.imageItem.setPixmap(image)
+                self.imageItem.setPos(0, 0)
+                self.setRect(0, 0, image.width(), image.height())
+            
+            case "@Digits":
+                imageList = value.split("|")
+                if imageList[0] == "fontresource":
+                    if getattr(sys, 'frozen', False):
+                        script_dir = os.path.dirname(os.path.abspath(__file__))
+                        fontPath = os.path.join(script_dir, 'custom_fonts')
+                        fontFile = os.path.join(fontPath, f"{imageList[1]}.mfnt")
+                        with open(fontFile, 'r') as file:
+                            fontData = json.loads(file.read())
+                            imageList = fontData["data"].split("|")
+                            for key, val in fontData["imgdata"].items():
+                                imageData[key] = val
+                    else:
+                        script_dir = os.path.dirname(os.path.abspath(__file__))
+                        data_dir = os.path.join(script_dir, '..', 'data')
+                        fontPath = os.path.join(data_dir, "custom_fonts")
+                        fontFile = os.path.join(fontPath, f"{imageList[1]}.mfnt")
+                        with open(fontFile, 'r') as file:
+                            fontData = json.loads(file.read())
+                            imageList = fontData["data"].split("|")
+                            for key, val in fontData["imgdata"].items():
+                                imageData[key] = val
+                
+                imageWidget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), QColor(255,255,255,0), i["@Name"])
+                imageWidget.setZValue(index)
+
+                # Loop through digits
+                for x in range(int(i["@Digits"])):
+                    # Convert base64 image to QPixmap
+                    base64Data = imageData[imageList[x]]
+                    decoded = base64.b64decode(base64Data)
+                    qByteArray = QByteArray(decoded)
+                    image = QPixmap()
+                    image.loadFromData(qByteArray)
+
+                    # Create imagewidget
+                    imageWidget.addImage(image, image.size().width()*x, 0, int(i["@Digits"]))
+            case "@X":
+                self.setX(int(value))
+            case "@Y":
+                self.setY(int(value))
+            case "@Alignment":
+                pass
+            case "@Alpha":
+                self.imageItem.setOpacity(1-value/255)
 
 class AnalogWidget(BaseObject):
     # hands pos X & Y are relative to anchor point 0,0 on the image
     # secHand, minHand & hrHand are QPixmaps, do not send raw data otherwise I will explode!!!!!!!
-    def __init__(self, posX, posY, sizeX, sizeY, color, name, screenSizeX, screenSizeY, background, secHand, secHandX, secHandY, minHand, minHandX, minHandY, hrHand, hrHandX, hrHandY):
+    def __init__(self, posX, posY, sizeX, sizeY, color, name, isAntialiased, screenSizeX, screenSizeY, background, secHand, secHandX, secHandY, minHand, minHandX, minHandY, hrHand, hrHandX, hrHandY):
         super().__init__(posX, posY, sizeX, sizeY, color, name)
         self.setPos(posX, posY)
         if not background == "":
@@ -692,3 +801,7 @@ class AnalogWidget(BaseObject):
         self.secHand = QGraphicsPixmapItem(secHand, self)
         self.secHand.setOffset(-int(secHandX), -int(secHandY))
         self.secHand.setPos(screenSizeX/2, screenSizeY/2)
+        if isAntialiased:
+            self.hrHand.setTransformationMode(Qt.SmoothTransformation)
+            self.minHand.setTransformationMode(Qt.SmoothTransformation)
+            self.secHand.setTransformationMode(Qt.SmoothTransformation)

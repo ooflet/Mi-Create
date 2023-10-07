@@ -1,4 +1,11 @@
 {
+    "27": {
+        "@Name":"",
+        "@X":"",
+        "@Y":"",
+        "@Width":"48",
+        "@Height":"48"
+    },
     "30": {
         "@Name":"",
         "@Bitmap":"resource/default/default.png",

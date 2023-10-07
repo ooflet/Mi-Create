@@ -134,6 +134,9 @@ class PropertiesWidget(QWidget):
         for key, value in properties["properties"].items():
             value[2] = data.get(key)
             match value[1]:
+                case "disabled":
+                    input = self.createLineEdit(value[2], True, key)
+                    self.addProperty(value[0], input)
                 case "text":
                     input = self.createLineEdit(value[2], False, key)
                     self.addProperty(value[0], input)
