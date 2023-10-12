@@ -80,7 +80,7 @@ class PropertiesWidget(QWidget):
         lineEdit.editingFinished.connect(onDeselect)
         return lineEdit
 
-    def createSpinBox(self, text, disabled, srcProperty):
+    def createSpinBox(self, text, disabled, srcProperty, minVal=-9999, maxVal=9999):
         def onChanged():
             self.sendPropertyChangedSignal(srcProperty, str(spinBox.value()))
 
@@ -90,7 +90,7 @@ class PropertiesWidget(QWidget):
 
         spinBox = QSpinBox(self)
         spinBox.setStyleSheet("background-color: rgba(0, 0, 0, 0); ")
-        spinBox.setRange(0, 9999)
+        spinBox.setRange(minVal, maxVal)
         if text == None:
             text = "0"
         spinBox.setValue(int(text))
@@ -145,6 +145,10 @@ class PropertiesWidget(QWidget):
                     self.addProperty(value[0], input)
                 case "bool":
                     input = self.createCheckBox(value[2], key)
+                    self.addProperty(value[0], input)
+                case "aint":
+                    # alpha integer
+                    input = self.createSpinBox(value[2], False, key, 0, 255)
                     self.addProperty(value[0], input)
 
     def clearProperties(self):

@@ -780,7 +780,8 @@ class ImageWidget(BaseObject):
             case "@Alignment":
                 pass
             case "@Alpha":
-                self.imageItem.setOpacity(1-value/255)
+                for x in self.imageItems:
+                    x.setOpacity(1-value/255)
 
 class AnalogWidget(BaseObject):
     # hands pos X & Y are relative to anchor point 0,0 on the image

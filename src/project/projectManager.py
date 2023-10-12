@@ -11,6 +11,7 @@ import tempfile
 import xmltodict
 import xml.dom.minidom as minidom
 import json
+import json_minify
 import base64
 from pprint import pprint
 
@@ -191,12 +192,10 @@ class mprjProject:
                         logging.info("Reading data")
                         rawXml = xmltodict.unparse(data["data"])
                         logging.info("Parsing to XML")
-                        dom = minidom.parseString(rawXml)
-                        prettyXml = dom.toprettyxml()
                         name = data["data"]["FaceProject"]["Screen"]["@Title"]+".fprj"
                         logging.info(f"Writing data to {name}")
                         with open(os.path.join(folder, name), "w") as fprjFile:
-                            fprjFile.write(prettyXml)
+                            fprjFile.write(rawXml)
                         imagesPath = os.path.join(folder, "images")
                         logging.info(f"Creating image directory at {imagesPath}")
                         os.mkdir(imagesPath)

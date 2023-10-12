@@ -90,42 +90,12 @@
         <property name="leftMargin">
          <number>32</number>
         </property>
-        <item row="1" column="0">
-         <widget class="QLabel" name="WelcomeText">
-          <property name="styleSheet">
-           <string notr="true">QLabel { font-size: 18pt;}</string>
-          </property>
-          <property name="text">
-           <string>Welcome</string>
-          </property>
-         </widget>
-        </item>
         <item row="3" column="0">
-         <widget class="QLabel" name="OpenProject">
-          <property name="text">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;img src=&quot;:/Dark/folder-open.png&quot;/&gt; &lt;a href=&quot;\&amp;quot;\&amp;quot;&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#55aaff;&quot;&gt;Open Project...&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0">
          <widget class="QLabel" name="NewProject">
           <property name="text">
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;img src=&quot;:/Dark/file-plus.png&quot;/&gt; &lt;a href=&quot;\&amp;quot;\&amp;quot;&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#55aaff;&quot;&gt;New Project...&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
          </widget>
-        </item>
-        <item row="4" column="0">
-         <spacer name="verticalSpacer">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>176</height>
-           </size>
-          </property>
-         </spacer>
         </item>
         <item row="0" column="0">
          <spacer name="verticalSpacer_2">
@@ -139,6 +109,43 @@
            </size>
           </property>
          </spacer>
+        </item>
+        <item row="4" column="0">
+         <widget class="QLabel" name="OpenProject">
+          <property name="text">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;img src=&quot;:/Dark/folder-open.png&quot;/&gt; &lt;a href=&quot;\&amp;quot;\&amp;quot;&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#55aaff;&quot;&gt;Open Project...&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="0">
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>176</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="WelcomeText">
+          <property name="styleSheet">
+           <string notr="true">QLabel { font-size: 18pt;}</string>
+          </property>
+          <property name="text">
+           <string>Welcome</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Create or open a .mprj or .fprj project.</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>

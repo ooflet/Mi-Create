@@ -16,9 +16,8 @@ Compatible with
 ### 🇬🇧 EN
 ### Features:
 - Intuitive and elegant user interface
-- Fast rendering engine
-- Quick creation of Mi Band 8 applets
 - Easy to build & unpack watch faces
+- Quick creation of Mi Band 8 applets
 - Powerful integrated text editor via [Monaco Editor](https://github.com/microsoft/monaco-editor)
 - Multiple languages (English, Simplified & Traditional Chinese, Russian)
 

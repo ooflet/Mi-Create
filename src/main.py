@@ -23,6 +23,7 @@ import subprocess
 import locale
 import ctypes
 
+from updater.updater import Updater
 from project.projectManager import watchData, mprjProject, fprjProject
 from widgets.canvas import Canvas, ObjectIcon, ResizeableObject
 from widgets.properties import PropertiesWidget
@@ -90,12 +91,12 @@ class MainWindow(QMainWindow):
             event.accept()
 
     def saveWindowState(self):
-        settings = QSettings("Mi Create", "Preferences")
+        settings = QSettings("Mi Create", "Workspace")
         settings.setValue("geometry", self.saveGeometry())
         settings.setValue("state", self.saveState())
 
     def loadWindowState(self):
-        settings = QSettings("Mi Create", "Preferences")
+        settings = QSettings("Mi Create", "Workspace")
         self.restoreGeometry(settings.value("geometry"))
         self.restoreState(settings.value("state"))
 
@@ -112,14 +113,9 @@ class MainWindow(QMainWindow):
         self.preferences.languageComboBox.setCurrentText(language)
 
     def launchUpdater(self):
-        # Launches the updater script to download and run install program
-        def execute_installer_script():
-            installer_script = currentDir+"\\updater\\updater.py"
-            subprocess.run(["python", installer_script])
-
         self.closeWithoutWarning = True
         self.close()
-        execute_installer_script()
+        Updater().start()
         sys.exit()
 
     def checkForUpdates(self):
@@ -529,6 +525,19 @@ class MainWindow(QMainWindow):
         if self.viewports.get(self.ui.workspace.tabText(self.ui.workspace.currentIndex())) and not self.ui.workspace.tabText == "Welcome":
             location = QFileDialog.getExistingDirectory(self, 'Compile Project To...', "")
             if location[0]:
+                currentIndex = self.ui.workspace.currentIndex()
+                currentName = self.ui.workspace.tabText(currentIndex)
+                
+                # Progress dialog
+                progress = QDialog()
+                progressLayout = QVBoxLayout()
+                text = QLabel()
+                text.setText("Compiling project...")
+                progressLayout.addWidget(text)
+                progress.setLayout(progressLayout)
+                progress.show()
+                QApplication.processEvents()
+
                 # Create output dialog
                 dialog = QDialog()
                 layout = QVBoxLayout()
@@ -540,14 +549,11 @@ class MainWindow(QMainWindow):
                 layout.addWidget(buttonBox)
                 dialog.setLayout(layout)
 
-                currentIndex = self.ui.workspace.currentIndex()
-                currentName = self.ui.workspace.tabText(currentIndex)
-
                 print(currentDir+"\\compiler\\compile.exe")
                 result = mprjProject.compile(currentName, location, currentDir+"\\compiler\\compile.exe")
-
                 output.setText(str(result))
                 buttonBox.accepted.connect(lambda: dialog.close())
+                progress.close()
                 dialog.exec()
         else:
             self.showDialogue("error", "Failed to compile project: No project is open!")
