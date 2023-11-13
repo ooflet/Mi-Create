@@ -8,42 +8,42 @@
     },
     "30": {
         "@Name":"",
-        "@Bitmap":"resource/default/default.png",
+        "@Bitmap":"",
         "@X":"",
         "@Y":"",
         "@Width":"48",
         "@Height":"48",
         "@Alpha":"255",
-        "@Visible_Src":""
+        "@Visible_Src":"0"
     },
     "31": {
         "@Name":"",
-        "@BitmapList":"(0):resource/default/default.png",
+        "@BitmapList":"",
         "@X":"",
         "@Y":"",
         "@Width":"48",
         "@Height":"48",
         "@Alpha":"255",
-        "@Alignment":"",
+        "@Alignment":"0",
         "@DefaultIndex":"0",
-        "@Value_Src":"",
-        "@Spacing":"",
-        "@Blanking":"",
-        "@Visible_Src":""
+        "@Value_Src":"0",
+        "@Spacing":"0",
+        "@Blanking":"0",
+        "@Visible_Src":"0"
     },
     "32": {
         "@Name":"",
-        "@BitmapList":"fontresource|Blueprint",
+        "@BitmapList":"",
         "@X":"",
         "@Y":"",
         "@Width":"48",
         "@Height":"48",
         "@Alpha":"255",
         "@Digits":"1",
-        "@Alignment":"",
-        "@Value_Src":"",
-        "@Spacing":"",
-        "@Blanking":"",
-        "@Visible_Src":""
+        "@Alignment":"0",
+        "@Value_Src":"0",
+        "@Spacing":"0",
+        "@Blanking":"0",
+        "@Visible_Src":"0"
     }
 }

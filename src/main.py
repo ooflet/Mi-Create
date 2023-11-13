@@ -1,33 +1,45 @@
 # Mi Create
 # tostr 2023
 
-# code is still very shitty, sorry
+# TODO
+# I plan to rewrite the quite bad tab system currently in place
+# Opening multiple projects is useless
+# And that allows the explorer to also display any apps placed in the project
+# Plus, its more simpler for my pea brain to use
+
+# Also, bundle in higher quality icons or use SVG versions they look very bad on Windows scale > 100%
+
+# Also add in a js/lua autocomplete to monaco, will be useful for turning the app into a full fledged IDE
+# But thats against trying to make the project as simple as it possibly can, would it?
+# Too many features, and new users immediately overwhelmed, need to open documentation for every feature lmao
+
+# No, even though Qt is compatible with Linux/MacOS im not making it compatible with those for now
 
 import os
-import time
 import pdb
+import gettext
 
 import PySide6.QtWidgets as QtWidgets
-from PySide6.QtWidgets import *
-from PySide6.QtGui import *
-from PySide6.QtCore import *
+from PySide6.QtWidgets import (QMainWindow, QDialog, QMessageBox, QApplication, QGraphicsScene, QPushButton, 
+                               QDialogButtonBox, QTreeWidgetItem, QFileDialog, QToolButton, QToolBar, QWidget, QVBoxLayout, 
+                               QFrame, QColorDialog, QFontDialog, QSplashScreen)
+from PySide6.QtGui import QIcon, QPixmap, QDesktopServices
+from PySide6.QtCore import Qt, QSettings, QSize, QUrl, QFileInfo
 
-from playsound import playsound
 from pprint import pprint
 import threading
 import logging
+import subprocess
 import json
 import theme.styles as theme
 import traceback
-import subprocess
 import locale
 import ctypes
 
 from updater.updater import Updater
-from project.projectManager import watchData, mprjProject, fprjProject
-from widgets.canvas import Canvas, ObjectIcon, ResizeableObject
+from project.projectManager import watchData, fprjProject
+from widgets.canvas import Canvas, ObjectIcon
 from widgets.properties import PropertiesWidget
-#from widgets.listviewdelegate import ListStyledItemDelegate
 from monaco.monaco_widget import MonacoWidget
 
 # resource import required because it sets up the icons initially
@@ -35,7 +47,13 @@ import resources.icons_rc
 
 from window_ui import Ui_MainWindow
 from dialog.preferences_ui import Ui_Dialog as Ui_Preferences
+from dialog.newProject_ui import Ui_Dialog as Ui_NewProject
+from dialog.resourceDialog_ui import Ui_Dialog as Ui_ResourceDialog
+from dialog.compileDialog_ui import Ui_Dialog as Ui_CompileDialog
+
 logging.basicConfig(level=logging.DEBUG)
+
+_ = gettext.gettext
 
 windll = ctypes.windll.kernel32
 currentDir = os.getcwd()
@@ -47,40 +65,54 @@ languages = ["English", "繁體中文", "简体中文", "Русский"]
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+
         self.closeWithoutWarning = False
         #self.showDialogue("info", "Thank you for beta testing! Please report any bugs using the bug report menu in the Help tab.")
 
-        # Setup Preferences Dialog
-        self.preferences_dialog = QDialog(self)
-        self.preferences = Ui_Preferences()
-        self.preferences.setupUi(self.preferences_dialog)
+        # Setup Preferences Dialog 
+        self.preferencesDialog = QDialog(self) 
+        self.preferences = Ui_Preferences() 
+        self.preferences.setupUi(self.preferencesDialog) 
+ 
+        # Setup New Project Dialog 
+        self.newProjectDialog = QDialog(self) 
+        self.newProjectUi = Ui_NewProject() 
+        self.newProjectUi.setupUi(self.newProjectDialog) 
+ 
+        # Setup Compile Project Dialog 
+        self.compileDialog = QDialog(self) 
+        self.compileUi = Ui_CompileDialog() 
+        self.compileUi.setupUi(self.compileDialog) 
+ 
+        # Setup Viewports (tabs) 
+        self.viewports = {} 
+ 
+        # Setup WatchData 
+        self.watchData = watchData() 
+ 
+        # Setup Project 
+        self.project = None 
+        self.projectXML = None 
+ 
+        # Setup Main Window 
+        self.ui = Ui_MainWindow() 
+        self.ui.setupUi(self) 
+        self.setupScaffold() 
+        self.setupWidgets() 
+        self.setupWorkspace() 
+        self.setupExplorer() 
+        self.setupProperties() 
+        self.setupNewProjectDialog() 
+        self.loadWindowState() 
+        self.loadSettings() 
+        self.loadTheme() 
+        self.statusBar().showMessage("Ready", 3000) 
 
-        # Setup Viewports (tabs)
-        self.viewports = {}
-
-        # Setup Project
-        self.project = None
-        self.projectXML = None
-
-        # Setup Main Window
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self)
-        self.setupScaffold()
-        self.setupWidgets()
-        self.setupWorkspace()
-        self.setupExplorer()
-        self.setupProperties()
-        self.loadWindowState()
-        self.loadSettings()
-        self.loadTheme()
-        self.statusBar().showMessage("Ready", 3000)
-
-    def closeEvent(self, event):
-        if self.closeWithoutWarning == False:
-            # Ask user if they want to exit
-            threading.Thread(target=playsound, args=(os.path.join(currentDir, f'data\\resource_packs\\sounds\\question.wav'),), daemon=True).start()
-            quit_msg = "Are you sure you want to exit Mi Create?"
-            reply = QMessageBox.question(self, 'Confirm Exit', quit_msg, QMessageBox.Yes, QMessageBox.No)
+    def closeEvent(self, event): 
+        if self.closeWithoutWarning == False: 
+            # Ask user if they want to exit 
+            quit_msg = "Are you sure you want to exit Mi Create?" 
+            reply = QMessageBox.question(self, 'Mi Create', quit_msg, QMessageBox.Yes, QMessageBox.No)
 
             if reply == QMessageBox.Yes:
                 self.saveWindowState()
@@ -145,8 +177,7 @@ class MainWindow(QMainWindow):
     def setupWorkspace(self):
         # Fires when tab closes
         def handleTabClose(index):
-            threading.Thread(target=playsound, args=(os.path.join(currentDir, f'data\\resource_packs\\sounds\\question.wav'),), daemon=True).start()
-            reply = QMessageBox.question(self, 'Message', 'Are you sure you want to close this tab?', QMessageBox.Yes, QMessageBox.No)
+            reply = QMessageBox.question(self, 'Mi Create', 'Are you sure you want to close this tab?', QMessageBox.Yes, QMessageBox.No)
             if reply == QMessageBox.Yes:
                 currentWidget = self.ui.workspace.widget(index)
                 currentTabName = self.ui.workspace.tabText(index)
@@ -163,16 +194,19 @@ class MainWindow(QMainWindow):
                     viewport.deleteLater()
                 
                 self.ui.workspace.removeTab(index)
-                del self.viewports[currentTabName]
+                if self.viewports.get(currentTabName):
+                    del self.viewports[currentTabName]
 
         # Fires when tab changes
         def handleTabChange(index): 
             tabName = self.ui.workspace.tabText(index)
             self.setWindowTitle(tabName+" - Mi Create")
-            if not tabName == "Project XML" and not tabName == "Welcome":
+            if tabName != "Project XML" and tabName != "Welcome":
                 tabData = self.viewports[tabName] 
-                if not tabData[0] == False:
+                if tabData[0] != False:
                     self.updateExplorer(tabData[1])
+                    self.propertiesWidget.imageFolder = tabData[2]
+                    threading.Thread(target=self.propertiesWidget.reloadResourceImages).start()
                 else:
                     self.clearExplorer()
                     self.updateProperties(False)
@@ -180,10 +214,16 @@ class MainWindow(QMainWindow):
                 self.clearExplorer()
                 self.updateProperties(False)
 
+        # setup compile dialog
+        
+        okButton = QPushButton()
+        okButton.setText("OK")
+
+        self.compileUi.buttonBox.addButton(okButton, QDialogButtonBox.AcceptRole)
+
         # Initialize Monaco WebView. This also starts the app in "OpenGL mode".
         self.monaco = MonacoWidget()
         self.ui.workspace.addTab(self.monaco, "init")
-        #self.ui.workspace.removeTab(1)
 
         # Connect objects in the Insert menu to actions
         self.ui.actionImage.triggered.connect(lambda: self.addObjectToCurrentCanvas("30"))
@@ -211,7 +251,8 @@ class MainWindow(QMainWindow):
             currentViewport = self.viewports[self.ui.workspace.tabText(currentIndex)]
             #print(currentViewport[0].getSelectedObject())
             for x in currentViewport[0].items():
-                if not currentViewport[0].getSelectedObject() == []:
+                if currentViewport[0].getSelectedObject() != []:
+                    # check if current selected object is not already selected
                     if x.data(0) == currentViewport[0].getSelectedObject()[0]:
                         selected = True
 
@@ -225,6 +266,20 @@ class MainWindow(QMainWindow):
         self.ui.Explorer.clear()
 
     def updateExplorer(self, data):
+        def createItem(x):
+            objectIcon = QIcon()
+            if ObjectIcon().icon.get(x["@Shape"]):
+                objectIcon.addFile(ObjectIcon().icon[x["@Shape"]], QSize(), QIcon.Normal, QIcon.Off)
+                object = QTreeWidgetItem(root)
+                object.setText(0, x["@Name"])
+                object.setIcon(0, objectIcon)
+                object.setFlags(object.flags() | Qt.ItemIsEditable)
+                object.setData(0, 100, x["@Shape"])
+                object.setData(0, 101, x["@Name"])
+                self.explorer[x["@Name"]] = object
+            else:
+                self.showDialogue("error", f"Widget {x['@Shape']} not implemented in ObjectIcon(), please report as issue.")
+
         self.explorer = {}
         self.ui.Explorer.clear()
         self.ui.Explorer.setAnimated(True)
@@ -240,21 +295,13 @@ class MainWindow(QMainWindow):
         root.setIcon(0, icon)
         root.setData(0, 100, "00")
         root.setFlags(root.flags() | Qt.ItemIsEditable)
-        if not data["FaceProject"]["Screen"].get("Widget") == None:
-            for x in data["FaceProject"]["Screen"]["Widget"]:
-                objectIcon = QIcon()
-                if ObjectIcon().icon.get(x["@Shape"]):
-                    objectIcon.addFile(ObjectIcon().icon[x["@Shape"]], QSize(), QIcon.Normal, QIcon.Off)
-                    object = QTreeWidgetItem(root)
-                    object.setText(0, x["@Name"])
-                    object.setIcon(0, objectIcon)
-                    object.setFlags(object.flags() | Qt.ItemIsEditable)
-                    object.setData(0, 100, x["@Shape"])
-                    object.setData(0, 101, x["@Name"])
-                    self.explorer[x["@Name"]] = object
-                else:
-                    self.showDialogue("error", f"Unknown shape {x['@Shape']}, please report as issue.")
-        
+        if data["FaceProject"]["Screen"].get("Widget") != None:
+            if type(data["FaceProject"]["Screen"].get("Widget")) == list:
+                for x in data["FaceProject"]["Screen"]["Widget"]:
+                    createItem(x)      
+            else:
+                createItem(data["FaceProject"]["Screen"].get("Widget"))  
+            
         self.ui.Explorer.expandAll()
 
     def setupProperties(self):
@@ -262,40 +309,87 @@ class MainWindow(QMainWindow):
             currentIndex = self.ui.workspace.currentIndex()
             currentViewport = self.viewports[self.ui.workspace.tabText(currentIndex)]
             currentSelected = self.ui.Explorer.currentItem()
-            # Look for currently selected item to change properties for using a generator expression
-            currentItem = next((item for item in currentViewport[1]["FaceProject"]["Screen"]["Widget"] if item["@Name"] == currentSelected.data(0,101)), None)
-            currentItem[args[0]] = args[1]
-            currentViewport[0].setObjectProperty(currentSelected.data(0,101), args[0], args[1])
+            currentItem = None
+            if type(currentViewport[1]["FaceProject"]["Screen"]["Widget"]) == list:
+                for i in currentViewport[1]["FaceProject"]["Screen"]["Widget"]:
+                    if i["@Name"] == currentSelected.data(0,101):
+                        currentItem = i
+                        break
+                else:
+                    self.showDialogue("error", "Failed to obtain currentItem", "No object found in widget list that has the name of currently selected graphics item.")
+            else:
+                currentItem = currentViewport[1]["FaceProject"]["Screen"]["Widget"]
+
+            if args[0] == "@Value_Src" or args[0] == "@Index_Src" or args[0] == "@VisibleSrc":
+                for x in self.watchData.modelSourceData[str(currentViewport[1]["FaceProject"]["@DeviceType"])]:
+                    if x["@Name"] == args[1]:
+                        try:
+                            currentItem[args[0]] = int(x["@ID"], 0)
+                        except:
+                            currentItem[args[0]] = int(x["@ID"])
+
+            else:
+                currentItem[args[0]] = args[1]
+                currentViewport[0].setObjectProperty(currentSelected.data(0,101), args[0], args[1])
 
         # Setup properties widget
         with open(currentDir+"\\data\\properties.json") as raw:
             propertiesSource = raw.read()
             self.propertyJson = json.loads(propertiesSource)
-            self.propertiesWidget = PropertiesWidget()
+            self.propertiesWidget = PropertiesWidget(self, Ui_ResourceDialog, self.watchData.modelSourceList, self.watchData.modelSourceData, QApplication.instance().primaryScreen())
             self.propertiesWidget.propertyChanged.connect(lambda *args: setProperty(args))
             self.ui.propertiesWidget.setWidget(self.propertiesWidget)
 
     def updateProperties(self, item):
-        print("update properties")
         if item:
             currentIndex = self.ui.workspace.currentIndex()
             currentViewport = self.viewports[self.ui.workspace.tabText(currentIndex)]
             # data(0,100) is objectID, data(0,101) is name
-            for index, object in enumerate(currentViewport[1]["FaceProject"]["Screen"]["Widget"]):
-                print(index, object)
-                if object["@Name"] == item.data(0,101):
-                    print("object[@Name] is equal to item.data(0,101)")
-                    self.propertiesWidget.loadProperties(self.propertyJson[item.data(0, 100)], currentViewport[1]["FaceProject"]["Screen"]["Widget"][index])
-                    break
+            if type(currentViewport[1]["FaceProject"]["Screen"]["Widget"]) == list:
+                for index, object in enumerate(currentViewport[1]["FaceProject"]["Screen"]["Widget"]):
+                    if object["@Name"] == item.data(0,101):
+                        self.propertiesWidget.loadProperties(self.propertyJson[item.data(0, 100)], currentViewport[1]["FaceProject"]["Screen"]["Widget"][index], currentViewport[1]["FaceProject"]["@DeviceType"])
+                        break
+                else:
+                    self.showDialogue("error", "Error occured during property update: Object not found!", f'Unable to find {object["@Name"]}.')
             else:
-                self.showDialogue("error", "Error occured during property update: Object not found!", f'{object["@Name"]} =\= {item.data(0,101)}')
+                if currentViewport[1]["FaceProject"]["Screen"]["Widget"]["@Name"] == item.data(0,101):
+                    self.propertiesWidget.loadProperties(self.propertyJson[item.data(0, 100)], currentViewport[1]["FaceProject"]["Screen"]["Widget"], currentViewport[1]["FaceProject"]["@DeviceType"])
         else:
             self.propertiesWidget.clearProperties() 
 
+    def updateObjectProperty(self, name, property, value):
+        currentIndex = self.ui.workspace.currentIndex()
+        currentViewport = self.viewports[self.ui.workspace.tabText(currentIndex)]
+        for index, object in enumerate(currentViewport[1]["FaceProject"]["Screen"]["Widget"]):
+            if object["@Name"] == name:
+                object[property] = value
+                break
+        self.propertiesWidget.propertyItems[property].setText(value)
+
     def setupScaffold(self):
-        with open(currentDir+"\\data\\default\\default.json") as raw:
-            defaultSource = raw.read()
-            self.defaultScaffold = json.loads(defaultSource)
+        with open(currentDir+"\\data\\default\\defaultItems.json") as raw:
+            self.defaultSource = raw.read()
+
+    def setupNewProjectDialog(self):
+        def check():
+            if self.newProjectUi.projectName.text() != "":
+                if self.newProjectUi.folderLocation.text() != "":
+                    self.newProjectUi.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)
+                else:
+                    self.newProjectUi.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
+            else:
+                self.newProjectUi.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
+
+        def openFolderDialog():
+            location = QFileDialog.getExistingDirectory(self, 'Select Folder...', "")
+            self.newProjectUi.folderLocation.setText(str(location))
+
+        check()
+        self.newProjectUi.deviceSelection.addItems(self.watchData.models)
+        self.newProjectUi.projectName.textChanged.connect(check)
+        self.newProjectUi.folderLocation.textChanged.connect(check)
+        self.newProjectUi.folderShow.clicked.connect(openFolderDialog)
 
     def changeSelectionInExplorer(self, name):
         self.ui.Explorer.setCurrentItem(self.explorer[name])
@@ -307,12 +401,11 @@ class MainWindow(QMainWindow):
         for key in currentViewport[1]["FaceProject"]["Screen"]["Widget"]:
             if "widget-" in key["@Name"]:
                 try:
-                    # Try to extract the numeric part of the name and update the count accordingly.
-                    widget_number = int(key["@Name"].split("-")[1])
-                    count = max(count, widget_number + 1)
+                    count += 1
                 except ValueError:
                     pass  # Ignore non-matching names
-        widgetData = self.defaultScaffold[id]
+        defaultScaffold = json.loads(self.defaultSource)
+        widgetData = defaultScaffold[id]
         widgetData["@Shape"] = id
         widgetData["@Name"] = "widget-" + str(count)
         widgetData["@X"] = currentViewport[0].scene.sceneRect().width()/2 - int(widgetData["@Width"])/2
@@ -324,26 +417,33 @@ class MainWindow(QMainWindow):
 
     def createNewWorkspace(self, name, isFprj, data, xml): 
         # data[0] is watchface data while data[1] is image data
+        # Viewports are technically "tabs"
         self.previousSelected = None
         if not self.viewports.get(name):
             def selectionChange(viewport):
-                if not viewport.scene.selectedItems() == []:
-                    print("selectedItems not []")
+                if viewport.scene.selectedItems() != []:
                     for x in viewport.scene.selectedItems():
-                        print("viewport.scene.selectedItems")
-                        print(x)
-                        if not self.previousSelected == viewport.scene.selectedItems():
-                            print("Not previously selected")
+                        if self.previousSelected != viewport.scene.selectedItems():
                             self.previousSelected = viewport.scene.selectedItems()
                             #print(viewport.scene.selectedItems())
                             self.changeSelectionInExplorer(x.data(0))
                             self.updateProperties(self.explorer[x.data(0)])
                             break
                 else:
-                    print("selected items is []")
                     self.previousSelected = None
                     self.ui.Explorer.currentItem().setSelected(False)
                     self.updateProperties(False)
+
+            def propertyChange(objectName, propertyName, propertyValue):
+                propertyField = self.propertiesWidget.propertyItems[propertyName]
+
+                if isinstance(propertyValue, list):
+                    propertyValue = propertyValue[0]
+
+                if propertyField.metaObject().className() == "QSpinBox":
+                    propertyField.setValue(int(propertyValue))
+                else:
+                    propertyField.setText(propertyValue)
 
             # Setup Project
             self.projectXML = xml
@@ -355,6 +455,7 @@ class MainWindow(QMainWindow):
             # Create the viewport
             viewport.setAcceptDrops(True)
             viewport.scene.selectionChanged.connect(lambda: selectionChange(viewport))
+            viewport.objectChanged.connect(propertyChange)
             #viewport.objectAdded.connect(addObjectOnDrop)
 
             # Add Icons
@@ -369,7 +470,13 @@ class MainWindow(QMainWindow):
             if data is not False:
                 success = viewport.loadObjectsFromData(data[0], data[1], self.preferences.AntialiasingEnabled.isChecked())
                 
-            if success:
+            if success[0]:
+                # When retreving data from viewports, keep in mind:
+                # viewport[0] is the Canvas object
+                # viewport[1] is the Fprj data
+                # viewport[2] is the path to the image folder
+                # viewport[3] contains whether the object is in the Fprj format (deprecated)
+                # viewport[4] contains the xml source
                 self.viewports[name] = [viewport, data[0], data[1], isFprj, xml]
 
                 # Setup Insert Menu
@@ -380,13 +487,22 @@ class MainWindow(QMainWindow):
                 insertButton.setText("Insert Widget")
                 insertButton.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
 
-                insertToolbar = QToolBar()
-                insertToolbar.setStyleSheet("background-color: rgb(42, 42, 42); padding-left: 20px; ")
-                insertToolbar.addWidget(insertButton)
+                # Setup AOD Switch
+                # AODSwitch = QToolButton()
+                # AODSwitch.setIcon(QPixmap(":Dark/moon.png"))
+                # AODSwitch.setIconSize(QSize(16,16))
+                # AODSwitch.setText("Toggle AOD")
+                # AODSwitch.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
+                # AODSwitch.setCheckable(True)
+
+                canvasToolbar = QToolBar()
+                canvasToolbar.setStyleSheet("background-color: rgb(42, 42, 42); padding-left: 20px; ")
+                canvasToolbar.addWidget(insertButton)
+                # canvasToolbar.addWidget(AODSwitch)
 
                 widget = QWidget()
                 layout = QVBoxLayout()
-                layout.addWidget(insertToolbar)
+                layout.addWidget(canvasToolbar)
                 layout.addWidget(viewport)
                 layout.setContentsMargins(0,0,0,0)
                 layout.setSpacing(0)
@@ -396,9 +512,9 @@ class MainWindow(QMainWindow):
                 self.ui.workspace.setCurrentIndex(index)
                 viewport.setFrameShape(QFrame.NoFrame)
             else:
-                self.showDialogue("error", "Cannot render project! Your project files are most likely corrupted.", "viewport.loadObjectsFromData did not return True")
+                self.showDialogue("error", f"Cannot render project! {success[1]}", success[1])
         else:
-            self.ui.workspace.setCurrentIndex(self.ui.workspace.indexOf(self.viewports[name][0]))
+           self.ui.workspace.setCurrentIndex(self.ui.workspace.indexOf(self.viewports[name][0]))
 
     def createNewCodespace(self, name, text, language, options={"cursorSmoothCaretAnimation":"on"}):
         # Setup Insert Menu
@@ -447,6 +563,7 @@ class MainWindow(QMainWindow):
         self.ui.actionDecompile.triggered.connect(self.decompileProject)
 
         # help
+        self.ui.actionDocumentation.triggered.connect(lambda: QDesktopServices.openUrl(QUrl("https://ooflet.github.io/docs", QUrl.TolerantMode)))
         self.ui.actionAbout_MiFaceStudio.triggered.connect(self.showAboutWindow)
         self.ui.actionAbout_Qt.triggered.connect(lambda: QMessageBox.aboutQt(self))
         self.ui.actionThirdPartyNotice.triggered.connect(self.showThirdPartyNotices)
@@ -460,7 +577,19 @@ class MainWindow(QMainWindow):
         self.ui.actionInstaller.triggered.connect(self.launchUpdater)
 
         # preferences
+        self.preferences.clearWindow.clicked.connect(self.clearWindowState)
+        self.preferences.openDataFolder.clicked.connect(lambda *event: subprocess.Popen(f'explorer /select,"{os.path.join(currentDir, "data")}"'))
+        self.preferences.reinstall.clicked.connect(self.launchUpdater)
         self.preferences.buttonBox.accepted.connect(self.saveAndLoadPreferences)
+
+    def clearWindowState(self):
+        reply = QMessageBox.question(self, 'Confirm Clear', "This will clear the positions of dock widgets/windows and restart the app. Confirm?", QMessageBox.Yes, QMessageBox.No)
+
+        if reply == QMessageBox.Yes:
+            settings = QSettings("Mi Create", "Workspace")
+            settings.setValue("geometry", None)
+            settings.setValue("state", None)
+            os.execl(sys.executable, sys.executable, *sys.argv)
 
     def saveAndLoadPreferences(self):
         self.saveSettings()
@@ -468,104 +597,99 @@ class MainWindow(QMainWindow):
         self.loadTheme()
 
     def newProject(self):
+        self.newProjectDialogAccepted = False
+
+        def accept():
+            self.newProjectDialogAccepted = True
+
+        self.newProjectDialog.accepted.connect(accept)
+
         # Get where to save the project
-        file = QFileDialog.getSaveFileName(self, 'New Project...', "", "Mi Create project (*.mprj);;Legacy Face project files (*.fprj)")
-        file_extension = QFileInfo(file[0]).suffix()
-        isFprj = False
+        self.newProjectDialog.exec()
+        
+        if self.newProjectDialogAccepted:
+            # Get file location from dialog
+            file = self.newProjectUi.folderLocation.text()
+            projectName = self.newProjectUi.projectName.text()
+            watchModel = self.newProjectUi.deviceSelection.currentText()
 
-        # Check if file was selected
-        if file[0]:
-            # Check if fprj
-            if file_extension == "fprj":
-                self.showDialogue('warning', 'The project was created using the legacy .fprj format. To preserve compatibility, some elements such as text will be immediately converted into images.')
-                isFprj = True
+            # Clear dialog text
+            self.newProjectUi.folderLocation.setText("")
+            self.newProjectUi.projectName.setText("")
+            
+            file_extension = QFileInfo(file).suffix()
+            isFprj = False
 
-            # Get watch model
-            watchModel = QInputDialog.getItem(self, "Watch Model", "Set Model:", watchData().models, 0, False)
-
-            # Check if watch model was selected
-            if watchModel[1]:
-                newProject = mprjProject.create(file[0], list(watchData().modelID.keys())[list(watchData().modelID.values()).index(str(watchModel[0]))])
-                if newProject[0]:
-                    project = mprjProject.load(file[0])
-                    if not project[0]:
-                        self.showDialogue("error", f'Cannot open project: {project[1]}. Your project is most likely corrupted.', project[2])
+            # Check if file was selected
+            if file:
+                accepted = True
+                if file.find("C:"):
+                    reply = QMessageBox.question(self, 'Confirm Path', "Your project will be created in the install directory of this program. Confirm?", QMessageBox.Yes, QMessageBox.No)
+                    if reply == QMessageBox.Yes:
+                        accepted = True
                     else:
-                        try:
-                            self.createNewWorkspace(file[0], False, [project[2], project[1]], project[3])    
-                        except Exception as e:
-                            self.showDialogue("error", f"Failed to createNewWorkspace: {e}.", traceback.format_exc())
+                        accepted = False
 
-                else:
-                    self.showDialogue("error", f"Failed to create a new project: {newProject[1]}. There's something seriously wrong.", newProject[2])
+                if accepted:
+                    newProject = fprjProject.create(file, self.watchData.modelID[str(watchModel)], projectName)
+                    if newProject[0]:
+                        project = fprjProject.load(newProject[1])
+                        if project[0]:
+                            try:
+                                self.createNewWorkspace(newProject[1], True, [project[1], project[2]], project[3])    
+                            except Exception as e:
+                                self.showDialogue("error", f"Failed to createNewWorkspace: {e}.", traceback.format_exc())
+                        else:
+                            self.showDialogue("error", f'Cannot open project: {project[1]}.', project[2])
+                    else:
+                        self.showDialogue("error", f"Failed to create a new project: {newProject[1]}.", newProject[2])
 
     def openProject(self): 
         # Get where to open the project from
-        file = QFileDialog.getOpenFileName(self, 'Open Project...', "%userprofile%\\", "Watchface projects (*.mprj *.fprj)")
+        file = QFileDialog.getOpenFileName(self, 'Open Project...', "%userprofile%\\", "Watchface Project (*.fprj)")
         file_extension = QFileInfo(file[0]).suffix()
 
         # Check if file was selected
         if file[0]:
             if file_extension == "fprj":
-                self.showDialogue('warning', 'You are opening a .fprj file. To preserve compatibility, some elements such as text will be immediately converted into images.')
                 project = fprjProject.load(file[0])
-                self.createNewWorkspace(file[0], True)
-            else:
-                # project[0] returns if the load was successful
-                project = mprjProject.load(file[0])
-                if not project[0]:
-                    self.showDialogue("error", f'Cannot open project: {project[1]}.', project[2])
-                else:
+                if project[0]:
                     try:
-                        self.createNewWorkspace(file[0], False, [project[2], project[1]], project[3])    
+                        self.createNewWorkspace(file[0], True, [project[1], project[2]], project[3])    
                     except Exception as e:
                         self.showDialogue("error", f"Failed to open project: {e}.", traceback.format_exc())
+                else:
+                    self.showDialogue("error", f'Cannot open project: {project[1]}.', project[2])
 
     def compileProject(self):
         if self.viewports.get(self.ui.workspace.tabText(self.ui.workspace.currentIndex())) and not self.ui.workspace.tabText == "Welcome":
-            location = QFileDialog.getExistingDirectory(self, 'Compile Project To...', "")
-            if location[0]:
-                currentIndex = self.ui.workspace.currentIndex()
-                currentName = self.ui.workspace.tabText(currentIndex)
-                
-                # Progress dialog
-                progress = QDialog()
-                progressLayout = QVBoxLayout()
-                text = QLabel()
-                text.setText("Compiling project...")
-                progressLayout.addWidget(text)
-                progress.setLayout(progressLayout)
-                progress.show()
-                QApplication.processEvents()
+            currentIndex = self.ui.workspace.currentIndex()
+            currentName = self.ui.workspace.tabText(currentIndex)
+            compileDirectory = os.path.join(os.path.dirname(currentName), "output")
 
-                # Create output dialog
-                dialog = QDialog()
-                layout = QVBoxLayout()
-                output = QTextEdit()
-                output.setMinimumSize(600,400)
-                output.setReadOnly(True)
-                buttonBox = QDialogButtonBox(QDialogButtonBox.Ok)
-                layout.addWidget(output)
-                layout.addWidget(buttonBox)
-                dialog.setLayout(layout)
+            self.compileUi.buttonBox.setDisabled(True)
+            self.compileUi.textEdit.setReadOnly(True)
+            self.compileUi.stackedWidget.setCurrentIndex(1)
+            self.compileDialog.setModal(True)
+            self.compileDialog.show()
+            QApplication.processEvents()
 
-                print(currentDir+"\\compiler\\compile.exe")
-                result = mprjProject.compile(currentName, location, currentDir+"\\compiler\\compile.exe")
-                output.setText(str(result))
-                buttonBox.accepted.connect(lambda: dialog.close())
-                progress.close()
-                dialog.exec()
+            result = fprjProject.compile(currentName, compileDirectory, currentDir+"\\compiler\\compile.exe")
+            self.compileUi.buttonBox.setDisabled(False)
+            self.compileUi.textEdit.setText(str(result))
+            self.compileUi.stackedWidget.setCurrentIndex(2)
+
         else:
             self.showDialogue("error", "Failed to compile project: No project is open!")
         
 
     def decompileProject(self):
         self.showDialogue("error", "Will add later, apologies.")
-        self.showDialogue("warning", "Please note that images may be glitched when unpacking.")
-        file = QFileDialog.getOpenFileName(self, 'Unpack File...', "%userprofile%\\", "Compiled Watchface Binaries (*.bin *.FACE)")
+        # self.showDialogue("warning", "Please note that images may be glitched when unpacking.")
+        # file = QFileDialog.getOpenFileName(self, 'Unpack File...', "%userprofile%\\", "Compiled Watchface Binaries (*.bin *.FACE)")
 
-        subprocess.run(f'{currentDir}\\compiler\\unpack.exe  "{file[0]}"')
-        self.showDialogue("info", "Decompile success! Would you like to open")
+        # subprocess.run(f'{currentDir}\\compiler\\unpack.exe  "{file[0]}"')
+        # self.showDialogue("info", "Decompile success! Would you like to open")
 
     def editProjectXML(self):
         if self.viewports.get(self.ui.workspace.tabText(self.ui.workspace.currentIndex())) and not self.ui.workspace.tabText == "Welcome":
@@ -581,7 +705,7 @@ class MainWindow(QMainWindow):
 
     def showPreferences(self):
         self.loadSettings()
-        self.preferences_dialog.exec()
+        self.preferencesDialog.exec()
 
     def showAboutWindow(self):
         dialog = QMessageBox(self)
@@ -592,41 +716,27 @@ class MainWindow(QMainWindow):
 
     def showThirdPartyNotices(self):
         dialog = QMessageBox(self)
-        dialog.setText('<html><head/><body><p><span style=" text-decoration: underline;">Third Party Notices</span></p><p><a href="https://lucide.dev"><span style=" text-decoration: underline; color:#55aaff;">Lucide Icons</span></a> - Under MIT License<br/><a href="https://github.com/gmarull/qtmodern/tree/master"><span style=" text-decoration: underline; color:#55aaff;">qtmodern</span></a> - Under MIT License<br/>EasyFace Compiler - Under explicit permission</p></body></html>')
+        dialog.setText('<html><head/><body><p><span style=" text-decoration: underline;">Third Party Notices</span></p><p><a href="https://lucide.dev"><span style=" text-decoration: underline; color:#55aaff;">Lucide Icons</span></a> - Under MIT License<br/><a href="https://github.com/gmarull/qtmodern/tree/master"><span style=" text-decoration: underline; color:#55aaff;">qtmodern</span></a> - Under MIT License<br/>m0tral Compiler - Under explicit permission</p></body></html>')
         dialog.setWindowTitle("Third Party Notices")
         dialog.exec()
 
     def showDialogue(self, type, text, detailedText=""):
-        threading.Thread(target=playsound, args=(os.path.join(currentDir, f'data\\resource_packs\\sounds\\{type}.wav'),), daemon=True).start()
         MessageBox = QMessageBox(self)
-        match type:
-            case "info":
-                MessageBox.setWindowTitle("Mi Create")
-                MessageBox.setWindowIcon(QPixmap(":/Images/MiCreate48x48.png"))
-                MessageBox.setIcon(QMessageBox.Information)
-                MessageBox.setText(text)
-                MessageBox.exec()
-            case "question":
-                MessageBox.setWindowTitle("Mi Create")
-                MessageBox.setWindowIcon(QPixmap(":/Images/MiCreate48x48.png"))
-                MessageBox.setIcon(QMessageBox.Question)
-                MessageBox.setText(text)
-                MessageBox.exec()
-            case "warning":
-                logging.warning(text)
-                MessageBox.setWindowTitle("Mi Create")
-                MessageBox.setWindowIcon(QPixmap(":/Images/MiCreate48x48.png"))
-                MessageBox.setIcon(QMessageBox.Warning)
-                MessageBox.setText(text)
-                MessageBox.exec()
-            case "error":
-                logging.error(text+"\n"+detailedText)
-                MessageBox.setWindowTitle("Mi Create")
-                MessageBox.setWindowIcon(QPixmap(":/Images/MiCreate48x48.png"))
-                MessageBox.setIcon(QMessageBox.Critical)
-                MessageBox.setText(text)
-                MessageBox.setDetailedText(detailedText)
-                MessageBox.exec()
+        MessageBox.setWindowTitle("Mi Create")
+        MessageBox.setWindowIcon(QPixmap(":/Images/MiCreate48x48.png"))
+        MessageBox.setText(text)
+        MessageBox.setDetailedText(detailedText)
+        if type == "info":
+            MessageBox.setIcon(QMessageBox.Information)
+        elif type == "question":
+            MessageBox.setIcon(QMessageBox.Question)
+        elif type == "warning":
+            logging.warning(text)
+            MessageBox.setIcon(QMessageBox.Warning)
+        elif type == "error":
+            logging.error(text+"\nDetailed output: "+detailedText)
+            MessageBox.setIcon(QMessageBox.Critical)
+        MessageBox.exec()
             
 if __name__ == "__main__":
     import sys
@@ -644,7 +754,6 @@ if __name__ == "__main__":
         main_window.monaco.close()
         main_window.monaco.deleteLater()
     except Exception as e:
-        threading.Thread(target=playsound, args=(os.path.join(currentDir, f'data\\resource_packs\\sounds\\error.wav'),), daemon=True).start()
         error_message = f"Critical error during initialization: {traceback.format_exc()}"
         logging.error(error_message)
         QMessageBox.critical(None, 'Error', error_message, QMessageBox.Ok)

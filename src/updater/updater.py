@@ -1,4 +1,11 @@
+# Updater
+# tostr 2022
+
+# Transferred from a previous project, so naming conventions are different
+# Only difference is UI which is made to match other dialogs in Mi Create
+
 import tkinter as tk
+from tkinter import messagebox
 from tkinter import ttk
 import urllib.request
 import winsound
@@ -12,6 +19,7 @@ class Updater:
         def download_progress_hook(block_count, block_size, total_size):
             current_size = block_count * block_size
             progress = min(int((current_size / total_size) * 100), 100)
+            status.config(text=f"Downloading... {round(current_size/1000000)} MB/{round(total_size/1000000)} MB")
             progressBar["value"] = progress
             window.update()
 
@@ -22,12 +30,16 @@ class Updater:
                 progressBar["value"] = 0
                 progressBar.start()
                 subprocess.run([temp_file, "/verysilent"])
-                window.quit()
+                progressBar.stop()
+                progressBar["mode"] = "determinate"
+                progressBar["value"] = 100
+                status.config(text="Installation complete")
+                exit_flag.set()
 
             except Exception as e:
-                winsound.PlaySound('SystemHand', winsound.SND_ALIAS | winsound.SND_ASYNC)
                 error_message = f"An error occurred: {e}"
-                status.config(text=error_message)
+                messagebox.showerror("Error", error_message)
+                exit_flag.set()
 
         def download_and_install():
             url = "https://github.com/ooflet/Mi-Face-Studio/releases/latest/download/Mi.Face.Studio.Setup.exe"
@@ -47,33 +59,9 @@ class Updater:
                 install_thread_object.start()
 
             except Exception as e:
-                winsound.PlaySound('SystemHand', winsound.SND_ALIAS | winsound.SND_ASYNC)
                 error_message = f"An error occurred: {e}"
-                status.config(text=error_message)
-
-        window = tk.Tk()
-        window.title('Updater')
-
-        window_width = 300
-        window_height = 55
-        display_width = window.winfo_screenwidth()
-        display_height = window.winfo_screenheight()
-
-        left = int(display_width/2 - window_width/2)
-        top = int(display_height/2 - window_height/2 - 50)
-        window.geometry(f'{window_width}x{window_height}+{left}+{top}')
-        window.minsize(300, 55)
-        window.maxsize(300, 55)
-
-        status = ttk.Label(window, text="Getting update package...")
-        progressBar = ttk.Progressbar(window, orient="horizontal", mode="indeterminate", length=285, value=0)
-
-        status.pack(fill="both", padx=7.5, pady=2)
-        progressBar.pack()
-
-        exit_flag = threading.Event()
-
-        download_and_install()
+                messagebox.showerror("Error", error_message)
+                exit_flag.set()
 
         def check_exit():
             if not exit_flag.is_set():
@@ -81,5 +69,43 @@ class Updater:
             else:
                 window.quit()
 
+        window = tk.Tk()
+        window.title('Updater')
+
+        def disable_event():
+            pass
+
+        window.protocol("WM_DELETE_WINDOW", disable_event)
+
+        window_width = 500
+        window_height = 300
+        display_width = window.winfo_screenwidth()
+        display_height = window.winfo_screenheight()
+
+        left = int(display_width/2 - window_width/2)
+        top = int(display_height/2 - window_height/2 - 50)
+        window.geometry(f'{window_width}x{window_height}+{left}+{top}')
+        window.resizable(False, False)
+        window.minsize(500, 300)
+        window.maxsize(500, 300)
+
+        title = ttk.Label(window, text="Updating...", font=("Segoe UI", 18))
+        status = ttk.Label(window, text="Getting update package...")
+        progressBar = ttk.Progressbar(window, orient="horizontal", mode="indeterminate", length=462, value=0)
+
+        title.pack(fill="both", padx=18, pady=2)
+        status.pack(fill="both", padx=18, pady=4)
+        progressBar.pack()
+
+        exit_flag = threading.Event()
+
+        # Start the download and install process in a separate thread
+        download_install_thread = threading.Thread(target=download_and_install)
+        download_install_thread.start()
+
         window.after(1000, check_exit)
         window.mainloop()
+
+if __name__ == "__main__":
+    updater = Updater()
+    updater.start()

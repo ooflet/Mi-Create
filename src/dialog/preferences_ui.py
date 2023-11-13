@@ -17,8 +17,8 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QAbstractButton, QApplication, QCheckBox, QComboBox,
     QDialog, QDialogButtonBox, QFormLayout, QGridLayout,
-    QGroupBox, QLabel, QSizePolicy, QTabWidget,
-    QVBoxLayout, QWidget)
+    QGroupBox, QLabel, QPushButton, QSizePolicy,
+    QTabWidget, QVBoxLayout, QWidget)
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
@@ -156,6 +156,61 @@ class Ui_Dialog(object):
         self.verticalLayout.addWidget(self.groupBox_2)
 
         self.tabWidget.addTab(self.Behaviour, "")
+        self.Advanced = QWidget()
+        self.Advanced.setObjectName(u"Advanced")
+        self.verticalLayout_2 = QVBoxLayout(self.Advanced)
+        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
+        self.groupBox_3 = QGroupBox(self.Advanced)
+        self.groupBox_3.setObjectName(u"groupBox_3")
+        self.formLayout_4 = QFormLayout(self.groupBox_3)
+        self.formLayout_4.setObjectName(u"formLayout_4")
+        self.formLayout_4.setHorizontalSpacing(0)
+        self.formLayout_4.setVerticalSpacing(5)
+        self.formLayout_4.setContentsMargins(20, 9, 9, 9)
+        self.DataFolderText = QLabel(self.groupBox_3)
+        self.DataFolderText.setObjectName(u"DataFolderText")
+        sizePolicy.setHeightForWidth(self.DataFolderText.sizePolicy().hasHeightForWidth())
+        self.DataFolderText.setSizePolicy(sizePolicy)
+        self.DataFolderText.setMinimumSize(QSize(100, 22))
+
+        self.formLayout_4.setWidget(2, QFormLayout.LabelRole, self.DataFolderText)
+
+        self.openDataFolder = QPushButton(self.groupBox_3)
+        self.openDataFolder.setObjectName(u"openDataFolder")
+        sizePolicy1.setHeightForWidth(self.openDataFolder.sizePolicy().hasHeightForWidth())
+        self.openDataFolder.setSizePolicy(sizePolicy1)
+
+        self.formLayout_4.setWidget(2, QFormLayout.FieldRole, self.openDataFolder)
+
+        self.label_2 = QLabel(self.groupBox_3)
+        self.label_2.setObjectName(u"label_2")
+
+        self.formLayout_4.setWidget(1, QFormLayout.LabelRole, self.label_2)
+
+        self.reinstall = QPushButton(self.groupBox_3)
+        self.reinstall.setObjectName(u"reinstall")
+        sizePolicy1.setHeightForWidth(self.reinstall.sizePolicy().hasHeightForWidth())
+        self.reinstall.setSizePolicy(sizePolicy1)
+
+        self.formLayout_4.setWidget(1, QFormLayout.FieldRole, self.reinstall)
+
+        self.label_3 = QLabel(self.groupBox_3)
+        self.label_3.setObjectName(u"label_3")
+        self.label_3.setMinimumSize(QSize(125, 0))
+
+        self.formLayout_4.setWidget(0, QFormLayout.LabelRole, self.label_3)
+
+        self.clearWindow = QPushButton(self.groupBox_3)
+        self.clearWindow.setObjectName(u"clearWindow")
+        sizePolicy1.setHeightForWidth(self.clearWindow.sizePolicy().hasHeightForWidth())
+        self.clearWindow.setSizePolicy(sizePolicy1)
+
+        self.formLayout_4.setWidget(0, QFormLayout.FieldRole, self.clearWindow)
+
+
+        self.verticalLayout_2.addWidget(self.groupBox_3)
+
+        self.tabWidget.addTab(self.Advanced, "")
 
         self.gridLayout_3.addWidget(self.tabWidget, 0, 1, 1, 1)
 
@@ -192,5 +247,13 @@ class Ui_Dialog(object):
         self.label.setText(QCoreApplication.translate("Dialog", u"Enable Antialiasing", None))
         self.AntialiasingEnabled.setText("")
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.Behaviour), QCoreApplication.translate("Dialog", u"Behaviour", None))
+        self.groupBox_3.setTitle(QCoreApplication.translate("Dialog", u"Advanced", None))
+        self.DataFolderText.setText(QCoreApplication.translate("Dialog", u"Open Data Folder", None))
+        self.openDataFolder.setText(QCoreApplication.translate("Dialog", u"Open", None))
+        self.label_2.setText(QCoreApplication.translate("Dialog", u"Force Reinstall", None))
+        self.reinstall.setText(QCoreApplication.translate("Dialog", u"Reinstall", None))
+        self.label_3.setText(QCoreApplication.translate("Dialog", u"Clear Window State", None))
+        self.clearWindow.setText(QCoreApplication.translate("Dialog", u"Clear", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.Advanced), QCoreApplication.translate("Dialog", u"Advanced", None))
     # retranslateUi
 

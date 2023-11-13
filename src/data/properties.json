@@ -2,301 +2,556 @@
     "27": {
         "Shape": "AnalogDisplay",
         "properties": {
-            "@Name": [
-                "Name",
-                "text",
-                ""
-            ],
-            "@X": [
-                "X",
-                "int",
-                ""
-            ],
-            "@Y": [
-                "Y",
-                "int",
-                ""
-            ],
-            "@Width": [
-                "Width",
-                "int",
-                "48"
-            ],
-            "@Height": [
-                "Height",
-                "int",
-                "48"
-            ],
-            "@Alpha": [
-                "Transparency",
-                "aint",
-                "255"
-            ],
-            "@HourhandCorrection_En": [
-                "HourHandSmoothMovement",
-                "bool",
-                "0"
-            ],
-            "@MinutehandCorrection_En": [
-                "MinuteHandSmoothMovement",
-                "bool",
-                "0"
-            ],
-            "@Visible_Src": [
-                "SourceVisibility",
-                "visrc",
-                ""
-            ],
-            "@Background_ImageName": [
-                "BackgroundImage",
-                "reslist",
-                ""
-            ],
-            "@BgImage_rotate_xc": [
-                "BackgroundPosX",
-                "int",
-                ""
-            ],
-            "@BgImage_rotate_yc": [
-                "BackgroundPosY",
-                "int",
-                ""
-            ],
-            "@HourHand_ImageName": [
-                "HourHandImage",
-                "reslist",
-                ""
-            ],
-            "@HourImage_rotate_xc": [
-                "HourHandOffset",
-                "int",
-                ""
-            ],
-            "@HourImage_rotate_yc": [
-                "HourHandOffset",
-                "int",
-                ""
-            ],
-            "@MinuteHand_Image": [
-                "HourHandImage",
-                "reslist",
-                ""
-            ],
-            "@MinuteImage_rotate_xc": [
-                "HourHandOffset",
-                "int",
-                ""
-            ],
-            "@MinuteImage_rotate_yc": [
-                "HourHandOffset",
-                "int",
-                ""
-            ],
-            "@SecondHand_Image": [
-                "HourHandImage",
-                "reslist",
-                ""
-            ],
-            "@SecondImage_rotate_xc": [
-                "HourHandOffset",
-                "int",
-                ""
-            ],
-            "@SecondImage_rotate_yc": [
-                "HourHandOffset",
-                "int",
-                ""
-            ]
+            "General": {
+                "WidgetType":[
+                    "Widget Type",
+                    "disabled",
+                    "AnalogDisplay"
+                ],
+                "@Name": [
+                    "Name",
+                    "text",
+                    ""
+                ]
+            },
+            "Position": {
+                "@X": [
+                    "X",
+                    "int",
+                    "",
+                    "-999",
+                    "999"
+                ],
+                "@Y": [
+                    "Y",
+                    "int",
+                    "",
+                    "-999",
+                    "999"
+                ],
+                "@Width": [
+                    "Width",
+                    "disabled",
+                    "48"
+                ],
+                "@Height": [
+                    "Height",
+                    "disabled",
+                    "48"
+                ]
+            },
+            "Appearance": {
+                "@Alpha": [
+                    "Opacity",
+                    "int",
+                    "255",
+                    "0",
+                    "255"
+                ],
+                "@Visible_Src": [
+                    "Visibility Trigger",
+                    "src",
+                    ""
+                ],
+                "@HourhandCorrection_En": [
+                    "Hour Hand Smooth",
+                    "bool",
+                    "0"
+                ],
+                "@MinutehandCorrection_En": [
+                    "Minute Hand Smooth",
+                    "bool",
+                    "0"
+                ]
+            },
+            "Analog Properties": {
+                "Background": {
+                    "@Background_ImageName": [
+                        "Image",
+                        "img",
+                        ""
+                    ],
+                    "Anchor Point": {
+                        "@BgImage_rotate_xc": [
+                            "X",
+                            "int",
+                            "",
+                            "0",
+                            "999"
+                        ],
+                        "@BgImage_rotate_yc": [
+                            "Y",
+                            "int",
+                            "",
+                            "0",
+                            "999"
+                        ]
+                    }
+                    
+                 },
+                 "Hour Hand": {
+                    "@HourHand_ImageName": [
+                        "Image",
+                        "img",
+                        ""
+                    ],
+                    "Anchor Point": {
+                        "@HourImage_rotate_xc": [
+                            "X",
+                            "int",
+                            "",
+                            "0",
+                            "999"
+                        ],
+                        "@HourImage_rotate_yc": [
+                            "Y",
+                            "int",
+                            "",
+                            "0",
+                            "999"
+                        ]
+                    }
+                 },
+                 "Minute Hand": {
+                    "@MinuteHand_Image": [
+                        "Image",
+                        "img",
+                        ""
+                    ],
+                    "Anchor Point": {
+                        "@MinuteImage_rotate_xc": [
+                            "X",
+                            "int",
+                            "",
+                            "0",
+                            "999"
+                        ],
+                        "@MinuteImage_rotate_yc": [
+                            "Y",
+                            "int",
+                            "",
+                            "0",
+                            "999"
+                        ]
+                    }
+                 },
+                 "Second Hand": {
+                    "@SecondHand_Image": [
+                        "Image",
+                        "img",
+                        ""
+                    ],
+                    "Anchor Point": {
+                        "@SecondImage_rotate_xc": [
+                            "X",
+                            "int",
+                            "",
+                            "0",
+                            "999"
+                        ],
+                        "@SecondImage_rotate_yc": [
+                            "Y",
+                            "int",
+                            "",
+                            "0",
+                            "999"
+                        ]
+                    }
+                 }
+            }
+        }
+    },
+    "29": {
+        "Shape":"CircleProgress",
+        "properties": {
+            "General": {
+                "WidgetType":[
+                    "Widget Type",
+                    "disabled",
+                    "CircleProgress"
+                ],
+                "@Name": [
+                    "Name",
+                    "text",
+                    ""
+                ]
+            },
+            "Position": {
+                "@X": [
+                    "X",
+                    "int",
+                    "",
+                    "-999",
+                    "999"
+                ],
+                "@Y": [
+                    "Y",
+                    "int",
+                    "",
+                    "-999",
+                    "999"
+                ],
+                "@Width": [
+                    "Width",
+                    "disabled",
+                    "48"
+                ],
+                "@Height": [
+                    "Height",
+                    "disabled",
+                    "48"
+                ]
+            },
+            "Appearance": {
+                "@Alpha": [
+                    "Opacity",
+                    "int",
+                    "255",
+                    "0",
+                    "255"
+                ],
+                "@Visible_Src": [
+                    "Visibility Trigger",
+                    "src",
+                    ""
+                ]
+            },
+            "Progress Bar":{
+                "@Rotate_xc": [
+                    "Offset X",
+                    "int",
+                    "0",
+                    "-999",
+                    "999"
+                ],
+                "@Rotate_yc": [
+                    "Offset Y",
+                    "int",
+                    "0",
+                    "-999",
+                    "999"
+                ],
+                "@Radius": [
+                    "Radius",
+                    "int",
+                    "0",
+                    "0",
+                    "999"
+                ],
+                "@Line_Width": [
+                    "Thickness",
+                    "int",
+                    "0",
+                    "999"
+                ],
+                "@StartAngle": [
+                    "Start Angle",
+                    "int",
+                    "0",
+                    "-360",
+                    "360"
+                ],
+                "@EndAngle": [
+                    "End Angle",
+                    "int",
+                    "0",
+                    "-360",
+                    "360"
+                ]
+                
+            },
+            "Range": {
+                "@Range_Min": [
+                    "Minimum Value",
+                    "int",
+                    "0",
+                    "0",
+                    "100"
+                ],
+                "@Range_Max": [
+                    "Maximum Value",
+                    "int",
+                    "0",
+                    "0",
+                    "100"
+                ],
+                "@Range_MinStep": [
+                    "Minimum Step Value",
+                    "int",
+                    "0",
+                    "0",
+                    "100"
+                ],
+                "@Range_Step": [
+                    "Step Value",
+                    "int",
+                    "0",
+                    "0",
+                    "100"
+                ]
+            },
+            "Data": {
+                "@Range_Val_Src": [
+                    "Data Source",
+                    "src",
+                    ""
+                ],
+                "@Range_Max_Src": [
+                    "Max Value Source",
+                    "src",
+                    ""
+                ]
+            },
+            "Images": {
+                "@Background_ImageName": [
+                    "Background",
+                    "img",
+                    ""
+                ],
+                "@Foreground_ImageName": [
+                    "Progress Bar",
+                    "img",
+                    ""
+                ]
+            }
         }
     },
     "30": {
         "Shape": "Image",
         "properties": {
-            "@Name": [
-                "Name",
-                "text",
-                ""
-            ],
-            "@Bitmap": [
-                "Image",
-                "reslist",
-                ""
-            ],
-            "@X": [
-                "X",
-                "int",
-                ""
-            ],
-            "@Y": [
-                "Y",
-                "int",
-                ""
-            ],
-            "@Width": [
-                "Width",
-                "int",
-                "48"
-            ],
-            "@Height": [
-                "Height",
-                "int",
-                "48"
-            ],
-            "@Alignment": [
-                "Alignment",
-                "int",
-                ""
-            ],
-            "@Alpha": [
-                "Transparency",
-                "aint",
-                "255"
-            ],
-            "@Visible_Src": [
-                "SourceVisibility",
-                "visrc",
-                ""
-            ]
+            "General": {
+                "WidgetType":[
+                    "Widget Type",
+                    "disabled",
+                    "Image"
+                ],
+                "@Name": [
+                    "Name",
+                    "text",
+                    ""
+                ]
+            },
+            "Position": {
+                "@X": [
+                    "X",
+                    "int",
+                    "",
+                    "-999",
+                    "999"
+                ],
+                "@Y": [
+                    "Y",
+                    "int",
+                    "",
+                    "-999",
+                    "999"
+                ],
+                "@Width": [
+                    "Width",
+                    "disabled",
+                    "48"
+                ],
+                "@Height": [
+                    "Height",
+                    "disabled",
+                    "48"
+                ]
+            },
+            "Appearance": {
+                "@Alpha": [
+                    "Opacity",
+                    "int",
+                    "255",
+                    "0",
+                    "255"
+                ],
+                "@Visible_Src": [
+                    "Visibility Trigger",
+                    "src",
+                    ""
+                ]
+            },
+            "Image": {
+                "@Bitmap": [
+                    "Image",
+                    "img",
+                    ""
+                ]
+            }
+            
         }
     },
     "31": {
         "Shape": "ImageList",
         "properties": {
-            "@Name": [
-                "Name",
-                "text",
-                ""
-            ],
-            "@BitmapList": [
-                "Images",
-                "reslist",
-                "(0):resource/default/default.png"
-            ],
-            "@X": [
-                "X",
-                "int",
-                ""
-            ],
-            "@Y": [
-                "Y",
-                "int",
-                ""
-            ],
-            "@Width": [
-                "Width",
-                "disabled",
-                "48"
-            ],
-            "@Height": [
-                "Height",
-                "disabled",
-                "48"
-            ],
-            "@Alpha": [
-                "Transparency",
-                "aint",
-                "255"
-            ],
-            "@Alignment": [
-                "Alignment",
-                "int",
-                ""
-            ],
-            "@DefaultIndex": [
-                "Default Index",
-                "int",
-                "0"
-            ],
-            "@Value_Src": [
-                "Data Source",
-                "source",
-                ""
-            ],
-            "@Spacing": [
-                "Spacing",
-                "bool",
-                ""
-            ],
-            "@Blanking": [
-                "Blanking",
-                "bool",
-                ""
-            ],
-            "@Visible_Src": [
-                "SourceVisibility",
-                "visrc",
-                ""
-            ]
+            "General": {
+                "WidgetType":[
+                    "Widget Type",
+                    "disabled",
+                    "ImageList"
+                ],
+                "@Name": [
+                    "Name",
+                    "text",
+                    ""
+                ]
+            },
+            "Position":{
+                "@X": [
+                    "X",
+                    "int",
+                    "",
+                    "-999",
+                    "999"
+                ],
+                "@Y": [
+                    "Y",
+                    "int",
+                    "",
+                    "-999",
+                    "999"
+                ],
+                "@Width": [
+                    "Width",
+                    "disabled",
+                    "48"
+                ],
+                "@Height": [
+                    "Height",
+                    "disabled",
+                    "48"
+                ]
+            },
+            "Appearance": {
+                "@Alpha": [
+                    "Opacity",
+                    "int",
+                    "255",
+                    "0",
+                    "255"
+                ],
+                "@Visible_Src": [
+                    "Visibility Trigger",
+                    "src",
+                    ""
+                ]
+            },
+            "Data":{
+                "@Index_Src": [
+                    "Data Source",
+                    "src",
+                    ""
+                ]
+            },
+            "Image List": {
+                "@DefaultIndex": [
+                    "Default Index",
+                    "int",
+                    "0",
+                    "0",
+                    "99"
+                ],
+                "@BitmapList": [
+                    "Images",
+                    "imglist",
+                    "(0):resource/default/default.png"
+                ]
+            }
         }
     },
     "32": {
         "Shape": "DigitalNumber",
         "properties": {
-            "@Name": [
-                "Name",
-                "text",
-                ""
-            ],
-            "@BitmapList": [
-                "Images",
-                "reslist",
-                "resourcefont|Blueprint.mfnt"
-            ],
-            "@X": [
-                "X",
-                "int",
-                ""
-            ],
-            "@Y": [
-                "Y",
-                "int",
-                ""
-            ],
-            "@Width": [
-                "Width",
-                "disabled",
-                ""
-            ],
-            "@Height": [
-                "Height",
-                "disabled",
-                ""
-            ],
-            "@Alpha": [
-                "Transparency",
-                "aint",
-                "255"
-            ],
-            "@Digits": [
-                "Digits",
-                "int",
-                "1"
-            ],
-            "@Alignment": [
-                "Alignment",
-                "int",
-                ""
-            ],
-            "@Value_Src": [
-                "Data Source",
-                "source",
-                ""
-            ],
-            "@Spacing": [
-                "Spacing",
-                "bool",
-                ""
-            ],
-            "@Blanking": [
-                "Blanking",
-                "bool",
-                ""
-            ],
-            "@Visible_Src": [
-                "SourceVisibility",
-                "visrc",
-                ""
-            ]
+            "General": {
+                "WidgetType":[
+                    "Widget Type",
+                    "disabled",
+                    "DigitalNumber"
+                ],
+                "@Name": [
+                    "Name",
+                    "text",
+                    ""
+                ]
+            },
+            "Position": {
+                "@X": [
+                    "X",
+                    "int",
+                    "",
+                    "-999",
+                    "999"
+                ],
+                "@Y": [
+                    "Y",
+                    "int",
+                    "",
+                    "-999",
+                    "999"
+                ],
+                "@Width": [
+                    "Width",
+                    "disabled",
+                    ""
+                ],
+                "@Height": [
+                    "Height",
+                    "disabled",
+                    ""
+                ],
+                "@Alignment": [
+                    "Alignment",
+                    "align",
+                    ""
+                ]
+            },
+            "Appearance": {
+                "@Alpha": [
+                    "Opacity",
+                    "int",
+                    "255",
+                    "0",
+                    "255"
+                ],
+                "@Visible_Src": [
+                    "Visibility Trigger",
+                    "src",
+                    ""
+                ],
+                "@Digits": [
+                    "Digits",
+                    "int",
+                    "1",
+                    "1",
+                    "11"
+                ],
+                "@Spacing": [
+                    "Spacing",
+                    "int",
+                    "",
+                    "0",
+                    "999"
+                ],
+                "@Blanking": [
+                    "Blanking",
+                    "bool",
+                    ""
+                ]
+            },
+            "Data": {
+                "@Value_Src": [
+                    "Data Source",
+                    "src",
+                    ""
+                ]
+            },
+           "Images": {
+                "@BitmapList": [
+                    "Images",
+                    "imglist",
+                    "resourcefont|Blueprint.mfnt"
+                ]
+           }
         }
     }
 }

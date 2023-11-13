@@ -3,16 +3,15 @@
 
 # Responsible for saving and loading various project formats, such as .mprj & .fprj
 
+import sys
 import os
 import subprocess
 import traceback
 import logging
-import tempfile
+import base64
+import json
 import xmltodict
 import xml.dom.minidom as minidom
-import json
-import json_minify
-import base64
 from pprint import pprint
 
 loadedProject = None
@@ -23,22 +22,11 @@ class watchData:
     def __init__(self):
         super().__init__()
     
-        self.models = [
-            "Xiaomi Watch Color", "Xiaomi Watch Color Sport", "Xiaomi Watch Color 2/s1/s2", "Xiaomi Watch S1 Pro", "Redmi Watch 2", "Xiaomi Smart Band 7 Pro", "Redmi Watch 3", "Redmi Smart Band Pro", "Xiaomi Smart Band 8", "Redmi Watch 3 Active", "Xiaomi Smart Band 8 Pro"
-        ]
-        self.modelID = {
-            "0":"Xiaomi Watch Color",
-            "1":"Xiaomi Watch Color Sport",
-            "3":"Xiaomi Watch Color 2/s1/s2",
-            "4":"Xiaomi Watch S1 Pro",
-            "5":"Redmi Watch 2",
-            "6":"Xiaomi Smart Band 7 Pro",
-            "7":"Redmi Watch 3",
-            "8":"Redmi Smart Band Pro",
-            "9":"Xiaomi Smart Band 8",
-            "10":"Redmi Watch 3 Active",
-            "11":"Xiaomi Smart Band 8 Pro"
-        }
+        self.models = []
+        self.modelID = {}
+        self.modelSize = {}
+        self.modelSourceList = {}
+        self.modelSourceData = {}
         self.shapeId = {
             "27":"AnalogDisplay",
             "30":"Image",
@@ -55,6 +43,18 @@ class watchData:
                 }
             }
         }
+        dataPath = os.path.join(os.getcwd(), "data", "DeviceInfo.db")
+
+        with open(dataPath, "r") as file:
+            deviceInfo = xmltodict.parse(file.read())
+            for x in deviceInfo["DeviceList"]["DeviceInfo"]:
+                self.models.append(x["@Name"])
+                self.modelID[x["@Name"]] = x["@Type"]
+                self.modelSize[x["@Type"]] = [int(x["@Width"]), int(x["@Height"]), int(x["@Radius"])]
+                self.modelSourceData[x["@Type"]] = x["SourceDataList"]["SRC"]
+                self.modelSourceList[x["@Type"]] = []
+                for y in x["SourceDataList"]["SRC"]:
+                    self.modelSourceList[x["@Type"]].append(y["@Name"])
 
     def getWatchModel(self, id):
         return self.watchID[id]
@@ -130,94 +130,48 @@ class mprjProject:
                     return False, ".mprj format version unsupported!", f"Project version {data['version']} > Supported version {supportedDialVersion}"
         except Exception as e:
             return False, str(e), traceback.format_exc()
-
-    def create(path, device):
-        # Create a dialproject
-        template = watchData().watchFileTemplate
-        template["FaceProject"]["@DeviceType"] = str(device)
-
-        file = {}
-
+        
+class fprjProject:  
+    def create(path, device, name):
         try:
-            with open(path, "w") as dataFile:
-                file["version"] = "1.0"
-                file["data"] = template
-                file["imgdata"] = ""
-                dataFile.write(json.dumps(file, indent=4))
-                return True, path
+            path = str.replace(path, "/", "\\")
+            template = watchData().watchFileTemplate
+            template["FaceProject"]["@DeviceType"] = str(device)
+            folder = os.path.join(path, name)
+            os.makedirs(os.path.join(folder, "images"))
+            os.makedirs(os.path.join(folder, "output"))
+            with open(os.path.join(folder, f"{name}.fprj"), "x") as fprj:
+                rawXml = xmltodict.unparse(template)
+                dom = minidom.parseString(rawXml)
+                prettyXml = dom.toprettyxml()
+                fprj.write(prettyXml)
+            return True, os.path.join(folder, f"{name}.fprj")
         except Exception as e:
             return False, str(e), traceback.format_exc()
 
     def load(path):
-        # Load data & images into a readable format for the program.
+        xml_path = os.path.join(path)
         try:
-            with open(path) as dataFile:
-                raw = str(dataFile.read())
-                data = json.loads(raw)
-                if str(data["version"]) <= supportedDialVersion:
-                    rawXml = xmltodict.unparse(data["data"])
-                    dom = minidom.parseString(rawXml)
-                    prettyXml = dom.toprettyxml()
-                    return True, data["imgdata"], data["data"], prettyXml
-                else:
-                    return False, ".mprj format version unsupported!", f"Project version {data['version']} > Supported version {supportedDialVersion}"
+            with open(xml_path, 'r') as xml:
+                # Parse XML, then encode images in /images dir to Base64
+                xmlsource = xml.read()
+                parse = xmltodict.parse(xmlsource)
+                if parse["FaceProject"]:
+                    imagesDir = os.path.join(os.path.dirname(path), "images")
+                return True, parse, imagesDir, xmlsource
         except Exception as e:
             return False, str(e), traceback.format_exc()
 
-    def save(path, data, imgdata):
-        try:
-            with open(path) as dataFile:
-                try:
-                    file = {}
-                    with open(path, "w") as dataFile:
-                        file["version"] = "1.0"
-                        file["data"] = data
-                        file["imgdata"] = imgdata
-                        dataFile.write(json.dumps(file, indent=4))
-                        return True, path
-                except Exception as e:
-                    return False, str(e), traceback.format_exc()
-        except Exception as e:
-            return False, str(e), traceback.format_exc()
+    def save(path):
+        pass
 
     def compile(path, location, compilerLocation):
-        try:
-            logging.info(f"Building project {path}...")
-            with tempfile.TemporaryDirectory() as folder:
-                logging.info(f"Creating virtual environment at {folder}...")
-                with open(path) as dataFile:
-                    raw = str(dataFile.read())
-                    data = json.loads(raw)
-                    if str(data["version"]) <= supportedDialVersion:
-                        logging.info("Reading data")
-                        rawXml = xmltodict.unparse(data["data"])
-                        logging.info("Parsing to XML")
-                        name = data["data"]["FaceProject"]["Screen"]["@Title"]+".fprj"
-                        logging.info(f"Writing data to {name}")
-                        with open(os.path.join(folder, name), "w") as fprjFile:
-                            fprjFile.write(rawXml)
-                        imagesPath = os.path.join(folder, "images")
-                        logging.info(f"Creating image directory at {imagesPath}")
-                        os.mkdir(imagesPath)
-                        for i, v in data["imgdata"].items():
-                            logging.info(f"Decoding and writing image {i}")
-                            with open(os.path.join(imagesPath, i), "wb") as image:
-                                image.write(base64.b64decode(v))
-                        logging.info(f'{compilerLocation} compile "{os.path.join(folder, name)}" "{location}" "{data["data"]["FaceProject"]["Screen"]["@Title"]+".face"}" 0')
-                        result = subprocess.run(f'{compilerLocation} compile "{os.path.join(folder, name)}" "{location}" "{data["data"]["FaceProject"]["Screen"]["@Title"]+".face"}" 0', capture_output=True, text=True)
-                        logging.info(result.stdout)
-                        return result.stdout
-                    else:
-                        return f".mprj format version unsupported!\nProject version {data['version']} > Supported version {supportedDialVersion}"
-        except Exception as e:
-            return traceback.format_exc()
-        
-class fprjProject:
-    def load(self, path):
-        pass
-
-    def save(self, path):
-        pass
+        logging.info("Compiling project "+path)
+        #path = str.replace(location, "/", "\\")
+        #location = str.replace(location, "/", "\\")
+        result = subprocess.run(f'{compilerLocation} compile "{path}" "{location}" "{str.split(os.path.basename(path), ".")[0]+".face"}" 0', capture_output=True, text=True)
+        logging.info(result.stdout)
+        return result.stdout
 
 class resourcePackage:
     def unpack(path):

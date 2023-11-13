@@ -91,33 +91,13 @@
          <number>32</number>
         </property>
         <item row="3" column="0">
-         <widget class="QLabel" name="NewProject">
-          <property name="text">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;img src=&quot;:/Dark/file-plus.png&quot;/&gt; &lt;a href=&quot;\&amp;quot;\&amp;quot;&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#55aaff;&quot;&gt;New Project...&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="0">
-         <spacer name="verticalSpacer_2">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>177</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="4" column="0">
          <widget class="QLabel" name="OpenProject">
           <property name="text">
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;img src=&quot;:/Dark/folder-open.png&quot;/&gt; &lt;a href=&quot;\&amp;quot;\&amp;quot;&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#55aaff;&quot;&gt;Open Project...&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
          </widget>
         </item>
-        <item row="5" column="0">
+        <item row="4" column="0">
          <spacer name="verticalSpacer">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
@@ -141,11 +121,24 @@
          </widget>
         </item>
         <item row="2" column="0">
-         <widget class="QLabel" name="label">
+         <widget class="QLabel" name="NewProject">
           <property name="text">
-           <string>Create or open a .mprj or .fprj project.</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;img src=&quot;:/Dark/file-plus.png&quot;/&gt; &lt;a href=&quot;\&amp;quot;\&amp;quot;&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#55aaff;&quot;&gt;New Project...&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
          </widget>
+        </item>
+        <item row="0" column="0">
+         <spacer name="verticalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>177</height>
+           </size>
+          </property>
+         </spacer>
         </item>
        </layout>
       </widget>
@@ -189,6 +182,8 @@
      <addaction name="actionAbout_Qt"/>
      <addaction name="actionThirdPartyNotice"/>
     </widget>
+    <addaction name="actionDocumentation"/>
+    <addaction name="separator"/>
     <addaction name="menuAbout"/>
    </widget>
    <widget class="QMenu" name="menuTest">
@@ -282,7 +277,7 @@
   <widget class="QDockWidget" name="explorerWidget">
    <property name="minimumSize">
     <size>
-     <width>250</width>
+     <width>300</width>
      <height>250</height>
     </size>
    </property>
@@ -342,7 +337,7 @@
    </property>
    <property name="minimumSize">
     <size>
-     <width>250</width>
+     <width>300</width>
      <height>250</height>
     </size>
    </property>
@@ -765,6 +760,19 @@
    </property>
    <property name="text">
     <string>Text</string>
+   </property>
+  </action>
+  <action name="actionWiki">
+   <property name="text">
+    <string>Wiki</string>
+   </property>
+  </action>
+  <action name="actionDocumentation">
+   <property name="text">
+    <string>Documentation</string>
+   </property>
+   <property name="shortcut">
+    <string>F1</string>
    </property>
   </action>
  </widget>

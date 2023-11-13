@@ -183,6 +183,10 @@ class Ui_MainWindow(object):
         icon17 = QIcon()
         icon17.addFile(u":/Dark/text.png", QSize(), QIcon.Normal, QIcon.Off)
         self.actionText.setIcon(icon17)
+        self.actionWiki = QAction(MainWindow)
+        self.actionWiki.setObjectName(u"actionWiki")
+        self.actionDocumentation = QAction(MainWindow)
+        self.actionDocumentation.setObjectName(u"actionDocumentation")
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         sizePolicy1 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
@@ -205,23 +209,14 @@ class Ui_MainWindow(object):
         self.gridLayout_3 = QGridLayout(self.Welcome)
         self.gridLayout_3.setObjectName(u"gridLayout_3")
         self.gridLayout_3.setContentsMargins(32, -1, -1, -1)
-        self.NewProject = QLabel(self.Welcome)
-        self.NewProject.setObjectName(u"NewProject")
-
-        self.gridLayout_3.addWidget(self.NewProject, 3, 0, 1, 1)
-
-        self.verticalSpacer_2 = QSpacerItem(20, 177, QSizePolicy.Minimum, QSizePolicy.Expanding)
-
-        self.gridLayout_3.addItem(self.verticalSpacer_2, 0, 0, 1, 1)
-
         self.OpenProject = QLabel(self.Welcome)
         self.OpenProject.setObjectName(u"OpenProject")
 
-        self.gridLayout_3.addWidget(self.OpenProject, 4, 0, 1, 1)
+        self.gridLayout_3.addWidget(self.OpenProject, 3, 0, 1, 1)
 
         self.verticalSpacer = QSpacerItem(20, 176, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
-        self.gridLayout_3.addItem(self.verticalSpacer, 5, 0, 1, 1)
+        self.gridLayout_3.addItem(self.verticalSpacer, 4, 0, 1, 1)
 
         self.WelcomeText = QLabel(self.Welcome)
         self.WelcomeText.setObjectName(u"WelcomeText")
@@ -229,10 +224,14 @@ class Ui_MainWindow(object):
 
         self.gridLayout_3.addWidget(self.WelcomeText, 1, 0, 1, 1)
 
-        self.label = QLabel(self.Welcome)
-        self.label.setObjectName(u"label")
+        self.NewProject = QLabel(self.Welcome)
+        self.NewProject.setObjectName(u"NewProject")
 
-        self.gridLayout_3.addWidget(self.label, 2, 0, 1, 1)
+        self.gridLayout_3.addWidget(self.NewProject, 2, 0, 1, 1)
+
+        self.verticalSpacer_2 = QSpacerItem(20, 177, QSizePolicy.Minimum, QSizePolicy.Expanding)
+
+        self.gridLayout_3.addItem(self.verticalSpacer_2, 0, 0, 1, 1)
 
         icon18 = QIcon()
         icon18.addFile(u":/Dark/MiFaceStudioFavicon.png", QSize(), QIcon.Normal, QIcon.Off)
@@ -271,7 +270,7 @@ class Ui_MainWindow(object):
         MainWindow.setMenuBar(self.menubar)
         self.explorerWidget = QDockWidget(MainWindow)
         self.explorerWidget.setObjectName(u"explorerWidget")
-        self.explorerWidget.setMinimumSize(QSize(250, 250))
+        self.explorerWidget.setMinimumSize(QSize(300, 250))
         self.explorerWidget.setStyleSheet(u"")
         self.dockWidgetContents = QWidget()
         self.dockWidgetContents.setObjectName(u"dockWidgetContents")
@@ -296,7 +295,7 @@ class Ui_MainWindow(object):
         sizePolicy2.setVerticalStretch(0)
         sizePolicy2.setHeightForWidth(self.propertiesWidget.sizePolicy().hasHeightForWidth())
         self.propertiesWidget.setSizePolicy(sizePolicy2)
-        self.propertiesWidget.setMinimumSize(QSize(250, 250))
+        self.propertiesWidget.setMinimumSize(QSize(300, 250))
         self.propertiesWidget.setStyleSheet(u"")
         self.dockWidgetContents_2 = QWidget()
         self.dockWidgetContents_2.setObjectName(u"dockWidgetContents_2")
@@ -336,6 +335,8 @@ class Ui_MainWindow(object):
         self.menuFile.addAction(self.actionSave_as)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionExit)
+        self.menuHelp.addAction(self.actionDocumentation)
+        self.menuHelp.addSeparator()
         self.menuHelp.addAction(self.menuAbout.menuAction())
         self.menuAbout.addAction(self.actionAbout_MiFaceStudio)
         self.menuAbout.addAction(self.actionAbout_Qt)
@@ -466,10 +467,14 @@ class Ui_MainWindow(object):
         self.actionArc_Progress.setText(QCoreApplication.translate("MainWindow", u"Arc Progress", None))
         self.actionShape.setText(QCoreApplication.translate("MainWindow", u"Shape", None))
         self.actionText.setText(QCoreApplication.translate("MainWindow", u"Text", None))
-        self.NewProject.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><img src=\":/Dark/file-plus.png\"/> <a href=\"\\&quot;\\&quot;\"><span style=\" text-decoration: underline; color:#55aaff;\">New Project...</span></a></p></body></html>", None))
+        self.actionWiki.setText(QCoreApplication.translate("MainWindow", u"Wiki", None))
+        self.actionDocumentation.setText(QCoreApplication.translate("MainWindow", u"Documentation", None))
+#if QT_CONFIG(shortcut)
+        self.actionDocumentation.setShortcut(QCoreApplication.translate("MainWindow", u"F1", None))
+#endif // QT_CONFIG(shortcut)
         self.OpenProject.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><img src=\":/Dark/folder-open.png\"/> <a href=\"\\&quot;\\&quot;\"><span style=\" text-decoration: underline; color:#55aaff;\">Open Project...</span></a></p></body></html>", None))
         self.WelcomeText.setText(QCoreApplication.translate("MainWindow", u"Welcome", None))
-        self.label.setText(QCoreApplication.translate("MainWindow", u"Create or open a .mprj or .fprj project.", None))
+        self.NewProject.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><img src=\":/Dark/file-plus.png\"/> <a href=\"\\&quot;\\&quot;\"><span style=\" text-decoration: underline; color:#55aaff;\">New Project...</span></a></p></body></html>", None))
         self.workspace.setTabText(self.workspace.indexOf(self.Welcome), QCoreApplication.translate("MainWindow", u"Welcome", None))
         self.menuFile.setTitle(QCoreApplication.translate("MainWindow", u"File", None))
         self.menuHelp.setTitle(QCoreApplication.translate("MainWindow", u"Help", None))

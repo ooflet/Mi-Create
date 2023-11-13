@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="Dark">
+    <file>moon.png</file>
     <file>analog.png</file>
     <file>text.png</file>
     <file>watch.png</file>
