@@ -1,12 +1,11 @@
 # List Widget Delegates
-# I stole this from somewhere i forgot
 
 from PySide6.QtCore import QRect, QSize
 from PySide6.QtGui import Qt, QIcon, QFontMetrics, QPen
 from PySide6.QtWidgets import QStyledItemDelegate, QStyle, QApplication
 
 class ImageDelegate(QStyledItemDelegate):
-    """Delegate to wrap filenames."""
+    # Delegate to wrap filenames.
 
     def paint(self, painter, option, index):
         if not index.isValid():

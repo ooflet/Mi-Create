@@ -42,7 +42,7 @@ class Updater:
                 exit_flag.set()
 
         def download_and_install():
-            url = "https://github.com/ooflet/Mi-Face-Studio/releases/latest/download/Mi.Face.Studio.Setup.exe"
+            url = "https://github.com/ooflet/Mi-Face-Studio/releases/latest/download/setup.exe"
             filename = os.path.basename(url)
             filename = filename.replace('?', '_')
 
@@ -73,7 +73,9 @@ class Updater:
         window.title('Updater')
 
         def disable_event():
-            pass
+            message = messagebox.askokcancel("Exit updater?", "Exit the updater? This will only cancel the download, not the install.")
+            if message:
+                exit_flag.set()
 
         window.protocol("WM_DELETE_WINDOW", disable_event)
 

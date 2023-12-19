@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="Dark">
+    <file>progress.png</file>
     <file>moon.png</file>
     <file>analog.png</file>
     <file>text.png</file>

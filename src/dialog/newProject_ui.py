@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'newProject.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.5.2
+## Created by: Qt User Interface Compiler version 6.6.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -83,6 +83,9 @@ class Ui_Dialog(object):
 
         self.folderShow = QToolButton(self.page)
         self.folderShow.setObjectName(u"folderShow")
+        icon = QIcon()
+        icon.addFile(u":/Dark/folder-open.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.folderShow.setIcon(icon)
 
         self.gridLayout.addWidget(self.folderShow, 6, 1, 1, 1)
 
@@ -142,7 +145,7 @@ class Ui_Dialog(object):
         self.label_2.setText(QCoreApplication.translate("Dialog", u"Select device", None))
         self.label_3.setText(QCoreApplication.translate("Dialog", u"Project name", None))
         self.label.setText(QCoreApplication.translate("Dialog", u"Create project...", None))
-        self.folderShow.setText(QCoreApplication.translate("Dialog", u"...", None))
+        self.folderShow.setText("")
         self.label_4.setText(QCoreApplication.translate("Dialog", u"Project location", None))
     # retranslateUi
 

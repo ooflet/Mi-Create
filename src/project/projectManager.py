@@ -1,7 +1,9 @@
 # Project Manager for Mi Create
 # tostr 2023
 
-# Responsible for saving and loading various project formats, such as .mprj & .fprj
+# Responsible for saving and loading project formats
+# Also contains code for mprj, an unused json based project format
+# May repurpose for easy distribution of watchface files? idk
 
 import sys
 import os
@@ -39,7 +41,7 @@ class watchData:
                 "Screen": {
                     "@Title": "",
                     "@Bitmap": "",
-                    "Widget": []
+                    "Widget": ""
                 }
             }
         }
@@ -140,7 +142,7 @@ class fprjProject:
             folder = os.path.join(path, name)
             os.makedirs(os.path.join(folder, "images"))
             os.makedirs(os.path.join(folder, "output"))
-            with open(os.path.join(folder, f"{name}.fprj"), "x") as fprj:
+            with open(os.path.join(folder, f"{name}.fprj"), "x", encoding="utf8") as fprj:
                 rawXml = xmltodict.unparse(template)
                 dom = minidom.parseString(rawXml)
                 prettyXml = dom.toprettyxml()
@@ -152,7 +154,7 @@ class fprjProject:
     def load(path):
         xml_path = os.path.join(path)
         try:
-            with open(xml_path, 'r') as xml:
+            with open(xml_path, 'r', encoding="utf8") as xml:
                 # Parse XML, then encode images in /images dir to Base64
                 xmlsource = xml.read()
                 parse = xmltodict.parse(xmlsource)

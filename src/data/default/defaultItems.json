@@ -1,12 +1,21 @@
 {
     "27": {
+        "@Shape":"27",
         "@Name":"",
         "@X":"",
         "@Y":"",
         "@Width":"48",
-        "@Height":"48"
+        "@Height":"48",
+        "@Alpha":"255",
+        "@HourHandCorrection_En":"0",
+        "@MinuteHandCorrection_En":"0",
+        "@Visible_Src":"0",
+        "@Background_ImageName":"",
+        "@BgImage_rotate_xc":"0", 
+        "@BgImage_rotate_yc":"0"
     },
     "30": {
+        "@Shape":"30",
         "@Name":"",
         "@Bitmap":"",
         "@X":"",
@@ -17,6 +26,7 @@
         "@Visible_Src":"0"
     },
     "31": {
+        "@Shape":"31",
         "@Name":"",
         "@BitmapList":"",
         "@X":"",
@@ -32,6 +42,7 @@
         "@Visible_Src":"0"
     },
     "32": {
+        "@Shape":"32",
         "@Name":"",
         "@BitmapList":"",
         "@X":"",
@@ -45,5 +56,8 @@
         "@Spacing":"0",
         "@Blanking":"0",
         "@Visible_Src":"0"
+    },
+    "33": {
+
     }
 }

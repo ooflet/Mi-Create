@@ -10,7 +10,6 @@ require(['vs/editor/editor.main'], function () {
         fontFamily: "Consolas, 'Courier New', monospace",
         theme: "vs-dark",
         automaticLayout: true,
-        cursorBlinking: "smooth"
     });
     editor.onDidChangeModelContent((event) => {
         sendToPython("value", editor.getModel().getValue())

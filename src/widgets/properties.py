@@ -1,14 +1,17 @@
-# Properties for Mi Create
+# Properties Widget for Mi Create
 # tostr 2023
+
+# Use a properties "scaffold" with the widget when creating
 
 import os
 import shutil
+import traceback
 from typing import Any
 from PySide6.QtWidgets import (QStyledItemDelegate, QWidget, QFileDialog, QTreeWidget, QFrame, QHeaderView, 
                                QDialog, QDialogButtonBox, QVBoxLayout, QListWidgetItem, QTreeWidgetItem, QLineEdit, 
-                               QSpinBox, QComboBox, QCheckBox)
+                               QSpinBox, QComboBox, QCheckBox, QMessageBox)
 from PySide6.QtCore import Qt, Signal, QPoint, QSize
-from PySide6.QtGui import QColor, QPen, QGuiApplication, QIcon
+from PySide6.QtGui import QColor, QPen, QGuiApplication, QIcon, QPalette
 from pprint import pprint
 
 class GridDelegate(QStyledItemDelegate):
@@ -23,12 +26,11 @@ class GridDelegate(QStyledItemDelegate):
         bottom = rect.bottom()
 
         # Create a custom pen with a thickness of 1 pixel
-        pen = QPen(QColor(60,60,60))
+        pen = QPen(QPalette().alternateBase().color())
         pen.setWidth(1)
         painter.setPen(pen)
 
-        # Draw horizontal line at the bottom of the cell (except for the last row)
-        #if index.row() < index.model().rowCount() - 1:
+        # Draw horizontal line at the bottom of the cell
         painter.drawLine(left, bottom, right, bottom)
 
         # Draw vertical line at the right edge of the cell
@@ -69,6 +71,7 @@ class PropertiesWidget(QWidget):
                 [self.resourceDialogUI.imageSelect.setCurrentItem(x) for x in self.resourceDialogUI.imageSelect.findItems(self.currentPropertyInput.text(), Qt.MatchExactly)]
 
         self.propertyItems = {}
+        self.imageListCategories = []
         self.imageFolder = ""
         self.currentPropertyInput = None
 
@@ -122,11 +125,12 @@ class PropertiesWidget(QWidget):
         self.propertyItems[srcProperty] = valueWidget
         item.setExpanded(True)
 
-    def createLineEdit(self, text, disabled, srcProperty):
+    def createLineEdit(self, text, disabled, propertySignalDisabled, srcProperty=""):
         def onDeselect():
             lineEdit.clearFocus()
             self.treeWidget.setCurrentItem(None)
-            self.sendPropertyChangedSignal(srcProperty, lineEdit.text())
+            if not propertySignalDisabled:
+                self.sendPropertyChangedSignal(srcProperty, lineEdit.text())
 
         lineEdit = QLineEdit(self)
         lineEdit.setStyleSheet("background-color: rgba(0, 0, 0, 0);")
@@ -135,8 +139,7 @@ class PropertiesWidget(QWidget):
         lineEdit.editingFinished.connect(onDeselect)
         return lineEdit
     
-    def createResourceEdit(self, text, disabled, resourceType, srcProperty):
-        # where resourceType 0 is regular image, resourceType 1 is image list and resourceType 2 is number list
+    def createResourceEdit(self, text, disabled, propertySignalDisabled, srcProperty=""):
         def onSelect():
             screenX = self.primaryScreen.size().width()
             screenY = self.primaryScreen.size().height()
@@ -148,7 +151,6 @@ class PropertiesWidget(QWidget):
                 posY = posY - 325
             resourceEdit.clearFocus()
             self.currentPropertyInput = resourceEdit
-            self.resourceDialogUI.stackedWidget.setCurrentIndex(resourceType)
             self.resourceDialog.setGeometry(posX, posY, 300, 325)
             [self.resourceDialogUI.imageSelect.setCurrentItem(x) for x in self.resourceDialogUI.imageSelect.findItems(resourceEdit.text(), Qt.MatchExactly)]
             self.resourceDialogUI.searchBar.setFocus()
@@ -163,12 +165,14 @@ class PropertiesWidget(QWidget):
         resourceEdit.setText(text)
         resourceEdit.setDisabled(disabled)
         resourceEdit.mousePressEvent = lambda event: onSelect()
-        resourceEdit.textChanged.connect(lambda *event: self.sendPropertyChangedSignal(srcProperty, resourceEdit.text()))
+        if not propertySignalDisabled:
+            resourceEdit.textChanged.connect(lambda *event: self.sendPropertyChangedSignal(srcProperty, resourceEdit.text()))
         return resourceEdit
 
-    def createSpinBox(self, text, disabled, srcProperty, minVal=-9999, maxVal=9999):
+    def createSpinBox(self, text, disabled, propertySignalDisabled, srcProperty, minVal=-9999, maxVal=9999):
         def onChanged():
-            self.sendPropertyChangedSignal(srcProperty, str(spinBox.value()))
+            if not propertySignalDisabled:
+                self.sendPropertyChangedSignal(srcProperty, str(spinBox.value()))
 
         def onDeselect():
             spinBox.clearFocus()
@@ -234,47 +238,116 @@ class PropertiesWidget(QWidget):
             parent.addChild(item)  # Add category as a child of the parent category
         else:
             self.treeWidget.addTopLevelItem(item)
-            item.setExpanded(True)
+        item.setExpanded(True)
         return item
 
     def addCategories(self, properties, data, parent, device):
         for key, value in properties.items():
             if isinstance(value, dict):
-                # It's a category
+                # category
                 categoryItem = self.createCategory(key, parent)
                 self.addCategories(value, data, categoryItem, device)  # Recursively add sub-categories
             else:
-                # It's a property
+                ignorePropertyCreation = False
+                # property
                 propertyValue = None
                 if data.get(key) is not None:
                     propertyValue = data.get(key)
                 else:
                     propertyValue = value[2]
-                input = None
+                inputWidget = None
                 
                 if value[1] == "disabled":
-                    input = self.createLineEdit(propertyValue, True, key)
+                    inputWidget = self.createLineEdit(propertyValue, True, key)
                 elif value[1] == "text":
-                    input = self.createLineEdit(propertyValue, False, key)
+                    inputWidget = self.createLineEdit(propertyValue, False, key)
                 elif value[1] == "img":
-                    input = self.createResourceEdit(propertyValue, 0, False, key)
+                    inputWidget = self.createResourceEdit(propertyValue, False, False, key)
+                elif value[1] == "imglist":
+                    self.imageCategories = []
+
+                    def imagesChanged(stringIndex, image, index):
+                        imageString = f"({stringIndex}):{image}"
+                        imageList[index] = imageString
+                        completeString = '|'.join(imageList)
+                        self.sendPropertyChangedSignal(key, completeString)
+
+                    def createImageCategories(imageList, imageCount):
+                        for index in range(0, imageCount):
+                            imageCategory = self.createCategory("Image"+str(index), parent)
+                            imageInput = self.createResourceEdit("", False, True, key)
+                            indexInput = self.createSpinBox(None, False, True, key)
+                            self.addProperty("", "Image", imageInput, imageCategory)
+                            self.addProperty("", "Index", indexInput, imageCategory)
+                            self.imageCategories.append([imageCategory, imageInput, indexInput])
+
+                        for index, image in enumerate(imageList):
+                            values = image.split(":")  
+                            try:
+                                self.imageCategories[index][1].setText(values[1])             
+                                self.imageCategories[index][2].setValue(int(values[0].strip("()"))) 
+                                self.imageCategories[index][1].textChanged.connect(lambda text, indexInput=self.imageCategories[index][2], index=index: imagesChanged(indexInput.text(), text, index))
+                                self.imageCategories[index][2].textChanged.connect(lambda text, imageInput=self.imageCategories[index][1], index=index: imagesChanged(text, imageInput.text(), index))
+                            except Exception as e:
+                                return False, traceback.format_exc()
+                        return True, None
+
+                    def deleteAllCategories():
+                        for category in self.imageCategories:
+                            category[0].parent().removeChild(category[0])
+
+                        self.imageCategories = []
+
+                    def updateImageAmount(value):
+                        value = int(value)
+                        deleteAllCategories()
+                        createImageCategories(imageList, value)
+
+                    ignorePropertyCreation = True
+                    imageList = propertyValue.split("|")
+                    imageAmountInput = self.createSpinBox(len(imageList), False, True, key, 0, 100)
+                    imageAmountInput.textChanged.connect(lambda value=imageAmountInput.value(): updateImageAmount(value))
+                    self.addProperty("", "Image Count", imageAmountInput, parent)
+
+                    success, message = createImageCategories(imageList, len(imageList))
+
+                    if not success:
+                        QMessageBox.critical(None, "Properties", f"Error occured loading images: {message}")
+
+                elif value[1] == "numlist":
+                    ignorePropertyCreation = True
+                    imageList = propertyValue.split("|")
+
+                    for index in range(0, 10):
+                        text = ""
+                        if index < len(imageList):
+                            text = imageList[index]
+                        imageInput = self.createResourceEdit(text, False, True)
+                        self.addProperty("", "Number "+str(index), imageInput, parent)
+                    
                 elif value[1] == "int":
-                    input = self.createSpinBox(propertyValue, False, key, int(value[3]), int(value[4]))
+                    inputWidget = self.createSpinBox(propertyValue, False, False, key, int(value[3]), int(value[4]))
                 elif value[1] == "bool":
-                    input = self.createCheckBox(propertyValue, key)
+                    inputWidget = self.createCheckBox(propertyValue, key)
                 elif value[1] == "src":
                     for x in self.sourceData[str(device)]:
                         if propertyValue != '':
                             try:
                                 if int(x["@ID"], 0) == int(propertyValue):
-                                    input = self.createResourceComboBox(self.sourceList[str(device)], x["@Name"], key)
+                                    inputWidget = self.createResourceComboBox(self.sourceList[str(device)], x["@Name"], key)
+                                    break
                             except:
                                 if int(x["@ID"]) == int(propertyValue):
-                                    input = self.createResourceComboBox(self.sourceList[str(device)], x["@Name"], key)
+                                    inputWidget = self.createResourceComboBox(self.sourceList[str(device)], x["@Name"], key)
+                                    break
                         else:
-                            input = self.createResourceComboBox(self.sourceList[str(device)], False, key)
-
-                self.addProperty(key, value[0], input, parent)
+                            inputWidget = self.createResourceComboBox(self.sourceList[str(device)], False, key)
+                            break   
+                    else:
+                        QMessageBox.critical(None, "Properties", f"Data source not found.")
+                if not ignorePropertyCreation:
+                    self.addProperty(key, value[0], inputWidget, parent)
+                inputWidget = None
 
     def loadProperties(self, properties, data, device):
         self.treeWidget.clear()

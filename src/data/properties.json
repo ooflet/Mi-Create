@@ -548,10 +548,166 @@
            "Images": {
                 "@BitmapList": [
                     "Images",
-                    "imglist",
-                    "resourcefont|Blueprint.mfnt"
+                    "numlist",
+                    "default://numbers/0.png|numbers/1.png|numbers/2.png|numbers/3.png|numbers/4.png|numbers/5.png|numbers/6.png|numbers/7.png|numbers/8.png|numbers/9.png"
                 ]
            }
+        }
+    },
+    "42": {
+        "Shape":"CircleProgress",
+        "properties": {
+            "General": {
+                "WidgetType":[
+                    "Widget Type",
+                    "disabled",
+                    "CircleProgress"
+                ],
+                "@Name": [
+                    "Name",
+                    "text",
+                    ""
+                ]
+            },
+            "Position": {
+                "@X": [
+                    "X",
+                    "int",
+                    "",
+                    "-999",
+                    "999"
+                ],
+                "@Y": [
+                    "Y",
+                    "int",
+                    "",
+                    "-999",
+                    "999"
+                ],
+                "@Width": [
+                    "Width",
+                    "disabled",
+                    "48"
+                ],
+                "@Height": [
+                    "Height",
+                    "disabled",
+                    "48"
+                ]
+            },
+            "Appearance": {
+                "@Alpha": [
+                    "Opacity",
+                    "int",
+                    "255",
+                    "0",
+                    "255"
+                ],
+                "@Visible_Src": [
+                    "Visibility Trigger",
+                    "src",
+                    ""
+                ]
+            },
+            "Progress Bar":{
+                "@Rotate_xc": [
+                    "Offset X",
+                    "int",
+                    "0",
+                    "-999",
+                    "999"
+                ],
+                "@Rotate_yc": [
+                    "Offset Y",
+                    "int",
+                    "0",
+                    "-999",
+                    "999"
+                ],
+                "@Radius": [
+                    "Radius",
+                    "int",
+                    "0",
+                    "0",
+                    "999"
+                ],
+                "@Line_Width": [
+                    "Thickness",
+                    "int",
+                    "0",
+                    "0",
+                    "999"
+                ],
+                "@StartAngle": [
+                    "Start Angle",
+                    "int",
+                    "0",
+                    "-360",
+                    "360"
+                ],
+                "@EndAngle": [
+                    "End Angle",
+                    "int",
+                    "0",
+                    "-360",
+                    "360"
+                ]
+                
+            },
+            "Range": {
+                "@Range_Min": [
+                    "Minimum Value",
+                    "int",
+                    "0",
+                    "0",
+                    "100"
+                ],
+                "@Range_Max": [
+                    "Maximum Value",
+                    "int",
+                    "0",
+                    "0",
+                    "100"
+                ],
+                "@Range_MinStep": [
+                    "Minimum Step Value",
+                    "int",
+                    "0",
+                    "0",
+                    "100"
+                ],
+                "@Range_Step": [
+                    "Step Value",
+                    "int",
+                    "0",
+                    "0",
+                    "100"
+                ]
+            },
+            "Data": {
+                "@Range_Val_Src": [
+                    "Data Source",
+                    "src",
+                    ""
+                ],
+                "@Range_Max_Src": [
+                    "Max Value Source",
+                    "src",
+                    ""
+                ]
+            },
+            "Images": {
+                "@Background_ImageName": [
+                    "Background",
+                    "img",
+                    ""
+                ],
+                "@Foreground_ImageName": [
+                    "Progress Bar",
+                    "img",
+                    ""
+                ]
+            }
         }
     }
 }

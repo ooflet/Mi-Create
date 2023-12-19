@@ -1,7 +1,8 @@
 # Canvas for Mi Create
 # tostr 2023
 
-# Responsible for rendering EasyFace XML projects via QGraphicsView library.
+# Responsible for rendering parsed EasyFace XML projects via QGraphicsView library.
+# Parse an xml file to a dictionary, create a Canvas object and call loadObjectsFromData
 
 import os
 import sys
@@ -12,10 +13,10 @@ from typing import Any
 sys.path.append("..")
 from project.projectManager import watchData
 
-from PySide6.QtCore import Signal, QPointF, QModelIndex, QSize, QRectF
+from PySide6.QtCore import Signal, QPointF, QModelIndex, QSize, QRectF, QRect
 from PySide6.QtGui import Qt, QPainter, QPainterPath, QPen, QColor, QStandardItemModel, QPixmap, QIcon, QBrush
 from PySide6.QtWidgets import (QApplication, QGraphicsPathItem, QGraphicsScene, QGraphicsView, QGraphicsItem, QGraphicsRectItem, 
-                               QGraphicsEllipseItem, QMenu, QGraphicsPixmapItem, QMessageBox)
+                               QGraphicsEllipseItem, QMenu, QGraphicsPixmapItem, QMessageBox, QRubberBand)
 
 class ObjectIcon:
     def __init__(self):
@@ -24,7 +25,8 @@ class ObjectIcon:
             "27":":Dark/analog.png",
             "30":":Dark/image.png",
             "31":":Dark/gallery-horizontal.png",
-            "32":":Dark/numbers.png"
+            "32":":Dark/numbers.png",
+            "42":":Dark/progress.png"
         }
 
 class DeviceOutline(QGraphicsPathItem):
@@ -41,7 +43,6 @@ class DeviceOutline(QGraphicsPathItem):
 
 class Scene(QGraphicsScene):
     itemSelectionChanged = Signal()
-    onObjectDeleted = Signal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -50,12 +51,10 @@ class Scene(QGraphicsScene):
         super().selectionChanged()
         self.itemSelectionChanged.emit()
 
-    def objectDeleted(self, name):
-        self.onObjectDeleted.emit(name)
-
 class Canvas(QGraphicsView):
     objectAdded = Signal(QPointF, str)
     objectChanged = Signal(str, str, Any)
+    objectDeleted = Signal(str)
     def __init__(self, device, antialiasingEnabled, deviceOutlineVisible, insertMenu, parent=None):
         super().__init__(parent)
 
@@ -171,6 +170,10 @@ class Canvas(QGraphicsView):
     def onObjectPropertyChanged(self, name, property, value):
         self.objectChanged.emit(name, property, value)
 
+    def onObjectDeleted(self, name, widget):
+        widget.mouseReleaseEvent = None
+        self.objectDeleted.emit(name)
+
     def loadObjectsFromData(self, data, imageFolder, antialiasing, selectObject=""):
         def onItemFinishMove(event, name, x, y, releaseEvent):
             self.onObjectPropertyChanged(name, "@X", x)
@@ -199,9 +202,10 @@ class Canvas(QGraphicsView):
                 analogWidget.setZValue(index)
                 self.scene.addItem(analogWidget)
                 analogWidget.mouseReleaseEvent = lambda event, self=self, name=name, releaseEvent=releaseEvent: onItemFinishMove(event, name, [i.pos().x() for i in self.items() if i.data(0) == name], [i.pos().y() for i in self.items() if i.data(0) == name], releaseEvent)
+                analogWidget.objectDeleted = lambda name, self=self: self.onObjectDeleted(name, analogWidget)
 
             elif i["@Shape"] == "29":
-                dialog = QMessageBox.warning(None, "Confirm", f"The object {i["@Name"]} uses the legacy CircleProgress object, it will be automatically converted to the newer CircleProgressPlus object.")
+                dialog = QMessageBox.warning(None, "Confirm", f"The object {i['@Name']} uses the legacy CircleProgress object, it will be automatically converted to the newer CircleProgressPlus object.")
 
             elif i["@Shape"] == "30":    
                 imageWidget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), QColor(255,255,255,0), i["@Name"], imageFolder)
@@ -217,11 +221,12 @@ class Canvas(QGraphicsView):
                     name = i["@Name"]
                     releaseEvent = imageWidget.returnMouseReleaseEvent()
                     self.scene.addItem(imageWidget)
-                    imageWidget.mouseReleaseEvent = lambda event, self=self, name=name, releaseEvent=releaseEvent: onItemFinishMove(event, name, [i.pos().x() for i in self.items() if i.data(0) == name], [i.pos().y() for i in self.items() if i.data(0) == name], releaseEvent)
                 else:
                     self.scene.addItem(imageWidget)
                     imageWidget.addImage(QPixmap(), 0, 0, 0, antialiasing)
                     imageWidget.representNoImage()
+                imageWidget.objectDeleted = lambda name, self=self: self.onObjectDeleted(name, imageWidget)
+                imageWidget.mouseReleaseEvent = lambda event, self=self, name=name, releaseEvent=releaseEvent: onItemFinishMove(event, name, [i.pos().x() for i in self.items() if i.data(0) == name], [i.pos().y() for i in self.items() if i.data(0) == name], releaseEvent)
 
             elif i["@Shape"] == "31":
                 imageWidget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), QColor(255,255,255,0), i["@Name"], imageFolder)
@@ -240,16 +245,18 @@ class Canvas(QGraphicsView):
                     name = i["@Name"]
                     releaseEvent = imageWidget.returnMouseReleaseEvent()
                     self.scene.addItem(imageWidget)
-                    imageWidget.mouseReleaseEvent = lambda event, self=self, name=name, releaseEvent=releaseEvent: onItemFinishMove(event, name, [i.pos().x() for i in self.items() if i.data(0) == name], [i.pos().y() for i in self.items() if i.data(0) == name], releaseEvent)
                 else:
                     self.scene.addItem(imageWidget)
                     imageWidget.addImage(QPixmap(), 0, 0, 0, antialiasing)
                     imageWidget.representNoImage()
 
+                imageWidget.mouseReleaseEvent = lambda event, self=self, name=name, releaseEvent=releaseEvent: onItemFinishMove(event, name, [i.pos().x() for i in self.items() if i.data(0) == name], [i.pos().y() for i in self.items() if i.data(0) == name], releaseEvent)
+                imageWidget.objectDeleted = lambda name, self=self: self.onObjectDeleted(name, imageWidget)
+
             elif i["@Shape"] == "32":
                 # Split images from the Bitmaplist
                 imageList = i["@BitmapList"].split("|")
-                imageWidget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), QColor(255,255,255,0), i["@Name"], imageFolder)
+                imageWidget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), QColor(255,255,255,100), i["@Name"], imageFolder)
                 imageWidget.setZValue(index)
 
                 imageWidget.loadNumbers(i["@Digits"], i["@Spacing"], imageList, antialiasing)
@@ -257,7 +264,8 @@ class Canvas(QGraphicsView):
                 name = i["@Name"]
                 self.scene.addItem(imageWidget)
                 imageWidget.mouseReleaseEvent = lambda event, self=self, name=name, releaseEvent=releaseEvent: onItemFinishMove(event, name, [i.pos().x() for i in self.items() if i.data(0) == name], [i.pos().y() for i in self.items() if i.data(0) == name], releaseEvent)
-            
+                imageWidget.objectDeleted = lambda name, self=self: self.onObjectDeleted(name, imageWidget)
+
             elif i["@Shape"] == "42":
                 bgImage = QPixmap()
                 bgImage.load(os.path.join(imageFolder, i["@Background_ImageName"]))
@@ -265,25 +273,22 @@ class Canvas(QGraphicsView):
                 fgImage = QPixmap()
                 fgImage.load(os.path.join(imageFolder, i["@Foreground_ImageName"]))
 
-                progressWidget = ProgressWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), QColor(255,255,255,0), i["@Name"], i["@Radius"], i["@Line_Width"], i["@StartAngle"], i["@EndAngle"], bgImage, fgImage, antialiasing)
+                progressWidget = ProgressWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), QColor(255,255,255,0), i["@Name"], i["@Rotate_xc"], i["@Rotate_yc"], i["@Radius"], i["@Line_Width"], i["@StartAngle"], i["@EndAngle"], bgImage, fgImage, antialiasing)
                 name = i["@Name"]
                 releaseEvent = progressWidget.returnMouseReleaseEvent()
                 progressWidget.setZValue(index)
                 self.scene.addItem(progressWidget)
                 progressWidget.mouseReleaseEvent = lambda event, self=self, name=name, releaseEvent=releaseEvent: onItemFinishMove(event, name, [i.pos().x() for i in self.items() if i.data(0) == name], [i.pos().y() for i in self.items() if i.data(0) == name], releaseEvent)
-            
+                progressWidget.objectDeleted = lambda name, self=self: self.onObjectDeleted(name, imageWidget)
+
             else:
                 return False, f"Widget {i['@Shape']} not implemented in canvas, please report as issue."
+            
             return True, "Success"
 
         if data["FaceProject"]["Screen"].get("Widget") != None:
             self.scene.clear()
             self.drawDecorations(self.deviceOutlineVisible)
-            
-            if type(data["FaceProject"]["Screen"]["Widget"]) == tuple:
-                print("tuple")
-            elif type(data["FaceProject"]["Screen"]["Widget"]) == dict:
-                print("dictionary")
 
             widgets = data["FaceProject"]["Screen"]["Widget"]
             if type(widgets) == list:
@@ -336,6 +341,10 @@ class Widget(QGraphicsRectItem):
 
         if action == action1:
             self.scene().removeItem(self)
+            self.objectDeleted(self.data(0))
+
+    def objectDeleted(self, name):
+        pass
 
     def returnMouseReleaseEvent(self):
         return self.mouseReleaseEvent
@@ -796,38 +805,35 @@ class AnalogWidget(Widget):
             self.secHand.setOffset(offset.x(), -int(value))
 
 class CircularArcItem(QGraphicsPathItem):
-    def __init__(self, rect, start_angle, span_angle, parent=None):
+    def __init__(self, rect, start_angle, end_angle, width, thickness, parent=None):
         super().__init__(parent)
         self.rect = QRectF(rect)
-        self.start_angle = start_angle
-        self.span_angle = span_angle
+        self.start_angle = end_angle
+        self.span_angle = abs(end_angle)*2
+        self.thickness = thickness
+        self.width = width/2
 
         self.setPath(self.createArcPath())
 
     def createArcPath(self):
         path = QPainterPath()
 
-        modified_start_angle = (self.start_angle*(-2))+(self.start_angle-90)
+        self.start_angle /= 1.4159
 
-        # Modify span_angle for top origin
-        modified_span_angle = self.span_angle+90
+        path.arcMoveTo(self.rect, self.start_angle - 90)
+        path.arcTo(self.rect, self.start_angle - 90, self.span_angle)
 
-        print(modified_start_angle, modified_span_angle)
-
-        # Adjust the starting point of the arc
-        path.arcMoveTo(self.rect, modified_start_angle - 90)
-        path.arcTo(self.rect, modified_start_angle - 90, modified_span_angle)
-
-        # Create smaller arcs at both ends to round the corners
-        small_radius = min(self.rect.width(), self.rect.height()) * 0.1
+        small_radius = min(self.rect.width(), self.rect.height()) * self.thickness / self.rect.width()
         path.arcTo(self.rect.adjusted(small_radius, small_radius, -small_radius, -small_radius),
-                   modified_start_angle - 90 + modified_span_angle, -modified_span_angle)
+                   self.start_angle - 90 + self.span_angle, -self.span_angle)
 
         return path
     
 class CirclularArcImage(QGraphicsPixmapItem):
-    def __init__(self, pixmap, parent, radius, thickness, start_angle, span_angle, antialiased):
+    def __init__(self, pixmap, parent, posX, posY, radius, thickness, start_angle, span_angle, antialiased):
         super().__init__(pixmap, parent)
+        self.posX = int(posX)
+        self.posY = int(posY)
         self.radius = radius
         self.thickness = thickness
         self.startAngle = start_angle
@@ -840,11 +846,19 @@ class CirclularArcImage(QGraphicsPixmapItem):
     def paint(self, painter, option, widget):
         painter.setRenderHint(QPainter.Antialiasing, self.antialiased)
         brush = QBrush(self.pixmap())
+        pen = QPen(QColor(255,255,255,255))
+        pen.setStyle(Qt.DashLine)
         painter.setBrush(brush)
-        painter.drawPath(CircularArcItem(QRectF(50,50,200,200), self.startAngle, self.endAngle).createArcPath())
+        painter.setPen(pen)
+
+        diameter = 2 * self.radius
+        arc_rect = QRectF(self.posX - self.radius - (self.thickness / 2), self.posY - self.radius - (self.thickness / 2), diameter + self.thickness, diameter + self.thickness)
+        
+        # Draw the circular arc within the calculated bounding rectangle
+        painter.drawPath(CircularArcItem(arc_rect, self.startAngle, self.endAngle, self.pixmap().width(), self.thickness).createArcPath())
 
 class ProgressWidget(Widget):
-    def __init__(self, posX, posY, sizeX, sizeY, color, name, radius, thickness, startAngle, endAngle, bgImage, pathImage, isAntialiased):
+    def __init__(self, posX, posY, sizeX, sizeY, color, name, offsetX, offsetY, radius, thickness, startAngle, endAngle, bgImage, pathImage, isAntialiased):
         super().__init__(posX, posY, sizeX, sizeY, color, name)
         self.setPos(posX, posY)
         self.setRect(0, 0, bgImage.width(), bgImage.height())
@@ -856,10 +870,8 @@ class ProgressWidget(Widget):
 
         self.backgroundImage = QGraphicsPixmapItem(bgImage, self)
 
-        self.pathImage = CirclularArcImage(pathImage, self, radius, thickness, startAngle, endAngle, isAntialiased)
+        self.pathImage = CirclularArcImage(pathImage, self, offsetX, offsetY, radius, thickness, startAngle, endAngle, isAntialiased)
 
         if isAntialiased:
             self.backgroundImage.setTransformationMode(Qt.SmoothTransformation)
             self.pathImage.setTransformationMode(Qt.SmoothTransformation)
-
-        

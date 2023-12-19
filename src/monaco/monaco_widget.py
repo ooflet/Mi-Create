@@ -1,4 +1,4 @@
-# Monaco Editor for Mi Create
+# Monaco Editor
 
 from PySide6.QtCore import Qt, QObject, Signal, Slot, Property, QUrl
 from PySide6.QtWidgets import QFrame
