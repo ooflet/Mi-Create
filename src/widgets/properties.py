@@ -6,6 +6,7 @@
 import os
 import shutil
 import traceback
+import logging
 from typing import Any
 from PySide6.QtWidgets import (QStyledItemDelegate, QWidget, QFileDialog, QTreeWidget, QFrame, QHeaderView, 
                                QDialog, QDialogButtonBox, QVBoxLayout, QListWidgetItem, QTreeWidgetItem, QLineEdit, 
@@ -112,6 +113,7 @@ class PropertiesWidget(QWidget):
         for filename in os.listdir(self.imageFolder):
             file = os.path.join(self.imageFolder, filename)
             if os.path.isfile(file):
+                logging.debug("File found in image dir "+os.path.basename(file))
                 item = QListWidgetItem(QIcon(file), os.path.basename(file))
                 item.setSizeHint(QSize(item.sizeHint().width(), 64))
                 self.resourceDialogUI.imageSelect.addItem(item)
@@ -189,14 +191,18 @@ class PropertiesWidget(QWidget):
         spinBox.editingFinished.connect(onDeselect)
         return spinBox
     
-    def createComboBox(self, items, selected, srcProperty):
+    def createAlignmentComboBox(self, selected, srcProperty):
+        items = ["Left", "Center", "Right"]
+
         def onChanged():
             self.sendPropertyChangedSignal(srcProperty, comboBox.currentText())
 
         comboBox = QComboBox(self)
+        comboBox.setEditable(True)
+        comboBox.setStyleSheet("background-color: rgba(0, 0, 0, 0); ")
         comboBox.addItems(items)
         if selected:
-            comboBox.setCurrentIndex(items.index(selected))
+            comboBox.setCurrentIndex(int(selected))
         comboBox.currentTextChanged.connect(onChanged)
         return comboBox
     
@@ -212,7 +218,6 @@ class PropertiesWidget(QWidget):
             comboBox.setCurrentIndex(items.index(selected))
         comboBox.currentTextChanged.connect(onChanged)
         return comboBox
-
 
     def createCheckBox(self, checked, srcProperty):
         def onChecked():
@@ -329,6 +334,8 @@ class PropertiesWidget(QWidget):
                     inputWidget = self.createSpinBox(propertyValue, False, False, key, int(value[3]), int(value[4]))
                 elif value[1] == "bool":
                     inputWidget = self.createCheckBox(propertyValue, key)
+                elif value[1] == "align":
+                    inputWidget = self.createAlignmentComboBox(propertyValue, key)
                 elif value[1] == "src":
                     for x in self.sourceData[str(device)]:
                         if propertyValue != '':

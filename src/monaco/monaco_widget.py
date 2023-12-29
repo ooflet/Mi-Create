@@ -1,6 +1,8 @@
 # Monaco Editor
 
-from PySide6.QtCore import Qt, QObject, Signal, Slot, Property, QUrl
+import os
+
+from PySide6.QtCore import Qt, QObject, Signal, Slot, Property, QUrl, QLoggingCategory
 from PySide6.QtWidgets import QFrame
 from PySide6.QtWebEngineCore import *
 from PySide6.QtWebEngineWidgets import * 
@@ -8,7 +10,6 @@ from PySide6.QtWebChannel import *
 
 from pathlib import Path
 import json
-
 
 class BaseBridge(QObject):
     initialized = Signal()
@@ -78,7 +79,6 @@ class EditorBridge(BaseBridge):
     )
     theme = Property(str, fget=getTheme, fset=setTheme, notify=themeChanged)
 
-
 index = Path(__file__).parent / "index.html"
 
 with open(index) as f:
@@ -102,6 +102,8 @@ class MonacoWidget(QWebEngineView):
 
         html = raw_html.replace('width:400px;', f'width:{self.size().width()}px;')
         html = raw_html.replace('height:400px;', f'height:{self.size().height()}px;')
+
+        #self.load("https://ooflet.github.io/docs")
 
         page = MonacoPage(parent=self)
         self.setPage(page)

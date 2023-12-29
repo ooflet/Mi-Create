@@ -186,30 +186,6 @@
     <addaction name="separator"/>
     <addaction name="menuAbout"/>
    </widget>
-   <widget class="QMenu" name="menuTest">
-    <property name="title">
-     <string>Test</string>
-    </property>
-    <widget class="QMenu" name="menuDialog">
-     <property name="title">
-      <string>Dialog...</string>
-     </property>
-     <addaction name="actionshowAboutWindow"/>
-     <addaction name="actionshowDefaultInfoDialog"/>
-     <addaction name="actionshowToast"/>
-     <addaction name="actionshowColorDialog"/>
-     <addaction name="actionshowSelectFont"/>
-    </widget>
-    <widget class="QMenu" name="menuRun">
-     <property name="title">
-      <string>Run...</string>
-     </property>
-     <addaction name="actionInstaller"/>
-     <addaction name="actionNewTab"/>
-    </widget>
-    <addaction name="menuDialog"/>
-    <addaction name="menuRun"/>
-   </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
      <string>View</string>
@@ -233,6 +209,10 @@
     </property>
     <addaction name="actionUndo"/>
     <addaction name="actionRedo"/>
+    <addaction name="separator"/>
+    <addaction name="actionCut"/>
+    <addaction name="actionCopy"/>
+    <addaction name="actionPaste"/>
     <addaction name="separator"/>
     <addaction name="actionProject_XML_File"/>
     <addaction name="separator"/>
@@ -267,7 +247,6 @@
    <addaction name="menuView"/>
    <addaction name="menuTools"/>
    <addaction name="menuHelp"/>
-   <addaction name="menuTest"/>
   </widget>
   <widget class="QDockWidget" name="explorerWidget">
    <property name="minimumSize">
@@ -470,16 +449,6 @@
     <string>Ctrl+K</string>
    </property>
   </action>
-  <action name="actionshowAboutWindow">
-   <property name="text">
-    <string>showAboutWindow</string>
-   </property>
-  </action>
-  <action name="actionshowDefaultInfoDialog">
-   <property name="text">
-    <string>showDefaultCriticalDialog</string>
-   </property>
-  </action>
   <action name="actionExplorer">
    <property name="checkable">
     <bool>true</bool>
@@ -505,11 +474,6 @@
   <action name="actionExit">
    <property name="text">
     <string>Exit</string>
-   </property>
-  </action>
-  <action name="actionshowToast">
-   <property name="text">
-    <string>showToast</string>
    </property>
   </action>
   <action name="actionEdit">
@@ -647,6 +611,9 @@
    <property name="text">
     <string>Cut</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+X</string>
+   </property>
   </action>
   <action name="actionCopy">
    <property name="icon">
@@ -655,6 +622,9 @@
    </property>
    <property name="text">
     <string>Copy</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
    </property>
   </action>
   <action name="actionPaste">
@@ -665,10 +635,8 @@
    <property name="text">
     <string>Paste</string>
    </property>
-  </action>
-  <action name="actionNewTab">
-   <property name="text">
-    <string>NewTab</string>
+   <property name="shortcut">
+    <string>Ctrl+V</string>
    </property>
   </action>
   <action name="actionProject_XML_File">
@@ -677,7 +645,7 @@
      <normaloff>:/Dark/file-code-2.png</normaloff>:/Dark/file-code-2.png</iconset>
    </property>
    <property name="text">
-    <string>Edit Project XML</string>
+    <string>Project Source Code</string>
    </property>
   </action>
   <action name="actionResize_Images">

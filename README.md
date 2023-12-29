@@ -27,7 +27,7 @@ Compatible with
 Download the latest installer from the [releases](https://github.com/ooflet/Mi-Create/releases) tab. You may also manually build the source code.
 
 ### Licensing:
-Mi Face Studio is licensed under the GPL-3 licence. [View what you can and can't do](https://gist.github.com/kn9ts/cbe95340d29fc1aaeaa5dd5c059d2e60)   
+Mi Create is licensed under the GPL-3 licence. [View what you can and can't do](https://gist.github.com/kn9ts/cbe95340d29fc1aaeaa5dd5c059d2e60)   
 Please note that the compiler & decompiler is made by a third party and is **NOT** open source.
 
 ### Roadmap: https://trello.com/b/u9NEkmzC/mi-create-roadmap
