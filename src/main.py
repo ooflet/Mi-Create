@@ -71,8 +71,6 @@ class MainWindow(QMainWindow):
 
         logging.debug("-- Starting Mi Create --")
 
-        history = historySystem()
-
         self.fileChanged = False
         self.clipboard = None
 
@@ -105,6 +103,7 @@ class MainWindow(QMainWindow):
 
         # Setup History System
         self.historySystem = historySystem()
+        self.ignoreHistoryInvoke = False
  
         # Setup Project 
         self.project = None 
@@ -144,7 +143,7 @@ class MainWindow(QMainWindow):
 
         if self.fileChanged == True: 
             # Ask user if they want to exit 
-            quit_msg = "You have unsaved project(s) open. Save and quit?" 
+            quit_msg = _("You have unsaved project(s) open. Save and quit?")
             reply = QMessageBox.warning(self, 'Mi Create', quit_msg, QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
 
             if reply == QMessageBox.Yes:
@@ -180,15 +179,24 @@ class MainWindow(QMainWindow):
                 if widget["@Name"] == entry[0]:
                     widget[entry[1]] == entry[2]
                     break
+            currentProject["canvas"].selectObject(widget["@Name"])
         elif type(currentProject["data"]["FaceProject"]["Screen"]["Widget"]) == dict:
             print("dict")
             currentProject["data"]["FaceProject"]["Screen"]["Widget"][entry[1]] == entry[2]
-        currentProject["canvas"].selectObject(widget["@Name"])
+            currentProject["canvas"].selectObject(currentProject["data"]["FaceProject"]["Screen"]["Widget"]["@Name"])
+
+        self.ignoreHistoryInvoke = True
 
         if propertyField.metaObject().className() == "QSpinBox":
-            propertyField.setValue(int(entry[2]))
+            if invokeType == "undo":
+                propertyField.setValue(int(entry[3]))
+            elif invokeType == "redo":
+                propertyField.setValue(int(entry[2]))
         else:
-            propertyField.setText(entry[2])
+            if invokeType == "undo":
+                propertyField.setText(entry[3])
+            elif invokeType == "redo":
+                propertyField.setText(entry[2])
 
     def getCurrentProject(self):
         currentIndex = self.ui.workspace.currentIndex()
@@ -228,10 +236,10 @@ class MainWindow(QMainWindow):
         version = currentVersion
         if version > currentVersion:
             if version[-1] == 'u':
-                self.showDialogue('info', f'An urgent update {version} was released! The app will now update.')
+                self.showDialogue('info', _('An urgent update {version} was released! The app will now update.').format(version=version))
                 self.launchUpdater()
             else:
-                reply = QMessageBox.question(self, f'A new update has been found (v{version}). Would you like to update now?', QMessageBox.Yes, QMessageBox.No)
+                reply = QMessageBox.question(self, _('A new update has been found (v{version}). Would you like to update now?').format(version=version), QMessageBox.Yes, QMessageBox.No)
 
                 if reply == QMessageBox.Yes:
                     self.launchUpdater()
@@ -361,7 +369,7 @@ class MainWindow(QMainWindow):
                 object.setData(0, 101, x["@Name"])
                 self.explorer[x["@Name"]] = object
             else:
-                self.showDialogue("error", f"Widget {x['@Shape']} not implemented in ObjectIcon(), please report as issue.")
+                self.showDialogue("error", _("Widget {shape} not implemented in ObjectIcon(), please report as issue.").format(shape=x["@Shape"]))
 
         self.explorer = {}
         self.ui.Explorer.clear()
@@ -394,18 +402,21 @@ class MainWindow(QMainWindow):
             currentItem = None
             currentProject["hasFileChanged"] = True
             self.fileChanged = True
-            logging.debug(f"Set property {args[0]}, {args[1]} for widget {currentSelected.data(0,101)}" )
+            logging.debug(f"Set property {args[0]}, {args[1]} for widget {currentSelected.data(0,101)}")
             if type(currentProject["data"]["FaceProject"]["Screen"]["Widget"]) == list:
                 for i in currentProject["data"]["FaceProject"]["Screen"]["Widget"]:
                     if i["@Name"] == currentSelected.data(0,101):
                         currentItem = i
                         break
                 else:
-                    self.showDialogue("error", "Failed to obtain currentItem", "No object found in widget list that has the name of currently selected graphics item: "+str(currentProject["data"]["FaceProject"]["Screen"]["Widget"]))
+                    self.showDialogue("error", _("Failed to obtain currentItem"), _("No object found in widget list that has the name of currently selected graphics item: ")+str(currentProject["data"]["FaceProject"]["Screen"]["Widget"]))
             else:
                 currentItem = currentProject["data"]["FaceProject"]["Screen"]["Widget"]
 
-            self.historySystem.addToHistory(currentSelected.data(0,101), args[0], args[1])
+            if self.ignoreHistoryInvoke:
+                self.ignoreHistoryInvoke = False
+            else:
+                self.historySystem.addToHistory(currentSelected.data(0,101), args[0], args[1], currentItem[args[0]])
             
             if args[0] == "@Value_Src" or args[0] == "@Index_Src" or args[0] == "@Visible_Src":
                 for x in self.watchData.modelSourceData[str(currentProject["data"]["FaceProject"]["@DeviceType"])]:
@@ -437,7 +448,7 @@ class MainWindow(QMainWindow):
                         self.propertiesWidget.loadProperties(self.propertyJson[item.data(0, 100)], currentProject["data"]["FaceProject"]["Screen"]["Widget"][index], currentProject["data"]["FaceProject"]["@DeviceType"])
                         break
                 else:
-                    self.showDialogue("error", "Error occured during property update: Object not found!", f'Unable to find {object["@Name"]}.')
+                    self.showDialogue("error", _("Error occured during property update: Object not found!"), _('Unable to find')+{object["@Name"]})
             else:
                 if currentProject["data"]["FaceProject"]["Screen"]["Widget"]["@Name"] == item.data(0,101):
                     self.propertiesWidget.loadProperties(self.propertyJson[item.data(0, 100)], currentProject["data"]["FaceProject"]["Screen"]["Widget"], currentProject["data"]["FaceProject"]["@DeviceType"])
@@ -468,7 +479,7 @@ class MainWindow(QMainWindow):
                 self.newProjectUi.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
 
         def openFolderDialog():
-            location = QFileDialog.getExistingDirectory(self, 'Select Folder...', "")
+            location = QFileDialog.getExistingDirectory(self, _('Select Folder...'), "")
             self.newProjectUi.folderLocation.setText(str(location))
 
         check()
@@ -634,7 +645,7 @@ class MainWindow(QMainWindow):
                 self.ui.workspace.setCurrentIndex(index)
                 project.setFrameShape(QFrame.NoFrame)
             else:
-                self.showDialogue("error", f"Cannot render project! {success[1]}", success[1])
+                self.showDialogue("error", "Cannot render project!" + success[1], success[1])
         else:
            self.ui.workspace.setCurrentIndex(self.ui.workspace.indexOf(self.projects[name][0]))
 
@@ -693,7 +704,7 @@ class MainWindow(QMainWindow):
         self.preferences.buttonBox.accepted.connect(self.saveAndLoadPreferences)
 
     def clearWindowState(self):
-        reply = QMessageBox.question(self, 'Confirm Clear', "This will clear the positions of dock widgets/windows and restart the app. Confirm?", QMessageBox.Yes, QMessageBox.No)
+        reply = QMessageBox.question(self, 'Confirm Clear', _("Are you sure you want to reset all dock widget positions?"), QMessageBox.Yes, QMessageBox.No)
 
         if reply == QMessageBox.Yes:
             settings = QSettings("Mi Create", "Workspace")
@@ -734,7 +745,7 @@ class MainWindow(QMainWindow):
             if file:
                 accepted = True
                 if file[0] != "C" and file[0] != "/":
-                    reply = QMessageBox.question(self, 'Confirm Path', "Your project will be created in the install directory of this program. Confirm?", QMessageBox.Yes, QMessageBox.No)
+                    reply = QMessageBox.question(self, 'Confirm Path', _("Are you sure you want to create your project in the directory of this program?"), QMessageBox.Yes, QMessageBox.No)
                     if reply == QMessageBox.Yes:
                         accepted = True
                     else:
@@ -748,15 +759,15 @@ class MainWindow(QMainWindow):
                             try:
                                 self.createNewWorkspace(newProject[1], True, [project[1], project[2]], project[3])    
                             except Exception as e:
-                                self.showDialogue("error", f"Failed to createNewWorkspace: {e}.", traceback.format_exc())
+                                self.showDialogue("error", _("Failed to createNewWorkspace: ") + e, traceback.format_exc())
                         else:
-                            self.showDialogue("error", f'Cannot open project: {project[1]}.', project[2])
+                            self.showDialogue("error", _('Cannot open project: ')+{project[1]}, project[2])
                     else:
-                        self.showDialogue("error", f"Failed to create a new project: {newProject[1]}.", newProject[2])
+                        self.showDialogue("error", _("Failed to create a new project: ") + newProject[1], newProject[2])
 
     def openProject(self): 
         # Get where to open the project from
-        file = QFileDialog.getOpenFileName(self, 'Open Project...', "%userprofile%\\", "Watchface Project (*.fprj)")
+        file = QFileDialog.getOpenFileName(self, _('Open Project...'), "%userprofile%\\", "Watchface Project (*.fprj)")
         file_extension = QFileInfo(file[0]).suffix()
 
         # Check if file was selected
@@ -767,9 +778,9 @@ class MainWindow(QMainWindow):
                     try:
                         self.createNewWorkspace(file[0], True, [project[1], project[2]], project[3])    
                     except Exception as e:
-                        self.showDialogue("error", f"Failed to open project: {e}.", traceback.format_exc())
+                        self.showDialogue("error", _("Failed to open project: ") + e, traceback.format_exc())
                 else:
-                    self.showDialogue("error", f'Cannot open project: {project[1]}.', project[2])
+                    self.showDialogue("error", _('Cannot open project: ') + project[1], project[2])
 
     def saveProjects(self, projectsToSave):
         if projectsToSave == "all":
@@ -784,8 +795,8 @@ class MainWindow(QMainWindow):
                         self.fileChanged = False
                         project["hasFileChanged"] = False
                     except Exception as e:
-                        self.statusBar().showMessage("Failed to save: "+str(e), 10000)
-                        self.showDialogue("error", "Failed to save project: "+str(e))
+                        self.statusBar().showMessage(_("Failed to save: ")+str(e), 10000)
+                        self.showDialogue("error", _("Failed to save project: ")+str(e))
         elif projectsToSave == "current":
             currentIndex = self.ui.workspace.currentIndex()
             currentName = self.ui.workspace.tabText(currentIndex)
@@ -798,15 +809,15 @@ class MainWindow(QMainWindow):
             try:
                 with open(currentName, "w", encoding="utf8") as file:
                     file.write(pretty_xml)
-                self.statusBar().showMessage("Project saved at "+currentName, 2000)
+                self.statusBar().showMessage(_("Project saved at ")+currentName, 2000)
             except Exception as e:
-                self.statusBar().showMessage("Failed to save: "+str(e), 10000)
-                self.showDialogue("error", "Failed to save project: "+str(e))
+                self.statusBar().showMessage(_("Failed to save: ")+str(e), 10000)
+                self.showDialogue("error", _("Failed to save project: ")+str(e))
     
     def compileProject(self):
         if self.projects.get(self.ui.workspace.tabText(self.ui.workspace.currentIndex())):
             if self.ui.workspace.tabText(self.ui.workspace.currentIndex()) != "Welcome" and self.ui.workspace.tabText(self.ui.workspace.currentIndex()) != "Project XML":
-                reply = QMessageBox.question(self, 'Mi Create', "Save project before building?", QMessageBox.Yes, QMessageBox.No)
+                reply = QMessageBox.question(self, 'Mi Create', _("Save project before building?"), QMessageBox.Yes, QMessageBox.No)
                 if reply == QMessageBox.Yes:
                     self.saveProjects("current")
                 QApplication.processEvents()
@@ -895,7 +906,7 @@ if __name__ == "__main__":
         main_window = MainWindow()
         main_window.ui.workspace.removeTab(1)
     except Exception as e:
-        error_message = f"Critical error during initialization: {traceback.format_exc()}"
+        error_message = "Critical error during initialization: "+traceback.format_exc()
         logging.error(error_message)
         QMessageBox.critical(None, 'Error', error_message, QMessageBox.Ok)
         sys.exit(1)

@@ -113,7 +113,7 @@ class PropertiesWidget(QWidget):
         for filename in os.listdir(self.imageFolder):
             file = os.path.join(self.imageFolder, filename)
             if os.path.isfile(file):
-                logging.debug("File found in image dir "+os.path.basename(file))
+                logging.debug("Creating file entry for "+os.path.basename(file))
                 item = QListWidgetItem(QIcon(file), os.path.basename(file))
                 item.setSizeHint(QSize(item.sizeHint().width(), 64))
                 self.resourceDialogUI.imageSelect.addItem(item)

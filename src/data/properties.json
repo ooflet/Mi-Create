@@ -218,14 +218,14 @@
             },
             "Progress Bar":{
                 "@Rotate_xc": [
-                    "Offset X",
+                    "X",
                     "int",
                     "0",
                     "-999",
                     "999"
                 ],
                 "@Rotate_yc": [
-                    "Offset Y",
+                    "Y",
                     "int",
                     "0",
                     "-999",
@@ -611,14 +611,14 @@
             },
             "Progress Bar":{
                 "@Rotate_xc": [
-                    "Offset X",
+                    "X",
                     "int",
                     "0",
                     "-999",
                     "999"
                 ],
                 "@Rotate_yc": [
-                    "Offset Y",
+                    "Y",
                     "int",
                     "0",
                     "-999",

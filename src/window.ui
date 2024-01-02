@@ -563,7 +563,7 @@
     <string>Redo</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Y, Ctrl+Shift+Z</string>
+    <string>Ctrl+Y</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>

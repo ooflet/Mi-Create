@@ -1,0 +1,86 @@
+# Translation for Mi Create.
+# FIRST AUTHOR <ooflet@proton.me>, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.0\n"
+"POT-Creation-Date: 2024-01-02 11:05+1100\n"
+"PO-Revision-Date: 2024-01-02 11:15+1100\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+"X-Generator: Poedit 3.4\n"
+
+msgid "You have unsaved project(s) open. Save and quit?"
+msgstr "You have unsaved project(s) open. Save and quit?"
+
+msgid "An urgent update {version} was released! The app will now update."
+msgstr "An urgent update {version} was released! The app will now update."
+
+msgid "A new update has been found (v{version}). Would you like to update now?"
+msgstr ""
+"A new update has been found (v{version}). Would you like to update now?"
+
+msgid "Widget {shape} not implemented in ObjectIcon(), please report as issue."
+msgstr ""
+"Widget {shape} not implemented in ObjectIcon(), please report as issue."
+
+msgid "Failed to obtain currentItem"
+msgstr "Failed to obtain currentItem"
+
+msgid ""
+"No object found in widget list that has the name of currently selected "
+"graphics item: "
+msgstr ""
+"No object found in widget list that has the name of currently selected "
+"graphics item: "
+
+msgid "Error occured during property update: Object not found!"
+msgstr "Error occurred during property update: Object not found!"
+
+msgid "Unable to find"
+msgstr "Unable to find"
+
+msgid "Select Folder..."
+msgstr "Select Folder..."
+
+msgid "Are you sure you want to reset all dock widget positions?"
+msgstr "Are you sure you want to reset all dock widget positions?"
+
+msgid ""
+"Are you sure you want to create your project in the directory of this "
+"program?"
+msgstr ""
+"Are you sure you want to create your project in the directory of this "
+"program?"
+
+msgid "Failed to createNewWorkspace: "
+msgstr "Failed to createNewWorkspace: "
+
+msgid "Cannot open project: "
+msgstr "Cannot open project: "
+
+msgid "Failed to create a new project: "
+msgstr "Failed to create a new project: "
+
+msgid "Open Project..."
+msgstr "Open Project..."
+
+msgid "Failed to open project: "
+msgstr "Failed to open project: "
+
+msgid "Failed to save: "
+msgstr "Failed to save: "
+
+msgid "Failed to save project: "
+msgstr "Failed to save project: "
+
+msgid "Project saved at "
+msgstr "Project saved at "
+
+msgid "Save project before building?"
+msgstr "Save project before building?"

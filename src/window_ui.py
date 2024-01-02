@@ -414,7 +414,7 @@ class Ui_MainWindow(object):
 #endif // QT_CONFIG(shortcut)
         self.actionRedo.setText(QCoreApplication.translate("MainWindow", u"Redo", None))
 #if QT_CONFIG(shortcut)
-        self.actionRedo.setShortcut(QCoreApplication.translate("MainWindow", u"Ctrl+Y, Ctrl+Shift+Z", None))
+        self.actionRedo.setShortcut(QCoreApplication.translate("MainWindow", u"Ctrl+Y", None))
 #endif // QT_CONFIG(shortcut)
         self.actionInstaller.setText(QCoreApplication.translate("MainWindow", u"Installer", None))
         self.actionAbout_Qt.setText(QCoreApplication.translate("MainWindow", u"About Qt", None))
