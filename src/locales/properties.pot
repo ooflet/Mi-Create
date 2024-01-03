@@ -1,4 +1,4 @@
-# Translation for Mi Create.
+# Property Translation for Mi Create.
 # FIRST AUTHOR <ooflet@proton.me>, 2024.
 #
 msgid ""
@@ -12,6 +12,7 @@ msgstr ""
 "Content-Type: text/plain; charset=cp1252\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
+
 
 msgid "General"
 msgstr ""

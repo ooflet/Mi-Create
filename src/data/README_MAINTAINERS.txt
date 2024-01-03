@@ -1,4 +1,22 @@
 ------------------------------------------------------------------------------------------------
+ABOUT TRANSLATIONS
+------------------------------------------------------------------------------------------------
+
+Translations are done to the 3 required translation files located at the locales folder:
+
+- main.pot
+- properties.pot
+- window.pot
+
+main.pot contains translation data for main.py. This mostly includes dialogs.
+properties.pot contains translation data for properties and property categories.
+window.pot contains translation data for "auto-compiled" windows/dialogs.
+
+Translation can be done by using a program like Poedit
+
+DeviceInfo.db is currently not possible to be translated at the current moment
+
+------------------------------------------------------------------------------------------------
 ABOUT DeviceInfo.db
 ------------------------------------------------------------------------------------------------
 
@@ -43,7 +61,7 @@ Each property contains an array with at most 5 values:
          "Property Name",
          "Property Identifier",
          "Fallback Value",
-         "Minimum Value",
+         "Minimum Value"/["Combobox", "List", "Array"],
          "Maximum Value",
       ] 
    }
@@ -54,19 +72,35 @@ Each property contains an array with at most 5 values:
 - "@SourcePropertyName" is the property tag, which represents the property in XML.
 - "Property Name" is the string which gets shown in the properties list.
 - "Property Identifier" identifies which property type it is and what input field to display.
-  The list of identifiers contains:
-  - disabled
+  
+  The list of identifiers are:
+  - disabled (disabled text input)
   - text
   - img
-  - imglist (for displaying imagelist items)
-  - numlist (for displaying Digital Number items)
   - int 
   - bool
+  - combobox
   - align (alignment values)
   - src (data source dropdown)
+  - imglist (for displaying imagelist items)
+  - numlist (for displaying Digital Number items)
+
   imglist is to be used at the end of a property list, because it clears itself and appends
   all image entries to the end of the properties list when refreshing (e.g when image number 
   increases) 
+
 - "Fallback Value" is the value that is set when no value is given in the project file. This 
   value is optional and you can leave it empty.
 - "Minimum Value" & "Maximum Value" both identify min and max range for int properties.
+- ["Combobox", "List", "Array"] contins an array of a combobox items.
+
+Both Property Category and Property Name get automatically translated to properties.mo
+
+------------------------------------------------------------------------------------------------
+ABOUT settings.json
+------------------------------------------------------------------------------------------------
+
+settings.json contains configuration values for the program. It uses the same system as
+properties.json.
+
+The actual settings are stored in Registry Computer\HKEY_CURRENT_USER\Software\Mi Create\Preferences.

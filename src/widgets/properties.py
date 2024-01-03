@@ -42,7 +42,7 @@ class GridDelegate(QStyledItemDelegate):
 
 class PropertiesWidget(QWidget):
     propertyChanged = Signal(Any, Any)
-    def __init__(self, window, resourceWidget, srcList, srcData, screen):
+    def __init__(self, window, resourceWidget=None, srcList=None, srcData=None, screen=None):
         super().__init__()
 
         def closeResourceDialog():
@@ -94,14 +94,15 @@ class PropertiesWidget(QWidget):
         self.treeWidget.setItemDelegate(GridDelegate())
         self.treeWidget.setStyleSheet("QTreeWidget::item{height:24px;}")
 
-        self.resourceDialog = QDialog(window)
-        self.resourceDialog.setWindowFlags(Qt.FramelessWindowHint | Qt.Popup)
-        self.resourceDialogUI = resourceWidget()
-        self.resourceDialogUI.setupUi(self.resourceDialog)
-        self.resourceDialogUI.searchBar.textChanged.connect(search)
-        self.resourceDialogUI.addImage.clicked.connect(addResource)
-        apply = self.resourceDialogUI.buttonBox.button(QDialogButtonBox.Apply)
-        apply.clicked.connect(closeResourceDialog)
+        if resourceWidget != None:
+            self.resourceDialog = QDialog(window)
+            self.resourceDialog.setWindowFlags(Qt.FramelessWindowHint | Qt.Popup)
+            self.resourceDialogUI = resourceWidget()
+            self.resourceDialogUI.setupUi(self.resourceDialog)
+            self.resourceDialogUI.searchBar.textChanged.connect(search)
+            self.resourceDialogUI.addImage.clicked.connect(addResource)
+            apply = self.resourceDialogUI.buttonBox.button(QDialogButtonBox.Apply)
+            apply.clicked.connect(closeResourceDialog)
 
         layout = QVBoxLayout(self)
         layout.addWidget(self.treeWidget)
@@ -191,6 +192,20 @@ class PropertiesWidget(QWidget):
         spinBox.editingFinished.connect(onDeselect)
         return spinBox
     
+    def createComboBox(self, items, selected, srcProperty, editable):
+        def onChanged():
+            self.sendPropertyChangedSignal(srcProperty, comboBox.currentText())
+
+        comboBox = QComboBox(self)
+        comboBox.addItems(items)
+        if editable:
+            comboBox.setEditable(True)
+            comboBox.setStyleSheet("background-color: rgba(0, 0, 0, 0); ")
+        if selected:
+            comboBox.setCurrentIndex(items.index(selected))
+        comboBox.currentTextChanged.connect(onChanged)
+        return comboBox
+    
     def createAlignmentComboBox(self, selected, srcProperty):
         items = ["Left", "Center", "Right"]
 
@@ -198,24 +213,9 @@ class PropertiesWidget(QWidget):
             self.sendPropertyChangedSignal(srcProperty, comboBox.currentText())
 
         comboBox = QComboBox(self)
-        comboBox.setEditable(True)
-        comboBox.setStyleSheet("background-color: rgba(0, 0, 0, 0); ")
         comboBox.addItems(items)
         if selected:
             comboBox.setCurrentIndex(int(selected))
-        comboBox.currentTextChanged.connect(onChanged)
-        return comboBox
-    
-    def createResourceComboBox(self, items, selected, srcProperty):
-        def onChanged():
-            self.sendPropertyChangedSignal(srcProperty, comboBox.currentText())
-
-        comboBox = QComboBox(self)
-        comboBox.setEditable(True)
-        comboBox.setStyleSheet("background-color: rgba(0, 0, 0, 0); ")
-        comboBox.addItems(items)
-        if selected:
-            comboBox.setCurrentIndex(items.index(selected))
         comboBox.currentTextChanged.connect(onChanged)
         return comboBox
 
@@ -256,7 +256,7 @@ class PropertiesWidget(QWidget):
                 ignorePropertyCreation = False
                 # property
                 propertyValue = None
-                if data.get(key) is not None:
+                if data != None and data.get(key) != None:
                     propertyValue = data.get(key)
                 else:
                     propertyValue = value[2]
@@ -268,6 +268,8 @@ class PropertiesWidget(QWidget):
                     inputWidget = self.createLineEdit(propertyValue, False, key)
                 elif value[1] == "img":
                     inputWidget = self.createResourceEdit(propertyValue, False, False, key)
+                elif value[1] == "combobox":
+                    inputWidget = self.createComboBox(value[3], propertyValue, key, False)
                 elif value[1] == "imglist":
                     self.imageCategories = []
 
@@ -341,14 +343,14 @@ class PropertiesWidget(QWidget):
                         if propertyValue != '':
                             try:
                                 if int(x["@ID"], 0) == int(propertyValue):
-                                    inputWidget = self.createResourceComboBox(self.sourceList[str(device)], x["@Name"], key)
+                                    inputWidget = self.createComboBox(self.sourceList[str(device)], x["@Name"], key, True)
                                     break
                             except:
                                 if int(x["@ID"]) == int(propertyValue):
-                                    inputWidget = self.createResourceComboBox(self.sourceList[str(device)], x["@Name"], key)
+                                    inputWidget = self.createComboBox(self.sourceList[str(device)], x["@Name"], key, True)
                                     break
                         else:
-                            inputWidget = self.createResourceComboBox(self.sourceList[str(device)], False, key)
+                            inputWidget = self.createComboBox(self.sourceList[str(device)], False, key, True)
                             break   
                     else:
                         QMessageBox.critical(None, "Properties", f"Data source not found.")
@@ -356,10 +358,13 @@ class PropertiesWidget(QWidget):
                     self.addProperty(key, value[0], inputWidget, parent)
                 inputWidget = None
 
-    def loadProperties(self, properties, data, device):
+    def loadProperties(self, properties, data=None, device=None):
         self.treeWidget.clear()
         self.propertyItems = {}
-        self.addCategories(properties["properties"], data, None, device)
+        if data == None:
+            self.addCategories(properties, data, None, device)
+        else:
+            self.addCategories(properties["properties"], data, None, device)
 
     def clearProperties(self):
         self.treeWidget.clear()

@@ -8,7 +8,7 @@
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
+from PySide6.QtCore import (QDate, QDateTime, QLocale,
     QMetaObject, QObject, QPoint, QRect,
     QSize, QTime, QUrl, Qt)
 from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
@@ -19,6 +19,12 @@ from PySide6.QtWidgets import (QAbstractButton, QApplication, QDialog, QDialogBu
     QFrame, QGridLayout, QLabel, QLineEdit,
     QListWidget, QListWidgetItem, QSizePolicy, QStackedWidget,
     QToolButton, QWidget)
+
+import sys
+
+sys.path.append("..")
+
+from coreGettext import QCoreApplication
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):

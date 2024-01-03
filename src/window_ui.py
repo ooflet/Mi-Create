@@ -8,7 +8,9 @@
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
+from coreGettext import QCoreApplication
+
+from PySide6.QtCore import (QDate, QDateTime, QLocale,
     QMetaObject, QObject, QPoint, QRect,
     QSize, QTime, QUrl, Qt)
 from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
@@ -98,14 +100,8 @@ class Ui_MainWindow(object):
         icon6.addFile(u":/Dark/redo-2.png", QSize(), QIcon.Normal, QIcon.Off)
         self.actionRedo.setIcon(icon6)
         self.actionRedo.setMenuRole(QAction.NoRole)
-        self.actionInstaller = QAction(MainWindow)
-        self.actionInstaller.setObjectName(u"actionInstaller")
         self.actionAbout_Qt = QAction(MainWindow)
         self.actionAbout_Qt.setObjectName(u"actionAbout_Qt")
-        self.actionshowColorDialog = QAction(MainWindow)
-        self.actionshowColorDialog.setObjectName(u"actionshowColorDialog")
-        self.actionshowSelectFont = QAction(MainWindow)
-        self.actionshowSelectFont.setObjectName(u"actionshowSelectFont")
         self.actionThirdPartyNotice = QAction(MainWindow)
         self.actionThirdPartyNotice.setObjectName(u"actionThirdPartyNotice")
         self.actionUnpack = QAction(MainWindow)
@@ -160,13 +156,6 @@ class Ui_MainWindow(object):
         icon16 = QIcon()
         icon16.addFile(u":/Dark/progress.png", QSize(), QIcon.Normal, QIcon.Off)
         self.actionArc_Progress.setIcon(icon16)
-        self.actionShape = QAction(MainWindow)
-        self.actionShape.setObjectName(u"actionShape")
-        self.actionText = QAction(MainWindow)
-        self.actionText.setObjectName(u"actionText")
-        icon17 = QIcon()
-        icon17.addFile(u":/Dark/text.png", QSize(), QIcon.Normal, QIcon.Off)
-        self.actionText.setIcon(icon17)
         self.actionDocumentation = QAction(MainWindow)
         self.actionDocumentation.setObjectName(u"actionDocumentation")
         self.centralwidget = QWidget(MainWindow)
@@ -215,9 +204,9 @@ class Ui_MainWindow(object):
 
         self.gridLayout_3.addItem(self.verticalSpacer_2, 0, 0, 1, 1)
 
-        icon18 = QIcon()
-        icon18.addFile(u":/Dark/MiFaceStudioFavicon.png", QSize(), QIcon.Normal, QIcon.Off)
-        self.workspace.addTab(self.Welcome, icon18, "")
+        icon17 = QIcon()
+        icon17.addFile(u":/Dark/MiFaceStudioFavicon.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.workspace.addTab(self.Welcome, icon17, "")
 
         self.gridLayout_2.addWidget(self.workspace, 0, 0, 1, 1)
 
@@ -377,7 +366,7 @@ class Ui_MainWindow(object):
         self.actionSave_as.setShortcut(QCoreApplication.translate("MainWindow", u"Ctrl+Shift+S", None))
 #endif // QT_CONFIG(shortcut)
         self.actionAbout_MiFaceStudio.setText(QCoreApplication.translate("MainWindow", u"About Mi Create", None))
-        self.actionPreferences.setText(QCoreApplication.translate("MainWindow", u"Preferences", None))
+        self.actionPreferences.setText(QCoreApplication.translate("MainWindow", u"Settings", None))
 #if QT_CONFIG(shortcut)
         self.actionPreferences.setShortcut(QCoreApplication.translate("MainWindow", u"Ctrl+P", None))
 #endif // QT_CONFIG(shortcut)
@@ -416,10 +405,7 @@ class Ui_MainWindow(object):
 #if QT_CONFIG(shortcut)
         self.actionRedo.setShortcut(QCoreApplication.translate("MainWindow", u"Ctrl+Y", None))
 #endif // QT_CONFIG(shortcut)
-        self.actionInstaller.setText(QCoreApplication.translate("MainWindow", u"Installer", None))
         self.actionAbout_Qt.setText(QCoreApplication.translate("MainWindow", u"About Qt", None))
-        self.actionshowColorDialog.setText(QCoreApplication.translate("MainWindow", u"showColorDialog", None))
-        self.actionshowSelectFont.setText(QCoreApplication.translate("MainWindow", u"showSelectFont", None))
         self.actionThirdPartyNotice.setText(QCoreApplication.translate("MainWindow", u"Third Party Notices", None))
         self.actionUnpack.setText(QCoreApplication.translate("MainWindow", u"Unpack...", None))
         self.actionCut.setText(QCoreApplication.translate("MainWindow", u"Cut", None))
@@ -441,8 +427,6 @@ class Ui_MainWindow(object):
         self.actionDigital_Number.setText(QCoreApplication.translate("MainWindow", u"Digital Number", None))
         self.actionAnalog_Display.setText(QCoreApplication.translate("MainWindow", u"Analog Display", None))
         self.actionArc_Progress.setText(QCoreApplication.translate("MainWindow", u"Arc Progress", None))
-        self.actionShape.setText(QCoreApplication.translate("MainWindow", u"Shape", None))
-        self.actionText.setText(QCoreApplication.translate("MainWindow", u"Text", None))
         self.actionDocumentation.setText(QCoreApplication.translate("MainWindow", u"Documentation", None))
 #if QT_CONFIG(shortcut)
         self.actionDocumentation.setShortcut(QCoreApplication.translate("MainWindow", u"Ctrl+H", None))

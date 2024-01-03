@@ -49,7 +49,6 @@ from monaco.monaco_widget import MonacoWidget
 import resources.icons_rc
 
 from window_ui import Ui_MainWindow
-from dialog.preferences_ui import Ui_Dialog as Ui_Preferences
 from dialog.newProject_ui import Ui_Dialog as Ui_NewProject
 from dialog.resourceDialog_ui import Ui_Dialog as Ui_ResourceDialog
 from dialog.compileDialog_ui import Ui_Dialog as Ui_CompileDialog
@@ -58,12 +57,8 @@ logging.basicConfig(level=logging.DEBUG)
 
 _ = gettext.gettext
 
-#windll = ctypes.windll.kernel32
 currentDir = os.getcwd()
 currentVersion = '0.0.1-pre-alpha-2'
-#currentLanguage = locale.windows_locale[windll.GetUserDefaultUILanguage()]
-
-languages = ["English", "繁體中文", "简体中文", "Русский"]
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -73,22 +68,34 @@ class MainWindow(QMainWindow):
 
         self.fileChanged = False
         self.clipboard = None
+        self.stagedChanges = []
 
-        # Setup Preferences Dialog 
-        logging.debug("Initializing dialogs")
-        self.preferencesDialog = QDialog(self) 
-        self.preferences = Ui_Preferences() 
-        self.preferences.setupUi(self.preferencesDialog) 
- 
-        # Setup New Project Dialog 
-        self.newProjectDialog = QDialog(self) 
-        self.newProjectUi = Ui_NewProject() 
-        self.newProjectUi.setupUi(self.newProjectDialog) 
- 
-        # Setup Compile Project Dialog 
-        self.compileDialog = QDialog(self) 
-        self.compileUi = Ui_CompileDialog() 
-        self.compileUi.setupUi(self.compileDialog) 
+        # Setup Settings
+        logging.debug("Loading App Settings")
+        
+        def close():
+            self.settingsDialog.close()
+            self.stagedChanges = []
+        
+        self.settingsDialog = QDialog(self) 
+        self.settingsDialog.setFixedSize(500, 300)
+        self.settingsDialog.setWindowTitle("Settings")
+        self.settingsLayout = QVBoxLayout()
+        self.settingsWidget = PropertiesWidget(self)
+        self.settingsButtonBox = QDialogButtonBox()
+        self.settingsButtonBox.setStandardButtons(QDialogButtonBox.Save | QDialogButtonBox.Cancel)
+        self.settingsButtonBox.rejected.connect(close)
+        self.settingsLayout.addWidget(self.settingsWidget)
+        self.settingsLayout.addWidget(self.settingsButtonBox)
+        self.settingsDialog.setLayout(self.settingsLayout)
+        self.loadSettings() 
+
+        self.settingsWidget.loadProperties(self.settings)
+        self.settingsWidget.propertyChanged.connect(lambda property, value: self.stagedChanges.append([property, value]))
+        self.loadTheme() 
+
+        # Setup Language
+        logging.debug("Initializing Language Files")
  
         # Setup projects (tabs) 
         self.projects = {
@@ -108,6 +115,19 @@ class MainWindow(QMainWindow):
         # Setup Project 
         self.project = None 
         self.projectXML = None 
+
+        # Setup Dialog 
+        logging.debug("Initializing pre-compiled dialogs")
+ 
+        # Setup New Project Dialog 
+        self.newProjectDialog = QDialog(self) 
+        self.newProjectUi = Ui_NewProject() 
+        self.newProjectUi.setupUi(self.newProjectDialog) 
+ 
+        # Setup Compile Project Dialog 
+        self.compileDialog = QDialog(self) 
+        self.compileUi = Ui_CompileDialog() 
+        self.compileUi.setupUi(self.compileDialog) 
  
         # Setup Main Window 
         logging.debug("Initializing MainWindow")
@@ -126,9 +146,6 @@ class MainWindow(QMainWindow):
         logging.debug("Initializing Misc") 
         self.setupNewProjectDialog() 
         self.loadWindowState() 
-        logging.debug("Loading App Settings")
-        self.loadSettings() 
-        self.loadTheme() 
         logging.debug("Launch!!")
         self.statusBar().showMessage("Ready", 3000) 
 
@@ -215,15 +232,17 @@ class MainWindow(QMainWindow):
 
     def saveSettings(self):
         settings = QSettings("Mi Create", "Preferences")
-        settings.setValue("theme", self.preferences.themeComboBox.currentText())
-        settings.setValue("language", self.preferences.languageComboBox.currentText())
+        for property, value in self.stagedChanges:
+            settings.setValue(property, value)
+
+        self.settingsDialog.close()
+        self.loadTheme()
 
     def loadSettings(self):
-        settings = QSettings("Mi Create", "Preferences")
-        theme = settings.value("theme", "Dark")
-        language = settings.value("language", "English")
-        self.preferences.themeComboBox.setCurrentText(theme)
-        self.preferences.languageComboBox.setCurrentText(language)
+        with open("data/settings.json") as file:
+            self.settings = json.load(file)
+            self.settings["General"]["Theme"][3] = ["Dark", "Light"]
+            self.settings["General"]["Language"][3] = ["English", "Something Else"]
 
     def launchUpdater(self):
         self.closeWithoutWarning = True
@@ -247,7 +266,7 @@ class MainWindow(QMainWindow):
 
     def loadTheme(self):
         # Loads theme from themeComboBox element. Later on will load the theme from the QSettings directly
-        themeName = self.preferences.themeComboBox.currentText()
+        themeName = self.settings["General"]["Theme"][2]
         app = QApplication.instance()
         if themeName == "Light":
             theme.light(app)
@@ -431,7 +450,7 @@ class MainWindow(QMainWindow):
                 currentProject["canvas"].setObjectProperty(currentSelected.data(0,101), args[0], args[1])
 
         # Setup properties widget
-        with open("data\\properties.json", encoding="utf8") as raw:
+        with open("data/properties.json", encoding="utf8") as raw:
             propertiesSource = raw.read()
             self.propertyJson = json.loads(propertiesSource)
             self.propertiesWidget = PropertiesWidget(self, Ui_ResourceDialog, self.watchData.modelSourceList, self.watchData.modelSourceData, QApplication.instance().primaryScreen())
@@ -464,7 +483,7 @@ class MainWindow(QMainWindow):
         self.propertiesWidget.propertyItems[property].setText(value)
 
     def setupScaffold(self):
-        with open("data\\default\\defaultItems.json", encoding="utf8") as raw:
+        with open("data/default/defaultItems.json", encoding="utf8") as raw:
             self.defaultSource = raw.read()
         self.defaultScaffold = json.loads(self.defaultSource)
 
@@ -507,7 +526,7 @@ class MainWindow(QMainWindow):
         widgetData["@X"] = int(currentProject["canvas"].scene.sceneRect().width()/2 - int(widgetData["@Width"])/2)
         widgetData["@Y"] = int(currentProject["canvas"].scene.sceneRect().height()/2 - int(widgetData["@Height"])/2)
         currentProject["data"]["FaceProject"]["Screen"]["Widget"].append(widgetData) 
-        currentProject["canvas"].loadObjectsFromData(currentProject["data"], currentProject["imageFolder"], self.preferences.AntialiasingEnabled.isChecked())
+        currentProject["canvas"].loadObjectsFromData(currentProject["data"], currentProject["imageFolder"], self.settings["Canvas"]["Antialiasing"][2])
         self.updateExplorer(currentProject["data"])
         currentProject["canvas"].selectObject(widgetData["@Name"])
 
@@ -531,7 +550,7 @@ class MainWindow(QMainWindow):
             result = list(filter(lambda widget: item["@Name"] == widget["@Name"],  currentProject["data"]["FaceProject"]["Screen"]["Widget"]))
             item["@Name"] = f"{item['@Name']}-{len(result)}"
             currentProject["data"]["FaceProject"]["Screen"]["Widget"].append(item)
-            currentProject["canvas"].loadObjectsFromData(currentProject["data"], currentProject["imageFolder"], self.preferences.AntialiasingEnabled.isChecked())
+            currentProject["canvas"].loadObjectsFromData(currentProject["data"], currentProject["imageFolder"], self.settings["Canvas"]["Antialiasing"][2])
             self.updateExplorer(currentProject["data"])
             currentProject["canvas"].selectObject(item["@Name"])
 
@@ -563,7 +582,7 @@ class MainWindow(QMainWindow):
                             currentProject["data"]["FaceProject"]["Screen"]["Widget"].pop(index)
                 elif type(currentProject["data"]["FaceProject"]["Screen"]["Widget"]) == dict:
                     currentProject["data"]["FaceProject"]["Screen"]["Widget"] = []
-                currentProject["canvas"].loadObjectsFromData(currentProject["data"], currentProject["imageFolder"], self.preferences.AntialiasingEnabled.isChecked())
+                currentProject["canvas"].loadObjectsFromData(currentProject["data"], currentProject["imageFolder"], self.settings["Canvas"]["Antialiasing"][2])
                 self.updateExplorer(currentProject["data"])
 
             def propertyChange(objectName, propertyName, propertyValue):
@@ -582,7 +601,7 @@ class MainWindow(QMainWindow):
             self.ui.Explorer.clear()
                 
             # Create a Canvas (QGraphicsScene & QGraphicsView)
-            project = Canvas(data[0]["FaceProject"]["@DeviceType"], self.preferences.AntialiasingEnabled.isChecked(), self.preferences.DeviceOutlineVisible.isChecked(), self.ui.menuInsert)
+            project = Canvas(data[0]["FaceProject"]["@DeviceType"], self.settings["Canvas"]["Antialiasing"][2], self.settings["Canvas"]["DeviceOutline"][2], self.ui.menuInsert)
 
             # Create the project
             project.setAcceptDrops(True)
@@ -601,7 +620,7 @@ class MainWindow(QMainWindow):
 
             # Render objects onto the canvas
             if data is not False:
-                success = project.loadObjectsFromData(data[0], data[1], self.preferences.AntialiasingEnabled.isChecked())
+                success = project.loadObjectsFromData(data[0], data[1], self.settings["Canvas"]["Antialiasing"][2])
                 
             if success[0]:
                 self.projects[name] = {
@@ -649,12 +668,11 @@ class MainWindow(QMainWindow):
         else:
            self.ui.workspace.setCurrentIndex(self.ui.workspace.indexOf(self.projects[name][0]))
 
-    def createNewCodespace(self, name, text, language, options={"cursorSmoothCaretAnimation":"on"}):
+    def createNewCodespace(self, name, text, language):
         # Creates a new instance of Monaco in a Codespace (code workspace)
         editor = MonacoWidget()
         editor.setText(text)
         editor.setLanguage(language)
-        editor.setEditorOptions(options)
 
         widget = QWidget()
         layout = QVBoxLayout()
@@ -685,7 +703,7 @@ class MainWindow(QMainWindow):
         self.ui.actionUndo.triggered.connect(lambda: self.invokeHistory("undo"))
         self.ui.actionRedo.triggered.connect(lambda: self.invokeHistory("redo"))
         self.ui.actionProject_XML_File.triggered.connect(self.editProjectXML)
-        self.ui.actionPreferences.triggered.connect(self.showPreferences)
+        self.ui.actionPreferences.triggered.connect(self.showSettings)
 
         # compile
         self.ui.actionBuild.triggered.connect(self.compileProject)
@@ -697,11 +715,8 @@ class MainWindow(QMainWindow):
         self.ui.actionAbout_Qt.triggered.connect(lambda: QMessageBox.aboutQt(self))
         self.ui.actionThirdPartyNotice.triggered.connect(self.showThirdPartyNotices)
 
-        # preferences
-        self.preferences.clearWindow.clicked.connect(self.clearWindowState)
-        self.preferences.openDataFolder.clicked.connect(lambda *event: subprocess.Popen(f'explorer /select, data"'))
-        self.preferences.reinstall.clicked.connect(self.launchUpdater)
-        self.preferences.buttonBox.accepted.connect(self.saveAndLoadPreferences)
+        # settings
+        self.settingsButtonBox.accepted.connect(self.saveSettings)
 
     def clearWindowState(self):
         reply = QMessageBox.question(self, 'Confirm Clear', _("Are you sure you want to reset all dock widget positions?"), QMessageBox.Yes, QMessageBox.No)
@@ -710,12 +725,7 @@ class MainWindow(QMainWindow):
             settings = QSettings("Mi Create", "Workspace")
             settings.setValue("geometry", None)
             settings.setValue("state", None)
-            os.execl(sys.executable, sys.executable, *sys.argv)
-
-    def saveAndLoadPreferences(self):
-        self.saveSettings()
-        self.loadSettings()
-        self.loadTheme()
+            os.execl(sys.executable, os.path.abspath(__file__), *sys.argv) 
 
     def newProject(self):
         self.newProjectDialogAccepted = False
@@ -767,7 +777,7 @@ class MainWindow(QMainWindow):
 
     def openProject(self): 
         # Get where to open the project from
-        file = QFileDialog.getOpenFileName(self, _('Open Project...'), "%userprofile%\\", "Watchface Project (*.fprj)")
+        file = QFileDialog.getOpenFileName(self, _('Open Project...'), "%userprofile%/", "Watchface Project (*.fprj)")
         file_extension = QFileInfo(file[0]).suffix()
 
         # Check if file was selected
@@ -833,7 +843,7 @@ class MainWindow(QMainWindow):
                 self.compileDialog.show()
                 QApplication.processEvents()
 
-                result = fprjProject.compile(currentName, compileDirectory, "compiler\\compile.exe")
+                result = fprjProject.compile(currentName, compileDirectory, "compiler/compile.exe")
                 self.compileUi.buttonBox.setDisabled(False)
                 self.compileUi.textEdit.setText(str(result))
                 self.compileUi.stackedWidget.setCurrentIndex(2) 
@@ -841,9 +851,9 @@ class MainWindow(QMainWindow):
     def decompileProject(self):
         self.showDialogue("error", "Will add later, apologies.")
         # self.showDialogue("warning", "Please note that images may be glitched when unpacking.")
-        # file = QFileDialog.getOpenFileName(self, 'Unpack File...', "%userprofile%\\", "Compiled Watchface Binaries (*.face)")
+        # file = QFileDialog.getOpenFileName(self, 'Unpack File...', "%userprofile%/", "Compiled Watchface Binaries (*.face)")
 
-        # subprocess.run(f'{currentDir}\\compiler\\unpack.exe  "{file[0]}"')
+        # subprocess.run(f'{currentDir}/compiler/unpack.exe  "{file[0]}"')
         # self.showDialogue("info", "Decompile success! Would you like to open")
 
     def editProjectXML(self):
@@ -856,9 +866,9 @@ class MainWindow(QMainWindow):
     def showFontSelect(self):
         font = QFontDialog.getFont(self, "Select Font")
 
-    def showPreferences(self):
-        self.loadSettings()
-        self.preferencesDialog.exec()
+    def showSettings(self):
+        self.settingsWidget.loadProperties(self.settings)
+        self.settingsDialog.exec()
 
     def showAboutWindow(self):
         dialog = QMessageBox(self)
