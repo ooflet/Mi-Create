@@ -45,6 +45,8 @@ class PropertiesWidget(QWidget):
     def __init__(self, window, resourceWidget=None, srcList=None, srcData=None, screen=None):
         super().__init__()
 
+        self.clearOnRefresh = True
+
         def closeResourceDialog():
             self.currentPropertyInput.setText(self.resourceDialogUI.imageSelect.currentItem().text())
             self.resourceDialog.close()
@@ -358,13 +360,16 @@ class PropertiesWidget(QWidget):
                     self.addProperty(key, value[0], inputWidget, parent)
                 inputWidget = None
 
-    def loadProperties(self, properties, data=None, device=None):
+    def loadProperties(self, properties, data=None, device=None, scrollTo=None):
         self.treeWidget.clear()
         self.propertyItems = {}
         if data == None:
             self.addCategories(properties, data, None, device)
         else:
             self.addCategories(properties["properties"], data, None, device)
+        if scrollTo != None:
+            print(scrollTo)
+            self.treeWidget.scrollContentsBy(0, scrollTo)
 
     def clearProperties(self):
         self.treeWidget.clear()

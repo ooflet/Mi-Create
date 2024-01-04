@@ -235,14 +235,28 @@ class MainWindow(QMainWindow):
         for property, value in self.stagedChanges:
             settings.setValue(property, value)
 
+        self.loadSettings()
         self.settingsDialog.close()
         self.loadTheme()
 
     def loadSettings(self):
+        settings = QSettings("Mi Create", "Preferences")
         with open("data/settings.json") as file:
             self.settings = json.load(file)
             self.settings["General"]["Theme"][3] = ["Dark", "Light"]
             self.settings["General"]["Language"][3] = ["English", "Something Else"]
+
+        for key in settings.allKeys():
+            for category, properties in self.settings.items():
+                for property, value in properties.items():
+                    if key == property:
+                        if settings.value(key) == "true":
+                            value[2] = True
+                        elif settings.value(key) == "false":
+                            value[2] = False
+                        else:
+                            value[2] = settings.value(key)
+
 
     def launchUpdater(self):
         self.closeWithoutWarning = True
@@ -359,16 +373,15 @@ class MainWindow(QMainWindow):
             if self.projects.get(self.ui.workspace.tabText(currentIndex)):
                 selected = False
                 currentProject = self.getCurrentProject()
-                #print(currentProject["canvas"].getSelectedObject())
-                for x in currentProject["canvas"].items():
-                    if currentProject["canvas"].getSelectedObject() != []:
-                        # check if current selected object is not already selected
-                        if x.data(0) == currentProject["canvas"].getSelectedObject()[0]:
-                            selected = True
 
+                # check if current selected object is not already selected
+                if self.ui.Explorer.selectedItems()[0].data(0, 101) == currentProject["canvas"].getSelectedObject()[0].data(0):
+                    selected = True
+                    
                 if not selected:
                     for x in self.ui.Explorer.selectedItems():
                         currentProject["canvas"].selectObject(x.text(0))
+
 
         self.ui.Explorer.itemSelectionChanged.connect(updateExplorerSelection)
 
@@ -447,7 +460,9 @@ class MainWindow(QMainWindow):
 
             else:
                 currentItem[args[0]] = args[1]
-                currentProject["canvas"].setObjectProperty(currentSelected.data(0,101), args[0], args[1])
+            self.propertiesWidget.clearOnRefresh = False
+            currentProject["canvas"].reloadObject(currentSelected.data(0,101), currentItem, currentProject["imageFolder"], self.settings["Canvas"]["Antialiasing"][2])
+            currentProject["canvas"].selectObject(currentSelected.data(0,101))
 
         # Setup properties widget
         with open("data/properties.json", encoding="utf8") as raw:
@@ -459,20 +474,24 @@ class MainWindow(QMainWindow):
 
     def updateProperties(self, item):
         if item:
-            currentProject = self.getCurrentProject()
-            # data(0,100) is objectID, data(0,101) is name
-            if type(currentProject["data"]["FaceProject"]["Screen"]["Widget"]) == list:
-                for index, object in enumerate(currentProject["data"]["FaceProject"]["Screen"]["Widget"]):
-                    if object["@Name"] == item.data(0,101):
-                        self.propertiesWidget.loadProperties(self.propertyJson[item.data(0, 100)], currentProject["data"]["FaceProject"]["Screen"]["Widget"][index], currentProject["data"]["FaceProject"]["@DeviceType"])
-                        break
+            if self.propertiesWidget.clearOnRefresh:
+                currentProject = self.getCurrentProject()
+                # data(0,100) is objectID, data(0,101) is name
+                if type(currentProject["data"]["FaceProject"]["Screen"]["Widget"]) == list:
+                    for index, object in enumerate(currentProject["data"]["FaceProject"]["Screen"]["Widget"]):
+                        if object["@Name"] == item.data(0,101):
+                            self.propertiesWidget.loadProperties(self.propertyJson[item.data(0, 100)], currentProject["data"]["FaceProject"]["Screen"]["Widget"][index], currentProject["data"]["FaceProject"]["@DeviceType"])
+                            break
+                    else:
+                        self.showDialogue("error", _("Error occured during property update: Object not found!"), _('Unable to find')+{object["@Name"]})
                 else:
-                    self.showDialogue("error", _("Error occured during property update: Object not found!"), _('Unable to find')+{object["@Name"]})
+                    if currentProject["data"]["FaceProject"]["Screen"]["Widget"]["@Name"] == item.data(0,101):
+                        self.propertiesWidget.loadProperties(self.propertyJson[item.data(0, 100)], currentProject["data"]["FaceProject"]["Screen"]["Widget"], currentProject["data"]["FaceProject"]["@DeviceType"])        
             else:
-                if currentProject["data"]["FaceProject"]["Screen"]["Widget"]["@Name"] == item.data(0,101):
-                    self.propertiesWidget.loadProperties(self.propertyJson[item.data(0, 100)], currentProject["data"]["FaceProject"]["Screen"]["Widget"], currentProject["data"]["FaceProject"]["@DeviceType"])
+                self.propertiesWidget.clearOnRefresh = True
         else:
-            self.propertiesWidget.clearProperties() 
+            if self.propertiesWidget.clearOnRefresh:
+                self.propertiesWidget.clearProperties()
 
     def updateObjectProperty(self, name, property, value):
         currentProject = self.getCurrentProject()
@@ -526,7 +545,7 @@ class MainWindow(QMainWindow):
         widgetData["@X"] = int(currentProject["canvas"].scene.sceneRect().width()/2 - int(widgetData["@Width"])/2)
         widgetData["@Y"] = int(currentProject["canvas"].scene.sceneRect().height()/2 - int(widgetData["@Height"])/2)
         currentProject["data"]["FaceProject"]["Screen"]["Widget"].append(widgetData) 
-        currentProject["canvas"].loadObjectsFromData(currentProject["data"], currentProject["imageFolder"], self.settings["Canvas"]["Antialiasing"][2])
+        currentProject["canvas"].loadObjects(currentProject["data"], currentProject["imageFolder"], self.settings["Canvas"]["Antialiasing"][2])
         self.updateExplorer(currentProject["data"])
         currentProject["canvas"].selectObject(widgetData["@Name"])
 
@@ -550,7 +569,7 @@ class MainWindow(QMainWindow):
             result = list(filter(lambda widget: item["@Name"] == widget["@Name"],  currentProject["data"]["FaceProject"]["Screen"]["Widget"]))
             item["@Name"] = f"{item['@Name']}-{len(result)}"
             currentProject["data"]["FaceProject"]["Screen"]["Widget"].append(item)
-            currentProject["canvas"].loadObjectsFromData(currentProject["data"], currentProject["imageFolder"], self.settings["Canvas"]["Antialiasing"][2])
+            currentProject["canvas"].loadObjects(currentProject["data"], currentProject["imageFolder"], self.settings["Canvas"]["Antialiasing"][2])
             self.updateExplorer(currentProject["data"])
             currentProject["canvas"].selectObject(item["@Name"])
 
@@ -582,7 +601,7 @@ class MainWindow(QMainWindow):
                             currentProject["data"]["FaceProject"]["Screen"]["Widget"].pop(index)
                 elif type(currentProject["data"]["FaceProject"]["Screen"]["Widget"]) == dict:
                     currentProject["data"]["FaceProject"]["Screen"]["Widget"] = []
-                currentProject["canvas"].loadObjectsFromData(currentProject["data"], currentProject["imageFolder"], self.settings["Canvas"]["Antialiasing"][2])
+                currentProject["canvas"].loadObjects(currentProject["data"], currentProject["imageFolder"], self.settings["Canvas"]["Antialiasing"][2])
                 self.updateExplorer(currentProject["data"])
 
             def propertyChange(objectName, propertyName, propertyValue):
@@ -620,7 +639,7 @@ class MainWindow(QMainWindow):
 
             # Render objects onto the canvas
             if data is not False:
-                success = project.loadObjectsFromData(data[0], data[1], self.settings["Canvas"]["Antialiasing"][2])
+                success = project.loadObjects(data[0], data[1], self.settings["Canvas"]["Antialiasing"][2])
                 
             if success[0]:
                 self.projects[name] = {

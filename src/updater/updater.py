@@ -8,7 +8,6 @@ import tkinter as tk
 from tkinter import messagebox
 from tkinter import ttk
 import urllib.request
-import winsound
 import tempfile
 import subprocess
 import os
