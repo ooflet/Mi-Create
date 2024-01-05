@@ -444,12 +444,14 @@ class MainWindow(QMainWindow):
                 currentProject = self.getCurrentProject()
 
                 # check if current selected object is not already selected
-                if currentProject["canvas"].getSelectedObject() != [] and self.ui.Explorer.selectedItems()[0].data(0, 101) == currentProject["canvas"].getSelectedObject()[0].data(0):
-                    selected = True
-                    
-                if not selected:
-                    for x in self.ui.Explorer.selectedItems():
-                        currentProject["canvas"].selectObject(x.text(0))
+                print(self.ui.Explorer.selectedItems())
+                if currentProject["canvas"].getSelectedObject() != [] and self.ui.Explorer.selectedItems() != []:
+                    if self.ui.Explorer.selectedItems()[0].data(0, 101) == currentProject["canvas"].getSelectedObject()[0].data(0):
+                        selected = True
+                        
+                    if not selected:
+                        for x in self.ui.Explorer.selectedItems():
+                            currentProject["canvas"].selectObject(x.text(0))
 
 
         self.ui.Explorer.itemSelectionChanged.connect(updateExplorerSelection)
@@ -526,15 +528,18 @@ class MainWindow(QMainWindow):
                             currentItem[args[0]] = int(x["@ID"], 0)
                         except:
                             currentItem[args[0]] = int(x["@ID"])
-
-            elif args[0] == "@Name":
-                currentItem[args[0]] = args[1]
-                self.updateExplorer(currentProject["data"])
             else:
                 currentItem[args[0]] = args[1]
-            self.propertiesWidget.clearOnRefresh = False
-            currentProject["canvas"].reloadObject(currentSelected.data(0,101), currentItem, currentProject["imageFolder"], self.settings["Canvas"]["Antialiasing"][2])
-            currentProject["canvas"].selectObject(currentSelected.data(0,101))
+
+            if args[0] == "@Name":
+                currentItem[args[0]] = args[1]
+                self.updateExplorer(currentProject["data"])
+                currentProject["canvas"].loadObjects(currentProject["data"], currentProject["imageFolder"], self.settings["Canvas"]["Antialiasing"][2])
+                self.propertiesWidget.clearProperties()
+            else:
+                self.propertiesWidget.clearOnRefresh = False
+                currentProject["canvas"].reloadObject(currentSelected.data(0,101), currentItem, currentProject["imageFolder"], self.settings["Canvas"]["Antialiasing"][2])
+                currentProject["canvas"].selectObject(currentSelected.data(0,101))
 
         # Setup properties widget
         with open("data/properties.json", encoding="utf8") as raw:
@@ -661,8 +666,9 @@ class MainWindow(QMainWindow):
                             break
                 else:
                     self.previousSelected = None
-                    self.ui.Explorer.currentItem().setSelected(False)
-                    self.updateProperties(False)
+                    if self.ui.Explorer.currentItem() != None:
+                        self.ui.Explorer.currentItem().setSelected(False)
+                        self.updateProperties(False)
 
             def objectDeleted(objectName):
                 print("del")
