@@ -1,10 +1,11 @@
 # Window Translation for Mi Create.
 # FIRST AUTHOR <ooflet@proton.me>, 2024.
 #
+#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
-"POT-Creation-Date: 2024-01-02 11:05+1100\n"
+"POT-Creation-Date: 2024-01-05 14:27+1100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -12,263 +13,196 @@ msgstr ""
 "Content-Type: text/plain; charset=cp1252\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
+"X-Generator: Poedit 3.4\n"
 
-                
 msgid "Mi Create"
-msgstr ""  
-                
+msgstr ""
+
 msgid "Save..."
-msgstr ""  
-                
+msgstr ""
+
 msgid "Save as..."
-msgstr ""  
-                
+msgstr ""
+
 msgid "About Mi Create"
-msgstr ""  
-                
+msgstr ""
+
 msgid "Settings"
-msgstr ""  
-                
+msgstr ""
+
 msgid "Build..."
-msgstr ""  
-                
+msgstr ""
+
 msgid "Build"
-msgstr ""  
-                
+msgstr ""
+
 msgid "Explorer"
-msgstr ""  
-                
+msgstr ""
+
 msgid "Attributes"
-msgstr ""  
-                
+msgstr ""
+
 msgid "Exit"
-msgstr ""  
-                
+msgstr ""
+
 msgid "Edit"
-msgstr ""  
-                
+msgstr ""
+
 msgid "File"
-msgstr ""  
-                
+msgstr ""
+
 msgid "Layout"
-msgstr ""  
-                
+msgstr ""
+
 msgid "New..."
-msgstr ""  
-                
+msgstr ""
+
 msgid "New File"
-msgstr ""  
-                
+msgstr ""
+
 msgid "Open..."
-msgstr ""  
-                
+msgstr ""
+
 msgid "Open File"
-msgstr ""  
-                
+msgstr ""
+
 msgid "Undo"
-msgstr ""  
-                
+msgstr ""
+
 msgid "Redo"
-msgstr ""  
-                
+msgstr ""
+
 msgid "About Qt"
-msgstr ""  
-                
+msgstr ""
+
 msgid "Third Party Notices"
-msgstr ""  
-                
+msgstr ""
+
 msgid "Unpack..."
-msgstr ""  
-                
+msgstr ""
+
 msgid "Cut"
-msgstr ""  
-                
+msgstr ""
+
 msgid "Copy"
-msgstr ""  
-                
+msgstr ""
+
 msgid "Paste"
-msgstr ""  
-                
+msgstr ""
+
 msgid "Project Source Code"
-msgstr ""  
-                
+msgstr ""
+
 msgid "Resize Images"
-msgstr ""  
-                
+msgstr ""
+
 msgid "Image"
-msgstr ""  
-                
+msgstr ""
+
 msgid "Image List"
-msgstr ""  
-                
+msgstr ""
+
 msgid "Digital Number"
-msgstr ""  
-                
+msgstr ""
+
 msgid "Analog Display"
-msgstr ""  
-                
+msgstr ""
+
 msgid "Arc Progress"
-msgstr ""  
-                
+msgstr ""
+
 msgid "Documentation"
-msgstr ""  
-                
-msgid "<html><head/><body><p><img src=":/Dark/folder-open.png"/> <a href="\&quot;\&quot;"><span style=" text-decoration: underline; color:#55aaff;">Open Project...</span></a></p></body></html>"
-msgstr ""  
-                
+msgstr ""
+
+msgid ""
+"<html><head/><body><p><img src=\":/Dark/folder-open.png\"/> <a "
+"href=\"\\&quot;\\&quot;\"><span style=\" text-decoration: underline; color:"
+"#55aaff;\">Open Project...</span></a></p></body></html>"
+msgstr ""
+
 msgid "Welcome"
-msgstr ""  
-                
-msgid "<html><head/><body><p><img src=":/Dark/file-plus.png"/> <a href="\&quot;\&quot;"><span style=" text-decoration: underline; color:#55aaff;">New Project...</span></a></p></body></html>"
-msgstr ""  
-                
-msgid "Welcome"
-msgstr ""  
-                
-msgid "File"
-msgstr ""  
-                
+msgstr ""
+
+msgid ""
+"<html><head/><body><p><img src=\":/Dark/file-plus.png\"/> <a href=\"\\&quot;"
+"\\&quot;\"><span style=\" text-decoration: underline; color:#55aaff;\">New "
+"Project...</span></a></p></body></html>"
+msgstr ""
+
 msgid "Help"
-msgstr ""  
-                
+msgstr ""
+
 msgid "About"
-msgstr ""  
-                
+msgstr ""
+
 msgid "View"
-msgstr ""  
-                
+msgstr ""
+
 msgid "Toolbars"
-msgstr ""  
-                
-msgid "Edit"
-msgstr ""  
-                
+msgstr ""
+
 msgid "Tools"
-msgstr ""  
-                
+msgstr ""
+
 msgid "Create"
-msgstr ""  
-                
-msgid "Explorer"
-msgstr ""  
-                
+msgstr ""
+
 msgid "Project"
-msgstr ""  
-                
+msgstr ""
+
 msgid "Properties"
-msgstr ""  
-                
+msgstr ""
+
 msgid "File Toolbar"
-msgstr ""  
-                
+msgstr ""
+
 msgid "toolBar_2"
-msgstr ""  
-                
+msgstr ""
+
 msgid "toolBar"
-msgstr ""         
-                
-msgid "Preferences"
-msgstr ""  
-                
-msgid "User Interface"
-msgstr ""  
-                
-msgid "Theme"
-msgstr ""  
-                
-msgid "Dark"
-msgstr ""  
-                
-msgid "Light"
-msgstr ""  
-                
-msgid "Language"
-msgstr ""  
-                
-msgid "Interface"
-msgstr ""  
-                
-msgid "Behaviour"
-msgstr ""  
-                
-msgid "Snap to Guides"
-msgstr ""  
-                
-msgid "Show Device Outline"
-msgstr ""  
-                
-msgid "Enable Antialiasing"
-msgstr ""  
-                
-msgid "Behaviour"
-msgstr ""  
-                
-msgid "Advanced"
-msgstr ""  
-                
-msgid "Open Data Folder"
-msgstr ""  
-                
-msgid "Open"
-msgstr ""  
-                
-msgid "Force Reinstall"
-msgstr ""  
-                
-msgid "Reinstall"
-msgstr ""  
-                
-msgid "Clear Window State"
-msgstr ""  
-                
-msgid "Clear"
-msgstr ""  
-                
-msgid "Advanced"
-msgstr ""  
-                
+msgstr ""
+
 msgid "New Project..."
-msgstr ""  
-                
+msgstr ""
+
 msgid "Select device"
-msgstr ""  
-                
+msgstr ""
+
 msgid "Project name"
-msgstr ""  
-                
+msgstr ""
+
 msgid "Create project..."
-msgstr ""  
-                
+msgstr ""
+
 msgid "Project location"
-msgstr ""  
-                
+msgstr ""
+
 msgid "Build Project..."
-msgstr ""  
-                
+msgstr ""
+
 msgid "Configure project..."
-msgstr ""  
-                
+msgstr ""
+
 msgid "Watchface name"
-msgstr ""  
-                
+msgstr ""
+
 msgid "Watchface thumbnail"
-msgstr ""  
-                
+msgstr ""
+
 msgid "Build project..."
-msgstr ""  
-                
+msgstr ""
+
 msgid "Building project..."
-msgstr ""  
-                
+msgstr ""
+
 msgid "Build results..."
-msgstr ""  
-                
+msgstr ""
+
 msgid "Select resource..."
-msgstr ""  
-                
+msgstr ""
+
 msgid "..."
-msgstr ""  
-                
+msgstr ""
+
 msgid "Search:"
-msgstr ""  
-                
+msgstr ""

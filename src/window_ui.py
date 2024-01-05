@@ -8,9 +8,7 @@
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from coreGettext import QCoreApplication
-
-from PySide6.QtCore import (QDate, QDateTime, QLocale,
+from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
     QMetaObject, QObject, QPoint, QRect,
     QSize, QTime, QUrl, Qt)
 from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
@@ -23,6 +21,7 @@ from PySide6.QtWidgets import (QApplication, QDockWidget, QFrame, QGridLayout,
     QMenuBar, QSizePolicy, QSpacerItem, QStatusBar,
     QTabWidget, QToolBar, QTreeWidget, QTreeWidgetItem,
     QVBoxLayout, QWidget)
+import icons_rc
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -330,7 +329,6 @@ class Ui_MainWindow(object):
         self.menuTools.addAction(self.actionBuild)
         self.menuTools.addAction(self.actionUnpack)
         self.menuTools.addSeparator()
-        self.menuTools.addAction(self.actionResize_Images)
         self.menuInsert.addAction(self.actionImage)
         self.menuInsert.addAction(self.actionImage_List)
         self.menuInsert.addSeparator()

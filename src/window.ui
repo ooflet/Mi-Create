@@ -225,7 +225,6 @@
     <addaction name="actionBuild"/>
     <addaction name="actionUnpack"/>
     <addaction name="separator"/>
-    <addaction name="actionResize_Images"/>
    </widget>
    <widget class="QMenu" name="menuInsert">
     <property name="tearOffEnabled">

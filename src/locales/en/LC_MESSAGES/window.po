@@ -1,0 +1,208 @@
+# Window Translation for Mi Create.
+# FIRST AUTHOR <ooflet@proton.me>, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.0\n"
+"POT-Creation-Date: 2024-01-05 14:27+1100\n"
+"PO-Revision-Date: 2024-01-05 14:27+1100\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+"X-Generator: Poedit 3.4\n"
+
+msgid "Mi Create"
+msgstr ""
+
+msgid "Save..."
+msgstr ""
+
+msgid "Save as..."
+msgstr ""
+
+msgid "About Mi Create"
+msgstr ""
+
+msgid "Settings"
+msgstr ""
+
+msgid "Build..."
+msgstr ""
+
+msgid "Build"
+msgstr ""
+
+msgid "Explorer"
+msgstr ""
+
+msgid "Attributes"
+msgstr ""
+
+msgid "Exit"
+msgstr ""
+
+msgid "Edit"
+msgstr ""
+
+msgid "File"
+msgstr ""
+
+msgid "Layout"
+msgstr ""
+
+msgid "New..."
+msgstr ""
+
+msgid "New File"
+msgstr ""
+
+msgid "Open..."
+msgstr ""
+
+msgid "Open File"
+msgstr ""
+
+msgid "Undo"
+msgstr ""
+
+msgid "Redo"
+msgstr ""
+
+msgid "About Qt"
+msgstr ""
+
+msgid "Third Party Notices"
+msgstr ""
+
+msgid "Unpack..."
+msgstr ""
+
+msgid "Cut"
+msgstr ""
+
+msgid "Copy"
+msgstr ""
+
+msgid "Paste"
+msgstr ""
+
+msgid "Project Source Code"
+msgstr ""
+
+msgid "Resize Images"
+msgstr ""
+
+msgid "Image"
+msgstr ""
+
+msgid "Image List"
+msgstr ""
+
+msgid "Digital Number"
+msgstr ""
+
+msgid "Analog Display"
+msgstr ""
+
+msgid "Arc Progress"
+msgstr ""
+
+msgid "Documentation"
+msgstr ""
+
+msgid ""
+"<html><head/><body><p><img src=\":/Dark/folder-open.png\"/> <a "
+"href=\"\\&quot;\\&quot;\"><span style=\" text-decoration: underline; color:"
+"#55aaff;\">Open Project...</span></a></p></body></html>"
+msgstr ""
+
+msgid "Welcome"
+msgstr ""
+
+msgid ""
+"<html><head/><body><p><img src=\":/Dark/file-plus.png\"/> <a href=\"\\&quot;"
+"\\&quot;\"><span style=\" text-decoration: underline; color:#55aaff;\">New "
+"Project...</span></a></p></body></html>"
+msgstr ""
+
+msgid "Help"
+msgstr ""
+
+msgid "About"
+msgstr ""
+
+msgid "View"
+msgstr ""
+
+msgid "Toolbars"
+msgstr ""
+
+msgid "Tools"
+msgstr ""
+
+msgid "Create"
+msgstr ""
+
+msgid "Project"
+msgstr ""
+
+msgid "Properties"
+msgstr ""
+
+msgid "File Toolbar"
+msgstr ""
+
+msgid "toolBar_2"
+msgstr ""
+
+msgid "toolBar"
+msgstr ""
+
+msgid "New Project..."
+msgstr ""
+
+msgid "Select device"
+msgstr ""
+
+msgid "Project name"
+msgstr ""
+
+msgid "Create project..."
+msgstr ""
+
+msgid "Project location"
+msgstr ""
+
+msgid "Build Project..."
+msgstr ""
+
+msgid "Configure project..."
+msgstr ""
+
+msgid "Watchface name"
+msgstr ""
+
+msgid "Watchface thumbnail"
+msgstr ""
+
+msgid "Build project..."
+msgstr ""
+
+msgid "Building project..."
+msgstr ""
+
+msgid "Build results..."
+msgstr ""
+
+msgid "Select resource..."
+msgstr ""
+
+msgid "..."
+msgstr ""
+
+msgid "Search:"
+msgstr ""

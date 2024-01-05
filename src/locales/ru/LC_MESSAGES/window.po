@@ -1,0 +1,214 @@
+# Window Translation for Mi Create.
+# FIRST AUTHOR <ooflet@proton.me>, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.0\n"
+"POT-Creation-Date: 2024-01-02 11:05+1100\n"
+"PO-Revision-Date: 2024-01-05 12:23+1100\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+"X-Generator: Poedit 3.4\n"
+
+msgid "Mi Create"
+msgstr ""
+
+msgid "Save..."
+msgstr "Спасите..."
+
+msgid "Save as..."
+msgstr "Сохранить как..."
+
+msgid "About Mi Create"
+msgstr "О компании Mi Create"
+
+msgid "Settings"
+msgstr "Настройки"
+
+msgid "Build..."
+msgstr "Стройте..."
+
+msgid "Build"
+msgstr "Построить"
+
+msgid "Explorer"
+msgstr "Исследователь"
+
+msgid "Attributes"
+msgstr "Атрибуты"
+
+msgid "Exit"
+msgstr "Выход"
+
+msgid "Edit"
+msgstr "Редактировать"
+
+msgid "File"
+msgstr "Файл"
+
+msgid "Layout"
+msgstr "Макет"
+
+msgid "New..."
+msgstr "Новый..."
+
+msgid "New File"
+msgstr "Новый файл"
+
+msgid "Open..."
+msgstr "Откройте..."
+
+msgid "Open File"
+msgstr "Открыть файл"
+
+msgid "Undo"
+msgstr "Отменить"
+
+msgid "Redo"
+msgstr "Редо"
+
+msgid "About Qt"
+msgstr "О Qt"
+
+msgid "Third Party Notices"
+msgstr "Уведомления третьих лиц"
+
+msgid "Unpack..."
+msgstr "Распакуйте..."
+
+msgid "Cut"
+msgstr "Разрез"
+
+msgid "Copy"
+msgstr "Копировать"
+
+msgid "Paste"
+msgstr "Паста"
+
+msgid "Project Source Code"
+msgstr "Исходный код проекта"
+
+msgid "Resize Images"
+msgstr "Изменение размера изображений"
+
+msgid "Image"
+msgstr "Изображение"
+
+msgid "Image List"
+msgstr "Список изображений"
+
+msgid "Digital Number"
+msgstr "Цифровой номер"
+
+msgid "Analog Display"
+msgstr "Аналоговый дисплей"
+
+msgid "Arc Progress"
+msgstr "Прогресс дуги"
+
+msgid "Documentation"
+msgstr "Документация"
+
+msgid ""
+"<html><head/><body><p><img src=\":/Dark/folder-open.png\"/> <a "
+"href=\"\\&quot;\\&quot;\"><span style=\" text-decoration: underline; color:"
+"#55aaff;\">Open Project...</span></a></p></body></html>"
+msgstr ""
+"<html><head/><body><p><img src=\":/Dark/folder-open.png\"/> <a "
+"href=\"\\&quot;\\&quot;\"><span style=\"text-decoration: underline; color:"
+"#55aaff;\">Открыть проект...</span></a></p></body></html>"
+
+msgid "Welcome"
+msgstr "Добро пожаловать"
+
+msgid ""
+"<html><head/><body><p><img src=\":/Dark/file-plus.png\"/> <a href=\"\\&quot;"
+"\\&quot;\"><span style=\" text-decoration: underline; color:#55aaff;\">New "
+"Project...</span></a></p></body></html>"
+msgstr ""
+"<html><head/><body><p><img src=\":/Dark/file-plus.png\"/> <a href=\"\\&quot;"
+"\\&quot;\"><span style=\"text-decoration: underline; color:#55aaff;\">Новый "
+"проект...</span></a></p></body></html>"
+
+msgid "Help"
+msgstr "Помощь"
+
+msgid "About"
+msgstr "О сайте"
+
+msgid "View"
+msgstr "Посмотреть"
+
+msgid "Toolbars"
+msgstr "Панели инструментов"
+
+msgid "Tools"
+msgstr "Инструменты"
+
+msgid "Create"
+msgstr "Создать"
+
+msgid "Project"
+msgstr "Проект"
+
+msgid "Properties"
+msgstr "Свойства"
+
+msgid "File Toolbar"
+msgstr "Панель инструментов файла"
+
+msgid "toolBar_2"
+msgstr ""
+
+msgid "toolBar"
+msgstr ""
+
+msgid "New Project..."
+msgstr "Новый проект..."
+
+msgid "Select device"
+msgstr "Выберите устройство"
+
+msgid "Project name"
+msgstr "Название проекта"
+
+msgid "Create project..."
+msgstr "Создайте проект..."
+
+msgid "Project location"
+msgstr "Расположение проекта"
+
+msgid "Build Project..."
+msgstr "Постройте проект..."
+
+msgid "Configure project..."
+msgstr "Настройте проект..."
+
+msgid "Watchface name"
+msgstr "Название часового интерфейса"
+
+msgid "Watchface thumbnail"
+msgstr "Миниатюра часового интерфейса"
+
+msgid "Build project..."
+msgstr "Постройте проект..."
+
+msgid "Building project..."
+msgstr "Строительный проект..."
+
+msgid "Build results..."
+msgstr "Постройте результаты..."
+
+msgid "Select resource..."
+msgstr "Выберите ресурс..."
+
+msgid "..."
+msgstr "..."
+
+msgid "Search:"
+msgstr "Поиск:"

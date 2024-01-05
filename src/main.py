@@ -7,21 +7,16 @@
 # And that allows the explorer to also display any apps placed in the project
 # Plus, its more simpler for me to use
 
-# Make so that data files are automatically created by the program, not manually bundled in.
+# Migrate to PyQt6 so that i can actually use QScintilla and make a proper code editor instead of bundling Chromium for no reason
+# Just so I can use Monaco
 
 # Also, bundle in higher quality icons or use SVG versions they look very bad on Windows scale > 100%
-
-# Also add in a js/lua autocomplete to monaco, will be useful for turning the app into a full fledged IDE
-# But thats against trying to make the project as simple as it possibly can, would it?
-# Too many features, and new users immediately overwhelmed, need to open documentation for every feature lmao
-
-# Make application compatible with Linux/macOS
 
 import os
 import pdb
 import gettext
 
-from PySide6.QtWidgets import (QMainWindow, QDialog, QMessageBox, QApplication, QGraphicsScene, QPushButton, 
+from PySide6.QtWidgets import (QMainWindow, QDialog, QInputDialog, QMessageBox, QApplication, QGraphicsScene, QPushButton, 
                                QDialogButtonBox, QTreeWidgetItem, QFileDialog, QToolButton, QToolBar, QWidget, QVBoxLayout, 
                                QFrame, QColorDialog, QFontDialog, QSplashScreen)
 from PySide6.QtGui import QIcon, QPixmap, QDesktopServices
@@ -30,6 +25,7 @@ from PySide6.QtWebEngineWidgets import QWebEngineView
 
 from pprint import pprint
 import xml.dom.minidom
+import configparser
 import xmltodict
 import threading
 import logging
@@ -38,6 +34,7 @@ import json
 import theme.styles as theme
 import traceback
 
+from coreGettext import QCoreApplication
 from updater.updater import Updater
 from project.projectManager import watchData, fprjProject
 from history.historyManager import historySystem
@@ -58,7 +55,7 @@ logging.basicConfig(level=logging.DEBUG)
 _ = gettext.gettext
 
 currentDir = os.getcwd()
-currentVersion = '0.0.1-pre-alpha-2'
+currentVersion = '1.0'
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -76,7 +73,26 @@ class MainWindow(QMainWindow):
         def close():
             self.settingsDialog.close()
             self.stagedChanges = []
+
+        # Setup Language
         
+        # Language[0] is language name
+        # Language[1] is language directory
+        # Language[2] is authorMessage
+        # Language[3] is author contact details
+        self.languages = []
+        self.languageNames = []
+
+        logging.debug("Initializing Language Files")
+        for file in os.listdir("locales"):
+            languageDir = os.path.join("locales", file)
+            if os.path.isdir(languageDir):
+                config = configparser.ConfigParser()
+                config.read_file(open(os.path.join(languageDir, "CONFIG.ini"), encoding="utf8"))
+                self.languages.append([config.get('config', 'language'), languageDir, config.get('config', 'authorMessage'), config.get('config', 'contact')])
+                self.languageNames.append(config.get('config', 'language'))
+
+
         self.settingsDialog = QDialog(self) 
         self.settingsDialog.setFixedSize(500, 300)
         self.settingsDialog.setWindowTitle("Settings")
@@ -90,13 +106,17 @@ class MainWindow(QMainWindow):
         self.settingsDialog.setLayout(self.settingsLayout)
         self.loadSettings() 
 
+        rawSettings = QSettings("Mi Create", "Preferences")
+        if "Language" not in rawSettings.allKeys():
+            item, accepted = QInputDialog().getItem(self, "Mi Create", "Select Language", self.languageNames, 0)
+            if accepted and not item == "":
+                self.stagedChanges.append(["Language", item])
+                self.saveSettings(False)
+                
         self.settingsWidget.loadProperties(self.settings)
         self.settingsWidget.propertyChanged.connect(lambda property, value: self.stagedChanges.append([property, value]))
         self.loadTheme() 
 
-        # Setup Language
-        logging.debug("Initializing Language Files")
- 
         # Setup projects (tabs) 
         self.projects = {
             "Welcome": {
@@ -125,9 +145,41 @@ class MainWindow(QMainWindow):
         self.newProjectUi.setupUi(self.newProjectDialog) 
  
         # Setup Compile Project Dialog 
+        def accepted():
+            if self.currentCompileState == 0:
+                currentProject = self.getCurrentProject()
+                currentProject["data"]["FaceProject"]["Screen"]["@Title"] = self.compileUi.watchfaceName.text()
+                currentProject["data"]["FaceProject"]["Screen"]["@Bitmap"] = self.compileUi.thumbnailLocation.text()
+
+                reply = QMessageBox.question(self, 'Mi Create', _("Save project before building?"), QMessageBox.Yes, QMessageBox.No)
+                if reply == QMessageBox.Yes:
+                    self.saveProjects("current")
+
+                currentIndex = self.ui.workspace.currentIndex()
+                currentName = self.ui.workspace.tabText(currentIndex)
+                compileDirectory = os.path.join(os.path.dirname(currentName), "output")
+
+                self.compileUi.buttonBox.clear()
+                self.compileUi.buttonBox.addButton("OK", QDialogButtonBox.AcceptRole)
+                self.compileUi.buttonBox.setDisabled(True)
+                self.compileUi.textEdit.setReadOnly(True)
+                self.compileUi.stackedWidget.setCurrentIndex(1)
+                QApplication.processEvents()
+
+                result = fprjProject.compile(currentName, compileDirectory, "compiler/compile.exe")
+                self.compileUi.buttonBox.setDisabled(False)
+                self.compileUi.textEdit.setText(str(result))
+                self.compileUi.stackedWidget.setCurrentIndex(2)
+                self.currentCompileState = 1
+
+            elif self.currentCompileState == 1:
+                self.compileDialog.close()
+
         self.compileDialog = QDialog(self) 
         self.compileUi = Ui_CompileDialog() 
         self.compileUi.setupUi(self.compileDialog) 
+        self.compileUi.buttonBox.accepted.connect(accepted)
+        self.compileUi.buttonBox.rejected.connect(lambda: self.compileDialog.close())
  
         # Setup Main Window 
         logging.debug("Initializing MainWindow")
@@ -145,7 +197,8 @@ class MainWindow(QMainWindow):
         self.setupProperties()
         logging.debug("Initializing Misc") 
         self.setupNewProjectDialog() 
-        self.loadWindowState() 
+        self.loadWindowState()
+        self.loadLanguage(True)
         logging.debug("Launch!!")
         self.statusBar().showMessage("Ready", 3000) 
 
@@ -230,7 +283,7 @@ class MainWindow(QMainWindow):
         self.restoreGeometry(settings.value("geometry"))
         self.restoreState(settings.value("state"))
 
-    def saveSettings(self):
+    def saveSettings(self, retranslate):
         settings = QSettings("Mi Create", "Preferences")
         for property, value in self.stagedChanges:
             settings.setValue(property, value)
@@ -238,13 +291,15 @@ class MainWindow(QMainWindow):
         self.loadSettings()
         self.settingsDialog.close()
         self.loadTheme()
+        if retranslate:
+            self.loadLanguage(True)
 
     def loadSettings(self):
         settings = QSettings("Mi Create", "Preferences")
         with open("data/settings.json") as file:
             self.settings = json.load(file)
             self.settings["General"]["Theme"][3] = ["Dark", "Light"]
-            self.settings["General"]["Language"][3] = ["English", "Something Else"]
+            self.settings["General"]["Language"][3] = self.languageNames
 
         for key in settings.allKeys():
             for category, properties in self.settings.items():
@@ -257,6 +312,25 @@ class MainWindow(QMainWindow):
                         else:
                             value[2] = settings.value(key)
 
+    def loadLanguage(self, retranslate):
+        selectedLanguage = None
+        for language in self.languages:
+            if language[0] == self.settings["General"]["Language"][2]:
+                selectedLanguage = language
+                break
+
+        if selectedLanguage != None:
+            translation = gettext.translation('main', localedir='locales', languages=[os.path.basename(selectedLanguage[1])])
+            translation.install()
+            global _
+            _ = translation.gettext
+            QCoreApplication.loadLanguage(os.path.basename(selectedLanguage[1]))
+            self.propertiesWidget.loadLanguage(os.path.basename(selectedLanguage[1]))
+            self.ui.retranslateUi(self)
+            self.compileUi.retranslateUi(self.compileDialog)
+            self.newProjectUi.retranslateUi(self.newProjectDialog)
+        else:
+            self.showDialogue("error", "Current selected language not found!")
 
     def launchUpdater(self):
         self.closeWithoutWarning = True
@@ -342,15 +416,10 @@ class MainWindow(QMainWindow):
                 self.updateProperties(False)
 
         # setup compile dialog
-        
-        okButton = QPushButton()
-        okButton.setText("OK")
 
         widget = QWebEngineView()
         widget.setUrl("")
         self.ui.workspace.addTab(widget, "init")
-
-        self.compileUi.buttonBox.addButton(okButton, QDialogButtonBox.AcceptRole)
         
         # Connect objects in the Insert menu to actions
         self.ui.actionImage.triggered.connect(lambda: self.createCanvasWidget("30"))
@@ -375,7 +444,7 @@ class MainWindow(QMainWindow):
                 currentProject = self.getCurrentProject()
 
                 # check if current selected object is not already selected
-                if self.ui.Explorer.selectedItems()[0].data(0, 101) == currentProject["canvas"].getSelectedObject()[0].data(0):
+                if currentProject["canvas"].getSelectedObject() != [] and self.ui.Explorer.selectedItems()[0].data(0, 101) == currentProject["canvas"].getSelectedObject()[0].data(0):
                     selected = True
                     
                 if not selected:
@@ -655,7 +724,7 @@ class MainWindow(QMainWindow):
                 insertButton.setMenu(self.ui.menuInsert)
                 insertButton.setPopupMode(QToolButton.InstantPopup)
                 insertButton.setIcon(QPixmap(":Dark/plus.png"))
-                insertButton.setText("Create Widget")
+                insertButton.setText(_("Create Widget"))
                 insertButton.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
 
                 # Setup AOD Switch
@@ -735,7 +804,7 @@ class MainWindow(QMainWindow):
         self.ui.actionThirdPartyNotice.triggered.connect(self.showThirdPartyNotices)
 
         # settings
-        self.settingsButtonBox.accepted.connect(self.saveSettings)
+        self.settingsButtonBox.accepted.connect(lambda: self.saveSettings(True))
 
     def clearWindowState(self):
         reply = QMessageBox.question(self, 'Confirm Clear', _("Are you sure you want to reset all dock widget positions?"), QMessageBox.Yes, QMessageBox.No)
@@ -846,26 +915,21 @@ class MainWindow(QMainWindow):
     def compileProject(self):
         if self.projects.get(self.ui.workspace.tabText(self.ui.workspace.currentIndex())):
             if self.ui.workspace.tabText(self.ui.workspace.currentIndex()) != "Welcome" and self.ui.workspace.tabText(self.ui.workspace.currentIndex()) != "Project XML":
-                reply = QMessageBox.question(self, 'Mi Create', _("Save project before building?"), QMessageBox.Yes, QMessageBox.No)
-                if reply == QMessageBox.Yes:
-                    self.saveProjects("current")
-                QApplication.processEvents()
-                
-                currentIndex = self.ui.workspace.currentIndex()
-                currentName = self.ui.workspace.tabText(currentIndex)
-                compileDirectory = os.path.join(os.path.dirname(currentName), "output")
+                currentProject = self.getCurrentProject()
 
-                self.compileUi.buttonBox.setDisabled(True)
-                self.compileUi.textEdit.setReadOnly(True)
-                self.compileUi.stackedWidget.setCurrentIndex(1)
+                self.currentCompileState = 0
+
+                self.compileUi.buttonBox.clear()
+
+                self.compileUi.buttonBox.addButton("Next", QDialogButtonBox.AcceptRole)
+                self.compileUi.buttonBox.addButton("Cancel", QDialogButtonBox.RejectRole)
+
+                self.compileUi.watchfaceName.setText(currentProject["data"]["FaceProject"]["Screen"]["@Title"])
+                self.compileUi.thumbnailLocation.setText(currentProject["data"]["FaceProject"]["Screen"]["@Bitmap"])
+
                 self.compileDialog.setModal(True)
                 self.compileDialog.show()
-                QApplication.processEvents()
-
-                result = fprjProject.compile(currentName, compileDirectory, "compiler/compile.exe")
-                self.compileUi.buttonBox.setDisabled(False)
-                self.compileUi.textEdit.setText(str(result))
-                self.compileUi.stackedWidget.setCurrentIndex(2) 
+                self.compileUi.stackedWidget.setCurrentIndex(0)
 
     def decompileProject(self):
         self.showDialogue("error", "Will add later, apologies.")

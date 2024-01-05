@@ -1,0 +1,88 @@
+# Main Translation for Mi Create.
+# FIRST AUTHOR <ooflet@proton.me>, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.0\n"
+"POT-Creation-Date: 2024-01-02 11:05+1100\n"
+"PO-Revision-Date: 2024-01-05 15:05+1100\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+"X-Generator: Poedit 3.4\n"
+
+msgid "You have unsaved project(s) open. Save and quit?"
+msgstr "У вас открыт несохраненный проект(ы). Сохранить и выйти из программы?"
+
+msgid "An urgent update {version} was released! The app will now update."
+msgstr ""
+"Выпущено срочное обновление {version}! Теперь приложение будет обновляться."
+
+msgid "A new update has been found (v{version}). Would you like to update now?"
+msgstr "Найдено новое обновление (v{version}). Хотите обновить сейчас?"
+
+msgid "Widget {shape} not implemented in ObjectIcon(), please report as issue."
+msgstr ""
+"Виджет {shape} не реализован в ObjectIcon(), пожалуйста, сообщите об этом "
+"как о проблеме."
+
+msgid "Failed to obtain currentItem"
+msgstr "Не удалось получить текущий элемент (CurrentItem)"
+
+msgid ""
+"No object found in widget list that has the name of currently selected "
+"graphics item: "
+msgstr ""
+"В списке виджетов не найдено объекта с именем выбранного в данный момент "
+"графического элемента: "
+
+msgid "Error occured during property update: Object not found!"
+msgstr "Возникла ошибка при обновлении свойств: Объект не найден!"
+
+msgid "Unable to find"
+msgstr "Невозможно найти"
+
+msgid "Select Folder..."
+msgstr "Выберите папку..."
+
+msgid "Are you sure you want to reset all dock widget positions?"
+msgstr "Вы уверены, что хотите сбросить все позиции виджетов доков?"
+
+msgid ""
+"Are you sure you want to create your project in the directory of this "
+"program?"
+msgstr "Вы уверены, что хотите создать свой проект в каталоге этой программы?"
+
+msgid "Failed to createNewWorkspace: "
+msgstr "Не удалось создатьNewWorkspace: "
+
+msgid "Cannot open project: "
+msgstr "Невозможно открыть проект: "
+
+msgid "Failed to create a new project: "
+msgstr "Не удалось создать новый проект: "
+
+msgid "Open Project..."
+msgstr "Открытый проект..."
+
+msgid "Failed to open project: "
+msgstr "Не удалось открыть проект: "
+
+msgid "Failed to save: "
+msgstr "Не удалось сохранить: "
+
+msgid "Failed to save project: "
+msgstr "Не удалось сохранить проект: "
+
+msgid "Project saved at "
+msgstr "Проект сохранен на "
+
+msgid "Save project before building?"
+msgstr "Сохранить проект до начала строительства?"
+
+msgid "Create Widget"
+msgstr "Создать виджет"

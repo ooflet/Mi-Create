@@ -3,7 +3,12 @@
 
 # Use a properties "scaffold" with the widget when creating
 
+import sys
+
+sys.path.append("..")
+
 import os
+import gettext
 import shutil
 import traceback
 import logging
@@ -14,6 +19,8 @@ from PySide6.QtWidgets import (QStyledItemDelegate, QWidget, QFileDialog, QTreeW
 from PySide6.QtCore import Qt, Signal, QPoint, QSize
 from PySide6.QtGui import QColor, QPen, QGuiApplication, QIcon, QPalette
 from pprint import pprint
+
+_ = gettext.gettext
 
 class GridDelegate(QStyledItemDelegate):
     def __init__(self, parent=None):
@@ -111,6 +118,13 @@ class PropertiesWidget(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
+    @staticmethod
+    def loadLanguage(language):
+        translation = gettext.translation('properties', localedir='locales', languages=[language])
+        translation.install()
+        global _
+        _ = translation.gettext
+
     def reloadResourceImages(self):
         self.resourceDialogUI.imageSelect.clear()
         for filename in os.listdir(self.imageFolder):
@@ -125,7 +139,7 @@ class PropertiesWidget(QWidget):
         self.propertyChanged.emit(property, value)
 
     def addProperty(self, srcProperty, name, valueWidget, parent):
-        item = QTreeWidgetItem(parent, [name, ""])
+        item = QTreeWidgetItem(parent, [_(name), ""])
         self.treeWidget.setItemWidget(item, 1, valueWidget)
         self.propertyItems[srcProperty] = valueWidget
         item.setExpanded(True)
@@ -204,7 +218,10 @@ class PropertiesWidget(QWidget):
             comboBox.setEditable(True)
             comboBox.setStyleSheet("background-color: rgba(0, 0, 0, 0); ")
         if selected:
-            comboBox.setCurrentIndex(items.index(selected))
+            if not selected.isnumeric():
+                comboBox.setCurrentIndex(items.index(selected))
+            else:
+                comboBox.setCurrentIndex(int(selected))
         comboBox.currentTextChanged.connect(onChanged)
         return comboBox
     
@@ -252,7 +269,7 @@ class PropertiesWidget(QWidget):
         for key, value in properties.items():
             if isinstance(value, dict):
                 # category
-                categoryItem = self.createCategory(key, parent)
+                categoryItem = self.createCategory(_(key), parent)
                 self.addCategories(value, data, categoryItem, device)  # Recursively add sub-categories
             else:
                 ignorePropertyCreation = False
@@ -291,14 +308,21 @@ class PropertiesWidget(QWidget):
                             self.imageCategories.append([imageCategory, imageInput, indexInput])
 
                         for index, image in enumerate(imageList):
-                            values = image.split(":")  
-                            try:
-                                self.imageCategories[index][1].setText(values[1])             
-                                self.imageCategories[index][2].setValue(int(values[0].strip("()"))) 
+                            values = image.split(":")
+                            if values != ['']:
+                                try:
+                                    self.imageCategories[index][1].setText(values[1])             
+                                    self.imageCategories[index][2].setValue(int(values[0].strip("()"))) 
+                                    self.imageCategories[index][1].textChanged.connect(lambda text, indexInput=self.imageCategories[index][2], index=index: imagesChanged(indexInput.text(), text, index))
+                                    self.imageCategories[index][2].textChanged.connect(lambda text, imageInput=self.imageCategories[index][1], index=index: imagesChanged(text, imageInput.text(), index))
+                                except Exception as e:
+                                    print(traceback.format_exc())
+                                    return False, traceback.format_exc()
+                            else:
                                 self.imageCategories[index][1].textChanged.connect(lambda text, indexInput=self.imageCategories[index][2], index=index: imagesChanged(indexInput.text(), text, index))
                                 self.imageCategories[index][2].textChanged.connect(lambda text, imageInput=self.imageCategories[index][1], index=index: imagesChanged(text, imageInput.text(), index))
-                            except Exception as e:
-                                return False, traceback.format_exc()
+ 
+
                         return True, None
 
                     def deleteAllCategories():
@@ -338,8 +362,6 @@ class PropertiesWidget(QWidget):
                     inputWidget = self.createSpinBox(propertyValue, False, False, key, int(value[3]), int(value[4]))
                 elif value[1] == "bool":
                     inputWidget = self.createCheckBox(propertyValue, key)
-                elif value[1] == "align":
-                    inputWidget = self.createAlignmentComboBox(propertyValue, key)
                 elif value[1] == "src":
                     for x in self.sourceData[str(device)]:
                         if propertyValue != '':

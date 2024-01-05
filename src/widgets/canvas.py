@@ -239,10 +239,12 @@ class Canvas(QGraphicsView):
 
                     if i["@BitmapList"] != "":
                         # Get Image
-                        image = QPixmap()
-                        image.load(os.path.join(imageFolder, firstImage[1]))
-
-                        imageWidget.addImage(image, 0, 0, 0, antialiasing)
+                        if firstImage != []:
+                            image = QPixmap()
+                            image.load(os.path.join(imageFolder, firstImage[1]))
+                            imageWidget.addImage(image, 0, 0, 0, antialiasing)
+                        else:
+                            imageWidget.representNoImage()
                         name = i["@Name"]
                         releaseEvent = imageWidget.returnMouseReleaseEvent()
                         self.scene.addItem(imageWidget)
@@ -261,7 +263,11 @@ class Canvas(QGraphicsView):
                     imageWidget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), QColor(255,255,255,100), i["@Name"], imageFolder)
                     imageWidget.setZValue(index)
 
-                    imageWidget.loadNumbers(i["@Digits"], i["@Spacing"], imageList, antialiasing)
+                    if len(imageList) != 11:
+                        imageWidget.representNoImage()
+                    else:
+                        imageWidget.loadNumbers(i["@Digits"], i["@Spacing"], imageList, antialiasing)
+                        
                     releaseEvent = imageWidget.returnMouseReleaseEvent()
                     name = i["@Name"]
                     self.scene.addItem(imageWidget)
@@ -859,14 +865,24 @@ class AnalogWidget(Widget):
             self.background = QGraphicsPixmapItem(background, self)
         self.centerHighlighted = True
         self.bgImage = QGraphicsPixmapItem(background, self)
+        if hrHand.isNull():
+            self.color = QColor(255, 0, 0, 100)
+            self.setRect(0,0,100,100)
         self.hrHand = QGraphicsPixmapItem(hrHand, self)
         self.hrHand.setOffset(-int(hrHandX), -int(hrHandY))
         self.hrHand.setRotation(-60)
         self.hrHand.setPos(screenSizeX/2, screenSizeY/2)
         self.minHand = QGraphicsPixmapItem(minHand, self)
+        if minHand.isNull():
+            self.color = QColor(255, 0, 0, 100)
+            self.setRect(0,0,100,100)
+        self.minHand = QGraphicsPixmapItem(minHand, self)
         self.minHand.setOffset(-int(minHandX), -int(minHandY))
         self.minHand.setRotation(60)
         self.minHand.setPos(screenSizeX/2, screenSizeY/2)
+        if secHand.isNull():
+            self.color = QColor(255, 0, 0, 100)
+            self.setRect(0,0,100,100)
         self.secHand = QGraphicsPixmapItem(secHand, self)
         self.secHand.setOffset(-int(secHandX), -int(secHandY))
         self.secHand.setPos(screenSizeX/2, screenSizeY/2)

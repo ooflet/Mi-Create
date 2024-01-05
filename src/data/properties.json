@@ -501,8 +501,9 @@
                 ],
                 "@Alignment": [
                     "Alignment",
-                    "align",
-                    ""
+                    "combobox",
+                    "",
+                    ["Left", "Center", "Right"]
                 ]
             },
             "Appearance": {
