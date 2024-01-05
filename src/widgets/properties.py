@@ -282,9 +282,9 @@ class PropertiesWidget(QWidget):
                 inputWidget = None
                 
                 if value[1] == "disabled":
-                    inputWidget = self.createLineEdit(propertyValue, True, key)
+                    inputWidget = self.createLineEdit(propertyValue, True, False, key)
                 elif value[1] == "text":
-                    inputWidget = self.createLineEdit(propertyValue, False, key)
+                    inputWidget = self.createLineEdit(propertyValue, False, False, key)
                 elif value[1] == "img":
                     inputWidget = self.createResourceEdit(propertyValue, False, False, key)
                 elif value[1] == "combobox":

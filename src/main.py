@@ -527,6 +527,9 @@ class MainWindow(QMainWindow):
                         except:
                             currentItem[args[0]] = int(x["@ID"])
 
+            elif args[0] == "@Name":
+                currentItem[args[0]] = args[1]
+                self.updateExplorer(currentProject["data"])
             else:
                 currentItem[args[0]] = args[1]
             self.propertiesWidget.clearOnRefresh = False

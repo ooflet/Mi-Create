@@ -8,7 +8,9 @@
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
+from coreGettext import QCoreApplication
+
+from PySide6.QtCore import (QDate, QDateTime, QLocale,
     QMetaObject, QObject, QPoint, QRect,
     QSize, QTime, QUrl, Qt)
 from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
@@ -21,7 +23,6 @@ from PySide6.QtWidgets import (QApplication, QDockWidget, QFrame, QGridLayout,
     QMenuBar, QSizePolicy, QSpacerItem, QStatusBar,
     QTabWidget, QToolBar, QTreeWidget, QTreeWidgetItem,
     QVBoxLayout, QWidget)
-import icons_rc
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
