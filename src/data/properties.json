@@ -31,13 +31,17 @@
                 ],
                 "@Width": [
                     "Width",
-                    "disabled",
-                    "48"
+                    "int",
+                    "48",
+                    "0",
+                    "999"
                 ],
                 "@Height": [
                     "Height",
-                    "disabled",
-                    "48"
+                    "int",
+                    "48",
+                    "0",
+                    "999"
                 ]
             },
             "Appearance": {

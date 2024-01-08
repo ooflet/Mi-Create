@@ -293,8 +293,12 @@ class PropertiesWidget(QWidget):
                     self.imageCategories = []
 
                     def imagesChanged(stringIndex, image, index):
+                        print("img change")
                         imageString = f"({stringIndex}):{image}"
-                        imageList[index] = imageString
+                        if len(imageList) <= index:
+                            image[index] = imageString
+                        else:
+                            imageList.insert(index, imageString)
                         completeString = '|'.join(imageList)
                         self.sendPropertyChangedSignal(key, completeString)
 
@@ -307,22 +311,24 @@ class PropertiesWidget(QWidget):
                             self.addProperty("", "Index", indexInput, imageCategory)
                             self.imageCategories.append([imageCategory, imageInput, indexInput])
 
-                        for index, image in enumerate(imageList):
-                            values = image.split(":")
-                            if values != ['']:
+                            print(len(imageList), index)
+                            if len(imageList) - 1 > index:
+                                print("more")
+                                image = imageList[index]
+                                values = image.split(":")
                                 try:
-                                    self.imageCategories[index][1].setText(values[1])             
-                                    self.imageCategories[index][2].setValue(int(values[0].strip("()"))) 
-                                    self.imageCategories[index][1].textChanged.connect(lambda text, indexInput=self.imageCategories[index][2], index=index: imagesChanged(indexInput.text(), text, index))
-                                    self.imageCategories[index][2].textChanged.connect(lambda text, imageInput=self.imageCategories[index][1], index=index: imagesChanged(text, imageInput.text(), index))
+                                    indexInput.setValue(int(values[0].strip("()"))) 
+                                    imageInput.setText(values[1])             
+                                    imageInput.textChanged.connect(lambda text, indexInput=self.imageCategories[index][2], index=index: imagesChanged(indexInput.text(), text, index))
+                                    indexInput.textChanged.connect(lambda text, imageInput=self.imageCategories[index][1], index=index: imagesChanged(text, imageInput.text(), index))
                                 except Exception as e:
                                     print(traceback.format_exc())
                                     return False, traceback.format_exc()
                             else:
-                                self.imageCategories[index][1].textChanged.connect(lambda text, indexInput=self.imageCategories[index][2], index=index: imagesChanged(indexInput.text(), text, index))
-                                self.imageCategories[index][2].textChanged.connect(lambda text, imageInput=self.imageCategories[index][1], index=index: imagesChanged(text, imageInput.text(), index))
+                                print("less")
+                                imageInput.textChanged.connect(lambda text, indexInput=self.imageCategories[index][2], index=index: imagesChanged(indexInput.text(), text, index))
+                                indexInput.textChanged.connect(lambda text, imageInput=self.imageCategories[index][1], index=index: imagesChanged(text, imageInput.text(), index))
  
-
                         return True, None
 
                     def deleteAllCategories():
@@ -351,13 +357,30 @@ class PropertiesWidget(QWidget):
                     ignorePropertyCreation = True
                     imageList = propertyValue.split("|")
 
-                    for index in range(0, 10):
+                    def updateNumberList(index, text):
+                        if index >= len(imageList):
+                            imageList.insert(index, text)
+                        else:
+                            imageList[index] = text
+                        imageString = '|'.join(imageList)
+                        self.sendPropertyChangedSignal(key, imageString)
+
+                    def createInput(index, definedText=None):
                         text = ""
                         if index < len(imageList):
                             text = imageList[index]
                         imageInput = self.createResourceEdit(text, False, True)
-                        self.addProperty("", "Number "+str(index), imageInput, parent)
-                    
+                        if definedText == None:
+                            self.addProperty("", "Number "+str(index), imageInput, parent)
+                        else:
+                            self.addProperty("", definedText, imageInput, parent)
+                        imageInput.textChanged.connect(lambda text, index=index: updateNumberList(index, text))
+
+                    for index in range(0, 10):
+                        createInput(index)
+
+                    createInput(10, "Negative Sign")
+
                 elif value[1] == "int":
                     inputWidget = self.createSpinBox(propertyValue, False, False, key, int(value[3]), int(value[4]))
                 elif value[1] == "bool":
@@ -390,7 +413,6 @@ class PropertiesWidget(QWidget):
         else:
             self.addCategories(properties["properties"], data, None, device)
         if scrollTo != None:
-            print(scrollTo)
             self.treeWidget.scrollContentsBy(0, scrollTo)
 
     def clearProperties(self):

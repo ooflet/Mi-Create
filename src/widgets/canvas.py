@@ -8,14 +8,15 @@ import os
 import sys
 import traceback
 import logging
+from tracemalloc import start
 from typing import Any
 
 sys.path.append("..")
 from project.projectManager import watchData
 
 from PySide6.QtCore import Signal, QPointF, QModelIndex, QSize, QRectF, QRect
-from PySide6.QtGui import Qt, QPainter, QPainterPath, QPen, QColor, QStandardItemModel, QPixmap, QIcon, QBrush
-from PySide6.QtWidgets import (QApplication, QGraphicsPathItem, QGraphicsScene, QGraphicsView, QGraphicsItem, QGraphicsRectItem, 
+from PySide6.QtGui import Qt, QPainter, QPainterPath, QPen, QColor, QStandardItemModel, QPixmap, QIcon, QBrush, QImage
+from PySide6.QtWidgets import (QApplication, QGraphicsPathItem, QGraphicsScene, QGraphicsSceneMouseEvent, QGraphicsView, QGraphicsItem, QGraphicsRectItem, 
                                QGraphicsEllipseItem, QMenu, QGraphicsPixmapItem, QMessageBox, QRubberBand)
 
 class ObjectIcon:
@@ -54,16 +55,20 @@ class Scene(QGraphicsScene):
 class Canvas(QGraphicsView):
     objectAdded = Signal(QPointF, str)
     objectChanged = Signal(str, str, Any)
+    objectLayerChange = Signal(str, str)
     objectDeleted = Signal(str)
+
     def __init__(self, device, antialiasingEnabled, deviceOutlineVisible, insertMenu, parent=None):
         super().__init__(parent)
 
         if antialiasingEnabled:
             self.setRenderHints(QPainter.Antialiasing)
 
+        #self.setDragMode(QGraphicsView.RubberBandDrag)
+        self.setTransformationAnchor(QGraphicsView.AnchorUnderMouse)
+
         self.insertMenu = insertMenu
         self.deviceOutlineVisible = deviceOutlineVisible
-        self.rubberBand = None
         self.origin = None
         self.setAcceptDrops(True)
 
@@ -162,141 +167,125 @@ class Canvas(QGraphicsView):
     def getSelectedObject(self):
         return self.scene.selectedItems()
 
-    def onObjectPropertyChanged(self, name, property, value):
-        self.objectChanged.emit(name, property, value)
-
     def onObjectDeleted(self, name, widget):
-        widget.mouseReleaseEvent = None
         self.objectDeleted.emit(name)
 
-    def loadObjects(self, data, imageFolder, antialiasing):
-        def onItemFinishMove(event, name, x, y, releaseEvent):
-            self.onObjectPropertyChanged(name, "@X", x)
-            self.onObjectPropertyChanged(name, "@Y", y)
-            releaseEvent(event)
+    def createObject(self, index, i, imageFolder, antialiasing):
+        # so many hacks
+        # dear god
+        try:
+            if i["@Shape"] == "27":
+                bgImg = QPixmap()
+                bgImg.load(os.path.join(imageFolder, i["@Background_ImageName"]))
 
-        def createObject(index, i):
-            # Note to maintainer, some parts of the code is very shoddy
-            # During mouseReleaseEvent, it loops through all objects in the scene and returns the one that has the same name to the function
-            # This is very inneficient.
-            # Simply put, pyside's signal system is trash so i can't put the signal in the object
-            # If you can pls implement, i will be very happy
-            try:
-                if i["@Shape"] == "27":
-                    bgImg = QPixmap()
-                    bgImg.load(os.path.join(imageFolder, i["@Background_ImageName"]))
+                secImg = QPixmap()
+                secImg.load(os.path.join(imageFolder, i["@SecondHand_Image"]))
 
-                    secImg = QPixmap()
-                    secImg.load(os.path.join(imageFolder, i["@SecondHand_Image"]))
+                minImg = QPixmap()
+                minImg.load(os.path.join(imageFolder, i["@MinuteHand_Image"]))
 
-                    minImg = QPixmap()
-                    minImg.load(os.path.join(imageFolder, i["@MinuteHand_Image"]))
+                hrImg = QPixmap()
+                hrImg.load(os.path.join(imageFolder, i["@HourHand_ImageName"]))
 
-                    hrImg = QPixmap()
-                    hrImg.load(os.path.join(imageFolder, i["@HourHand_ImageName"]))
+                # Create analogwidget
+                analogWidget = AnalogWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), self, QColor(255,255,255,0), i["@Name"])
+                analogWidget.setZValue(index)
+                analogWidget.addBackground(bgImg, i["@BgImage_rotate_xc"], i["@BgImage_rotate_yc"], antialiasing)
+                analogWidget.addHourHand(hrImg, i["@HourImage_rotate_xc"], i["@HourImage_rotate_yc"], antialiasing)
+                analogWidget.addMinuteHand(minImg, i["@MinuteImage_rotate_xc"], i["@MinuteImage_rotate_yc"], antialiasing)
+                analogWidget.addSecondHand(secImg, i["@SecondImage_rotate_xc"], i["@SecondImage_rotate_yc"], antialiasing)
+                self.scene.addItem(analogWidget)
+                analogWidget.objectDeleted = lambda name, self=self: self.onObjectDeleted(name, analogWidget)
+                analogWidget.objectLayerAction = lambda name, action: self.objectLayerChange.emit(name, action)
 
-                    # Create analogwidget
-                    analogWidget = AnalogWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), QColor(255,255,255,0), i["@Name"], antialiasing, self.sceneRect().width(), self.sceneRect().height(), bgImg, secImg, i["@SecondImage_rotate_xc"], i["@SecondImage_rotate_yc"], minImg, i["@MinuteImage_rotate_xc"], i["@MinuteImage_rotate_yc"], hrImg, i["@HourImage_rotate_xc"], i["@HourImage_rotate_yc"])
-                    name = i["@Name"]
-                    releaseEvent = analogWidget.returnMouseReleaseEvent()
-                    analogWidget.setZValue(index)
-                    self.scene.addItem(analogWidget)
-                    analogWidget.mouseReleaseEvent = lambda event, self=self, name=name, releaseEvent=releaseEvent: onItemFinishMove(event, name, [i.pos().x() for i in self.items() if i.data(0) == name], [i.pos().y() for i in self.items() if i.data(0) == name], releaseEvent)
-                    analogWidget.objectDeleted = lambda name, self=self: self.onObjectDeleted(name, analogWidget)
+            elif i["@Shape"] == "29":
+                dialog = QMessageBox.warning(None, "Confirm", f"The object {i['@Name']} uses the legacy CircleProgress object, it will be automatically converted to the newer CircleProgressPlus object.")
 
-                elif i["@Shape"] == "29":
-                    dialog = QMessageBox.warning(None, "Confirm", f"The object {i['@Name']} uses the legacy CircleProgress object, it will be automatically converted to the newer CircleProgressPlus object.")
+            elif i["@Shape"] == "30":    
+                imageWidget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), self, QColor(255,255,255,0), i["@Name"], imageFolder)
+                imageWidget.setZValue(index)
 
-                elif i["@Shape"] == "30":    
-                    imageWidget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), QColor(255,255,255,0), i["@Name"], imageFolder)
-                    imageWidget.setZValue(index)
+                if i["@Bitmap"] != "":
+                    # Get QPixmap from file string
+                    image = QPixmap()
+                    image.load(os.path.join(imageFolder, i["@Bitmap"]))
 
-                    if i["@Bitmap"] != "":
-                        # Get QPixmap from file string
+                    # Create imagewidget    
+                    imageWidget.addImage(image, 0, 0, 0, antialiasing)
+                    self.scene.addItem(imageWidget)
+                else:
+                    self.scene.addItem(imageWidget)
+                    imageWidget.addImage(QPixmap(), 0, 0, 0, antialiasing)
+                    imageWidget.representNoImage()
+                
+                imageWidget.objectDeleted = lambda name, self=self: self.onObjectDeleted(name, imageWidget)
+                imageWidget.objectLayerAction = lambda name, action: self.objectLayerChange.emit(name, action)
+                
+            elif i["@Shape"] == "31":
+                imageWidget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), self, QColor(255,255,255,0), i["@Name"], imageFolder)
+                imageWidget.setZValue(index)
+                
+                # Split image strings from the Bitmaplist
+                imageList = i["@BitmapList"].split("|")
+                firstImage = imageList[0].split(":")
+
+                if i["@BitmapList"] != "":
+                    # Get Image
+                    if len(firstImage) >= 2:
                         image = QPixmap()
-                        image.load(os.path.join(imageFolder, i["@Bitmap"]))
-
-                        # Create imagewidget    
+                        image.load(os.path.join(imageFolder, firstImage[1]))
                         imageWidget.addImage(image, 0, 0, 0, antialiasing)
-                        name = i["@Name"]
-                        releaseEvent = imageWidget.returnMouseReleaseEvent()
-                        self.scene.addItem(imageWidget)
-                        imageWidget.mouseReleaseEvent = lambda event, self=self, name=name, releaseEvent=releaseEvent: onItemFinishMove(event, name, [i.pos().x() for i in self.items() if i.data(0) == name], [i.pos().y() for i in self.items() if i.data(0) == name], releaseEvent)
                     else:
-                        self.scene.addItem(imageWidget)
-                        imageWidget.addImage(QPixmap(), 0, 0, 0, antialiasing)
                         imageWidget.representNoImage()
-                    
-                    imageWidget.objectDeleted = lambda name, self=self: self.onObjectDeleted(name, imageWidget)
-                    
-                elif i["@Shape"] == "31":
-                    imageWidget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), QColor(255,255,255,0), i["@Name"], imageFolder)
-                    imageWidget.setZValue(index)
-                    
-                    # Split image strings from the Bitmaplist
-                    imageList = i["@BitmapList"].split("|")
-                    firstImage = imageList[0].split(":")
-
-                    if i["@BitmapList"] != "":
-                        # Get Image
-                        if firstImage != []:
-                            image = QPixmap()
-                            image.load(os.path.join(imageFolder, firstImage[1]))
-                            imageWidget.addImage(image, 0, 0, 0, antialiasing)
-                        else:
-                            imageWidget.representNoImage()
-                        name = i["@Name"]
-                        releaseEvent = imageWidget.returnMouseReleaseEvent()
-                        self.scene.addItem(imageWidget)
-                        imageWidget.mouseReleaseEvent = lambda event, self=self, name=name, releaseEvent=releaseEvent: onItemFinishMove(event, name, [i.pos().x() for i in self.items() if i.data(0) == name], [i.pos().y() for i in self.items() if i.data(0) == name], releaseEvent)
-
-                    else:
-                        self.scene.addItem(imageWidget)
-                        imageWidget.addImage(QPixmap(), 0, 0, 0, antialiasing)
-                        imageWidget.representNoImage()
-                        
-                    imageWidget.objectDeleted = lambda name, self=self: self.onObjectDeleted(name, imageWidget)
-
-                elif i["@Shape"] == "32":
-                    # Split images from the Bitmaplist
-                    imageList = i["@BitmapList"].split("|")
-                    imageWidget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), QColor(255,255,255,100), i["@Name"], imageFolder)
-                    imageWidget.setZValue(index)
-
-                    if len(imageList) != 11:
-                        imageWidget.representNoImage()
-                    else:
-                        imageWidget.loadNumbers(i["@Digits"], i["@Spacing"], imageList, antialiasing)
-                        
-                    releaseEvent = imageWidget.returnMouseReleaseEvent()
                     name = i["@Name"]
                     self.scene.addItem(imageWidget)
-                    imageWidget.mouseReleaseEvent = lambda event, self=self, name=name, releaseEvent=releaseEvent: onItemFinishMove(event, name, [i.pos().x() for i in self.items() if i.data(0) == name], [i.pos().y() for i in self.items() if i.data(0) == name], releaseEvent)
-                    imageWidget.objectDeleted = lambda name, self=self: self.onObjectDeleted(name, imageWidget)
-
-                elif i["@Shape"] == "42":
-                    bgImage = QPixmap()
-                    bgImage.load(os.path.join(imageFolder, i["@Background_ImageName"]))
-                
-                    fgImage = QPixmap()
-                    fgImage.load(os.path.join(imageFolder, i["@Foreground_ImageName"]))
-
-                    progressWidget = ProgressWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), QColor(255,255,255,0), i["@Name"], i["@Rotate_xc"], i["@Rotate_yc"], i["@Radius"], i["@Line_Width"], i["@StartAngle"], i["@EndAngle"], bgImage, fgImage, antialiasing)
-                    name = i["@Name"]
-                    releaseEvent = progressWidget.returnMouseReleaseEvent()
-                    progressWidget.setZValue(index)
-                    self.scene.addItem(progressWidget)
-                    progressWidget.mouseReleaseEvent = lambda event, self=self, name=name, releaseEvent=releaseEvent: onItemFinishMove(event, name, [i.pos().x() for i in self.items() if i.data(0) == name], [i.pos().y() for i in self.items() if i.data(0) == name], releaseEvent)
-                    progressWidget.objectDeleted = lambda name, self=self: self.onObjectDeleted(name, imageWidget)
-
                 else:
-                    return False, f"Widget {i['@Shape']} not implemented in canvas, please report as issue."
-                
-                return True, "Success"
-            except Exception as e:
-                QMessageBox().critical(None, "Error", f"Unable to create object {i['@Name']}: {traceback.format_exc()}")
-                return False, str(e)
+                    self.scene.addItem(imageWidget)
+                    imageWidget.addImage(QPixmap(), 0, 0, 0, antialiasing)
+                    imageWidget.representNoImage()
+                    
+                imageWidget.objectDeleted = lambda name, self=self: self.onObjectDeleted(name, imageWidget)
+                imageWidget.objectLayerAction = lambda name, action: self.objectLayerChange.emit(name, action)
 
+            elif i["@Shape"] == "32":
+                # Split images from the Bitmaplist
+                imageList = i["@BitmapList"].split("|")
+                imageWidget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), self, QColor(255,255,255,100), i["@Name"], imageFolder)
+                imageWidget.setZValue(index)
+
+                if len(imageList) != 11:
+                    imageWidget.representNoImage()
+                else:
+                    imageWidget.loadNumbers(i["@Digits"], i["@Spacing"], imageList, antialiasing)
+                    
+                name = i["@Name"]
+                self.scene.addItem(imageWidget)
+                imageWidget.objectDeleted = lambda name, self=self: self.onObjectDeleted(name, imageWidget)
+                imageWidget.objectLayerAction = lambda name, action: self.objectLayerChange.emit(name, action)
+
+            elif i["@Shape"] == "42":
+                bgImage = QPixmap()
+                bgImage.load(os.path.join(imageFolder, i["@Background_ImageName"]))
+            
+                fgImage = QPixmap()
+                fgImage.load(os.path.join(imageFolder, i["@Foreground_ImageName"]))
+                
+                progressWidget = ProgressWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), self, QColor(255,255,255,0), i["@Name"], i["@Rotate_xc"], i["@Rotate_yc"], i["@Radius"], i["@Line_Width"], i["@StartAngle"], i["@EndAngle"], bgImage, fgImage, antialiasing)
+                progressWidget.setZValue(index)
+                name = i["@Name"]
+                self.scene.addItem(progressWidget)
+                progressWidget.objectDeleted = lambda name, self=self: self.onObjectDeleted(name, progressWidget)
+                progressWidget.objectLayerAction = lambda name, action: self.objectLayerChange.emit(name, action)
+
+            else:
+                return False, f"Widget {i['@Shape']} not implemented in canvas, please report as issue."
+            
+            return True, "Success"
+        except Exception as e:
+            QMessageBox().critical(None, "Error", f"Unable to create object {i['@Name']}: {traceback.format_exc()}")
+            return False, str(e)
+
+    def loadObjects(self, data, imageFolder, antialiasing):
         if data["FaceProject"]["Screen"].get("Widget") != None:
             self.scene.clear()
             self.drawDecorations(self.deviceOutlineVisible)
@@ -304,12 +293,12 @@ class Canvas(QGraphicsView):
             widgets = data["FaceProject"]["Screen"]["Widget"]
             if type(widgets) == list:
                 for index, i in enumerate(widgets):     
-                    result, reason = createObject(index, i)
+                    result, reason = self.createObject(index, i, imageFolder, antialiasing)
                     if not result:
                         return False, reason 
                 return True, "Success"
             else:
-                result, reason = createObject(0, widgets)
+                result, reason = self.createObject(0, widgets, imageFolder, antialiasing)
                 if not result:
                     return False, reason 
                 else:
@@ -321,11 +310,6 @@ class Canvas(QGraphicsView):
         object = None
         objectZValue = None
 
-        def onItemFinishMove(event, name, x, y, releaseEvent):
-            self.onObjectPropertyChanged(name, "@X", x)
-            self.onObjectPropertyChanged(name, "@Y", y)
-            releaseEvent(event)
-
         for x in self.items():
             # data(0) is name
             if x.data(0) == objectName:
@@ -335,137 +319,30 @@ class Canvas(QGraphicsView):
 
         if object != None:
             object.scene().removeItem(object)
-            try:
-                if objectData["@Shape"] == "27":
-                    bgImg = QPixmap()
-                    bgImg.load(os.path.join(imageFolder, objectData["@Background_ImageName"]))
-
-                    secImg = QPixmap()
-                    secImg.load(os.path.join(imageFolder, objectData["@SecondHand_Image"]))
-
-                    minImg = QPixmap()
-                    minImg.load(os.path.join(imageFolder, objectData["@MinuteHand_Image"]))
-
-                    hrImg = QPixmap()
-                    hrImg.load(os.path.join(imageFolder, objectData["@HourHand_ImageName"]))
-
-                    # Create analogwidget
-                    analogWidget = AnalogWidget(int(objectData["@X"]), int(objectData["@Y"]), int(objectData["@Width"]), int(objectData["@Height"]), QColor(255,255,255,0), objectData["@Name"], antialiasing, self.sceneRect().width(), self.sceneRect().height(), bgImg, secImg, objectData["@SecondImage_rotate_xc"], objectData["@SecondImage_rotate_yc"], minImg, objectData["@MinuteImage_rotate_xc"], objectData["@MinuteImage_rotate_yc"], hrImg, objectData["@HourImage_rotate_xc"], objectData["@HourImage_rotate_yc"])
-                    name = objectData["@Name"]
-                    releaseEvent = analogWidget.returnMouseReleaseEvent()
-                    analogWidget.setZValue(objectZValue)
-                    self.scene.addItem(analogWidget)
-                    analogWidget.mouseReleaseEvent = lambda event, self=self, name=name, releaseEvent=releaseEvent: onItemFinishMove(event, name, [i.pos().x() for i in self.items() if i.data(0) == name], [i.pos().y() for i in self.items() if i.data(0) == name], releaseEvent)
-                    analogWidget.objectDeleted = lambda name, self=self: self.onObjectDeleted(name, analogWidget)
-
-                elif objectData["@Shape"] == "29":
-                    dialog = QMessageBox.warning(None, "Confirm", f"The object {objectData['@Name']} uses the legacy CircleProgress object, it will be automatically converted to the newer CircleProgressPlus object.")
-
-                elif objectData["@Shape"] == "30":    
-                    imageWidget = ImageWidget(int(objectData["@X"]), int(objectData["@Y"]), int(objectData["@Width"]), int(objectData["@Height"]), QColor(255,255,255,0), objectData["@Name"], imageFolder)
-                    imageWidget.setZValue(objectZValue)
-
-                    if objectData["@Bitmap"] != "":
-                        # Get QPixmap from file string
-                        image = QPixmap()
-                        image.load(os.path.join(imageFolder, objectData["@Bitmap"]))
-
-                        # Create imagewidget    
-                        imageWidget.addImage(image, 0, 0, 0, antialiasing)
-                        name = objectData["@Name"]
-                        releaseEvent = imageWidget.returnMouseReleaseEvent()
-                        self.scene.addItem(imageWidget)
-                        imageWidget.mouseReleaseEvent = lambda event, self=self, name=name, releaseEvent=releaseEvent: onItemFinishMove(event, name, [i.pos().x() for i in self.items() if i.data(0) == name], [i.pos().y() for i in self.items() if i.data(0) == name], releaseEvent)
-                    else:
-                        self.scene.addItem(imageWidget)
-                        imageWidget.addImage(QPixmap(), 0, 0, 0, antialiasing)
-                        imageWidget.representNoImage()
-                    
-                    imageWidget.objectDeleted = lambda name, self=self: self.onObjectDeleted(name, imageWidget)
-                    
-                elif objectData["@Shape"] == "31":
-                    imageWidget = ImageWidget(int(objectData["@X"]), int(objectData["@Y"]), int(objectData["@Width"]), int(objectData["@Height"]), QColor(255,255,255,0), objectData["@Name"], imageFolder)
-                    imageWidget.setZValue(objectZValue)
-                    
-                    # Split image strings from the Bitmaplist
-                    imageList = objectData["@BitmapList"].split("|")
-                    firstImage = imageList[0].split(":")
-
-                    if objectData["@BitmapList"] != "":
-                        # Get Image
-                        image = QPixmap()
-                        image.load(os.path.join(imageFolder, firstImage[1]))
-
-                        imageWidget.addImage(image, 0, 0, 0, antialiasing)
-                        name = objectData["@Name"]
-                        releaseEvent = imageWidget.returnMouseReleaseEvent()
-                        self.scene.addItem(imageWidget)
-                        imageWidget.mouseReleaseEvent = lambda event, self=self, name=name, releaseEvent=releaseEvent: onItemFinishMove(event, name, [i.pos().x() for i in self.items() if i.data(0) == name], [i.pos().y() for i in self.items() if i.data(0) == name], releaseEvent)
-
-                    else:
-                        self.scene.addItem(imageWidget)
-                        imageWidget.addImage(QPixmap(), 0, 0, 0, antialiasing)
-                        imageWidget.representNoImage()
-                        
-                    imageWidget.objectDeleted = lambda name, self=self: self.onObjectDeleted(name, imageWidget)
-
-                elif objectData["@Shape"] == "32":
-                    # Split images from the Bitmaplist
-                    imageList = objectData["@BitmapList"].split("|")
-                    imageWidget = ImageWidget(int(objectData["@X"]), int(objectData["@Y"]), int(objectData["@Width"]), int(objectData["@Height"]), QColor(255,255,255,100), objectData["@Name"], imageFolder)
-                    imageWidget.setZValue(objectZValue)
-
-                    imageWidget.loadNumbers(objectData["@Digits"], objectData["@Spacing"], imageList, antialiasing)
-                    releaseEvent = imageWidget.returnMouseReleaseEvent()
-                    name = objectData["@Name"]
-                    self.scene.addItem(imageWidget)
-                    imageWidget.mouseReleaseEvent = lambda event, self=self, name=name, releaseEvent=releaseEvent: onItemFinishMove(event, name, [i.pos().x() for i in self.items() if i.data(0) == name], [i.pos().y() for i in self.items() if i.data(0) == name], releaseEvent)
-                    imageWidget.objectDeleted = lambda name, self=self: self.onObjectDeleted(name, imageWidget)
-
-                elif objectData["@Shape"] == "42":
-                    bgImage = QPixmap()
-                    bgImage.load(os.path.join(imageFolder, objectData["@Background_ImageName"]))
-                
-                    fgImage = QPixmap()
-                    fgImage.load(os.path.join(imageFolder, objectData["@Foreground_ImageName"]))
-
-                    progressWidget = ProgressWidget(int(objectData["@X"]), int(objectData["@Y"]), int(objectData["@Width"]), int(objectData["@Height"]), QColor(255,255,255,0), objectData["@Name"], objectData["@Rotate_xc"], objectData["@Rotate_yc"], objectData["@Radius"], objectData["@Line_Width"], objectData["@StartAngle"], objectData["@EndAngle"], bgImage, fgImage, antialiasing)
-                    name = objectData["@Name"]
-                    releaseEvent = progressWidget.returnMouseReleaseEvent()
-                    progressWidget.setZValue(objectZValue)
-                    self.scene.addItem(progressWidget)
-                    progressWidget.mouseReleaseEvent = lambda event, self=self, name=name, releaseEvent=releaseEvent: onItemFinishMove(event, name, [i.pos().x() for i in self.items() if i.data(0) == name], [i.pos().y() for i in self.items() if i.data(0) == name], releaseEvent)
-                    progressWidget.objectDeleted = lambda name, self=self: self.onObjectDeleted(name, imageWidget)
-
-                else:
-                    return False, f"Widget {objectData['@Shape']} not implemented in canvas, please report as issue."
-                
+            result, reason = self.createObject(objectZValue, objectData, imageFolder, antialiasing)
+            if not result:
+                return False, reason 
+            else:
                 return True, "Success"
-            except Exception as e:
-                QMessageBox().critical(None, "Error", f"Unable to create object {objectData['@Name']}: {traceback.format_exc()}")
-                return False, str(e)
-                
-        else:
-            return False, "Object to reload not found!"
                 
         
 class Widget(QGraphicsRectItem):
     # Basic widget with only bounding box and movement
     # All other widgets inherit this widget except ResizeableWidget
 
-    def __init__(self, posX, posY, sizeX, sizeY, color, name):
+    def __init__(self, posX, posY, sizeX, sizeY, canvas, color, name):
         # Initialize the shape.
         super().__init__(posX, posY, sizeX, sizeY)
+        self.setRect(0, 0, sizeX, sizeY)
         self.color = color
+        self.canvas = canvas
         self.setAcceptHoverEvents(True)
         self.setData(0, name)
         self.setFlag(QGraphicsItem.ItemIsMovable, True)
         self.setFlag(QGraphicsItem.ItemIsSelectable, True)
         self.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
         self.setFlag(QGraphicsItem.ItemIsFocusable, True)
-
-        self.centerIndicator = QGraphicsEllipseItem()
-        self.centerIndicator.setPen(QPen(QColor(255,255,255,200), 2))
+        self.setFlag(QGraphicsItem.ItemClipsChildrenToShape, True)
 
     def contextMenuEvent(self, event):
         scenePos = self.mapToScene(event.pos())
@@ -473,6 +350,17 @@ class Widget(QGraphicsRectItem):
         viewPos = view.mapToGlobal(view.mapFromScene(scenePos))
 
         menu = QMenu()
+        raiseIcon = QIcon()
+        raiseIcon.addFile(u":/Dark/bring-to-front.png", QSize(), QIcon.Normal, QIcon.Off)
+        raiseToTopAction = menu.addAction("Bring to Front")
+        raiseToTopAction.setIcon(raiseIcon)
+        raiseAction = menu.addAction("Bring Forwards")
+        lowerIcon = QIcon()
+        lowerIcon.addFile(u":/Dark/send-to-back.png", QSize(), QIcon.Normal, QIcon.Off)
+        lowerToBottomAction = menu.addAction("Send to Back")
+        lowerToBottomAction.setIcon(lowerIcon)
+        lowerAction = menu.addAction("Send Backwards")
+        menu.addSeparator()
         deleteIcon = QIcon()
         deleteIcon.addFile(u":/Dark/x_dim.png", QSize(), QIcon.Normal, QIcon.Off)
         action1 = menu.addAction("Delete")
@@ -481,19 +369,31 @@ class Widget(QGraphicsRectItem):
         action = menu.exec(viewPos)
 
         if action == action1:
-            #self.scene().removeItem(self)
             self.objectDeleted(self.data(0))
+        elif action == raiseToTopAction:
+            self.objectLayerAction(self.data(0), "top")
+        elif action == raiseAction:
+            self.objectLayerAction(self.data(0), "raise")
+        elif action == lowerToBottomAction:
+            self.objectLayerAction(self.data(0), "bottom")
+        elif action == lowerAction:
+            self.objectLayerAction(self.data(0), "lower")
+        
 
     def objectDeleted(self, name):
         pass
 
-    def returnMouseReleaseEvent(self):
-        return self.mouseReleaseEvent
+    def objectLayerAction(self, name, action):
+        pass
 
     def boundingRect(self):
         # Ensure the bounding rectangle accounts for any changes that affect the item's appearance
         outline_width = 2.0  # Adjust this value as needed
         return self.rect().adjusted(-outline_width, -outline_width, outline_width, outline_width)
+    
+    def mouseReleaseEvent(self, event):
+        super().mouseReleaseEvent(event)
+        self.canvas.fireObjectPositionChanged(self.data(0), self.pos().x(), self.pos().y())
 
     def paint(self, painter, option, widget=None):
         # Paint the node in the graphic view.
@@ -768,9 +668,6 @@ class ResizeableWidget(QGraphicsRectItem):
     def objectDeleted(self, name):
         pass
 
-    def returnMouseReleaseEvent(self):
-        return self.mouseReleaseEvent
-
     def shape(self):
         # Returns the shape of this item as a QPainterPath in local coordinates.
 
@@ -812,14 +709,13 @@ class RectangleWidget(ResizeableWidget):
 class ImageWidget(Widget):
     # Widget for basic images and handling for DigitalNumber
     # All ImageList related things are handled in the createObject function
-    # Images are QPixmaps
     # Live previews of animations are planned with this widget
 
-    def __init__(self, posX, posY, sizeX, sizeY, color, name, srcDir):
-        super().__init__(posX, posY, sizeX, sizeY, color, name)
+    def __init__(self, posX, posY, sizeX, sizeY, canvas, color, name, srcDir):
+        super().__init__(posX, posY, sizeX, sizeY, canvas, color, name)
         self.srcDir = srcDir
-        self.setPos(posX, posY)
         self.imageItems = []
+        self.setPos(posX, posY)
 
     def loadNumbers(self, digits, spacing, numList,  antialiasing):
         self.digits = digits
@@ -829,10 +725,13 @@ class ImageWidget(Widget):
         # Loop through digits
         for x in range(int(digits)):
             # Get QPixmap from file string
-            image = QPixmap()
-            image.load(os.path.join(self.srcDir, numList[x]))
+            if len(numList) == 11:
+                image = QPixmap()
+                image.load(os.path.join(self.srcDir, numList[x]))
 
-            self.addImage(image, image.size().width()*x+(int(self.spacing)*x), 0, int(self.spacing), antialiasing)
+                self.addImage(image, image.size().width()*x+(int(self.spacing)*x), 0, int(self.spacing), antialiasing)
+            else:
+                self.representNoImage()
 
     def addImage(self, qPixmap, posX, posY, spacing, isAntialiased):
         item = QGraphicsPixmapItem(qPixmap, self)
@@ -855,50 +754,60 @@ class ImageWidget(Widget):
 
 class AnalogWidget(Widget):
     # Widget for handling AnalogDisplays
-    # Hands pos are determined by anchor points, do not modify the hands positions manually
-    # Images are QPixmaps
     
-    def __init__(self, posX, posY, sizeX, sizeY, color, name, isAntialiased, screenSizeX, screenSizeY, background, secHand, secHandX, secHandY, minHand, minHandX, minHandY, hrHand, hrHandX, hrHandY):
-        super().__init__(posX, posY, sizeX, sizeY, color, name)
+    def __init__(self, posX, posY, sizeX, sizeY, canvas, color, name):
+        super().__init__(posX, posY, sizeX, sizeY, canvas, color, name)
         self.setPos(posX, posY)
-        if background != "":
-            self.background = QGraphicsPixmapItem(background, self)
-        self.centerHighlighted = True
-        self.bgImage = QGraphicsPixmapItem(background, self)
-        if hrHand.isNull():
+
+    def addBackground(self, backgroundImage, bgX, bgY, antialiasing):
+        if backgroundImage != "":
+            self.background = QGraphicsPixmapItem(backgroundImage, self)
+        self.bgImage = QGraphicsPixmapItem(backgroundImage, self)
+        self.bgImage.setPos(int(bgX), int(bgY))
+        if antialiasing:
+            self.bgImage.setTransformationMode(Qt.SmoothTransformation)
+
+    def addSecondHand(self, secHandImage, secHandX, secHandY, antialiasing):
+        if secHandImage.isNull():
             self.color = QColor(255, 0, 0, 100)
             self.setRect(0,0,100,100)
-        self.hrHand = QGraphicsPixmapItem(hrHand, self)
-        self.hrHand.setOffset(-int(hrHandX), -int(hrHandY))
-        self.hrHand.setRotation(-60)
-        self.hrHand.setPos(screenSizeX/2, screenSizeY/2)
-        self.minHand = QGraphicsPixmapItem(minHand, self)
-        if minHand.isNull():
+        self.secHand = QGraphicsPixmapItem(secHandImage, self)
+        self.secHand.setOffset(-int(secHandX), -int(secHandY))
+        self.secHand.setPos(self.rect().width()/2, self.rect().height()/2)
+        if antialiasing:
+            self.secHand.setTransformationMode(Qt.SmoothTransformation)
+
+    def addMinuteHand(self, minHandImage, minHandX, minHandY, antialiasing):
+        if minHandImage.isNull():
             self.color = QColor(255, 0, 0, 100)
             self.setRect(0,0,100,100)
-        self.minHand = QGraphicsPixmapItem(minHand, self)
+        self.minHand = QGraphicsPixmapItem(minHandImage, self)
         self.minHand.setOffset(-int(minHandX), -int(minHandY))
         self.minHand.setRotation(60)
-        self.minHand.setPos(screenSizeX/2, screenSizeY/2)
-        if secHand.isNull():
+        self.minHand.setPos(self.rect().width()/2, self.rect().height()/2)
+        if antialiasing:
+            self.minHand.setTransformationMode(Qt.SmoothTransformation)
+
+    def addHourHand(self, hourHandImage, hrHandX, hrHandY, antialiasing):
+        if hourHandImage.isNull():
             self.color = QColor(255, 0, 0, 100)
             self.setRect(0,0,100,100)
-        self.secHand = QGraphicsPixmapItem(secHand, self)
-        self.secHand.setOffset(-int(secHandX), -int(secHandY))
-        self.secHand.setPos(screenSizeX/2, screenSizeY/2)
-        if isAntialiased:
-            self.bgImage.setTransformationMode(Qt.SmoothTransformation)
+        self.hrHand = QGraphicsPixmapItem(hourHandImage, self)
+        self.hrHand.setOffset(-int(hrHandX), -int(hrHandY))
+        self.hrHand.setRotation(-60)
+        self.hrHand.setPos(self.rect().width()/2, self.rect().height()/2)
+        if antialiasing:
             self.hrHand.setTransformationMode(Qt.SmoothTransformation)
-            self.minHand.setTransformationMode(Qt.SmoothTransformation)
-            self.secHand.setTransformationMode(Qt.SmoothTransformation)
+
 
 class CircularArcItem(QGraphicsPathItem):
     # hate this so much!!!!!!!!
     def __init__(self, rect, start_angle, end_angle, width, thickness, parent=None):
         super().__init__(parent)
         self.rect = QRectF(rect)
-        self.start_angle = start_angle + 90
+        self.start_angle = -end_angle + 90
         self.span_angle = abs(start_angle) + abs(end_angle)
+        print(self.start_angle, self.span_angle)
         self.thickness = thickness
         self.width = width/2
 
@@ -915,6 +824,7 @@ class CircularArcItem(QGraphicsPathItem):
         small_radius = min(self.rect.width(), self.rect.height()) * self.thickness / self.rect.width()
         path.arcTo(self.rect.adjusted(small_radius, small_radius, -small_radius, -small_radius),
                    self.start_angle + self.span_angle, -self.span_angle)
+        path.closeSubpath()
 
         return path
     
@@ -947,8 +857,8 @@ class CirclularArcImage(QGraphicsPixmapItem):
         painter.drawPath(CircularArcItem(arc_rect, self.startAngle, self.endAngle, self.pixmap().width(), self.thickness).createArcPath())
 
 class ProgressWidget(Widget):
-    def __init__(self, posX, posY, sizeX, sizeY, color, name, offsetX, offsetY, radius, thickness, startAngle, endAngle, bgImage, pathImage, isAntialiased):
-        super().__init__(posX, posY, sizeX, sizeY, color, name)
+    def __init__(self, posX, posY, sizeX, sizeY, canvas, color, name, offsetX, offsetY, radius, thickness, startAngle, endAngle, bgImage, pathImage, isAntialiased):
+        super().__init__(posX, posY, sizeX, sizeY, canvas, color, name)
         self.setPos(posX, posY)
         self.setRect(0, 0, bgImage.width(), bgImage.height())
 
