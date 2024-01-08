@@ -37,7 +37,7 @@ import traceback
 from coreGettext import QCoreApplication
 from updater.updater import Updater
 from project.projectManager import watchData, fprjProject
-from history.historyManager import historySystem
+from history.historyManager import historySystem, CommandAddWidget, CommandDeleteWidget, CommandModifyProperty, CommandMoveWidget
 from widgets.canvas import Canvas, ObjectIcon
 from widgets.properties import PropertiesWidget
 from monaco.monaco_widget import MonacoWidget
@@ -546,6 +546,7 @@ class MainWindow(QMainWindow):
             if self.ignoreHistoryInvoke:
                 self.ignoreHistoryInvoke = False
             else:
+                command = self.historySystem
                 self.historySystem.addToHistory(currentSelected.data(0,101), args[0], args[1], currentItem[args[0]])
             
             if args[0] == "@Value_Src" or args[0] == "@Index_Src" or args[0] == "@Visible_Src":
