@@ -7,71 +7,43 @@ class historySystem:
         self.undoStack = QUndoStack()
 
 class CommandAddWidget(QUndoCommand):
-    def __init__(self, data, objectIndex, objectData, description):
-        super(CommandModifyProperty, self).__init__(description)
-        self.data = data
+    def __init__(self, objectIndex, objectData, commandFunc, description):
+        super(CommandAddWidget, self).__init__(description)
         self.objectIndex = objectIndex
         self.objectData = objectData
+        self.commandFunc = commandFunc
 
     def redo(self):
-        self.data.insert(self.objectIndex, self.objectData)
+        self.commandFunc("redo", self.objectIndex, self.objectData)
 
     def undo(self):
-        self.data.pop(self.objectIndex)
+        self.commandFunc("undo", self.objectIndex)
 
 class CommandDeleteWidget(QUndoCommand):
-    def __init__(self, data, objectIndex, objectData, description):
-        super(CommandModifyProperty, self).__init__(description)
-        self.data = data
+    def __init__(self, objectIndex, objectData, commandFunc, description):
+        super(CommandDeleteWidget, self).__init__(description)
         self.objectIndex = objectIndex
         self.objectData = objectData
+        self.commandFunc = commandFunc
 
     def redo(self):
-        self.data.pop(self.objectIndex)
+        self.commandFunc("redo", self.objectIndex)
 
     def undo(self):
-        self.data.insert(self.objectIndex, self.objectData)
-
-class CommandMoveWidget(QUndoCommand):
-    def __init__(self, inputX, inputY, prevX, prevY, currentX, currentY, description):
-        super(CommandModifyProperty, self).__init__(description)
-        self.inputX = inputX
-        self.inputY = inputY
-        self.prevX = prevX
-        self.prevY = prevY
-        self.currentX = currentX
-        self.currentY = currentY
-
-    def redo(self):
-         self.inputX.setValue(int(self.currentX))
-         self.inputY.setValue(int(self.currentY))
-
-    def undo(self):
-        self.inputX.setValue(int(self.prevX))
-        self.inputY.setValue(int(self.prevY))
+        self.commandFunc("undo", self.objectIndex, self.objectData)
 
 class CommandModifyProperty(QUndoCommand):
-    def __init__(self, object, previousString, currentString, description):
+    def __init__(self, name, property, previousValue, currentValue, commandFunc, description):
         super(CommandModifyProperty, self).__init__(description)
-        propertyField = self.propertiesWidget.propertyItems[property]
-        
-        self.inputObject = inputObject
-        self.previousValue = previousString
-        self.currentValue = currentString
+        self.name = name
+        self.property = property
+        self.previousValue = previousValue
+        self.currentValue = currentValue
+        self.commandFunc = commandFunc
 
     def redo(self):
-        if self.inputObject.metaObject().className() == "QSpinBox":
-            self.inputObject.setValue(int(self.currentValue))              
-        elif self.inputObject.metaObject().className() == "QCheckBox":
-            self.inputObject.setChecked(self.currentValue)
-        else:
-            self.inputObject.setText(self.currentValue)
+        self.commandFunc(self.name, self.property, self.currentValue)
 
     def undo(self):
-        if self.inputObject.metaObject().className() == "QSpinBox":
-            self.inputObject.setValue(int(self.previousValue))              
-        elif self.inputObject.metaObject().className() == "QCheckBox":
-            self.inputObject.setChecked(self.previousValue)
-        else:
-            self.inputObject.setText(self.previousValue)
+        self.commandFunc(self.name, self.property, self.previousValue)
     

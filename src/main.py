@@ -18,7 +18,7 @@ import gettext
 
 from PySide6.QtWidgets import (QMainWindow, QDialog, QInputDialog, QMessageBox, QApplication, QGraphicsScene, QPushButton, 
                                QDialogButtonBox, QTreeWidgetItem, QFileDialog, QToolButton, QToolBar, QWidget, QVBoxLayout, 
-                               QFrame, QColorDialog, QFontDialog, QSplashScreen)
+                               QFrame, QColorDialog, QFontDialog, QSplashScreen, QUndoView)
 from PySide6.QtGui import QIcon, QPixmap, QDesktopServices
 from PySide6.QtCore import Qt, QSettings, QSize, QUrl, QFileInfo
 from PySide6.QtWebEngineWidgets import QWebEngineView
@@ -37,7 +37,7 @@ import traceback
 from coreGettext import QCoreApplication
 from updater.updater import Updater
 from project.projectManager import watchData, fprjProject
-from history.historyManager import historySystem, CommandAddWidget, CommandDeleteWidget, CommandModifyProperty, CommandMoveWidget
+from history.historyManager import historySystem, CommandAddWidget, CommandDeleteWidget, CommandModifyProperty
 from widgets.canvas import Canvas, ObjectIcon
 from widgets.properties import PropertiesWidget
 from monaco.monaco_widget import MonacoWidget
@@ -131,6 +131,12 @@ class MainWindow(QMainWindow):
         # Setup History System
         self.historySystem = historySystem()
         self.ignoreHistoryInvoke = False
+        # self.undoLayout = QVBoxLayout()
+        # self.undoDialog = QDialog(self)
+        # self.undoView = QUndoView(self.historySystem.undoStack)
+        # self.undoLayout.addWidget(self.undoView)
+        # self.undoDialog.setLayout(self.undoLayout)
+        # self.undoDialog.show()
  
         # Setup Project 
         self.project = None 
@@ -228,73 +234,6 @@ class MainWindow(QMainWindow):
                 event.ignore()
         else:
             quitWindow()
-
-    def invokeHistory(self, invokeType):
-        currentProject = self.getCurrentProject()
-        
-        try:
-            if invokeType == "undo":
-                widgetName, property, value, prevValue = self.historySystem.undo()
-            elif invokeType == "redo":
-                widgetName, property, value, prevValue = self.historySystem.redo()
-            else:
-                self.showDialogue("error", "Unknown history invoke type! Must be either 'undo' or 'redo'.")
-        except:
-            return
-
-        self.ignoreHistoryInvoke = True
-        
-        if property == "objAdd":
-            # indicate object added
-            # value would be the index where the widget is
-            # prevValue would be the widget data
-            if invokeType == "undo":
-                currentProject["data"]["FaceProject"]["Screen"]["Widget"].pop(value - 1)            
-            elif invokeType == "redo":
-                currentProject["data"]["FaceProject"]["Screen"]["Widget"].insert(value, prevValue)
-            currentProject["canvas"].loadObjects(currentProject["data"], currentProject["imageFolder"], self.settings["Canvas"]["Antialiasing"][2])
-            self.updateExplorer(currentProject["data"])
-
-        elif property == "objDel":
-            # indicate object deleted
-            # value would be the index where the widget is
-            # prevValue would be the widget data
-            if invokeType == "undo":
-                currentProject["data"]["FaceProject"]["Screen"]["Widget"].insert(value, prevValue)
-            elif invokeType == "redo":
-                currentProject["data"]["FaceProject"]["Screen"]["Widget"].pop(value - 1)            
-            currentProject["canvas"].loadObjects(currentProject["data"], currentProject["imageFolder"], self.settings["Canvas"]["Antialiasing"][2])
-            self.updateExplorer(currentProject["data"])
-
-        else:
-            if type(currentProject["data"]["FaceProject"]["Screen"]["Widget"]) == list:
-                print("list")
-                for widget in currentProject["data"]["FaceProject"]["Screen"]["Widget"]:
-                    if widget["@Name"] == widgetName:
-                        widget[property] == value
-                        break
-                currentProject["canvas"].selectObject(widget["@Name"])
-            elif type(currentProject["data"]["FaceProject"]["Screen"]["Widget"]) == dict:
-                print("dict")
-                currentProject["data"]["FaceProject"]["Screen"]["Widget"][property] == value
-                currentProject["canvas"].selectObject(currentProject["data"]["FaceProject"]["Screen"]["Widget"]["@Name"])
-
-            propertyField = self.propertiesWidget.propertyItems[property]
-            if invokeType == "undo":
-                if propertyField.metaObject().className() == "QSpinBox":
-                    propertyField.setValue(int(prevValue))              
-                elif propertyField.metaObject().className() == "QCheckBox":
-                    propertyField.setChecked(prevValue)
-                else:
-                    propertyField.setText(prevValue)
-
-            elif invokeType == "redo":
-                if propertyField.metaObject().className() == "QSpinBox":
-                    propertyField.setValue(int(value))
-                elif propertyField.metaObject().className() == "QCheckBox":
-                    propertyField.setChecked(value)
-                else:
-                    propertyField.setText(value)
 
     def getCurrentProject(self):
         currentIndex = self.ui.workspace.currentIndex()
@@ -542,32 +481,34 @@ class MainWindow(QMainWindow):
                     self.showDialogue("error", _("Failed to obtain currentItem"), _("No object found in widget list that has the name of currently selected graphics item: ")+str(currentProject["data"]["FaceProject"]["Screen"]["Widget"]))
             else:
                 currentItem = currentProject["data"]["FaceProject"]["Screen"]["Widget"]
+        
+            def updateProperty(widgetName, property, value):
+                if property == "@Value_Src" or property == "@Index_Src" or property == "@Visible_Src":
+                    for x in self.watchData.modelSourceData[str(currentProject["data"]["FaceProject"]["@DeviceType"])]:
+                        if x["@Name"] == value:
+                            try:
+                                currentItem[property] = int(x["@ID"], 0)
+                            except:
+                                currentItem[property] = int(x["@ID"])
+                else:
+                    currentItem[property] = value
+
+                if property == "@Name":
+                    self.updateExplorer(currentProject["data"])
+                    currentProject["canvas"].loadObjects(currentProject["data"], currentProject["imageFolder"], self.settings["Canvas"]["Antialiasing"][2])
+                    self.propertiesWidget.clearProperties()
+                else:
+                    currentProject["canvas"].reloadObject(widgetName, currentItem, currentProject["imageFolder"], self.settings["Canvas"]["Antialiasing"][2])
+                    currentProject["canvas"].selectObject(widgetName)
 
             if self.ignoreHistoryInvoke:
                 self.ignoreHistoryInvoke = False
-            else:
-                command = self.historySystem
-                self.historySystem.addToHistory(currentSelected.data(0,101), args[0], args[1], currentItem[args[0]])
+            else:   
+                command = CommandModifyProperty(currentItem["@Name"], args[0], currentItem[args[0]], args[1], updateProperty, f"Change property {args[0]} to {args[1]}")
+                self.historySystem.undoStack.push(command)
+                self.ignoreHistoryInvoke = False
             
-            if args[0] == "@Value_Src" or args[0] == "@Index_Src" or args[0] == "@Visible_Src":
-                for x in self.watchData.modelSourceData[str(currentProject["data"]["FaceProject"]["@DeviceType"])]:
-                    if x["@Name"] == args[1]:
-                        try:
-                            currentItem[args[0]] = int(x["@ID"], 0)
-                        except:
-                            currentItem[args[0]] = int(x["@ID"])
-            else:
-                currentItem[args[0]] = args[1]
-
-            if args[0] == "@Name":
-                currentItem[args[0]] = args[1]
-                self.updateExplorer(currentProject["data"])
-                currentProject["canvas"].loadObjects(currentProject["data"], currentProject["imageFolder"], self.settings["Canvas"]["Antialiasing"][2])
-                self.propertiesWidget.clearProperties()
-            else:
-                self.propertiesWidget.clearOnRefresh = False
-                currentProject["canvas"].reloadObject(currentSelected.data(0,101), currentItem, currentProject["imageFolder"], self.settings["Canvas"]["Antialiasing"][2])
-                currentProject["canvas"].selectObject(currentSelected.data(0,101))
+            updateProperty(currentSelected.data(0,101), args[0], args[1])
 
         # Setup properties widget
         with open("data/properties.json", encoding="utf8") as raw:
@@ -649,13 +590,20 @@ class MainWindow(QMainWindow):
         widgetData["@Name"] = "widget-" + str(count)
         widgetData["@X"] = int(currentProject["canvas"].scene.sceneRect().width()/2 - int(widgetData["@Width"])/2)
         widgetData["@Y"] = int(currentProject["canvas"].scene.sceneRect().height()/2 - int(widgetData["@Height"])/2)
-        currentProject["data"]["FaceProject"]["Screen"]["Widget"].append(widgetData) 
-        currentProject["canvas"].loadObjects(currentProject["data"], currentProject["imageFolder"], self.settings["Canvas"]["Antialiasing"][2])
         self.updateExplorer(currentProject["data"])
         if self.ignoreHistoryInvoke:
             self.ignoreHistoryInvoke = False
         else:
-            self.historySystem.addToHistory(widgetData["@Name"], "objAdd", len(currentProject["data"]["FaceProject"]["Screen"]["Widget"]), widgetData)
+            def commandFunc(type, index, object=None):
+                if type == "undo":
+                    currentProject["data"]["FaceProject"]["Screen"]["Widget"].pop(index)   
+                elif type == "redo":
+                    currentProject["data"]["FaceProject"]["Screen"]["Widget"].insert(index, object)
+                currentProject["canvas"].loadObjects(currentProject["data"], currentProject["imageFolder"], self.settings["Canvas"]["Antialiasing"][2])
+                self.updateExplorer(currentProject["data"])
+
+            command = CommandAddWidget(len(currentProject["data"]["FaceProject"]["Screen"]["Widget"]), widgetData, commandFunc, f"Add object {widgetData['@Name']}")
+            self.historySystem.undoStack.push(command)
         currentProject["canvas"].selectObject(widgetData["@Name"])
 
     def copyCanvasWidget(self):
@@ -719,19 +667,33 @@ class MainWindow(QMainWindow):
 
             def objectDeleted(objectName):
                 currentProject = self.getCurrentProject()
+                currentObject = None
+
                 if type(currentProject["data"]["FaceProject"]["Screen"]["Widget"]) == list:
                     for index, obj in enumerate(currentProject["data"]["FaceProject"]["Screen"]["Widget"]):
                         if obj["@Name"] == objectName:
-                            if self.ignoreHistoryInvoke:
-                                self.ignoreHistoryInvoke = False
-                            else:
-                                self.historySystem.addToHistory(objectName, "objDel", index, obj)
-                            currentProject["data"]["FaceProject"]["Screen"]["Widget"].pop(index)
-                            break
-                elif type(currentProject["data"]["FaceProject"]["Screen"]["Widget"]) == dict:
-                    currentProject["data"]["FaceProject"]["Screen"]["Widget"] = []
-                currentProject["canvas"].loadObjects(currentProject["data"], currentProject["imageFolder"], self.settings["Canvas"]["Antialiasing"][2])
-                self.updateExplorer(currentProject["data"])
+                            currentObject = obj
+
+                if self.ignoreHistoryInvoke:
+                    self.ignoreHistoryInvoke = False
+                else:
+                    def commandFunc(historyType, index, object=None):
+                        currentProjectWidget = currentProject["data"]["FaceProject"]["Screen"]["Widget"]
+                        if historyType == "undo":
+                            if type(currentProjectWidget) == list:
+                                currentProjectWidget.insert(index, object)
+                            elif type(currentProjectWidget) == dict:
+                                currentProjectWidget = [currentProjectWidget]
+                                currentProjectWidget.insert(index, object)
+                        elif historyType == "redo":
+                            currentProjectWidget.pop(index)
+
+                        currentProject["canvas"].loadObjects(currentProject["data"], currentProject["imageFolder"], self.settings["Canvas"]["Antialiasing"][2])
+                        self.updateExplorer(currentProject["data"])
+
+                    command = CommandDeleteWidget(index, currentObject, commandFunc, f"Delete object {currentObject['@Name']}")
+                    self.historySystem.undoStack.push(command)
+            
 
             def layerChange(objectName, changeType):
                 currentProject = self.getCurrentProject()
@@ -871,8 +833,8 @@ class MainWindow(QMainWindow):
         # edit
         self.ui.actionCopy.triggered.connect(self.copyCanvasWidget)
         self.ui.actionPaste.triggered.connect(self.pasteCanvasWidget)
-        self.ui.actionUndo.triggered.connect(lambda: self.invokeHistory("undo"))
-        self.ui.actionRedo.triggered.connect(lambda: self.invokeHistory("redo"))
+        self.ui.actionUndo.triggered.connect(lambda: self.historySystem.undoStack.undo())
+        self.ui.actionRedo.triggered.connect(lambda: self.historySystem.undoStack.redo())
         self.ui.actionProject_XML_File.triggered.connect(self.editProjectXML)
         self.ui.actionPreferences.triggered.connect(self.showSettings)
 
