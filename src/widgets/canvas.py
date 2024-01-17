@@ -9,14 +9,13 @@ import sys
 import traceback
 import logging
 from tracemalloc import start
-from typing import Any
 
 sys.path.append("..")
 from project.projectManager import watchData
 
-from PySide6.QtCore import Signal, QPointF, QModelIndex, QSize, QRectF, QRect
-from PySide6.QtGui import Qt, QPainter, QPainterPath, QPen, QColor, QStandardItemModel, QPixmap, QIcon, QBrush, QImage
-from PySide6.QtWidgets import (QApplication, QGraphicsPathItem, QGraphicsScene, QGraphicsSceneMouseEvent, QGraphicsView, QGraphicsItem, QGraphicsRectItem, 
+from PyQt6.QtCore import pyqtSignal, QPointF, QModelIndex, QSize, QRectF, QRect, Qt
+from PyQt6.QtGui import QPainter, QPainterPath, QPen, QColor, QStandardItemModel, QPixmap, QIcon, QBrush, QImage
+from PyQt6.QtWidgets import (QApplication, QGraphicsPathItem, QGraphicsScene, QGraphicsSceneMouseEvent, QGraphicsView, QGraphicsItem, QGraphicsRectItem, 
                                QGraphicsEllipseItem, QMenu, QGraphicsPixmapItem, QMessageBox, QRubberBand)
 
 class ObjectIcon:
@@ -38,34 +37,28 @@ class DeviceOutline(QGraphicsPathItem):
         outline = QPainterPath()
         outline.addRoundedRect(thickness/2, thickness/2, (size[0]-thickness), (size[1]-thickness), size[2], size[2])
         self.setPath(outline)
-        self.setPen(QPen(QColor(200, 200, 200, 100), thickness, Qt.SolidLine))
+        self.setPen(QPen(QColor(200, 200, 200, 100), thickness, Qt.PenStyle.SolidLine))
         self.setBrush(QColor(0,0,0,0))
         self.setZValue(9999)
 
 class Scene(QGraphicsScene):
-    itemSelectionChanged = Signal()
-
     def __init__(self, parent=None):
         super().__init__(parent)
 
-    def selectionChanged(self):
-        super().selectionChanged()
-        self.itemSelectionChanged.emit()
-
 class Canvas(QGraphicsView):
-    objectAdded = Signal(QPointF, str)
-    objectChanged = Signal(str, str, Any)
-    objectLayerChange = Signal(str, str)
-    objectDeleted = Signal(str)
+    objectAdded = pyqtSignal(QPointF, str)
+    objectChanged = pyqtSignal(str, str, object) # hate hacky workarounds, just support any type already Qt
+    objectLayerChange = pyqtSignal(str, str)
+    objectDeleted = pyqtSignal(str)
 
     def __init__(self, device, antialiasingEnabled, deviceOutlineVisible, insertMenu, parent=None):
         super().__init__(parent)
 
         if antialiasingEnabled:
-            self.setRenderHints(QPainter.Antialiasing)
+            self.setRenderHints(QPainter.RenderHint.Antialiasing)
 
         #self.setDragMode(QGraphicsView.RubberBandDrag)
-        self.setTransformationAnchor(QGraphicsView.AnchorUnderMouse)
+        self.setTransformationAnchor(QGraphicsView.ViewportAnchor.AnchorUnderMouse)
 
         self.insertMenu = insertMenu
         self.deviceOutlineVisible = deviceOutlineVisible
@@ -89,7 +82,7 @@ class Canvas(QGraphicsView):
 
     def drawDecorations(self, deviceOutlineVisible):
         background = QGraphicsRectItem(0, 0, self.deviceSize[0], self.deviceSize[1])
-        background.setPen(QPen(Qt.NoPen))
+        background.setPen(QPen(Qt.PenStyle.NoPen))
         background.setBrush(QColor(0, 0, 0, 255))
         
         self.scene.addItem(background)
@@ -117,7 +110,7 @@ class Canvas(QGraphicsView):
         relativePos = scenePos - offset
 
         model = QStandardItemModel()
-        model.dropMimeData(event.mimeData(), Qt.CopyAction, 0, 0, QModelIndex())
+        model.dropMimeData(event.mimeData(), Qt.DropAction.CopyAction, 0, 0, QModelIndex())
         self.objectAdded.emit(relativePos, model.item(0, 0).data(99))
 
         event.acceptProposedAction()
@@ -125,12 +118,12 @@ class Canvas(QGraphicsView):
     def wheelEvent(self, event):
         modifiers = QApplication.keyboardModifiers()
 
-        if modifiers == Qt.ControlModifier:
+        if modifiers == Qt.KeyboardModifier.ControlModifier:
             delta = event.angleDelta().y()
             zoom_factor = 1.25 if delta > 0 else 1 / 1.25
             self.scale(zoom_factor, zoom_factor)
 
-        elif modifiers == Qt.AltModifier:
+        elif modifiers == Qt.KeyboardModifier.AltModifier:
             scroll_delta = event.angleDelta().x()
             scroll_value = self.horizontalScrollBar().value() - scroll_delta
             self.horizontalScrollBar().setValue(scroll_value)
@@ -140,11 +133,11 @@ class Canvas(QGraphicsView):
             self.verticalScrollBar().setValue(scroll_value)
 
     def keyPressEvent(self, event):
-        if event.modifiers() == Qt.ControlModifier:
-            if event.key() == Qt.Key_Plus or event.key() == Qt.Key_Equal:
+        if event.modifiers() == Qt.KeyboardModifier.ControlModifier:
+            if event.key() == Qt.Key.Key_Plus or event.key() == Qt.Key.Key_Equal:
                 zoom_factor = 1.25
                 self.scale(zoom_factor, zoom_factor)
-            elif event.key() == Qt.Key_Minus:
+            elif event.key() == Qt.Key.Key_Minus:
                 zoom_factor = 1 / 1.25
                 self.scale(zoom_factor, zoom_factor)
             event.accept()
@@ -338,11 +331,11 @@ class Widget(QGraphicsRectItem):
         self.canvas = canvas
         self.setAcceptHoverEvents(True)
         self.setData(0, name)
-        self.setFlag(QGraphicsItem.ItemIsMovable, True)
-        self.setFlag(QGraphicsItem.ItemIsSelectable, True)
-        self.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
-        self.setFlag(QGraphicsItem.ItemIsFocusable, True)
-        self.setFlag(QGraphicsItem.ItemClipsChildrenToShape, True)
+        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsMovable, True)
+        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsSelectable, True)
+        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemSendsGeometryChanges, True)
+        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsFocusable, True)
+        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemClipsChildrenToShape, True)
 
     def contextMenuEvent(self, event):
         scenePos = self.mapToScene(event.pos())
@@ -351,18 +344,18 @@ class Widget(QGraphicsRectItem):
 
         menu = QMenu()
         raiseIcon = QIcon()
-        raiseIcon.addFile(u":/Dark/bring-to-front.png", QSize(), QIcon.Normal, QIcon.Off)
+        raiseIcon.addFile(u":/Dark/bring-to-front.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         raiseToTopAction = menu.addAction("Bring to Front")
         raiseToTopAction.setIcon(raiseIcon)
         raiseAction = menu.addAction("Bring Forwards")
         lowerIcon = QIcon()
-        lowerIcon.addFile(u":/Dark/send-to-back.png", QSize(), QIcon.Normal, QIcon.Off)
+        lowerIcon.addFile(u":/Dark/send-to-back.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         lowerToBottomAction = menu.addAction("Send to Back")
         lowerToBottomAction.setIcon(lowerIcon)
         lowerAction = menu.addAction("Send Backwards")
         menu.addSeparator()
         deleteIcon = QIcon()
-        deleteIcon.addFile(u":/Dark/x_dim.png", QSize(), QIcon.Normal, QIcon.Off)
+        deleteIcon.addFile(u":/Dark/x_dim.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         action1 = menu.addAction("Delete")
         action1.setIcon(deleteIcon)
 
@@ -398,313 +391,16 @@ class Widget(QGraphicsRectItem):
     def paint(self, painter, option, widget=None):
         # Paint the node in the graphic view.
 
-        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         painter.setBrush(QBrush(self.color))
 
         if self.isSelected():
             outline_width = 2.0  # Adjust this value as needed
-            painter.setPen(QPen(QColor(0, 205, 255), outline_width, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin))
+            painter.setPen(QPen(QColor(0, 205, 255), outline_width, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin))
         else:
-            painter.setPen(QPen(QColor(0, 0, 0, 0), 0, Qt.SolidLine))
+            painter.setPen(QPen(QColor(0, 0, 0, 0), 0, Qt.PenStyle.SolidLine))
 
         painter.drawRect(self.rect())
-
-class ResizeableWidget(QGraphicsRectItem):
-    # Widget with resizing properties
-
-    handleTopLeft = 1
-    handleTopMiddle = 2
-    handleTopRight = 3
-    handleMiddleLeft = 4
-    handleMiddleRight = 5
-    handleBottomLeft = 6
-    handleBottomMiddle = 7
-    handleBottomRight = 8
-
-    handleSize = +8.0
-    handleSpace = -4.0
-
-    handleCursors = {
-        handleTopLeft: Qt.SizeFDiagCursor,
-        handleTopMiddle: Qt.SizeVerCursor,
-        handleTopRight: Qt.SizeBDiagCursor,
-        handleMiddleLeft: Qt.SizeHorCursor,
-        handleMiddleRight: Qt.SizeHorCursor,
-        handleBottomLeft: Qt.SizeBDiagCursor,
-        handleBottomMiddle: Qt.SizeVerCursor,
-        handleBottomRight: Qt.SizeFDiagCursor,
-    }
-
-    def __init__(self, posX, posY, sizeX, sizeY, color, name):
-        """
-        Initialize the shape.
-        """
-        super().__init__(posX, posY, sizeX, sizeY)
-        self.color = color
-        self.handles = {}
-        self.handleSelected = None
-        self.mousePressPos = None
-        self.mousePressRect = None
-        self.setAcceptHoverEvents(True)
-        self.setData(0, name)
-        self.setFlag(QGraphicsItem.ItemIsMovable, True)
-        self.setFlag(QGraphicsItem.ItemIsSelectable, True)
-        self.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
-        self.setFlag(QGraphicsItem.ItemIsFocusable, True)
-        self.updateHandlesPos()
-        self.setZValue(9999)
-
-    def handleAt(self, point):
-        """
-        Returns the resize handle below the given point.
-        """
-        for k, v, in self.handles.items():
-            if v.contains(point):
-                return k
-        return None
-
-    def hoverMoveEvent(self, moveEvent):
-        """
-        Executed when the mouse moves over the shape (NOT PRESSED).
-        """
-        if self.isSelected():
-            handle = self.handleAt(moveEvent.pos())
-            cursor = Qt.ArrowCursor if handle is None else self.handleCursors[handle]
-            self.setCursor(cursor)
-        super().hoverMoveEvent(moveEvent)
-
-    def hoverLeaveEvent(self, moveEvent):
-        """
-        Executed when the mouse leaves the shape (NOT PRESSED).
-        """
-        self.setCursor(Qt.ArrowCursor)
-        super().hoverLeaveEvent(moveEvent)
-
-    def mousePressEvent(self, mouseEvent):
-        """
-        Executed when the mouse is pressed on the item.
-        """
-        self.handleSelected = self.handleAt(mouseEvent.pos())
-        if self.handleSelected:
-            self.mousePressPos = mouseEvent.pos()
-            self.mousePressRect = self.boundingRect()
-        
-        super().mousePressEvent(mouseEvent)
-
-    def mouseMoveEvent(self, mouseEvent):
-        """
-        Executed when the mouse is being moved over the item while being pressed.
-        """
-        if self.handleSelected is not None:
-            self.interactiveResize(mouseEvent.pos())
-        else:
-            super().mouseMoveEvent(mouseEvent)
-
-    def mouseReleaseEvent(self, mouseEvent):
-        """
-        Executed when the mouse is released from the item.
-        """
-        super().mouseReleaseEvent(mouseEvent)
-        self.handleSelected = None
-        self.mousePressPos = None
-        self.mousePressRect = None
-        self.update()
-
-    def contextMenuEvent(self, event):
-
-        scenePos = self.mapToScene(event.pos())
-        view = self.scene().views()[0]  # Get the first view
-        viewPos = view.mapToGlobal(view.mapFromScene(scenePos))
-        
-        menu = QMenu()
-        deleteIcon = QIcon()
-        deleteIcon.addFile(u":/Dark/x_dim.png", QSize(), QIcon.Normal, QIcon.Off)
-        action1 = menu.addAction("Delete")
-        action1.setIcon(deleteIcon)
-        
-        action = menu.exec(viewPos)
-        
-        if action == action1:
-            self.scene().removeItem(self)
-
-    def boundingRect(self):
-        """
-        Returns the bounding rect of the shape (including the resize handles).
-        """
-        o = self.handleSize + self.handleSpace
-        return self.rect().adjusted(-o, -o, o, o)
-
-    def updateHandlesPos(self):
-        """
-        Update current resize handles according to the shape size and position.
-        """
-        s = self.handleSize
-        b = self.boundingRect()
-        self.handles[self.handleTopLeft] = QRectF(b.left(), b.top(), s, s)
-        self.handles[self.handleTopMiddle] = QRectF(b.center().x() - s / 2, b.top(), s, s)
-        self.handles[self.handleTopRight] = QRectF(b.right() - s, b.top(), s, s)
-        self.handles[self.handleMiddleLeft] = QRectF(b.left(), b.center().y() - s / 2, s, s)
-        self.handles[self.handleMiddleRight] = QRectF(b.right() - s, b.center().y() - s / 2, s, s)
-        self.handles[self.handleBottomLeft] = QRectF(b.left(), b.bottom() - s, s, s)
-        self.handles[self.handleBottomMiddle] = QRectF(b.center().x() - s / 2, b.bottom() - s, s, s)
-        self.handles[self.handleBottomRight] = QRectF(b.right() - s, b.bottom() - s, s, s)
-
-        for handle, rect in self.handles.items():
-            rect_item = QGraphicsRectItem(rect)
-            rect_item.setZValue(1000)  
-
-    def interactiveResize(self, mousePos):
-        # Perform shape interactive resize.
-
-        offset = self.handleSize + self.handleSpace
-        boundingRect = self.boundingRect()
-        rect = self.rect()
-        diff = QPointF(0, 0)
-
-        self.prepareGeometryChange()
-
-        if self.handleSelected == self.handleTopLeft:
-
-            fromX = self.mousePressRect.left()
-            fromY = self.mousePressRect.top()
-            toX = fromX + mousePos.x() - self.mousePressPos.x()
-            toY = fromY + mousePos.y() - self.mousePressPos.y()
-            diff.setX(toX - fromX)
-            diff.setY(toY - fromY)
-            boundingRect.setLeft(toX)
-            boundingRect.setTop(toY)
-            rect.setLeft(boundingRect.left() + offset)
-            rect.setTop(boundingRect.top() + offset)
-            if rect.width() > 0 and rect.height() > 0:
-                self.setRect(rect)
-
-        elif self.handleSelected == self.handleTopMiddle:
-
-            fromY = self.mousePressRect.top()
-            toY = fromY + mousePos.y() - self.mousePressPos.y()
-            diff.setY(toY - fromY)
-            boundingRect.setTop(toY)
-            rect.setTop(boundingRect.top() + offset)
-            if rect.height() > 0:
-                self.setRect(rect)
-
-        elif self.handleSelected == self.handleTopRight:
-
-            fromX = self.mousePressRect.right()
-            fromY = self.mousePressRect.top()
-            toX = fromX + mousePos.x() - self.mousePressPos.x()
-            toY = fromY + mousePos.y() - self.mousePressPos.y()
-            diff.setX(toX - fromX)
-            diff.setY(toY - fromY)
-            boundingRect.setRight(toX)
-            boundingRect.setTop(toY)
-            rect.setRight(boundingRect.right() - offset)
-            rect.setTop(boundingRect.top() + offset)
-            if rect.width() > 0 and rect.height() > 0:
-                self.setRect(rect)
-
-        elif self.handleSelected == self.handleMiddleLeft:
-
-            fromX = self.mousePressRect.left()
-            toX = fromX + mousePos.x() - self.mousePressPos.x()
-            diff.setX(toX - fromX)
-            boundingRect.setLeft(toX)
-            rect.setLeft(boundingRect.left() + offset)
-            if rect.width() > 0 and rect.height() > 0:
-                self.setRect(rect)
-
-        elif self.handleSelected == self.handleMiddleRight:
-            #print("MR")
-            fromX = self.mousePressRect.right()
-            toX = fromX + mousePos.x() - self.mousePressPos.x()
-            diff.setX(toX - fromX)
-            boundingRect.setRight(toX)
-            rect.setRight(boundingRect.right() - offset)
-            if rect.width() > 0 and rect.height() > 0:
-                self.setRect(rect)
-
-        elif self.handleSelected == self.handleBottomLeft:
-
-            fromX = self.mousePressRect.left()
-            fromY = self.mousePressRect.bottom()
-            toX = fromX + mousePos.x() - self.mousePressPos.x()
-            toY = fromY + mousePos.y() - self.mousePressPos.y()
-            diff.setX(toX - fromX)
-            diff.setY(toY - fromY)
-            boundingRect.setLeft(toX)
-            boundingRect.setBottom(toY)
-            rect.setLeft(boundingRect.left() + offset)
-            rect.setBottom(boundingRect.bottom() - offset)
-            if rect.width() > 0 and rect.height() > 0:
-                self.setRect(rect)
-
-        elif self.handleSelected == self.handleBottomMiddle:
-
-            fromY = self.mousePressRect.bottom()
-            toY = fromY + mousePos.y() - self.mousePressPos.y()
-            diff.setY(toY - fromY)
-            boundingRect.setBottom(toY)
-            rect.setBottom(boundingRect.bottom() - offset)
-            if rect.width() > 0 and rect.height() > 0:
-                self.setRect(rect)
-
-        elif self.handleSelected == self.handleBottomRight:
-
-            fromX = self.mousePressRect.right()
-            fromY = self.mousePressRect.bottom()
-            toX = fromX + mousePos.x() - self.mousePressPos.x()
-            toY = fromY + mousePos.y() - self.mousePressPos.y()
-            diff.setX(toX - fromX)
-            diff.setY(toY - fromY)
-            boundingRect.setRight(toX)
-            boundingRect.setBottom(toY)
-            rect.setRight(boundingRect.right() - offset)
-            rect.setBottom(boundingRect.bottom() - offset)
-            if rect.width() > 0 and rect.height() > 0:
-                self.setRect(rect)
-                
-        self.updateHandlesPos()
-
-    def objectDeleted(self, name):
-        pass
-
-    def shape(self):
-        # Returns the shape of this item as a QPainterPath in local coordinates.
-
-        path = QPainterPath()
-        path.addRect(self.rect())
-        if self.isSelected():
-            for shape in self.handles.values():
-                path.addEllipse(shape)
-        return path
-
-    def paint(self, painter, option, widget=None):
-        # Paint the node in the graphic view.
-
-        painter.setRenderHint(QPainter.Antialiasing)
-        painter.setBrush(QBrush(self.color))
-        painter.setPen(QPen(QColor(0, 205, 255), 0, Qt.SolidLine))
-
-        if self.isSelected():
-            painter.setPen(QPen(QColor(0, 205, 255), 2.0, Qt.SolidLine))
-
-        if not self.isSelected():
-            painter.setPen(QPen(QColor(0, 0, 0, 0), 0, Qt.SolidLine))
-
-        painter.drawRect(self.rect())
-
-        if self.isSelected():
-            painter.setPen(QPen(QColor(0, 0, 0, 255), 1.0, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin))
-            painter.setBrush(QBrush(QColor(255, 255, 255, 255)))
-            for handle, rect in self.handles.items():
-                if self.handleSelected is None or handle == self.handleSelected:
-                    painter.drawRect(rect)
-
-
-class RectangleWidget(ResizeableWidget):
-    def __init__(self, posX, posY, sizeX, sizeY, color, name):
-        super().__init__(posX, posY, sizeX, sizeY, color, name)
-
 
 class ImageWidget(Widget):
     # Widget for basic images and handling for DigitalNumber
@@ -738,7 +434,7 @@ class ImageWidget(Widget):
         item.setPos(posX, posY)
         self.imageItems.append(item)
         if isAntialiased:
-            item.setTransformationMode(Qt.SmoothTransformation)
+            item.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
         self.color = QColor(0,0,0,0)
         self.setBrush(QBrush(self.color))
         self.setRect(0, 0, qPixmap.width()*len(self.imageItems)+spacing*len(self.imageItems)-spacing, qPixmap.height())
@@ -765,7 +461,7 @@ class AnalogWidget(Widget):
         self.bgImage = QGraphicsPixmapItem(backgroundImage, self)
         self.bgImage.setPos(int(bgX), int(bgY))
         if antialiasing:
-            self.bgImage.setTransformationMode(Qt.SmoothTransformation)
+            self.bgImage.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
 
     def addSecondHand(self, secHandImage, secHandX, secHandY, antialiasing):
         if secHandImage.isNull():
@@ -775,7 +471,7 @@ class AnalogWidget(Widget):
         self.secHand.setOffset(-int(secHandX), -int(secHandY))
         self.secHand.setPos(self.rect().width()/2, self.rect().height()/2)
         if antialiasing:
-            self.secHand.setTransformationMode(Qt.SmoothTransformation)
+            self.secHand.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
 
     def addMinuteHand(self, minHandImage, minHandX, minHandY, antialiasing):
         if minHandImage.isNull():
@@ -786,7 +482,7 @@ class AnalogWidget(Widget):
         self.minHand.setRotation(60)
         self.minHand.setPos(self.rect().width()/2, self.rect().height()/2)
         if antialiasing:
-            self.minHand.setTransformationMode(Qt.SmoothTransformation)
+            self.minHand.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
 
     def addHourHand(self, hourHandImage, hrHandX, hrHandY, antialiasing):
         if hourHandImage.isNull():
@@ -797,7 +493,7 @@ class AnalogWidget(Widget):
         self.hrHand.setRotation(-60)
         self.hrHand.setPos(self.rect().width()/2, self.rect().height()/2)
         if antialiasing:
-            self.hrHand.setTransformationMode(Qt.SmoothTransformation)
+            self.hrHand.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
 
 
 class CircularArcItem(QGraphicsPathItem):
@@ -846,7 +542,7 @@ class CirclularArcImage(QGraphicsPixmapItem):
         painter.setRenderHint(QPainter.Antialiasing, self.antialiased)
         brush = QBrush(self.pixmap())
         pen = QPen(QColor(255,255,255,255))
-        pen.setStyle(Qt.DashLine)
+        pen.setStyle(Qt.PenStyle.DashLine)
         painter.setBrush(brush)
         painter.setPen(pen)
 
@@ -872,5 +568,5 @@ class ProgressWidget(Widget):
         self.pathImage = CirclularArcImage(pathImage, self, offsetX, offsetY, radius, thickness, startAngle, endAngle, isAntialiased)
 
         if isAntialiased:
-            self.backgroundImage.setTransformationMode(Qt.SmoothTransformation)
-            self.pathImage.setTransformationMode(Qt.SmoothTransformation)
+            self.backgroundImage.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
+            self.pathImage.setTransformationMode(Qt.TransformationMode.SmoothTransformation)

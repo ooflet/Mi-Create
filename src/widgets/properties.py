@@ -13,11 +13,11 @@ import shutil
 import traceback
 import logging
 from typing import Any
-from PySide6.QtWidgets import (QStyledItemDelegate, QWidget, QFileDialog, QTreeWidget, QFrame, QHeaderView, 
+from PyQt6.QtWidgets import (QStyledItemDelegate, QWidget, QFileDialog, QTreeWidget, QFrame, QHeaderView, 
                                QDialog, QDialogButtonBox, QVBoxLayout, QListWidgetItem, QTreeWidgetItem, QLineEdit, 
-                               QSpinBox, QComboBox, QCheckBox, QMessageBox)
-from PySide6.QtCore import Qt, Signal, QPoint, QSize
-from PySide6.QtGui import QColor, QPen, QGuiApplication, QIcon, QPalette
+                               QSpinBox, QComboBox, QCheckBox, QMessageBox, QAbstractItemView)
+from PyQt6.QtCore import Qt, pyqtSignal, QPoint, QSize
+from PyQt6.QtGui import QColor, QPen, QGuiApplication, QIcon, QPalette
 from pprint import pprint
 
 _ = gettext.gettext
@@ -48,7 +48,7 @@ class GridDelegate(QStyledItemDelegate):
         super().paint(painter, option, index)
 
 class PropertiesWidget(QWidget):
-    propertyChanged = Signal(Any, Any)
+    propertyChanged = pyqtSignal(object, object)
     def __init__(self, window, resourceWidget=None, srcList=None, srcData=None, screen=None):
         super().__init__()
 
@@ -90,27 +90,26 @@ class PropertiesWidget(QWidget):
         self.primaryScreen = screen
 
         self.treeWidget = QTreeWidget(self)
-        self.treeWidget.setFrameShape(QFrame.NoFrame)
+        self.treeWidget.setFrameShape(QFrame.Shape.NoFrame)
         self.treeWidget.setRootIsDecorated(True)
-        self.treeWidget.setEditTriggers(QTreeWidget.NoEditTriggers)
+        self.treeWidget.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.treeWidget.setAnimated(True)
         self.treeWidget.setUniformRowHeights(True)
 
-        self.treeWidget.header().setSectionResizeMode(0, QHeaderView.Interactive)
-        self.treeWidget.header().setSectionResizeMode(1, QHeaderView.Interactive)
-        self.treeWidget.header().resizeSection(0, 145)
+        self.treeWidget.header().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        self.treeWidget.header().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
         self.treeWidget.setHeaderLabels(["Property", "Value"])
         self.treeWidget.setItemDelegate(GridDelegate())
         self.treeWidget.setStyleSheet("QTreeWidget::item{height:24px;}")
 
         if resourceWidget != None:
             self.resourceDialog = QDialog(window)
-            self.resourceDialog.setWindowFlags(Qt.FramelessWindowHint | Qt.Popup)
+            self.resourceDialog.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Popup)
             self.resourceDialogUI = resourceWidget()
             self.resourceDialogUI.setupUi(self.resourceDialog)
             self.resourceDialogUI.searchBar.textChanged.connect(search)
             self.resourceDialogUI.addImage.clicked.connect(addResource)
-            apply = self.resourceDialogUI.buttonBox.button(QDialogButtonBox.Apply)
+            apply = self.resourceDialogUI.buttonBox.button(QDialogButtonBox.StandardButton.Apply)
             apply.clicked.connect(closeResourceDialog)
 
         layout = QVBoxLayout(self)
@@ -144,11 +143,11 @@ class PropertiesWidget(QWidget):
         self.propertyItems[srcProperty] = valueWidget
         item.setExpanded(True)
 
-    def createLineEdit(self, text, disabled, propertySignalDisabled, srcProperty=""):
+    def createLineEdit(self, text, disabled, propertypyqtSignalDisabled, srcProperty=""):
         def onDeselect():
             lineEdit.clearFocus()
             self.treeWidget.setCurrentItem(None)
-            if not propertySignalDisabled:
+            if not propertypyqtSignalDisabled:
                 self.sendPropertyChangedSignal(srcProperty, lineEdit.text())
 
         lineEdit = QLineEdit(self)
@@ -158,7 +157,7 @@ class PropertiesWidget(QWidget):
         lineEdit.editingFinished.connect(onDeselect)
         return lineEdit
     
-    def createResourceEdit(self, text, disabled, propertySignalDisabled, srcProperty=""):
+    def createResourceEdit(self, text, disabled, propertypyqtSignalDisabled, srcProperty=""):
         def onSelect():
             screenX = self.primaryScreen.size().width()
             screenY = self.primaryScreen.size().height()
@@ -171,7 +170,7 @@ class PropertiesWidget(QWidget):
             resourceEdit.clearFocus()
             self.currentPropertyInput = resourceEdit
             self.resourceDialog.setGeometry(posX, posY, 300, 325)
-            [self.resourceDialogUI.imageSelect.setCurrentItem(x) for x in self.resourceDialogUI.imageSelect.findItems(resourceEdit.text(), Qt.MatchExactly)]
+            [self.resourceDialogUI.imageSelect.setCurrentItem(x) for x in self.resourceDialogUI.imageSelect.findItems(resourceEdit.text(), Qt.MatchFlag.MatchExactly)]
             self.resourceDialogUI.searchBar.setFocus()
             self.resourceDialog.exec()
 
@@ -184,13 +183,13 @@ class PropertiesWidget(QWidget):
         resourceEdit.setText(text)
         resourceEdit.setDisabled(disabled)
         resourceEdit.mousePressEvent = lambda event: onSelect()
-        if not propertySignalDisabled:
+        if not propertypyqtSignalDisabled:
             resourceEdit.textChanged.connect(lambda *event: self.sendPropertyChangedSignal(srcProperty, resourceEdit.text()))
         return resourceEdit
 
-    def createSpinBox(self, text, disabled, propertySignalDisabled, srcProperty, minVal=-9999, maxVal=9999):
+    def createSpinBox(self, text, disabled, propertypyqtSignalDisabled, srcProperty, minVal=-9999, maxVal=9999):
         def onChanged():
-            if not propertySignalDisabled:
+            if not propertypyqtSignalDisabled:
                 self.sendPropertyChangedSignal(srcProperty, str(spinBox.value()))
 
         def onDeselect():
@@ -406,6 +405,7 @@ class PropertiesWidget(QWidget):
                 inputWidget = None
 
     def loadProperties(self, properties, data=None, device=None, scrollTo=None):
+        print("load")
         self.treeWidget.clear()
         self.propertyItems = {}
         if data == None:
@@ -417,3 +417,4 @@ class PropertiesWidget(QWidget):
 
     def clearProperties(self):
         self.treeWidget.clear()
+        self.propertyItems = {}

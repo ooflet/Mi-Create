@@ -1,7 +1,7 @@
 # QModernStyle
 
 
-from PySide6.QtGui import QPalette, QColor
+from PyQt6.QtGui import QPalette, QColor
 from ._utils import resource_path
 
 _STYLESHEET = resource_path('resources/style.qss')
@@ -26,35 +26,35 @@ def dark(app):
     darkPalette = QPalette()
 
     # base
-    darkPalette.setColor(QPalette.WindowText, QColor(255, 255, 255))
-    darkPalette.setColor(QPalette.Button, QColor(53, 53, 53))
-    darkPalette.setColor(QPalette.Light, QColor(255, 255, 255))
-    darkPalette.setColor(QPalette.Midlight, QColor(90, 90, 90))
-    darkPalette.setColor(QPalette.Dark, QColor(35, 35, 35))
-    darkPalette.setColor(QPalette.Text, QColor(255, 255, 255))
-    darkPalette.setColor(QPalette.BrightText, QColor(255, 255, 255))
-    darkPalette.setColor(QPalette.ButtonText, QColor(255, 255, 255))
-    darkPalette.setColor(QPalette.Base, QColor(42, 42, 42))
-    darkPalette.setColor(QPalette.Window, QColor(50, 50, 50))
-    darkPalette.setColor(QPalette.Shadow, QColor(20, 20, 20))
-    darkPalette.setColor(QPalette.Highlight, QColor(42, 130, 218))
-    darkPalette.setColor(QPalette.HighlightedText, QColor(255, 255, 255))
-    darkPalette.setColor(QPalette.Link, QColor(85, 170, 255))
-    darkPalette.setColor(QPalette.AlternateBase, QColor(66, 66, 66))
-    darkPalette.setColor(QPalette.ToolTipBase, QColor(53, 53, 53))
-    darkPalette.setColor(QPalette.ToolTipText, QColor(255, 255, 255))
-    darkPalette.setColor(QPalette.LinkVisited, QColor(80, 80, 80))
+    darkPalette.setColor(QPalette.ColorRole.WindowText, QColor(255, 255, 255))
+    darkPalette.setColor(QPalette.ColorRole.Button, QColor(53, 53, 53))
+    darkPalette.setColor(QPalette.ColorRole.Light, QColor(255, 255, 255))
+    darkPalette.setColor(QPalette.ColorRole.Midlight, QColor(90, 90, 90))
+    darkPalette.setColor(QPalette.ColorRole.Dark, QColor(35, 35, 35))
+    darkPalette.setColor(QPalette.ColorRole.Text, QColor(255, 255, 255))
+    darkPalette.setColor(QPalette.ColorRole.BrightText, QColor(255, 255, 255))
+    darkPalette.setColor(QPalette.ColorRole.ButtonText, QColor(255, 255, 255))
+    darkPalette.setColor(QPalette.ColorRole.Base, QColor(42, 42, 42))
+    darkPalette.setColor(QPalette.ColorRole.Window, QColor(50, 50, 50))
+    darkPalette.setColor(QPalette.ColorRole.Shadow, QColor(20, 20, 20))
+    darkPalette.setColor(QPalette.ColorRole.Highlight, QColor(42, 130, 218))
+    darkPalette.setColor(QPalette.ColorRole.HighlightedText, QColor(255, 255, 255))
+    darkPalette.setColor(QPalette.ColorRole.Link, QColor(85, 170, 255))
+    darkPalette.setColor(QPalette.ColorRole.AlternateBase, QColor(66, 66, 66))
+    darkPalette.setColor(QPalette.ColorRole.ToolTipBase, QColor(53, 53, 53))
+    darkPalette.setColor(QPalette.ColorRole.ToolTipText, QColor(255, 255, 255))
+    darkPalette.setColor(QPalette.ColorRole.LinkVisited, QColor(80, 80, 80))
 
     # disabled
-    darkPalette.setColor(QPalette.Disabled, QPalette.WindowText,
+    darkPalette.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.WindowText,
                          QColor(127, 127, 127))
-    darkPalette.setColor(QPalette.Disabled, QPalette.Text,
+    darkPalette.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.Text,
                          QColor(127, 127, 127))
-    darkPalette.setColor(QPalette.Disabled, QPalette.ButtonText,
+    darkPalette.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.ButtonText,
                          QColor(127, 127, 127))
-    darkPalette.setColor(QPalette.Disabled, QPalette.Highlight,
+    darkPalette.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.Highlight,
                          QColor(80, 80, 80))
-    darkPalette.setColor(QPalette.Disabled, QPalette.HighlightedText,
+    darkPalette.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.HighlightedText,
                          QColor(127, 127, 127))
 
     app.setPalette(darkPalette)
@@ -72,35 +72,35 @@ def light(app):
     lightPalette = QPalette()
 
     # base
-    lightPalette.setColor(QPalette.WindowText, QColor(0, 0, 0))
-    lightPalette.setColor(QPalette.Button, QColor(240, 240, 240))
-    lightPalette.setColor(QPalette.Light, QColor(180, 180, 180))
-    lightPalette.setColor(QPalette.Midlight, QColor(200, 200, 200))
-    lightPalette.setColor(QPalette.Dark, QColor(225, 225, 225))
-    lightPalette.setColor(QPalette.Text, QColor(0, 0, 0))
-    lightPalette.setColor(QPalette.BrightText, QColor(0, 0, 0))
-    lightPalette.setColor(QPalette.ButtonText, QColor(0, 0, 0))
-    lightPalette.setColor(QPalette.Base, QColor(237, 237, 237))
-    lightPalette.setColor(QPalette.Window, QColor(240, 240, 240))
-    lightPalette.setColor(QPalette.Shadow, QColor(20, 20, 20))
-    lightPalette.setColor(QPalette.Highlight, QColor(76, 163, 224))
-    lightPalette.setColor(QPalette.HighlightedText, QColor(0, 0, 0))
-    lightPalette.setColor(QPalette.Link, QColor(0, 162, 232))
-    lightPalette.setColor(QPalette.AlternateBase, QColor(225, 225, 225))
-    lightPalette.setColor(QPalette.ToolTipBase, QColor(240, 240, 240))
-    lightPalette.setColor(QPalette.ToolTipText, QColor(0, 0, 0))
-    lightPalette.setColor(QPalette.LinkVisited, QColor(222, 222, 222))
+    lightPalette.setColor(QPalette.ColorRole.WindowText, QColor(0, 0, 0))
+    lightPalette.setColor(QPalette.ColorRole.Button, QColor(240, 240, 240))
+    lightPalette.setColor(QPalette.ColorRole.Light, QColor(180, 180, 180))
+    lightPalette.setColor(QPalette.ColorRole.Midlight, QColor(200, 200, 200))
+    lightPalette.setColor(QPalette.ColorRole.Dark, QColor(225, 225, 225))
+    lightPalette.setColor(QPalette.ColorRole.Text, QColor(0, 0, 0))
+    lightPalette.setColor(QPalette.ColorRole.BrightText, QColor(0, 0, 0))
+    lightPalette.setColor(QPalette.ColorRole.ButtonText, QColor(0, 0, 0))
+    lightPalette.setColor(QPalette.ColorRole.Base, QColor(237, 237, 237))
+    lightPalette.setColor(QPalette.ColorRole.Window, QColor(240, 240, 240))
+    lightPalette.setColor(QPalette.ColorRole.Shadow, QColor(20, 20, 20))
+    lightPalette.setColor(QPalette.ColorRole.Highlight, QColor(76, 163, 224))
+    lightPalette.setColor(QPalette.ColorRole.HighlightedText, QColor(0, 0, 0))
+    lightPalette.setColor(QPalette.ColorRole.Link, QColor(0, 162, 232))
+    lightPalette.setColor(QPalette.ColorRole.AlternateBase, QColor(225, 225, 225))
+    lightPalette.setColor(QPalette.ColorRole.ToolTipBase, QColor(240, 240, 240))
+    lightPalette.setColor(QPalette.ColorRole.ToolTipText, QColor(0, 0, 0))
+    lightPalette.setColor(QPalette.ColorRole.LinkVisited, QColor(222, 222, 222))
 
     # disabled
-    lightPalette.setColor(QPalette.Disabled, QPalette.WindowText,
+    lightPalette.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.WindowText,
                          QColor(115, 115, 115))
-    lightPalette.setColor(QPalette.Disabled, QPalette.Text,
+    lightPalette.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.Text,
                          QColor(115, 115, 115))
-    lightPalette.setColor(QPalette.Disabled, QPalette.ButtonText,
+    lightPalette.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.ButtonText,
                          QColor(115, 115, 115))
-    lightPalette.setColor(QPalette.Disabled, QPalette.Highlight,
+    lightPalette.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.Highlight,
                          QColor(190, 190, 190))
-    lightPalette.setColor(QPalette.Disabled, QPalette.HighlightedText,
+    lightPalette.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.HighlightedText,
                          QColor(115, 115, 115))
 
     app.setPalette(lightPalette)

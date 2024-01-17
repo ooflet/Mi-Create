@@ -1,9 +1,9 @@
 # Resource object code (Python 3)
 # Created by: object code
-# Created by: The Resource Compiler for Qt version 6.6.0
+# Created by: The Resource Compiler for Qt version 6.4.3
 # WARNING! All changes made in this file will be lost!
 
-from PySide6 import QtCore
+from PyQt6 import QtCore
 
 qt_resource_data = b"\
 \x00\x00\x04\xe5\

@@ -1,6 +1,5 @@
 from typing import Any
-from PySide6.QtCore import Signal
-from PySide6.QtGui import QUndoCommand, QUndoStack
+from PyQt6.QtGui import QUndoCommand, QUndoStack
 
 class historySystem:
     def __init__(self):

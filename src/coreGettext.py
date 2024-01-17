@@ -1,4 +1,4 @@
-from PySide6.QtCore import QCoreApplication
+from PyQt6.QtCore import QCoreApplication
 import gettext
 import sys
 
@@ -21,7 +21,7 @@ class QCoreApplication(QCoreApplication):
         _ = translation.gettext
 
     @staticmethod
-    def translate(context, key, disambiguation):
+    def translate(context, key):
         with open("locales/window.pot", "a") as file:
             if not "Ctrl" in key:
                 return _(key)
