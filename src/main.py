@@ -9,6 +9,8 @@
 # And that allows the explorer to also display any apps placed in the project
 # Plus, its more simpler for me to use
 
+# Switch watchface render framework from QGraphicsFramework to Qt Quick
+
 # Also, bundle in higher quality icons or use SVG versions they look very bad on Windows scale > 100%
 
 import os
@@ -17,10 +19,10 @@ import gettext
 
 from PyQt6.QtWidgets import (QMainWindow, QDialog, QInputDialog, QMessageBox, QApplication, QGraphicsScene, QPushButton, 
                                QDialogButtonBox, QTreeWidgetItem, QFileDialog, QToolButton, QToolBar, QWidget, QVBoxLayout, 
-                               QFrame, QColorDialog, QFontDialog, QSplashScreen)
-from PyQt6.QtGui import QIcon, QPixmap, QDesktopServices
-from PyQt6.QtCore import Qt, QSettings, QSize, QUrl, QFileInfo
-from PyQt6.Qsci import QsciLexerXML, QsciLexerLua, QsciLexerJavaScript
+                               QFrame, QColorDialog, QFontDialog, QSplashScreen, QGridLayout, QLabel, QListWidgetItem,
+                               QSpacerItem, QSizePolicy, QAbstractItemView)
+from PyQt6.QtGui import QIcon, QPixmap, QDesktopServices, QDrag
+from PyQt6.QtCore import Qt, QSettings, QSize, QUrl, QFileInfo, QItemSelectionModel
 
 from pprint import pprint
 import xml.dom.minidom
@@ -28,18 +30,19 @@ import configparser
 import xmltodict
 import threading
 import logging
-import subprocess
 import json
 import theme.styles as theme
 import traceback
 
 from coreGettext import QCoreApplication
-from updater.updater import Updater
-from project.projectManager import watchData, fprjProject
-from history.historyManager import historySystem, CommandAddWidget, CommandDeleteWidget, CommandModifyProperty
+from utils.updater import Updater
+from utils.project import watchData, fprjProject
+from utils.history import historySystem, CommandAddWidget, CommandDeleteWidget, CommandModifyProperty
 from widgets.canvas import Canvas, ObjectIcon
 from widgets.properties import PropertiesWidget
-from widgets.editor import Editor
+from widgets.editor import Editor, XMLLexer
+
+from coreGettext import QCoreApplication
 
 import resources.icons_rc # resource import required because it sets up the icons
 
@@ -203,6 +206,7 @@ class MainWindow(QMainWindow):
         self.setupNewProjectDialog() 
         self.loadWindowState()
         self.loadLanguage(True)
+        self.createWelcomePage()
         logging.debug("Launch!!")
         self.statusBar().showMessage("Ready", 3000) 
 
@@ -235,7 +239,9 @@ class MainWindow(QMainWindow):
 
     def getCurrentProject(self):
         currentIndex = self.ui.workspace.currentIndex()
-        currentProject = self.projects[self.ui.workspace.tabText(currentIndex)]
+        currentProject = self.projects.get(self.ui.workspace.tabText(currentIndex))
+        if currentProject == None:
+            self.showDialogue("error", "Failed to retrieve currentProject! May lead to a crash afterwards. Please report as bug and include error details.", f"Unable to find {self.ui.workspace.tabText(currentIndex)} in list of projects: {str(self.projects)}")
         return currentProject
 
     def saveWindowState(self):
@@ -330,6 +336,52 @@ class MainWindow(QMainWindow):
         elif themeName == "Dark":
             theme.dark(app)
 
+    def createWelcomePage(self):
+        Welcome = QWidget()
+        Welcome.setObjectName("Welcome")
+        gridLayout_3 = QGridLayout(Welcome)
+        gridLayout_3.setContentsMargins(32, -1, -1, -1)
+        gridLayout_3.setObjectName("gridLayout_3")
+        OpenProject = QLabel(parent=Welcome)
+        OpenProject.setObjectName("OpenProject")
+        gridLayout_3.addWidget(OpenProject, 3, 0, 1, 1)
+        spacerItem = QSpacerItem(20, 176, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+        gridLayout_3.addItem(spacerItem, 4, 0, 1, 1)
+        WelcomeText = QLabel(parent=Welcome)
+        WelcomeText.setStyleSheet("QLabel { font-size: 18pt;}")
+        WelcomeText.setObjectName("WelcomeText")
+        gridLayout_3.addWidget(WelcomeText, 1, 0, 1, 1)
+        NewProject = QLabel(parent=Welcome)
+        NewProject.setObjectName("NewProject")
+        gridLayout_3.addWidget(NewProject, 2, 0, 1, 1)
+        spacerItem1 = QSpacerItem(20, 177, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+        gridLayout_3.addItem(spacerItem1, 0, 0, 1, 1)
+        icon1 = QIcon()
+        icon1.addPixmap(QPixmap(":/Dark/MiFaceStudioFavicon.png"), QIcon.Mode.Normal, QIcon.State.Off)
+
+        OpenProject.setText(QCoreApplication.translate("MainWindow", "<html><head/><body><p><img src=\":/Dark/folder-open.png\"/> <a href=\"\\&quot;\\&quot;\"><span style=\" text-decoration: underline; color:#55aaff;\">Open Project...</span></a></p></body></html>"))
+        WelcomeText.setText(QCoreApplication.translate("MainWindow", "Welcome"))
+        NewProject.setText(QCoreApplication.translate("MainWindow", "<html><head/><body><p><img src=\":/Dark/file-plus.png\"/> <a href=\"\\&quot;\\&quot;\"><span style=\" text-decoration: underline; color:#55aaff;\">New Project...</span></a></p></body></html>"))
+
+        NewProject.linkActivated.connect(lambda: self.ui.actionNewFile.trigger())
+        OpenProject.linkActivated.connect(lambda: self.ui.actionOpenFile.trigger())
+
+        self.ui.workspace.addTab(Welcome, icon1, QCoreApplication.translate("MainWindow", "Welcome"))
+
+    def reloadImages(self, imageFolder, reset):
+        if reset:
+            self.ui.resourceList.clear()
+        else:
+            self.ui.resourceList.clear()
+            for filename in os.listdir(imageFolder):
+                file = os.path.join(imageFolder, filename)
+                if os.path.isfile(file):
+                    logging.debug("Creating file entry for "+os.path.basename(file))
+                    item = QListWidgetItem(QIcon(file), os.path.basename(file))
+                    item.setData(0, os.path.basename(file))
+                    item.setSizeHint(QSize(item.sizeHint().width(), 64))
+                    self.ui.resourceList.addItem(item)
+
     def setupWorkspace(self):
         # Fires when tab closes
         def handleTabClose(index):
@@ -355,17 +407,17 @@ class MainWindow(QMainWindow):
             currentWidget = self.ui.workspace.widget(index)
             currentTabName = self.ui.workspace.tabText(index)
             if self.projects.get(currentTabName) and self.projects[currentTabName]["hasFileChanged"]:
-                reply = QMessageBox.warning(self, 'Mi Create', 'This tab has unsaved changes. Save and close?', QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
-                if reply == QMessageBox.Yes:
+                reply = QMessageBox.warning(self, 'Mi Create', 'This tab has unsaved changes. Save and close?', QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.Cancel)
+                if reply == QMessageBox.StandardButton.Yes:
                     self.saveProjects("current")
                     delWidget()
-                elif reply == QMessageBox.No:
+                elif reply == QMessageBox.StandardButton.No:
                     delWidget()
             else:
                 delWidget()
 
         # Fires when tab changes
-        def handleTabChange(index): 
+        def handleTabChange(index):
             tabName = self.ui.workspace.tabText(index)
             self.setWindowTitle(tabName+" - Mi Create")
             if self.projects.get(tabName):
@@ -373,16 +425,35 @@ class MainWindow(QMainWindow):
                 if tabData.get("canvas") != None:
                     logging.debug("Updating explorer with "+str(tabData["data"])) 
                     self.updateExplorer(tabData["data"])
-                    self.propertiesWidget.imageFolder = tabData["imageFolder"]
-                    threading.Thread(target=self.propertiesWidget.reloadResourceImages).start()
-                    logging.debug("Thread started to reload resource dialog images")
+                    threading.Thread(target=lambda: self.reloadImages(tabData["imageFolder"], False)).start()
+                    
                 else:
                     self.clearExplorer()
                     self.updateProperties(False)
+                    self.reloadImages(None, True)
             else:
                 self.clearExplorer()
                 self.updateProperties(False)
+                self.reloadImages(None, True)
         
+        # setup resourceList
+
+        def startDrag(supportedActions):
+            listsQModelIndex = self.ui.resourceList.selectedIndexes()
+            if listsQModelIndex:
+                dataQMimeData = self.ui.resourceList.model().mimeData(listsQModelIndex)
+                if not dataQMimeData:
+                    return None
+                dragQDrag = QDrag(self.ui.resourceList)
+                # dragQDrag.setPixmap(QtGui.QPixmap('test.jpg')) # <- For put your custom image here
+                dragQDrag.setMimeData(dataQMimeData)
+                defaultDropAction = Qt.DropAction.IgnoreAction
+                if ((supportedActions & Qt.DropAction.CopyAction) and (self.ui.resourceList.dragDropMode() != QAbstractItemView.DragDropMode.InternalMove)):
+                    defaultDropAction = Qt.DropAction.CopyAction
+                dragQDrag.exec(supportedActions, defaultDropAction)
+
+        self.ui.resourceList.startDrag = startDrag
+
         # Connect objects in the Insert menu to actions
         self.ui.actionImage.triggered.connect(lambda: self.createCanvasWidget("30"))
         self.ui.actionImage_List.triggered.connect(lambda: self.createCanvasWidget("31"))
@@ -390,36 +461,26 @@ class MainWindow(QMainWindow):
         self.ui.actionAnalog_Display.triggered.connect(lambda: self.createCanvasWidget("27"))
         self.ui.actionArc_Progress.triggered.connect(lambda: self.createCanvasWidget("42"))
 
-        # Connect links in the welcome screen to actions
-        self.ui.NewProject.linkActivated.connect(lambda: self.ui.actionNewFile.trigger())
-        self.ui.OpenProject.linkActivated.connect(lambda: self.ui.actionOpenFile.trigger())
-
         # Connect tab changes
         self.ui.workspace.tabCloseRequested.connect(handleTabClose)
         self.ui.workspace.currentChanged.connect(handleTabChange)
 
     def setupExplorer(self):
         def updateExplorerSelection():
-            currentIndex = self.ui.workspace.currentIndex()
-
-            if not self.projects.get(self.ui.workspace.tabText(currentIndex)):
-                return
-            
-            selected = False
             currentProject = self.getCurrentProject()
 
-            # check if current selected object is not already selected
             if not currentProject.get("canvas"):
                 return
 
+            selected = False
+
+            # check if current selected object is not already selected
             if currentProject["canvas"].getSelectedObject() != [] and self.ui.Explorer.selectedItems() != []:
                 if self.ui.Explorer.selectedItems()[0].data(0, 101) == currentProject["canvas"].getSelectedObject()[0].data(0):
                     selected = True
                     
             if not selected:
-                for x in self.ui.Explorer.selectedItems():
-                    currentProject["canvas"].selectObject(x.text(0))
-
+                currentProject["canvas"].selectObjects(self.ui.Explorer.selectedItems())
 
         self.ui.Explorer.itemSelectionChanged.connect(updateExplorerSelection)
 
@@ -577,18 +638,31 @@ class MainWindow(QMainWindow):
         self.newProjectUi.folderShow.clicked.connect(openFolderDialog)
 
     def changeSelectionInExplorer(self, name):
-        self.ui.Explorer.setCurrentItem(self.explorer[name])
+        print(type(name))
+        if type(name) == str:
+            self.ui.Explorer.setCurrentItem(self.explorer[name])
+        elif type(name) == list:
+            for item in name:
+                print(item.data(0), self.ui.Explorer.indexFromItem(self.explorer[item.data(0)]).row())
+                index = self.ui.Explorer.indexFromItem(self.explorer[item.data(0)])
+                self.ui.Explorer.selectionModel().select(self.ui.Explorer.model().index(index.row(), index.column(), index.parent()), QItemSelectionModel.SelectionFlag.Select)
 
     def createCanvasWidget(self, id):
         count = 0
         currentProject = self.getCurrentProject()
+
+        if not currentProject.get("data"):
+            return
+        
         if not currentProject["data"]["FaceProject"]["Screen"].get("Widget"):
             currentProject["data"]["FaceProject"]["Screen"]["Widget"] = []
         elif type(currentProject["data"]["FaceProject"]["Screen"].get("Widget")) == dict:
             currentProject["data"]["FaceProject"]["Screen"]["Widget"] = [currentProject["data"]["FaceProject"]["Screen"]["Widget"]]
+
         for key in currentProject["data"]["FaceProject"]["Screen"]["Widget"]:
             if "widget-" in key["@Name"]:
                 count += 1
+
         defaultScaffold = json.loads(self.defaultSource)
         widgetData = defaultScaffold[id]
         widgetData["@Name"] = "widget-" + str(count)
@@ -612,6 +686,9 @@ class MainWindow(QMainWindow):
 
     def copyCanvasWidget(self):
         currentProject = self.getCurrentProject()
+        if not currentProject.get("canvas"):
+            return
+        
         selectedObjects = currentProject["canvas"].getSelectedObject()
 
         for object in selectedObjects:
@@ -623,6 +700,10 @@ class MainWindow(QMainWindow):
 
     def pasteCanvasWidget(self):
         currentProject = self.getCurrentProject()
+
+        if not currentProject.get("data"):
+            return
+
         if type(currentProject["data"]["FaceProject"]["Screen"]["Widget"]) == dict:
             currentProject["data"]["FaceProject"]["Screen"]["Widget"] = [currentProject["data"]["FaceProject"]["Screen"]["Widget"]]
 
@@ -654,19 +735,32 @@ class MainWindow(QMainWindow):
         # projects are technically "tabs"
         self.previousSelected = None
         if self.projects.get(name):
-            self.ui.workspace.setCurrentIndex(self.ui.workspace.indexOf(self.projects[name][0]))
+            print(self.ui.workspace.indexOf(self.projects[name]['canvas']))
+            self.ui.workspace.setCurrentIndex(self.ui.workspace.indexOf(self.projects[name]['canvas']))
+            return
             
         def selectionChange(project):
-            if project.scene.selectedItems() != []:
-                for x in project.scene.selectedItems():
-                    if self.previousSelected == project.scene.selectedItems():
+            selectedItems = project.scene.selectedItems()
+            if selectedItems != []:
+                if len(selectedItems) == 1:
+                    if self.previousSelected == selectedItems:
+                        print("return")
                         return
                     
-                    self.previousSelected = project.scene.selectedItems()
-                    #print(project.scene.selectedItems())
-                    self.changeSelectionInExplorer(x.data(0))
-                    self.updateProperties(self.explorer[x.data(0)])
-                    break
+                    self.previousSelected = selectedItems
+                    self.changeSelectionInExplorer(selectedItems[0].data(0))
+                    self.updateProperties(self.explorer[selectedItems[0].data(0)])
+                else:
+                    print(selectedItems)
+                    self.updateProperties(None)
+                    self.changeSelectionInExplorer(selectedItems)
+                    for x in selectedItems:
+                        print(x.data(0))
+                        if self.previousSelected == selectedItems:
+                            print("return")
+                            return
+
+                        self.previousSelected = selectedItems
             else:
                 self.previousSelected = None
                 if self.ui.Explorer.currentItem() != None:
@@ -937,6 +1031,8 @@ class MainWindow(QMainWindow):
         if projectsToSave == "all":
             for index, project in enumerate(self.projects):
                 if project["hasFileChanged"]:
+                    if not project.get("data"):
+                        return
                     raw = xmltodict.unparse(project["data"])
                     dom = xml.dom.minidom.parseString(raw)
                     pretty_xml = dom.toprettyxml()
@@ -952,6 +1048,9 @@ class MainWindow(QMainWindow):
             currentIndex = self.ui.workspace.currentIndex()
             currentName = self.ui.workspace.tabText(currentIndex)
             currentProject = self.getCurrentProject()
+
+            if not currentProject.get("data"):
+                return
 
             raw = xmltodict.unparse(currentProject["data"])
             dom = xml.dom.minidom.parseString(raw)
@@ -996,7 +1095,7 @@ class MainWindow(QMainWindow):
 
     def editProjectXML(self):
         if self.getCurrentProject().get("xml"):
-            self.createNewCodespace("Project XML", self.getCurrentProject()["xml"], QsciLexerXML)
+            self.createNewCodespace("Project XML", self.getCurrentProject()["xml"], XMLLexer)
 
     def showColorDialog(self):
         color = QColorDialog.getColor(Qt.white, self, "Select Color")
@@ -1010,14 +1109,14 @@ class MainWindow(QMainWindow):
 
     def showAboutWindow(self):
         dialog = QMessageBox(self)
-        dialog.setText(f'<html><head/><body><p>Mi Create v{currentVersion}<br/><a href="https://github.com/ooflet/Mi-Create/"><span style=" text-decoration: underline; color:#55aaff;">https://github.com/ooflet/Mi-Create/</span></a></p><p>(c) tostr 2023-2024<br/>This program is licensed under GPLv3</p></body></html>')
+        dialog.setText(f'<html><head/><body><p>Mi Create v{currentVersion}<br/><a href="https://github.com/ooflet/Mi-Create/"><span style=" text-decoration: underline; color:#55aaff;">https://github.com/ooflet/Mi-Create/</span></a></p><p>tostr 2024</p></body></html>')
         dialog.setIconPixmap(QPixmap(":/Images/MiCreate48x48.png"))
         dialog.setWindowTitle("About Mi Create")
         dialog.exec()
 
     def showThirdPartyNotices(self):
         dialog = QMessageBox(self)
-        dialog.setText('<html><head/><body><p><span style=" text-decoration: underline;">Third Party Notices</span></p><p><a href="https://www.riverbankcomputing.com/software/pyqt/"><span style=" text-decoration: underline; color:#55aaff;"> Qt6 + PyQt6</span></a> - Under GPLv3 License<br/><a href="https://lucide.dev"><span style=" text-decoration: underline; color:#55aaff;">Lucide Icons</span></a> - Under MIT License<br/>      <a href="https://github.com/microsoft/monaco-editor"><span style=" text-decoration: underline; color:#55aaff;">Monaco Editor</span></a> - Under MIT License<br/><a href="https://github.com/DaelonSuzuka/monaco-qt"><span style=" text-decoration: underline; color:#55aaff;">monaco-qt</span></a> - Under MIT License<br/>m0tral\'s Compiler - Under explicit permission</p></body></html>')
+        dialog.setText('<html><head/><body><p><span style=" text-decoration: underline;">Third Party Notices</span></p><p><a href="https://www.riverbankcomputing.com/software/pyqt/"><span style=" text-decoration: underline; color:#55aaff;"> Qt6 + PyQt6</span></a> - Under GPLv3 License<br/><a href="https://lucide.dev"><span style=" text-decoration: underline; color:#55aaff;">Lucide Icons</span></a> - Under MIT License<br/>m0tral\'s Compiler - Under explicit permission</p></body></html>')
         dialog.setWindowTitle("Third Party Notices")
         dialog.exec()
 

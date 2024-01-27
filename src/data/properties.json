@@ -10,7 +10,7 @@
                 ],
                 "@Name": [
                     "Name",
-                    "text",
+                    "str",
                     ""
                 ]
             },
@@ -176,7 +176,7 @@
                 ],
                 "@Name": [
                     "Name",
-                    "text",
+                    "str",
                     ""
                 ]
             },
@@ -331,7 +331,7 @@
                 ],
                 "@Name": [
                     "Name",
-                    "text",
+                    "str",
                     ""
                 ]
             },
@@ -396,7 +396,7 @@
                 ],
                 "@Name": [
                     "Name",
-                    "text",
+                    "str",
                     ""
                 ]
             },
@@ -458,7 +458,7 @@
                 "@BitmapList": [
                     "Images",
                     "imglist",
-                    "(0):resource/default/default.png"
+                    ""
                 ]
             }
         }
@@ -474,7 +474,7 @@
                 ],
                 "@Name": [
                     "Name",
-                    "text",
+                    "str",
                     ""
                 ]
             },
@@ -570,7 +570,7 @@
                 ],
                 "@Name": [
                     "Name",
-                    "text",
+                    "str",
                     ""
                 ]
             },

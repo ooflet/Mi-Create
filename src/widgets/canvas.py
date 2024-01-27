@@ -11,7 +11,7 @@ import logging
 from tracemalloc import start
 
 sys.path.append("..")
-from project.projectManager import watchData
+from utils.project import watchData
 
 from PyQt6.QtCore import pyqtSignal, QPointF, QModelIndex, QSize, QRectF, QRect, Qt
 from PyQt6.QtGui import QPainter, QPainterPath, QPen, QColor, QStandardItemModel, QPixmap, QIcon, QBrush, QImage
@@ -57,7 +57,7 @@ class Canvas(QGraphicsView):
         if antialiasingEnabled:
             self.setRenderHints(QPainter.RenderHint.Antialiasing)
 
-        #self.setDragMode(QGraphicsView.RubberBandDrag)
+        self.setDragMode(QGraphicsView.DragMode.RubberBandDrag)
         self.setTransformationAnchor(QGraphicsView.ViewportAnchor.AnchorUnderMouse)
 
         self.insertMenu = insertMenu
@@ -89,31 +89,6 @@ class Canvas(QGraphicsView):
 
         if deviceOutlineVisible:
             self.scene.addItem(DeviceOutline(self.deviceSize))
-
-    def dragEnterEvent(self, event):
-        if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
-            event.acceptProposedAction()
-
-    def dragMoveEvent(self, event):
-        if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
-            event.acceptProposedAction()
-
-    def dropEvent(self, event):
-        scenePos = self.mapToScene(event.pos())  # Convert to scene coordinates
-
-        # Calculate the offset between the view's top-left corner and the rectangle's top-left corner
-        viewRect = self.viewport().rect()
-        sceneRect = self.sceneRect()
-        offset = QPointF(sceneRect.x() - viewRect.x(), sceneRect.y() - viewRect.y())
-
-        # Subtract the offset from the drop position to get the position relative to the rectangle
-        relativePos = scenePos - offset
-
-        model = QStandardItemModel()
-        model.dropMimeData(event.mimeData(), Qt.DropAction.CopyAction, 0, 0, QModelIndex())
-        self.objectAdded.emit(relativePos, model.item(0, 0).data(99))
-
-        event.acceptProposedAction()
 
     def wheelEvent(self, event):
         modifiers = QApplication.keyboardModifiers()
@@ -156,6 +131,16 @@ class Canvas(QGraphicsView):
                 x.setSelected(True)
             else:
                 x.setSelected(False)
+
+    def selectObjects(self, objects):
+        for obj in objects:
+            for x in self.items():
+                # data(0) is name
+                # text(0) is treewidgetitem text
+                if x.data(0) == obj.text(0):
+                    x.setSelected(True)
+                else:
+                    x.setSelected(False)
 
     def getSelectedObject(self):
         return self.scene.selectedItems()
@@ -539,7 +524,7 @@ class CirclularArcImage(QGraphicsPixmapItem):
         return QRectF(0, 0, self.pixmap().width(), self.pixmap().height())
 
     def paint(self, painter, option, widget):
-        painter.setRenderHint(QPainter.Antialiasing, self.antialiased)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing, self.antialiased)
         brush = QBrush(self.pixmap())
         pen = QPen(QColor(255,255,255,255))
         pen.setStyle(Qt.PenStyle.DashLine)

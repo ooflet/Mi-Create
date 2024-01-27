@@ -16,8 +16,8 @@ from typing import Any
 from PyQt6.QtWidgets import (QStyledItemDelegate, QWidget, QFileDialog, QTreeWidget, QFrame, QHeaderView, 
                                QDialog, QDialogButtonBox, QVBoxLayout, QListWidgetItem, QTreeWidgetItem, QLineEdit, 
                                QSpinBox, QComboBox, QCheckBox, QMessageBox, QAbstractItemView)
-from PyQt6.QtCore import Qt, pyqtSignal, QPoint, QSize
-from PyQt6.QtGui import QColor, QPen, QGuiApplication, QIcon, QPalette
+from PyQt6.QtCore import Qt, pyqtSignal, QPoint, QSize, QModelIndex
+from PyQt6.QtGui import QColor, QPen, QGuiApplication, QIcon, QPalette, QStandardItemModel
 from pprint import pprint
 
 _ = gettext.gettext
@@ -90,6 +90,7 @@ class PropertiesWidget(QWidget):
         self.primaryScreen = screen
 
         self.treeWidget = QTreeWidget(self)
+        self.treeWidget.setHeaderHidden(True)
         self.treeWidget.setFrameShape(QFrame.Shape.NoFrame)
         self.treeWidget.setRootIsDecorated(True)
         self.treeWidget.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
@@ -123,16 +124,6 @@ class PropertiesWidget(QWidget):
         translation.install()
         global _
         _ = translation.gettext
-
-    def reloadResourceImages(self):
-        self.resourceDialogUI.imageSelect.clear()
-        for filename in os.listdir(self.imageFolder):
-            file = os.path.join(self.imageFolder, filename)
-            if os.path.isfile(file):
-                logging.debug("Creating file entry for "+os.path.basename(file))
-                item = QListWidgetItem(QIcon(file), os.path.basename(file))
-                item.setSizeHint(QSize(item.sizeHint().width(), 64))
-                self.resourceDialogUI.imageSelect.addItem(item)
     
     def sendPropertyChangedSignal(self, property, value):
         self.propertyChanged.emit(property, value)
@@ -143,11 +134,11 @@ class PropertiesWidget(QWidget):
         self.propertyItems[srcProperty] = valueWidget
         item.setExpanded(True)
 
-    def createLineEdit(self, text, disabled, propertypyqtSignalDisabled, srcProperty=""):
+    def createLineEdit(self, text, disabled, propertySignalDisabled, srcProperty=""):
         def onDeselect():
             lineEdit.clearFocus()
             self.treeWidget.setCurrentItem(None)
-            if not propertypyqtSignalDisabled:
+            if not propertySignalDisabled:
                 self.sendPropertyChangedSignal(srcProperty, lineEdit.text())
 
         lineEdit = QLineEdit(self)
@@ -157,39 +148,37 @@ class PropertiesWidget(QWidget):
         lineEdit.editingFinished.connect(onDeselect)
         return lineEdit
     
-    def createResourceEdit(self, text, disabled, propertypyqtSignalDisabled, srcProperty=""):
-        def onSelect():
-            screenX = self.primaryScreen.size().width()
-            screenY = self.primaryScreen.size().height()
-            posX = resourceEdit.mapToGlobal(QPoint(0,22)).x() - 150
-            posY = resourceEdit.mapToGlobal(QPoint(0,22)).y()
-            if posX + 300 > screenX:
-                posX = posX - ((posX + 300) - screenX)
-            if posY + 325 > screenY:
-                posY = posY - 325
-            resourceEdit.clearFocus()
-            self.currentPropertyInput = resourceEdit
-            self.resourceDialog.setGeometry(posX, posY, 300, 325)
-            [self.resourceDialogUI.imageSelect.setCurrentItem(x) for x in self.resourceDialogUI.imageSelect.findItems(resourceEdit.text(), Qt.MatchFlag.MatchExactly)]
-            self.resourceDialogUI.searchBar.setFocus()
-            self.resourceDialog.exec()
+    def createResourceEdit(self, text, disabled, propertySignalDisabled, srcProperty=""):
+        def dragEnterEvent(event):
+            if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
+                event.acceptProposedAction()
 
-        def onDeselect():
-            resourceEdit.clearFocus()
-            self.treeWidget.setCurrentItem(None)  
+        def dragMoveEvent(event):
+            if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
+                event.acceptProposedAction()
+
+        def dropEvent(event):
+
+            model = QStandardItemModel()
+            model.dropMimeData(event.mimeData(), Qt.DropAction.CopyAction, 0, 0, QModelIndex())
+            resourceEdit.setText(model.item(0, 0).data(0))
+
+            event.acceptProposedAction()
 
         resourceEdit = QLineEdit(self)
         resourceEdit.setStyleSheet("background-color: rgba(0, 0, 0, 0);")
         resourceEdit.setText(text)
         resourceEdit.setDisabled(disabled)
-        resourceEdit.mousePressEvent = lambda event: onSelect()
-        if not propertypyqtSignalDisabled:
+        resourceEdit.dragEnterEvent = dragEnterEvent
+        resourceEdit.dragMoveEvent = dragMoveEvent
+        resourceEdit.dropEvent = dropEvent
+        if not propertySignalDisabled:
             resourceEdit.textChanged.connect(lambda *event: self.sendPropertyChangedSignal(srcProperty, resourceEdit.text()))
         return resourceEdit
 
-    def createSpinBox(self, text, disabled, propertypyqtSignalDisabled, srcProperty, minVal=-9999, maxVal=9999):
+    def createSpinBox(self, text, disabled, propertySignalDisabled, srcProperty, minVal=-9999, maxVal=9999):
         def onChanged():
-            if not propertypyqtSignalDisabled:
+            if not propertySignalDisabled:
                 self.sendPropertyChangedSignal(srcProperty, str(spinBox.value()))
 
         def onDeselect():
@@ -282,7 +271,7 @@ class PropertiesWidget(QWidget):
                 
                 if value[1] == "disabled":
                     inputWidget = self.createLineEdit(propertyValue, True, False, key)
-                elif value[1] == "text":
+                elif value[1] == "str":
                     inputWidget = self.createLineEdit(propertyValue, False, False, key)
                 elif value[1] == "img":
                     inputWidget = self.createResourceEdit(propertyValue, False, False, key)
@@ -310,9 +299,8 @@ class PropertiesWidget(QWidget):
                             self.addProperty("", "Index", indexInput, imageCategory)
                             self.imageCategories.append([imageCategory, imageInput, indexInput])
 
-                            print(len(imageList), index)
-                            if len(imageList) - 1 > index:
-                                print("more")
+                            if len(imageList) > index:
+                                print(imageList)
                                 image = imageList[index]
                                 values = image.split(":")
                                 try:
@@ -324,7 +312,6 @@ class PropertiesWidget(QWidget):
                                     print(traceback.format_exc())
                                     return False, traceback.format_exc()
                             else:
-                                print("less")
                                 imageInput.textChanged.connect(lambda text, indexInput=self.imageCategories[index][2], index=index: imagesChanged(indexInput.text(), text, index))
                                 indexInput.textChanged.connect(lambda text, imageInput=self.imageCategories[index][1], index=index: imagesChanged(text, imageInput.text(), index))
  
@@ -405,7 +392,6 @@ class PropertiesWidget(QWidget):
                 inputWidget = None
 
     def loadProperties(self, properties, data=None, device=None, scrollTo=None):
-        print("load")
         self.treeWidget.clear()
         self.propertyItems = {}
         if data == None:

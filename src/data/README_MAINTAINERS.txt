@@ -14,14 +14,13 @@ window.pot contains translation data for "auto-compiled" windows/dialogs.
 
 Translation can be done by using a program like Poedit
 
-DeviceInfo.db is currently not possible to be translated at the current moment
+DeviceInfo.db is currently not possible to be translated
 
 ------------------------------------------------------------------------------------------------
 ABOUT DeviceInfo.db
 ------------------------------------------------------------------------------------------------
 
-DeviceInfo contains information about every compatible device. It is entirely ported from 
-EasyFace.
+DeviceInfo contains information about every compatible device. It is the same from EasyFace.
 
 The program does not use every entry in DeviceInfo. It only uses:
 - SRC ID
@@ -29,7 +28,7 @@ The program does not use every entry in DeviceInfo. It only uses:
 
 Everything else gets ignored because it is either hardcoded or not used at all.
 
-Mi Create can recognize raw hex strings in source ID and automatically convert it so it's cross
+Mi Create can recognize hex strings in source ID and automatically convert it so it's cross
 compatible with EasyFace projects.
 
 ------------------------------------------------------------------------------------------------

@@ -78,7 +78,7 @@ class Ui_Dialog(object):
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
     def retranslateUi(self, Dialog):
-        _translate = QtCore.QCoreApplication.translate
+        _translate = QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "Select resource..."))
         self.addImage.setText(_translate("Dialog", "..."))
         self.searchLabel.setText(_translate("Dialog", "Search:"))

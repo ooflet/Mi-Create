@@ -2,26 +2,14 @@
 ### Mi Create
 Unofficial watchface and application creator for Xiaomi Wearables.
 
-Compatible with
-- Xiaomi Watch Color/Color Sport
-- Xiaomi Watch Color 2/S1/S2
-- Xiaomi Watch S1 Pro
-- Redmi/Poco Watch
-- Redmi Watch 2 Lite
-- Redmi Watch 3/Active
-- Redmi Band Pro
-- Xiaomi Smart Band 7 Pro
-- Xiaomi Smart Band 8
-- Xiaomi Smart Band 8 Pro
-- 70mai Sapphir
+Compatible with all Xiaomi wearables made ~2021 and above (Devices manufactured by 70mai & Longcheer)
 
 ### 🇬🇧 EN
 ### Features:
 - Intuitive and elegant user interface
 - Easy to build & unpack watch faces
-- Quick creation of Mi Band 8 applets
-- Powerful integrated text editor via [Monaco Editor](https://github.com/microsoft/monaco-editor)
-- Multiple languages (English, Simplified & Traditional Chinese, Russian)
+- Powerful integrated text editor
+- Language support
 
 ### Installation:
 Download the latest installer from the [releases](https://github.com/ooflet/Mi-Create/releases) tab. You may also manually build the source code.

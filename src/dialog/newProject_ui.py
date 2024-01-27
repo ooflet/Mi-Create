@@ -117,7 +117,7 @@ class Ui_Dialog(object):
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
     def retranslateUi(self, Dialog):
-        _translate = QtCore.QCoreApplication.translate
+        _translate = QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "New Project..."))
         self.label_2.setText(_translate("Dialog", "Select device"))
         self.label_3.setText(_translate("Dialog", "Project name"))
