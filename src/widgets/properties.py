@@ -253,12 +253,12 @@ class PropertiesWidget(QWidget):
         item.setExpanded(True)
         return item
 
-    def addCategories(self, properties, data, parent, device):
+    def addProperties(self, properties, data, parent, device):
         for key, value in properties.items():
             if isinstance(value, dict):
                 # category
                 categoryItem = self.createCategory(_(key), parent)
-                self.addCategories(value, data, categoryItem, device)  # Recursively add sub-categories
+                self.addProperties(value, data, categoryItem, device)  # Recursively add sub-categories
             else:
                 ignorePropertyCreation = False
                 # property
@@ -281,7 +281,6 @@ class PropertiesWidget(QWidget):
                     self.imageCategories = []
 
                     def imagesChanged(stringIndex, image, index):
-                        print("img change")
                         imageString = f"({stringIndex}):{image}"
                         if len(imageList) <= index:
                             image[index] = imageString
@@ -300,7 +299,6 @@ class PropertiesWidget(QWidget):
                             self.imageCategories.append([imageCategory, imageInput, indexInput])
 
                             if len(imageList) > index:
-                                print(imageList)
                                 image = imageList[index]
                                 values = image.split(":")
                                 try:
@@ -309,7 +307,6 @@ class PropertiesWidget(QWidget):
                                     imageInput.textChanged.connect(lambda text, indexInput=self.imageCategories[index][2], index=index: imagesChanged(indexInput.text(), text, index))
                                     indexInput.textChanged.connect(lambda text, imageInput=self.imageCategories[index][1], index=index: imagesChanged(text, imageInput.text(), index))
                                 except Exception as e:
-                                    print(traceback.format_exc())
                                     return False, traceback.format_exc()
                             else:
                                 imageInput.textChanged.connect(lambda text, indexInput=self.imageCategories[index][2], index=index: imagesChanged(indexInput.text(), text, index))
@@ -395,9 +392,9 @@ class PropertiesWidget(QWidget):
         self.treeWidget.clear()
         self.propertyItems = {}
         if data == None:
-            self.addCategories(properties, data, None, device)
+            self.addProperties(properties, data, None, device)
         else:
-            self.addCategories(properties["properties"], data, None, device)
+            self.addProperties(properties["properties"], data, None, device)
         if scrollTo != None:
             self.treeWidget.scrollContentsBy(0, scrollTo)
 

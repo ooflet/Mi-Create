@@ -169,8 +169,7 @@ class fprjProject:
 
     def compile(path, location, compilerLocation):
         logging.info("Compiling project "+path)
-        #path = str.replace(location, "/", "\\")
-        #location = str.replace(location, "/", "\\")
+        flags = subprocess.CREATE_NO_WINDOW
         result = subprocess.run(f'{compilerLocation} compile "{path}" "{location}" "{str.split(os.path.basename(path), ".")[0]+".face"}" 0', capture_output=True, text=True)
         logging.info(result.stdout)
         return result.stdout

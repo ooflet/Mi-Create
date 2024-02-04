@@ -168,6 +168,7 @@ class Canvas(QGraphicsView):
                 # Create analogwidget
                 analogWidget = AnalogWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), self, QColor(255,255,255,0), i["@Name"])
                 analogWidget.setZValue(index)
+                imageWidget.setData(1, "27")
                 analogWidget.addBackground(bgImg, i["@BgImage_rotate_xc"], i["@BgImage_rotate_yc"], antialiasing)
                 analogWidget.addHourHand(hrImg, i["@HourImage_rotate_xc"], i["@HourImage_rotate_yc"], antialiasing)
                 analogWidget.addMinuteHand(minImg, i["@MinuteImage_rotate_xc"], i["@MinuteImage_rotate_yc"], antialiasing)
@@ -182,6 +183,7 @@ class Canvas(QGraphicsView):
             elif i["@Shape"] == "30":    
                 imageWidget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), self, QColor(255,255,255,0), i["@Name"], imageFolder)
                 imageWidget.setZValue(index)
+                imageWidget.setData(1, "30")
 
                 if i["@Bitmap"] != "":
                     # Get QPixmap from file string
@@ -202,6 +204,7 @@ class Canvas(QGraphicsView):
             elif i["@Shape"] == "31":
                 imageWidget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), self, QColor(255,255,255,0), i["@Name"], imageFolder)
                 imageWidget.setZValue(index)
+                imageWidget.setData(1, "31")
                 
                 # Split image strings from the Bitmaplist
                 imageList = i["@BitmapList"].split("|")
@@ -230,6 +233,7 @@ class Canvas(QGraphicsView):
                 imageList = i["@BitmapList"].split("|")
                 imageWidget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), self, QColor(255,255,255,100), i["@Name"], imageFolder)
                 imageWidget.setZValue(index)
+                imageWidget.setData(1, "32")
 
                 if len(imageList) != 11:
                     imageWidget.representNoImage()
@@ -250,7 +254,7 @@ class Canvas(QGraphicsView):
                 
                 progressWidget = ProgressWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), self, QColor(255,255,255,0), i["@Name"], i["@Rotate_xc"], i["@Rotate_yc"], i["@Radius"], i["@Line_Width"], i["@StartAngle"], i["@EndAngle"], bgImage, fgImage, antialiasing)
                 progressWidget.setZValue(index)
-                name = i["@Name"]
+                imageWidget.setData(1, "42")
                 self.scene.addItem(progressWidget)
                 progressWidget.objectDeleted = lambda name, self=self: self.onObjectDeleted(name, progressWidget)
                 progressWidget.objectLayerAction = lambda name, action: self.objectLayerChange.emit(name, action)

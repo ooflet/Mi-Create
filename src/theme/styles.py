@@ -32,7 +32,7 @@ def dark(app):
     darkPalette.setColor(QPalette.ColorRole.Midlight, QColor(90, 90, 90))
     darkPalette.setColor(QPalette.ColorRole.Dark, QColor(35, 35, 35))
     darkPalette.setColor(QPalette.ColorRole.Text, QColor(255, 255, 255))
-    darkPalette.setColor(QPalette.ColorRole.BrightText, QColor(255, 255, 255))
+    darkPalette.setColor(QPalette.ColorRole.BrightText, QColor(0, 0, 0))
     darkPalette.setColor(QPalette.ColorRole.ButtonText, QColor(255, 255, 255))
     darkPalette.setColor(QPalette.ColorRole.Base, QColor(42, 42, 42))
     darkPalette.setColor(QPalette.ColorRole.Window, QColor(50, 50, 50))

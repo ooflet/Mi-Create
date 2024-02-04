@@ -138,6 +138,8 @@
     <addaction name="actionAttributes"/>
     <addaction name="separator"/>
     <addaction name="menuToolbars"/>
+    <addaction name="separator"/>
+    <addaction name="actionFull_Screen"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -216,30 +218,6 @@
      <property name="bottomMargin">
       <number>0</number>
      </property>
-     <item>
-      <widget class="QTreeWidget" name="Explorer">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="frameShape">
-        <enum>QFrame::NoFrame</enum>
-       </property>
-       <property name="uniformRowHeights">
-        <bool>true</bool>
-       </property>
-       <property name="headerHidden">
-        <bool>true</bool>
-       </property>
-       <column>
-        <property name="text">
-         <string>Project</string>
-        </property>
-       </column>
-      </widget>
-     </item>
     </layout>
    </widget>
   </widget>
@@ -383,8 +361,17 @@
          <height>64</height>
         </size>
        </property>
+       <property name="flow">
+        <enum>QListView::TopToBottom</enum>
+       </property>
        <property name="isWrapping" stdset="0">
         <bool>false</bool>
+       </property>
+       <property name="resizeMode">
+        <enum>QListView::Adjust</enum>
+       </property>
+       <property name="viewMode">
+        <enum>QListView::ListMode</enum>
        </property>
        <property name="uniformItemSizes">
         <bool>false</bool>
@@ -685,6 +672,19 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+H</string>
+   </property>
+  </action>
+  <action name="actionConsole">
+   <property name="text">
+    <string>Console</string>
+   </property>
+  </action>
+  <action name="actionFull_Screen">
+   <property name="text">
+    <string>Full Screen</string>
+   </property>
+   <property name="shortcut">
+    <string>F11</string>
    </property>
   </action>
  </widget>

@@ -1,12 +1,8 @@
-# List Widget Delegates
+from PyQt6.QtWidgets import QStyledItemDelegate, QStyle, QApplication
+from PyQt6.QtGui import QIcon, QFontMetrics, QPen
+from PyQt6.QtCore import Qt, QRect, QSize
 
-from PySide6.QtCore import QRect, QSize
-from PySide6.QtGui import Qt, QIcon, QFontMetrics, QPen
-from PySide6.QtWidgets import QStyledItemDelegate, QStyle, QApplication
-
-class ImageDelegate(QStyledItemDelegate):
-    # Delegate to wrap filenames.
-
+class ItemNameDelegate(QStyledItemDelegate):
     def paint(self, painter, option, index):
         if not index.isValid():
             return
@@ -23,7 +19,7 @@ class ImageDelegate(QStyledItemDelegate):
         mode = QIcon.Normal
         state = QIcon.On if option.state & QStyle.State_Open else QIcon.Off
         icon_rect = QRect(option.rect)
-        icon_rect.setSize(QSize(option.rect.width(), 48))
+        icon_rect.setSize(QSize(option.rect.width(), 40))
         icon.paint(painter, icon_rect, alignment=Qt.AlignCenter | Qt.AlignVCenter, mode=mode, state=state)
 
         # Text
@@ -45,7 +41,7 @@ class ImageDelegate(QStyledItemDelegate):
     
     def sizeHint(self, option, index):
         if not index.isValid():
-            return super(ImageDelegate, self).sizeHint(option, index)
+            return super(FileNameDelegate, self).sizeHint(option, index)
         else:
             text = index.data()
             font = QApplication.font()

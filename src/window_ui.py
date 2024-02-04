@@ -7,7 +7,7 @@
 
 
 from PyQt6 import QtCore, QtGui, QtWidgets
-from coreGettext import QCoreApplication
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -75,17 +75,6 @@ class Ui_MainWindow(object):
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout.setSpacing(0)
         self.verticalLayout.setObjectName("verticalLayout")
-        self.Explorer = QtWidgets.QTreeWidget(parent=self.dockWidgetContents)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.Explorer.sizePolicy().hasHeightForWidth())
-        self.Explorer.setSizePolicy(sizePolicy)
-        self.Explorer.setFrameShape(QtWidgets.QFrame.Shape.NoFrame)
-        self.Explorer.setUniformRowHeights(True)
-        self.Explorer.setHeaderHidden(True)
-        self.Explorer.setObjectName("Explorer")
-        self.verticalLayout.addWidget(self.Explorer)
         self.explorerWidget.setWidget(self.dockWidgetContents)
         MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(2), self.explorerWidget)
         self.propertiesWidget = QtWidgets.QDockWidget(parent=MainWindow)
@@ -134,7 +123,10 @@ class Ui_MainWindow(object):
         self.resourceList.setProperty("showDropIndicator", False)
         self.resourceList.setDragEnabled(True)
         self.resourceList.setIconSize(QtCore.QSize(64, 64))
+        self.resourceList.setFlow(QtWidgets.QListView.Flow.TopToBottom)
         self.resourceList.setProperty("isWrapping", False)
+        self.resourceList.setResizeMode(QtWidgets.QListView.ResizeMode.Adjust)
+        self.resourceList.setViewMode(QtWidgets.QListView.ViewMode.ListMode)
         self.resourceList.setUniformItemSizes(False)
         self.resourceList.setWordWrap(True)
         self.resourceList.setObjectName("resourceList")
@@ -259,6 +251,10 @@ class Ui_MainWindow(object):
         self.actionArc_Progress.setObjectName("actionArc_Progress")
         self.actionDocumentation = QtGui.QAction(parent=MainWindow)
         self.actionDocumentation.setObjectName("actionDocumentation")
+        self.actionConsole = QtGui.QAction(parent=MainWindow)
+        self.actionConsole.setObjectName("actionConsole")
+        self.actionFull_Screen = QtGui.QAction(parent=MainWindow)
+        self.actionFull_Screen.setObjectName("actionFull_Screen")
         self.menuFile.addAction(self.actionNewFile)
         self.menuFile.addAction(self.actionOpenFile)
         self.menuFile.addSeparator()
@@ -279,6 +275,8 @@ class Ui_MainWindow(object):
         self.menuView.addAction(self.actionAttributes)
         self.menuView.addSeparator()
         self.menuView.addAction(self.menuToolbars.menuAction())
+        self.menuView.addSeparator()
+        self.menuView.addAction(self.actionFull_Screen)
         self.menuEdit.addAction(self.actionUndo)
         self.menuEdit.addAction(self.actionRedo)
         self.menuEdit.addSeparator()
@@ -319,7 +317,7 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
-        _translate = QCoreApplication.translate
+        _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Mi Create"))
         self.menuFile.setTitle(_translate("MainWindow", "File"))
         self.menuHelp.setTitle(_translate("MainWindow", "Help"))
@@ -330,7 +328,6 @@ class Ui_MainWindow(object):
         self.menuTools.setTitle(_translate("MainWindow", "Tools"))
         self.menuInsert.setTitle(_translate("MainWindow", "Create"))
         self.explorerWidget.setWindowTitle(_translate("MainWindow", "Explorer"))
-        self.Explorer.headerItem().setText(0, _translate("MainWindow", "Project"))
         self.propertiesWidget.setWindowTitle(_translate("MainWindow", "Properties"))
         self.fileToolbar.setWindowTitle(_translate("MainWindow", "File Toolbar"))
         self.actionsToolbar.setWindowTitle(_translate("MainWindow", "toolBar_2"))
@@ -380,3 +377,6 @@ class Ui_MainWindow(object):
         self.actionArc_Progress.setText(_translate("MainWindow", "Arc Progress"))
         self.actionDocumentation.setText(_translate("MainWindow", "Documentation"))
         self.actionDocumentation.setShortcut(_translate("MainWindow", "Ctrl+H"))
+        self.actionConsole.setText(_translate("MainWindow", "Console"))
+        self.actionFull_Screen.setText(_translate("MainWindow", "Full Screen"))
+        self.actionFull_Screen.setShortcut(_translate("MainWindow", "F11"))

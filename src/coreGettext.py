@@ -1,14 +1,5 @@
 from PyQt6.QtCore import QCoreApplication
 import gettext
-import sys
-
-# from coreGettext import QCoreApplication
-
-"""
-import sys
-sys.path.append("..")
-from coreGettext import QCoreApplication
-"""
 
 _ = gettext.gettext
 
