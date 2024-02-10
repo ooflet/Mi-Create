@@ -1,5 +1,5 @@
 # Mi Create
-# tostr 2023
+# tostr 2023-2024
 
 # TODO
 # Put documentation on code, its a dog's breakfast out in the source code
@@ -22,7 +22,7 @@ os.chdir(os.path.dirname(os.path.realpath(__file__)))
 from PyQt6.QtWidgets import (QMainWindow, QDialog, QInputDialog, QMessageBox, QApplication, QGraphicsScene, QPushButton, 
                                QDialogButtonBox, QTreeWidgetItem, QFileDialog, QToolButton, QToolBar, QWidget, QVBoxLayout, 
                                QFrame, QColorDialog, QFontDialog, QSplashScreen, QGridLayout, QLabel, QListWidgetItem,
-                               QSpacerItem, QSizePolicy, QAbstractItemView)
+                               QSpacerItem, QSizePolicy, QAbstractItemView, QUndoView)
 from PyQt6.QtGui import QIcon, QPixmap, QDesktopServices, QDrag
 from PyQt6.QtCore import Qt, QSettings, QSize, QUrl, QFileInfo, QItemSelectionModel
 
@@ -43,7 +43,7 @@ import traceback
 from coreGettext import QCoreApplication
 from utils.updater import Updater
 from utils.project import watchData, fprjProject
-from utils.history import historySystem, CommandAddWidget, CommandDeleteWidget, CommandModifyProperty
+from utils.history import historySystem, CommandAddWidget, CommandModifyProperty, CommandModifyPosition, CommandDeleteWidget
 from utils.listviewdelegate import ResourceListDelegate
 from widgets.canvas import Canvas, ObjectIcon
 from widgets.explorer import Explorer
@@ -67,8 +67,6 @@ currentVersion = '0.3-beta'
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-
-        logging.debug("-- Starting Mi Create --")
 
         self.fileChanged = False
         self.clipboard = None
@@ -140,12 +138,12 @@ class MainWindow(QMainWindow):
         # Setup History System
         self.historySystem = historySystem()
         self.ignoreHistoryInvoke = False
-        # self.undoLayout = QVBoxLayout()
-        # self.undoDialog = QDialog(self)
-        # self.undoView = QUndoView(self.historySystem.undoStack)
-        # self.undoLayout.addWidget(self.undoView)
-        # self.undoDialog.setLayout(self.undoLayout)
-        # self.undoDialog.show()
+        self.undoLayout = QVBoxLayout()
+        self.undoDialog = QDialog(self)
+        self.undoView = QUndoView(self.historySystem.undoStack)
+        self.undoLayout.addWidget(self.undoView)
+        self.undoDialog.setLayout(self.undoLayout)
+        self.undoDialog.show()
  
         # Setup Project 
         self.project = None 
@@ -653,7 +651,6 @@ class MainWindow(QMainWindow):
         selectedObjects = currentProject["canvas"].getSelectedObject()
 
         for object in selectedObjects:
-            # replace all shitty for loops with code below 
             if type(currentProject["data"]["FaceProject"]["Screen"]["Widget"]) == dict:
                 currentProject["data"]["FaceProject"]["Screen"]["Widget"] = [currentProject["data"]["FaceProject"]["Screen"]["Widget"]]
             result = list(filter(lambda widget: widget["@Name"] == object.data(0),  currentProject["data"]["FaceProject"]["Screen"]["Widget"]))
@@ -691,26 +688,42 @@ class MainWindow(QMainWindow):
             currentProject["canvas"].selectObject(modifiedItem["@Name"])
 
     def updateProjectSelections(self, subject):
+        print(subject)
         currentProject = self.getCurrentProject()
         currentCanvasSelected = []
         currentExplorerSelected = []
 
-        if not currentProject.get("canvas"):
+        if not currentProject.get("canvas") or self.selectionDebounce:
             return
 
         for item in currentProject["canvas"].scene.selectedItems():
             currentCanvasSelected.append(item.data(0))
+            logging.debug(currentProject["canvas"].scene.selectedItems())
+            logging.debug(currentCanvasSelected)
 
         for item in self.Explorer.selectedItems():
             currentExplorerSelected.append(item.data(0, 101))
+            logging.debug(currentExplorerSelected)
 
         if set(currentCanvasSelected) == set(currentExplorerSelected):
             return
         
         if subject == "canvas":
-            for item in currentCanvasSelected:
-                self.Explorer.items[item].setSelected(True)
+            if len(currentCanvasSelected) > 1:
+                for item in currentCanvasSelected:
+                    self.selectionDebounce = True
+                    self.Explorer.items[item].setSelected(True)
+                    self.selectionDebounce = False
+            elif len(currentCanvasSelected) == 1:
+                self.selectionDebounce = True
+                self.Explorer.setCurrentItem(self.Explorer.items[currentCanvasSelected[0]])
+                self.selectionDebounce = False
+            else:
+                self.selectionDebounce = True
+                self.Explorer.setCurrentItem(None)
+                self.selectionDebounce = False
         elif subject == "explorer":
+            self.selectionDebounce = True
             for item in currentExplorerSelected:
                 currentProject["canvas"].selectObject(item)
 
@@ -739,6 +752,7 @@ class MainWindow(QMainWindow):
                 for index, obj in enumerate(currentProject["data"]["FaceProject"]["Screen"]["Widget"]):
                     if obj["@Name"] == objectName:
                         currentObject = obj
+                        break
 
             if self.ignoreHistoryInvoke:
                 self.ignoreHistoryInvoke = False
@@ -760,7 +774,6 @@ class MainWindow(QMainWindow):
                 command = CommandDeleteWidget(index, currentObject, commandFunc, f"Delete object {currentObject['@Name']}")
                 self.historySystem.undoStack.push(command)
         
-
         def layerChange(objectName, changeType):
             currentProject = self.getCurrentProject()
             if type(currentProject["data"]["FaceProject"]["Screen"]["Widget"]) != list:
@@ -797,6 +810,52 @@ class MainWindow(QMainWindow):
             else:
                 propertyField.setText(propertyValue)
 
+        def posChange():
+            currentProject = self.getCurrentProject()
+            selectedObjects = currentProject["canvas"].getSelectedObject()
+            prevPos = []
+            currentPos = []
+
+            for object in selectedObjects:
+                if type(currentProject["data"]["FaceProject"]["Screen"]["Widget"]) == dict:
+                    currentProject["data"]["FaceProject"]["Screen"]["Widget"] = [currentProject["data"]["FaceProject"]["Screen"]["Widget"]]
+                result = list(filter(lambda widget: widget["@Name"] == object.data(0), currentProject["data"]["FaceProject"]["Screen"]["Widget"]))
+                
+                if int(result[0]["@X"]) == int(object.pos().x()):
+                    return
+                
+                prevPosObject = {
+                    "Name": result[0]["@Name"],
+                    "X": result[0]["@X"],
+                    "Y": result[0]["@Y"]
+                }
+                currentPosObject = {
+                    "Name": object.data(0),
+                    "X": object.pos().x(),
+                    "Y": object.pos().y()
+                }
+                prevPos.append(prevPosObject)
+                currentPos.append(currentPosObject)
+
+            def commandFunc(objects):
+                if len(objects) == 1:
+                    propertyFieldX = self.propertiesWidget.propertyItems.get("@X")
+                    propertyFieldY = self.propertiesWidget.propertyItems.get("@Y")
+
+                    if not propertyFieldX or not propertyFieldY:
+                        return
+
+                    propertyFieldX.setValue(int(objects[0]["X"]))
+                    propertyFieldY.setValue(int(objects[0]["Y"]))
+                else:
+                    for object in objects:
+                        result = list(filter(lambda widget: widget["@Name"] == object["Name"], currentProject["data"]["FaceProject"]["Screen"]["Widget"]))
+                        result[0]["@X"] = int(object["X"])
+                        result[0]["@Y"] = int(object["Y"])
+
+            command = CommandModifyPosition(prevPos, currentPos, commandFunc, f"Change object pos")
+            self.historySystem.undoStack.push(command)
+
         # Setup Project
         self.projectXML = xml
         self.Explorer.clear()
@@ -808,6 +867,7 @@ class MainWindow(QMainWindow):
         project.setAcceptDrops(True)
         project.scene.selectionChanged.connect(lambda: self.updateProjectSelections("canvas"))
         project.objectChanged.connect(propertyChange)
+        project.objectPosChanged.connect(posChange)
         project.objectLayerChange.connect(layerChange)
         project.objectDeleted.connect(objectDeleted)
         #project.objectAdded.connect(addObjectOnDrop)
@@ -1109,6 +1169,8 @@ class MainWindow(QMainWindow):
         MessageBox.exec()
             
 if __name__ == "__main__":
+    logging.debug("-- Starting Mi Create --")
+
     app = QApplication(sys.argv)
 
     # splash

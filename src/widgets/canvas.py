@@ -48,6 +48,7 @@ class Scene(QGraphicsScene):
 class Canvas(QGraphicsView):
     objectAdded = pyqtSignal(QPointF, str)
     objectChanged = pyqtSignal(str, str, object) # hate hacky workarounds, just support any type already Qt
+    objectPosChanged = pyqtSignal()
     objectLayerChange = pyqtSignal(str, str)
     objectDeleted = pyqtSignal(str)
 
@@ -76,9 +77,8 @@ class Canvas(QGraphicsView):
 
         self.setScene(self.scene)
 
-    def fireObjectPositionChanged(self, name, x, y):
-        self.objectChanged.emit(name, "@X", x)
-        self.objectChanged.emit(name, "@Y", y)
+    def fireObjectPositionChanged(self):
+        self.objectPosChanged.emit()
 
     def drawDecorations(self, deviceOutlineVisible):
         background = QGraphicsRectItem(0, 0, self.deviceSize[0], self.deviceSize[1])
@@ -133,11 +133,11 @@ class Canvas(QGraphicsView):
                 x.setSelected(False)
 
     def selectObjects(self, objects):
-        for obj in objects:
+        for name in objects:
             for x in self.items():
                 # data(0) is name
                 # text(0) is treewidgetitem text
-                if x.data(0) == obj.text(0):
+                if x.data(0) == name:
                     x.setSelected(True)
                 else:
                     x.setSelected(False)
@@ -168,7 +168,7 @@ class Canvas(QGraphicsView):
                 # Create analogwidget
                 analogWidget = AnalogWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), self, QColor(255,255,255,0), i["@Name"])
                 analogWidget.setZValue(index)
-                imageWidget.setData(1, "27")
+                analogWidget.setData(1, "27")
                 analogWidget.addBackground(bgImg, i["@BgImage_rotate_xc"], i["@BgImage_rotate_yc"], antialiasing)
                 analogWidget.addHourHand(hrImg, i["@HourImage_rotate_xc"], i["@HourImage_rotate_yc"], antialiasing)
                 analogWidget.addMinuteHand(minImg, i["@MinuteImage_rotate_xc"], i["@MinuteImage_rotate_yc"], antialiasing)
@@ -375,7 +375,7 @@ class Widget(QGraphicsRectItem):
     
     def mouseReleaseEvent(self, event):
         super().mouseReleaseEvent(event)
-        self.canvas.fireObjectPositionChanged(self.data(0), self.pos().x(), self.pos().y())
+        self.canvas.fireObjectPositionChanged()
 
     def paint(self, painter, option, widget=None):
         # Paint the node in the graphic view.

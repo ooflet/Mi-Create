@@ -20,6 +20,9 @@ QPushButton:default {
 
 */
 
+QDialogButtonBox {
+  dialogbuttonbox-buttons-have-icons: 0;
+}
 
 /*
  * QGroupBox

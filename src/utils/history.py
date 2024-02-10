@@ -46,3 +46,15 @@ class CommandModifyProperty(QUndoCommand):
     def undo(self):
         self.commandFunc(self.name, self.property, self.previousValue)
     
+class CommandModifyPosition(QUndoCommand):
+    def __init__(self, previousPosition, currentPosition, commandFunc, description):
+        super(CommandModifyPosition, self).__init__(description)
+        self.prevPos = previousPosition
+        self.currentPos = currentPosition
+        self.commandFunc = commandFunc
+
+    def redo(self):
+        self.commandFunc(self.currentPos)
+
+    def undo(self):
+        self.commandFunc(self.prevPos)
