@@ -9,7 +9,7 @@ import sys
 
 sys.path.append("..")
 
-from coreGettext import QCoreApplication
+from translate import QCoreApplication
 
 
 from PyQt6 import QtCore, QtGui, QtWidgets

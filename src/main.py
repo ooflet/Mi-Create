@@ -25,6 +25,7 @@ from PyQt6.QtWidgets import (QMainWindow, QDialog, QInputDialog, QMessageBox, QA
                                QSpacerItem, QSizePolicy, QAbstractItemView, QUndoView)
 from PyQt6.QtGui import QIcon, QPixmap, QDesktopServices, QDrag
 from PyQt6.QtCore import Qt, QSettings, QSize, QUrl, QFileInfo, QItemSelectionModel
+from PyQt6.PyQtAds import CDockWidget
 
 from pprint import pformat
 import xml.dom.minidom
@@ -40,7 +41,7 @@ import json
 import theme.styles as theme
 import traceback
 
-from coreGettext import QCoreApplication
+from translate import QCoreApplication
 from utils.updater import Updater
 from utils.project import watchData, fprjProject
 from utils.history import historySystem, CommandAddWidget, CommandModifyProperty, CommandModifyPosition, CommandDeleteWidget
@@ -50,7 +51,7 @@ from widgets.explorer import Explorer
 from widgets.properties import PropertiesWidget
 from widgets.editor import Editor, XMLLexer
 
-from coreGettext import QCoreApplication
+from translate import QCoreApplication
 
 import resources.icons_rc # resource import required because it sets up the icons
 
@@ -67,6 +68,8 @@ currentVersion = '0.3-beta'
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+
+        print(QIcon().themeSearchPaths())
 
         self.fileChanged = False
         self.clipboard = None
@@ -168,9 +171,7 @@ class MainWindow(QMainWindow):
                 if reply == QMessageBox.StandardButton.Yes:
                     self.saveProjects("current")
 
-                currentIndex = self.ui.workspace.currentIndex()
-                currentName = self.ui.workspace.tabText(currentIndex)
-                compileDirectory = os.path.join(os.path.dirname(currentName), "output")
+                compileDirectory = os.path.join(os.path.dirname(currentProject["path"]), "output")
 
                 self.compileUi.buttonBox.clear()
                 self.compileUi.buttonBox.addButton("OK", QDialogButtonBox.ButtonRole.AcceptRole)
@@ -179,7 +180,7 @@ class MainWindow(QMainWindow):
                 self.compileUi.stackedWidget.setCurrentIndex(1)
                 QApplication.processEvents()
 
-                result = fprjProject.compile(currentName, compileDirectory, "compiler/compile.exe")
+                result = fprjProject.compile(currentProject["path"], compileDirectory, "compiler/compile.exe")
                 self.compileUi.buttonBox.setDisabled(False)
                 self.compileUi.textEdit.setText(str(result))
                 self.compileUi.stackedWidget.setCurrentIndex(2)
@@ -209,7 +210,7 @@ class MainWindow(QMainWindow):
         logging.debug("Initializing Watch Properties")
         self.setupProperties()
         logging.debug("Initializing Misc") 
-        self.setupNewProjectDialog() 
+        self.setupNewProjectDialog()
         self.loadWindowState()
         self.loadLanguage(True)
         self.createWelcomePage()
@@ -262,6 +263,8 @@ class MainWindow(QMainWindow):
 
     def loadWindowState(self):
         settings = QSettings("Mi Create", "Workspace")
+        if settings.value("geometry") == None or settings.value("state") == None:
+            return
         self.restoreGeometry(settings.value("geometry"))
         self.restoreState(settings.value("state"))
 
@@ -546,6 +549,7 @@ class MainWindow(QMainWindow):
             self.ui.propertiesWidget.setWidget(self.propertiesWidget)
 
     def updateProperties(self, item, itemType=None):
+        print("update", item)
         if item:
             if self.propertiesWidget.clearOnRefresh:
                 currentProject = self.getCurrentProject()
@@ -555,7 +559,7 @@ class MainWindow(QMainWindow):
                             self.propertiesWidget.loadProperties(self.propertyJson[itemType], currentProject["data"]["FaceProject"]["Screen"]["Widget"][index], currentProject["data"]["FaceProject"]["@DeviceType"])
                             break
                     else:
-                        self.showDialogue("error", _("Error occured during property update: Object not found!"), _('Unable to find')+{object["@Name"]})
+                        return
                 else:
                     if currentProject["data"]["FaceProject"]["Screen"]["Widget"]["@Name"] == item:
                         self.propertiesWidget.loadProperties(self.propertyJson[itemType], currentProject["data"]["FaceProject"]["Screen"]["Widget"], currentProject["data"]["FaceProject"]["@DeviceType"])        
@@ -659,7 +663,7 @@ class MainWindow(QMainWindow):
     def pasteWatchfaceWidget(self):
         currentProject = self.getCurrentProject()
 
-        if not currentProject.get("data"):
+        if not currentProject.get("data") or self.clipboard == None:
             return
 
         if type(currentProject["data"]["FaceProject"]["Screen"]["Widget"]) == dict:
@@ -709,69 +713,86 @@ class MainWindow(QMainWindow):
             return
         
         if subject == "canvas":
+            print("no return")
             if len(currentCanvasSelected) > 1:
+                print(">1")
                 for item in currentCanvasSelected:
                     self.selectionDebounce = True
                     self.Explorer.items[item].setSelected(True)
                     self.selectionDebounce = False
             elif len(currentCanvasSelected) == 1:
+                print("1")
                 self.selectionDebounce = True
                 self.Explorer.setCurrentItem(self.Explorer.items[currentCanvasSelected[0]])
                 self.selectionDebounce = False
             else:
+                print("none")
                 self.selectionDebounce = True
                 self.Explorer.setCurrentItem(None)
                 self.selectionDebounce = False
+
+            if len(currentCanvasSelected) == 1:
+                self.updateProperties(currentCanvasSelected[0], self.Explorer.items[currentCanvasSelected[0]].data(0, 100))
+            else:
+                self.updateProperties(False)
+
         elif subject == "explorer":
-            self.selectionDebounce = True
             for item in currentExplorerSelected:
-                currentProject["canvas"].selectObject(item)
+                self.selectionDebounce = True
+                currentProject["canvas"].selectObject(currentExplorerSelected[0])
+                self.selectionDebounce = False
 
-        # prioritise canvas selections
+            if currentExplorerSelected == [] or currentExplorerSelected[0] == None:
+                return
 
-        if len(currentCanvasSelected) == 1:
-            self.updateProperties(currentCanvasSelected[0], self.Explorer.items[currentCanvasSelected[0]].data(0, 100))
-        else:
-            self.updateProperties(False)
+            if len(currentExplorerSelected) == 1:
+                self.updateProperties(currentExplorerSelected[0], self.Explorer.items[currentExplorerSelected[0]].data(0, 100))
+            else:
+                self.updateProperties(False)
 
         logging.debug(f"currentCanvasSelected: {currentCanvasSelected} | currentExplorerSelected: {currentExplorerSelected} isSame: {set(currentCanvasSelected) == set(currentExplorerSelected)}")
 
-    def createNewWorkspace(self, name, isFprj, data, xml): 
-        # data[0] is watchface data while data[1] is image data
+    def createNewWorkspace(self, name, path, data, imagePath):
         # projects are technically "tabs"
         self.previousSelected = None
         if self.projects.get(name):
             self.ui.workspace.setCurrentIndex(self.ui.workspace.indexOf(self.projects[name]['canvas']))
             return
 
-        def objectDeleted(objectName):
+        def objectDeleted():
             currentProject = self.getCurrentProject()
             currentObject = None
+            indexList = []
 
             if type(currentProject["data"]["FaceProject"]["Screen"]["Widget"]) == list:
-                for index, obj in enumerate(currentProject["data"]["FaceProject"]["Screen"]["Widget"]):
-                    if obj["@Name"] == objectName:
-                        currentObject = obj
-                        break
+                for item in currentProject["canvas"].getSelectedObject():
+                    result = list(filter(lambda widget: widget["@Name"] == item.data(0), currentProject["data"]["FaceProject"]["Screen"]["Widget"]))
+                    currentObject = result
+                    for item in result:
+                        indexList.append(currentProject["data"]["FaceProject"]["Screen"]["Widget"].index(item))
 
             if self.ignoreHistoryInvoke:
                 self.ignoreHistoryInvoke = False
             else:
-                def commandFunc(historyType, index, object=None):
+                def commandFunc(historyType, indexes, object=None):
                     currentProjectWidget = currentProject["data"]["FaceProject"]["Screen"]["Widget"]
                     if historyType == "undo":
-                        if type(currentProjectWidget) == list:
-                            currentProjectWidget.insert(index, object)
-                        elif type(currentProjectWidget) == dict:
-                            currentProjectWidget = [currentProjectWidget]
-                            currentProjectWidget.insert(index, object)
+                        for i, item in enumerate(object):
+                            if type(currentProjectWidget) == list:
+                                currentProjectWidget.insert(i, item)
+                            elif type(currentProjectWidget) == dict:
+                                currentProjectWidget = [currentProjectWidget]
+                                currentProjectWidget.insert(i, item)
                     elif historyType == "redo":
-                        currentProjectWidget.pop(index)
+                        for index in indexes:
+                            print(index)
+                            currentProjectWidget.pop(index)
 
                     currentProject["canvas"].loadObjects(currentProject["data"], currentProject["imageFolder"], self.settings["Canvas"]["Antialiasing"][2])
                     self.Explorer.updateExplorer(currentProject["data"])
 
-                command = CommandDeleteWidget(index, currentObject, commandFunc, f"Delete object {currentObject['@Name']}")
+                indexList.sort(reverse=True)
+                command = CommandDeleteWidget(indexList, currentObject, commandFunc, f"Delete objects")
                 self.historySystem.undoStack.push(command)
         
         def layerChange(objectName, changeType):
@@ -861,36 +882,34 @@ class MainWindow(QMainWindow):
         self.Explorer.clear()
             
         # Create a Canvas (QGraphicsScene & QGraphicsView)
-        project = Canvas(data[0]["FaceProject"]["@DeviceType"], self.settings["Canvas"]["Antialiasing"][2], self.settings["Canvas"]["DeviceOutline"][2], self.ui.menuInsert)
+        canvas = Canvas(data["FaceProject"]["@DeviceType"], self.settings["Canvas"]["Antialiasing"][2], self.settings["Canvas"]["DeviceOutline"][2], self.ui.menuInsert)
 
         # Create the project
-        project.setAcceptDrops(True)
-        project.scene.selectionChanged.connect(lambda: self.updateProjectSelections("canvas"))
-        project.objectChanged.connect(propertyChange)
-        project.objectPosChanged.connect(posChange)
-        project.objectLayerChange.connect(layerChange)
-        project.objectDeleted.connect(objectDeleted)
-        #project.objectAdded.connect(addObjectOnDrop)
+        canvas.setAcceptDrops(True)
+        canvas.scene.selectionChanged.connect(lambda: self.updateProjectSelections("canvas"))
+        canvas.objectChanged.connect(propertyChange)
+        canvas.objectPosChanged.connect(posChange)
+        canvas.objectLayerChange.connect(layerChange)
+        canvas.objectDeleted.connect(objectDeleted)
+        #canvas.objectAdded.connect(addObjectOnDrop)
 
         # Add Icons
-        if isFprj:
-            icon = QIcon(":/Dark/folder-clock.png")
-        else:
-            icon = QIcon(":/Dark/file-clock.png")
+        icon = QIcon(":/Dark/folder-clock.png")
+
 
         success = True
 
         # Render objects onto the canvas
         if data is not False:
-            success = project.loadObjects(data[0], data[1], self.settings["Canvas"]["Antialiasing"][2])
+            success = canvas.loadObjects(data, imagePath, self.settings["Canvas"]["Antialiasing"][2])
             
         if success[0]:
             self.projects[name] = {
-                "canvas": project, 
-                "data": data[0], 
-                "imageFolder": data[1], 
-                "hasFileChanged": False, 
-                "xml": xml
+                "canvas": canvas, 
+                "data": data, 
+                "path": path,
+                "imageFolder": imagePath, 
+                "hasFileChanged": False
             }
 
             # Setup Insert Menu
@@ -917,18 +936,18 @@ class MainWindow(QMainWindow):
             widget = QWidget()
             layout = QVBoxLayout()
             layout.addWidget(canvasToolbar)
-            layout.addWidget(project)
+            layout.addWidget(canvas)
             layout.setContentsMargins(0,0,0,0)
             layout.setSpacing(0)
             widget.setLayout(layout)
 
             index = self.ui.workspace.addTab(widget, icon, name)
             self.ui.workspace.setCurrentIndex(index)
-            project.setFrameShape(QFrame.Shape.NoFrame)
+            canvas.setFrameShape(QFrame.Shape.NoFrame)
         else:
             self.showDialogue("error", "Cannot render project!" + success[1], success[1])
 
-    def createNewCodespace(self, name, text, language):
+    def createNewCodespace(self, name, path, text, language):
         # Creates a new instance of QScintilla in a Codespace (code workspace)
 
         widget = QWidget()
@@ -943,7 +962,9 @@ class MainWindow(QMainWindow):
         icon = QIcon(":/Dark/file-code-2.png")
         index = self.ui.workspace.addTab(widget, icon, name)
         self.projects[name] = {
-            "hasFileChanged": False
+            "hasFileChanged": False,
+            "editor": editor,
+            "path": path
         }
         self.ui.workspace.setCurrentIndex(index)
 
@@ -1029,7 +1050,7 @@ class MainWindow(QMainWindow):
                         project = fprjProject.load(newProject[1])
                         if project[0]:
                             try:
-                                self.createNewWorkspace(newProject[1], True, [project[1], project[2]], project[3])    
+                                self.createNewWorkspace(newProject[1], newProject[1], project[1], project[2])    
                             except Exception as e:
                                 self.showDialogue("error", _("Failed to createNewWorkspace: ") + e, traceback.format_exc())
                         else:
@@ -1049,7 +1070,7 @@ class MainWindow(QMainWindow):
                 project = fprjProject.load(file[0])
                 if project[0]:
                     try:
-                        self.createNewWorkspace(file[0], True, [project[1], project[2]], project[3])    
+                        self.createNewWorkspace(file[0], file[0], project[1], project[2])    
                     except Exception as e:
                         self.showDialogue("error", _("Failed to open project: ") + str(e), traceback.format_exc())
                 else:
@@ -1057,7 +1078,8 @@ class MainWindow(QMainWindow):
 
     def saveProjects(self, projectsToSave):
         if projectsToSave == "all":
-            for index, project in enumerate(self.projects):
+            for index, project in enumerate(self.projects.items()):
+                project = project[1]
                 if project["hasFileChanged"]:
                     if not project.get("data"):
                         return
@@ -1077,20 +1099,23 @@ class MainWindow(QMainWindow):
             currentName = self.ui.workspace.tabText(currentIndex)
             currentProject = self.getCurrentProject()
 
-            if not currentProject.get("data"):
-                return
-
-            raw = xmltodict.unparse(currentProject["data"])
-            dom = xml.dom.minidom.parseString(raw)
-            pretty_xml = dom.toprettyxml()
-
-            try:
-                with open(currentName, "w", encoding="utf8") as file:
-                    file.write(pretty_xml)
-                self.statusBar().showMessage(_("Project saved at ")+currentName, 2000)
-            except Exception as e:
-                self.statusBar().showMessage(_("Failed to save: ")+str(e), 10000)
-                self.showDialogue("error", _("Failed to save project: ")+str(e))
+            if currentProject.get("data"):
+                success, message = fprjProject.save(currentName, currentProject["data"])
+                if success:
+                    self.statusBar().showMessage(_("Project saved at ")+currentName, 2000)
+                    self.fileChanged = False
+                    currentProject["hasFileChanged"] = False
+                else:
+                    self.statusBar().showMessage(_("Failed to save: ")+str(message), 10000)
+                    self.showDialogue("error", _("Failed to save project: ")+str(message))
+            elif currentProject.get("editor"):
+                try:
+                    with open(currentProject["path"], "w", encoding="utf8") as file:
+                        file.write(currentProject["editor"].text())
+                    self.statusBar().showMessage(_("Project saved at ")+currentProject["path"], 2000)
+                except Exception as e:
+                    self.statusBar().showMessage(_("Failed to save: ")+str(e), 10000)
+                    self.showDialogue("error", _("Failed to save project: ")+str(e))
     
     def compileProject(self):
         tabText = self.ui.workspace.tabText(self.ui.workspace.currentIndex())
@@ -1122,8 +1147,15 @@ class MainWindow(QMainWindow):
         # self.showDialogue("info", "Decompile success! Would you like to open")
 
     def editProjectXML(self):
-        if self.getCurrentProject().get("xml"):
-            self.createNewCodespace("Project XML", self.getCurrentProject()["xml"], XMLLexer)
+        currentProject = self.getCurrentProject()
+
+        if not currentProject.get("data"):
+            return
+
+        raw = xmltodict.unparse(currentProject["data"])
+        dom = xml.dom.minidom.parseString(raw)
+        pretty_xml = dom.toprettyxml()
+        self.createNewCodespace("Project XML", currentProject["path"], pretty_xml, XMLLexer)
 
     def showColorDialog(self):
         color = QColorDialog.getColor(Qt.white, self, "Select Color")

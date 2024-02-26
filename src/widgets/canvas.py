@@ -24,7 +24,7 @@ class ObjectIcon:
         self.icon = {
             "27":":Dark/analog.png",
             "30":":Dark/image.png",
-            "31":":Dark/gallery-horizontal.png",
+            "31":":Dark/image-list.png",
             "32":":Dark/numbers.png",
             "42":":Dark/progress.png"
         }
@@ -308,9 +308,9 @@ class Canvas(QGraphicsView):
                 return True, "Success"
                 
         
-class Widget(QGraphicsRectItem):
-    # Basic widget with only bounding box and movement
-    # All other widgets inherit this widget except ResizeableWidget
+class BaseWidget(QGraphicsRectItem):
+    # Basic widget with draggable and selectable controls
+    # Adding child QGraphicsItems to this widget extends functionality 
 
     def __init__(self, posX, posY, sizeX, sizeY, canvas, color, name):
         # Initialize the shape.
@@ -347,6 +347,9 @@ class Widget(QGraphicsRectItem):
         deleteIcon.addFile(u":/Dark/x_dim.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         action1 = menu.addAction("Delete")
         action1.setIcon(deleteIcon)
+
+        if not self.isSelected():
+            self.setSelected(True)
 
         action = menu.exec(viewPos)
 
@@ -391,9 +394,9 @@ class Widget(QGraphicsRectItem):
 
         painter.drawRect(self.rect())
 
-class ImageWidget(Widget):
+class ImageWidget(BaseWidget):
     # Widget for basic images and handling for DigitalNumber
-    # All ImageList related things are handled in the createObject function
+    # All ImageList related things are handled in the addImage function
     # Live previews of animations are planned with this widget
 
     def __init__(self, posX, posY, sizeX, sizeY, canvas, color, name, srcDir):
@@ -437,7 +440,7 @@ class ImageWidget(Widget):
         self.color = QColor(255, 0, 0, 100)
         self.setRect(0,0,48,48)
 
-class AnalogWidget(Widget):
+class AnalogWidget(BaseWidget):
     # Widget for handling AnalogDisplays
     
     def __init__(self, posX, posY, sizeX, sizeY, canvas, color, name):
@@ -541,7 +544,7 @@ class CirclularArcImage(QGraphicsPixmapItem):
         # Draw using image brush. Its very bad to use, will implement soon
         painter.drawPath(CircularArcItem(arc_rect, self.startAngle, self.endAngle, self.pixmap().width(), self.thickness).createArcPath())
 
-class ProgressWidget(Widget):
+class ProgressWidget(BaseWidget):
     def __init__(self, posX, posY, sizeX, sizeY, canvas, color, name, offsetX, offsetY, radius, thickness, startAngle, endAngle, bgImage, pathImage, isAntialiased):
         super().__init__(posX, posY, sizeX, sizeY, canvas, color, name)
         self.setPos(posX, posY)

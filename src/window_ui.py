@@ -7,7 +7,7 @@
 
 
 from PyQt6 import QtCore, QtGui, QtWidgets
-from coreGettext import QCoreApplication
+from translate import QCoreApplication
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -259,7 +259,6 @@ class Ui_MainWindow(object):
         self.menuFile.addAction(self.actionOpenFile)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionSave)
-        self.menuFile.addAction(self.actionSave_as)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionExit)
         self.menuAbout.addAction(self.actionAbout_MiFaceStudio)
