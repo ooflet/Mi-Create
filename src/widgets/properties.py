@@ -13,7 +13,7 @@ import shutil
 import traceback
 import logging
 from typing import Any
-from PyQt6.QtWidgets import (QStyledItemDelegate, QWidget, QFileDialog, QTreeWidget, QFrame, QHeaderView, 
+from PyQt6.QtWidgets import (QStyledItemDelegate, QWidget, QFileDialog, QTreeWidget, QFrame, QHeaderView, QPushButton,
                                QDialog, QDialogButtonBox, QVBoxLayout, QListWidgetItem, QTreeWidgetItem, QLineEdit, 
                                QSpinBox, QComboBox, QCheckBox, QMessageBox, QAbstractItemView)
 from PyQt6.QtCore import Qt, pyqtSignal, QPoint, QSize, QModelIndex
@@ -49,45 +49,95 @@ class GridDelegate(QStyledItemDelegate):
 
 class PropertiesWidget(QWidget):
     propertyChanged = pyqtSignal(object, object)
-    def __init__(self, window, resourceWidget=None, srcList=None, srcData=None, screen=None):
+    def __init__(self, window, srcList=None, srcData=None):
         super().__init__()
 
         self.clearOnRefresh = True
-
-        def closeResourceDialog():
-            self.currentPropertyInput.setText(self.resourceDialogUI.imageSelect.currentItem().text())
-            self.resourceDialog.close()
-
-        def addResource():
-            file = QFileDialog.getOpenFileName(self, 'Open Image...', "%userprofile%\\", "Image File (*.png *.jpeg *.bmp)")
-            if file[0]:
-                shutil.copyfile(file[0], os.path.join(self.imageFolder, os.path.basename(file[0])))
-                self.reloadResourceImages()
-                self.currentPropertyInput.setText(os.path.basename(file[0]))
-
-        def search():
-            filter_text = self.resourceDialogUI.searchBar.text()
-            visible_items = []
-            for x in range(self.resourceDialogUI.imageSelect.count()): 
-                item = self.resourceDialogUI.imageSelect.item(x)
-                if filter_text.lower() in item.text().lower():
-                    item.setHidden(False)
-                    visible_items.append(x)
-                else:
-                    item.setHidden(True)
-            if filter_text != "":
-                self.resourceDialogUI.imageSelect.setCurrentRow(visible_items[0])
-            else:
-                [self.resourceDialogUI.imageSelect.setCurrentItem(x) for x in self.resourceDialogUI.imageSelect.findItems(self.currentPropertyInput.text(), Qt.MatchExactly)]
 
         self.propertyItems = {}
         self.imageListCategories = []
         self.imageFolder = ""
         self.currentPropertyInput = None
 
+        self.propertyStyleSheet = """
+            QLineEdit {
+                background-color: rgba(0, 0, 0, 0); 
+                border-radius: 0px;
+                padding-left: 2px;
+            }
+
+            QLineEdit:focus {
+                background-color: palette(dark);
+                border: 1px solid black;
+            }
+
+            QSpinBox {
+                background-color: rgba(0, 0, 0, 0); 
+                border-radius: 0px;
+                padding-left: 2px;
+            }
+
+            QSpinBox::up-button {
+                background-color: palette(dark);
+                subcontrol-position: top right;
+                width: 16px;
+                border-style: none;
+            }
+
+            QSpinBox::up-arrow {
+                image: url(:/Dark/up-arrow.png);
+                width: 7px;
+                height: 7px;
+            }
+            
+            QSpinBox::down-button {
+                background-color: palette(dark);
+                subcontrol-position: bottom right;
+                width: 16px;
+                border-style: none;
+            }
+
+            QSpinBox::down-arrow {
+                image: url(:/Dark/down-arrow.png);
+                width: 7px;
+                height: 7px;
+            }
+            
+            QSpinBox:focus {
+                background-color: palette(dark);
+                border: 1px solid black;
+            }
+
+            QComboBox {
+                background-color: rgba(0, 0, 0, 0); 
+                border-radius: 0px;
+                padding-left: 2px;
+            }
+
+            QComboBox:!editable {
+                padding-left: 4px;
+            }
+
+            QComboBox::drop-down {
+                background-color: palette(dark);
+                border-style: none;
+                width: 16px;
+            }
+
+            QComboBox::down-arrow {
+                image: url(:/Dark/down-arrow.png);
+                width: 7px;
+                height: 7px;
+            }
+
+            QComboBox:focus {
+                background-color: palette(dark);
+                border: 1px solid black;
+            }  
+        """
+
         self.sourceList = srcList
         self.sourceData = srcData
-        self.primaryScreen = screen
 
         self.treeWidget = QTreeWidget(self)
         self.treeWidget.setHeaderHidden(True)
@@ -102,16 +152,6 @@ class PropertiesWidget(QWidget):
         self.treeWidget.setHeaderLabels(["Property", "Value"])
         self.treeWidget.setItemDelegate(GridDelegate())
         self.treeWidget.setStyleSheet("QTreeWidget::item{height:24px;}")
-
-        if resourceWidget != None:
-            self.resourceDialog = QDialog(window)
-            self.resourceDialog.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Popup)
-            self.resourceDialogUI = resourceWidget()
-            self.resourceDialogUI.setupUi(self.resourceDialog)
-            self.resourceDialogUI.searchBar.textChanged.connect(search)
-            self.resourceDialogUI.addImage.clicked.connect(addResource)
-            apply = self.resourceDialogUI.buttonBox.button(QDialogButtonBox.StandardButton.Apply)
-            apply.clicked.connect(closeResourceDialog)
 
         layout = QVBoxLayout(self)
         layout.addWidget(self.treeWidget)
@@ -128,10 +168,19 @@ class PropertiesWidget(QWidget):
     def sendPropertyChangedSignal(self, property, value):
         self.propertyChanged.emit(property, value)
 
-    def addProperty(self, srcProperty, name, valueWidget, parent):
-        item = QTreeWidgetItem(parent, [_(name), ""])
-        self.treeWidget.setItemWidget(item, 1, valueWidget)
-        self.propertyItems[srcProperty] = valueWidget
+    def addProperty(self, srcProperty, name, valueWidget, parent=None):
+        print(srcProperty)
+        if parent != None:
+            item = QTreeWidgetItem(parent, [_(name), ""])
+            self.treeWidget.setItemWidget(item, 1, valueWidget)
+            self.propertyItems[srcProperty] = valueWidget
+        else:
+            item = QTreeWidgetItem()
+            item.setText(0, _(name))
+            self.treeWidget.addTopLevelItem(item)
+            self.treeWidget.setItemWidget(item, 1, valueWidget)
+            self.propertyItems[srcProperty] = valueWidget
+
         item.setExpanded(True)
 
     def createLineEdit(self, text, disabled, propertySignalDisabled, srcProperty=""):
@@ -142,11 +191,21 @@ class PropertiesWidget(QWidget):
                 self.sendPropertyChangedSignal(srcProperty, lineEdit.text())
 
         lineEdit = QLineEdit(self)
-        lineEdit.setStyleSheet("background-color: rgba(0, 0, 0, 0);")
+        lineEdit.setStyleSheet(self.propertyStyleSheet)
         lineEdit.setText(text)
         lineEdit.setDisabled(disabled)
         lineEdit.editingFinished.connect(onDeselect)
         return lineEdit
+    
+    def createButton(self, text, property):
+        def onClick():
+            self.sendPropertyChangedSignal(property, "click")
+
+        button = QPushButton(self)
+        button.setStyleSheet(self.propertyStyleSheet)
+        button.setText(text)
+        button.clicked.connect(onClick)
+        return button
     
     def createResourceEdit(self, text, disabled, propertySignalDisabled, srcProperty=""):
         def dragEnterEvent(event):
@@ -166,7 +225,7 @@ class PropertiesWidget(QWidget):
             event.acceptProposedAction()
 
         resourceEdit = QLineEdit(self)
-        resourceEdit.setStyleSheet("background-color: rgba(0, 0, 0, 0);")
+        resourceEdit.setStyleSheet(self.propertyStyleSheet)
         resourceEdit.setText(text)
         resourceEdit.setDisabled(disabled)
         resourceEdit.dragEnterEvent = dragEnterEvent
@@ -186,7 +245,7 @@ class PropertiesWidget(QWidget):
             self.treeWidget.setCurrentItem(None)
 
         spinBox = QSpinBox(self)
-        spinBox.setStyleSheet("background-color: rgba(0, 0, 0, 0); ")
+        spinBox.setStyleSheet(self.propertyStyleSheet)
         spinBox.setRange(minVal, maxVal)
         if text == None:
             text = "0"
@@ -198,19 +257,20 @@ class PropertiesWidget(QWidget):
     
     def createComboBox(self, items, selected, srcProperty, editable):
         def onChanged():
+            comboBox.clearFocus()
             self.sendPropertyChangedSignal(srcProperty, comboBox.currentText())
 
         comboBox = QComboBox(self)
         comboBox.addItems(items)
+        comboBox.setStyleSheet(self.propertyStyleSheet)
         if editable:
             comboBox.setEditable(True)
-            comboBox.setStyleSheet("background-color: rgba(0, 0, 0, 0); ")
         if selected:
             if not selected.isnumeric():
                 comboBox.setCurrentIndex(items.index(selected))
             else:
                 comboBox.setCurrentIndex(int(selected))
-        comboBox.currentTextChanged.connect(onChanged)
+        comboBox.activated.connect(onChanged)
         return comboBox
     
     def createAlignmentComboBox(self, selected, srcProperty):
@@ -254,11 +314,11 @@ class PropertiesWidget(QWidget):
         return item
 
     def addProperties(self, properties, data, parent, device):
-        for key, value in properties.items():
-            if isinstance(value, dict):
+        for key, property in properties.items():
+            if not property.get("string"):
                 # category
                 categoryItem = self.createCategory(_(key), parent)
-                self.addProperties(value, data, categoryItem, device)  # Recursively add sub-categories
+                self.addProperties(property, data, categoryItem, device)  # Recursively add sub-categories
             else:
                 ignorePropertyCreation = False
                 # property
@@ -266,18 +326,21 @@ class PropertiesWidget(QWidget):
                 if data != None and data.get(key) != None:
                     propertyValue = data.get(key)
                 else:
-                    propertyValue = value[2]
+                    propertyValue = property["value"]
+
                 inputWidget = None
                 
-                if value[1] == "disabled":
+                if property["type"] == "disabled":
                     inputWidget = self.createLineEdit(propertyValue, True, False, key)
-                elif value[1] == "str":
+                elif property["type"] == "str":
                     inputWidget = self.createLineEdit(propertyValue, False, False, key)
-                elif value[1] == "img":
+                elif property["type"] == "btn":
+                    inputWidget = self.createButton(propertyValue, key)
+                elif property["type"] == "img":
                     inputWidget = self.createResourceEdit(propertyValue, False, False, key)
-                elif value[1] == "combobox":
-                    inputWidget = self.createComboBox(value[3], propertyValue, key, False)
-                elif value[1] == "imglist":
+                elif property["type"] == "list":
+                    inputWidget = self.createComboBox(property["options"], propertyValue, key, False)
+                elif property["type"] == "imglist":
                     self.imageCategories = []
 
                     def imagesChanged(stringIndex, image, index):
@@ -336,7 +399,7 @@ class PropertiesWidget(QWidget):
                     if not success:
                         QMessageBox.critical(None, "Properties", f"Error occured loading images: {message}")
 
-                elif value[1] == "numlist":
+                elif property["type"] == "numlist":
                     ignorePropertyCreation = True
                     imageList = propertyValue.split("|")
 
@@ -364,11 +427,13 @@ class PropertiesWidget(QWidget):
 
                     createInput(10, "Negative Sign")
 
-                elif value[1] == "int":
-                    inputWidget = self.createSpinBox(propertyValue, False, False, key, int(value[3]), int(value[4]))
-                elif value[1] == "bool":
+                elif property["type"] == "int":
+                    if len(property) < 5:
+                        QMessageBox.critical(None, "Properties", f"Int property for {property['string']} requires a min/max val, provided in list 3/4 ")
+                    inputWidget = self.createSpinBox(propertyValue, False, False, key, int(property["min"]), int(property["max"]))
+                elif property["type"] == "bool":
                     inputWidget = self.createCheckBox(propertyValue, key)
-                elif value[1] == "src":
+                elif property["type"] == "src":
                     for x in self.sourceData[str(device)]:
                         if propertyValue != '':
                             try:
@@ -385,7 +450,7 @@ class PropertiesWidget(QWidget):
                     else:
                         QMessageBox.critical(None, "Properties", f"Data source not found.")
                 if not ignorePropertyCreation:
-                    self.addProperty(key, value[0], inputWidget, parent)
+                    self.addProperty(key, property["string"], inputWidget, parent)
                 inputWidget = None
 
     def loadProperties(self, properties, data=None, device=None, scrollTo=None):

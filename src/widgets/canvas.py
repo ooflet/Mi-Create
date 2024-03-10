@@ -14,9 +14,11 @@ sys.path.append("..")
 from utils.project import watchData
 
 from PyQt6.QtCore import pyqtSignal, QPointF, QModelIndex, QSize, QRectF, QRect, Qt
-from PyQt6.QtGui import QPainter, QPainterPath, QPen, QColor, QStandardItemModel, QPixmap, QIcon, QBrush, QImage
+from PyQt6.QtGui import QPainter, QPainterPath, QPen, QColor, QStandardItemModel, QPixmap, QIcon, QBrush, QImage, QCursor
 from PyQt6.QtWidgets import (QApplication, QGraphicsPathItem, QGraphicsScene, QGraphicsSceneMouseEvent, QGraphicsView, QGraphicsItem, QGraphicsRectItem, 
                                QGraphicsEllipseItem, QMenu, QGraphicsPixmapItem, QMessageBox, QRubberBand)
+
+from utils.contextMenu import ContextMenu
 
 class ObjectIcon:
     def __init__(self):
@@ -46,22 +48,22 @@ class Scene(QGraphicsScene):
         super().__init__(parent)
 
 class Canvas(QGraphicsView):
-    objectAdded = pyqtSignal(QPointF, str)
-    objectChanged = pyqtSignal(str, str, object) # hate hacky workarounds, just support any type already Qt
-    objectPosChanged = pyqtSignal()
-    objectLayerChange = pyqtSignal(str, str)
-    objectDeleted = pyqtSignal(str)
+    onObjectAdded = pyqtSignal(QPointF, str)
+    onObjectChange = pyqtSignal(str, str, object) # hate hacky workarounds, just support any type already Qt
+    onObjectPosChange = pyqtSignal()
+    onObjectLayerChange = pyqtSignal(str, str)
 
-    def __init__(self, device, antialiasingEnabled, deviceOutlineVisible, insertMenu, parent=None):
+    def __init__(self, device, antialiasingEnabled, deviceOutlineVisible, ui, parent=None):
         super().__init__(parent)
 
         if antialiasingEnabled:
             self.setRenderHints(QPainter.RenderHint.Antialiasing)
 
+        self.mainWindowUI = ui
+
         self.setDragMode(QGraphicsView.DragMode.RubberBandDrag)
         self.setTransformationAnchor(QGraphicsView.ViewportAnchor.AnchorUnderMouse)
 
-        self.insertMenu = insertMenu
         self.deviceOutlineVisible = deviceOutlineVisible
         self.origin = None
         self.setAcceptDrops(True)
@@ -78,7 +80,7 @@ class Canvas(QGraphicsView):
         self.setScene(self.scene)
 
     def fireObjectPositionChanged(self):
-        self.objectPosChanged.emit()
+        self.onObjectPosChange.emit()
 
     def drawDecorations(self, deviceOutlineVisible):
         background = QGraphicsRectItem(0, 0, self.deviceSize[0], self.deviceSize[1])
@@ -89,6 +91,31 @@ class Canvas(QGraphicsView):
 
         if deviceOutlineVisible:
             self.scene.addItem(DeviceOutline(self.deviceSize))
+
+    def contextMenuEvent(self, event):
+        scenePos = self.mapToScene(event.pos())
+        view = self.scene.views()[0]  # Get the first view
+        viewPos = view.mapToGlobal(view.mapFromScene(scenePos))
+
+        topLevelItem = None
+        items = self.items(event.pos())
+        for item in items:
+            if isinstance(item, BaseWidget):
+                if topLevelItem == None:
+                    topLevelItem = item
+                elif topLevelItem.zValue() < item.zValue():
+                    topLevelItem = item
+        
+        #print(topLevelItem, topLevelItem.zValue())
+
+        if topLevelItem != None:
+            if not topLevelItem.isSelected():
+                self.selectObject(topLevelItem.data(0))
+            menu = ContextMenu("shape", viewPos, self.mainWindowUI)
+        else:
+            menu = ContextMenu("default", viewPos, self.mainWindowUI)
+
+        action = menu.exec(viewPos)
 
     def wheelEvent(self, event):
         modifiers = QApplication.keyboardModifiers()
@@ -107,22 +134,16 @@ class Canvas(QGraphicsView):
             scroll_value = self.verticalScrollBar().value() - scroll_delta
             self.verticalScrollBar().setValue(scroll_value)
 
-    def keyPressEvent(self, event):
-        if event.modifiers() == Qt.KeyboardModifier.ControlModifier:
-            if event.key() == Qt.Key.Key_Plus or event.key() == Qt.Key.Key_Equal:
-                zoom_factor = 1.25
-                self.scale(zoom_factor, zoom_factor)
-            elif event.key() == Qt.Key.Key_Minus:
-                zoom_factor = 1 / 1.25
-                self.scale(zoom_factor, zoom_factor)
-            event.accept()
-        else:
-            super().keyPressEvent(event)
-
     def handleObjectSelectionChange(self):
         selected_object = self.getSelectedObject()
         if selected_object:
             print(f"Object '{selected_object}' selected")
+
+    def getObject(self, name):
+        for x in self.items():
+            # data(0) is name
+            if x.data(0) == name:
+                return x
 
     def selectObject(self, name):
         for x in self.items():
@@ -132,25 +153,20 @@ class Canvas(QGraphicsView):
             else:
                 x.setSelected(False)
 
-    def selectObjects(self, objects):
-        for name in objects:
+    def selectObjectsFromPropertyList(self, names):
+        for name in names:
             for x in self.items():
                 # data(0) is name
-                # text(0) is treewidgetitem text
-                if x.data(0) == name:
+                if x.data(0) == name["Name"]:
                     x.setSelected(True)
-                else:
-                    x.setSelected(False)
 
-    def getSelectedObject(self):
+    def getSelectedObjects(self):
         return self.scene.selectedItems()
 
     def onObjectDeleted(self, name, widget):
         self.objectDeleted.emit(name)
 
     def createObject(self, index, i, imageFolder, antialiasing):
-        # so many hacks
-        # dear god
         try:
             if i["@Shape"] == "27":
                 bgImg = QPixmap()
@@ -174,8 +190,6 @@ class Canvas(QGraphicsView):
                 analogWidget.addMinuteHand(minImg, i["@MinuteImage_rotate_xc"], i["@MinuteImage_rotate_yc"], antialiasing)
                 analogWidget.addSecondHand(secImg, i["@SecondImage_rotate_xc"], i["@SecondImage_rotate_yc"], antialiasing)
                 self.scene.addItem(analogWidget)
-                analogWidget.objectDeleted = lambda name, self=self: self.onObjectDeleted(name, analogWidget)
-                analogWidget.objectLayerAction = lambda name, action: self.objectLayerChange.emit(name, action)
 
             elif i["@Shape"] == "29":
                 dialog = QMessageBox.warning(None, "Confirm", f"The object {i['@Name']} uses the legacy CircleProgress object, it will be automatically converted to the newer CircleProgressPlus object.")
@@ -197,9 +211,6 @@ class Canvas(QGraphicsView):
                     self.scene.addItem(imageWidget)
                     imageWidget.addImage(QPixmap(), 0, 0, 0, antialiasing)
                     imageWidget.representNoImage()
-                
-                imageWidget.objectDeleted = lambda name, self=self: self.onObjectDeleted(name, imageWidget)
-                imageWidget.objectLayerAction = lambda name, action: self.objectLayerChange.emit(name, action)
                 
             elif i["@Shape"] == "31":
                 imageWidget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), self, QColor(255,255,255,0), i["@Name"], imageFolder)
@@ -224,9 +235,6 @@ class Canvas(QGraphicsView):
                     self.scene.addItem(imageWidget)
                     imageWidget.addImage(QPixmap(), 0, 0, 0, antialiasing)
                     imageWidget.representNoImage()
-                    
-                imageWidget.objectDeleted = lambda name, self=self: self.onObjectDeleted(name, imageWidget)
-                imageWidget.objectLayerAction = lambda name, action: self.objectLayerChange.emit(name, action)
 
             elif i["@Shape"] == "32":
                 # Split images from the Bitmaplist
@@ -242,8 +250,6 @@ class Canvas(QGraphicsView):
                     
                 name = i["@Name"]
                 self.scene.addItem(imageWidget)
-                imageWidget.objectDeleted = lambda name, self=self: self.onObjectDeleted(name, imageWidget)
-                imageWidget.objectLayerAction = lambda name, action: self.objectLayerChange.emit(name, action)
 
             elif i["@Shape"] == "42":
                 bgImage = QPixmap()
@@ -254,10 +260,8 @@ class Canvas(QGraphicsView):
                 
                 progressWidget = ProgressWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), self, QColor(255,255,255,0), i["@Name"], i["@Rotate_xc"], i["@Rotate_yc"], i["@Radius"], i["@Line_Width"], i["@StartAngle"], i["@EndAngle"], bgImage, fgImage, antialiasing)
                 progressWidget.setZValue(index)
-                imageWidget.setData(1, "42")
+                progressWidget.setData(1, "42")
                 self.scene.addItem(progressWidget)
-                progressWidget.objectDeleted = lambda name, self=self: self.onObjectDeleted(name, progressWidget)
-                progressWidget.objectLayerAction = lambda name, action: self.objectLayerChange.emit(name, action)
 
             else:
                 return False, f"Widget {i['@Shape']} not implemented in canvas, please report as issue."
@@ -326,45 +330,6 @@ class BaseWidget(QGraphicsRectItem):
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsFocusable, True)
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemClipsChildrenToShape, True)
 
-    def contextMenuEvent(self, event):
-        scenePos = self.mapToScene(event.pos())
-        view = self.scene().views()[0]  # Get the first view
-        viewPos = view.mapToGlobal(view.mapFromScene(scenePos))
-
-        menu = QMenu()
-        raiseIcon = QIcon()
-        raiseIcon.addFile(u":/Dark/bring-to-front.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        raiseToTopAction = menu.addAction("Bring to Front")
-        raiseToTopAction.setIcon(raiseIcon)
-        raiseAction = menu.addAction("Bring Forwards")
-        lowerIcon = QIcon()
-        lowerIcon.addFile(u":/Dark/send-to-back.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        lowerToBottomAction = menu.addAction("Send to Back")
-        lowerToBottomAction.setIcon(lowerIcon)
-        lowerAction = menu.addAction("Send Backwards")
-        menu.addSeparator()
-        deleteIcon = QIcon()
-        deleteIcon.addFile(u":/Dark/x_dim.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        action1 = menu.addAction("Delete")
-        action1.setIcon(deleteIcon)
-
-        if not self.isSelected():
-            self.setSelected(True)
-
-        action = menu.exec(viewPos)
-
-        if action == action1:
-            self.objectDeleted(self.data(0))
-        elif action == raiseToTopAction:
-            self.objectLayerAction(self.data(0), "top")
-        elif action == raiseAction:
-            self.objectLayerAction(self.data(0), "raise")
-        elif action == lowerToBottomAction:
-            self.objectLayerAction(self.data(0), "bottom")
-        elif action == lowerAction:
-            self.objectLayerAction(self.data(0), "lower")
-        
-
     def objectDeleted(self, name):
         pass
 
@@ -378,7 +343,8 @@ class BaseWidget(QGraphicsRectItem):
     
     def mouseReleaseEvent(self, event):
         super().mouseReleaseEvent(event)
-        self.canvas.fireObjectPositionChanged()
+        if event.button() != Qt.MouseButton.RightButton:
+            self.canvas.fireObjectPositionChanged()
 
     def paint(self, painter, option, widget=None):
         # Paint the node in the graphic view.

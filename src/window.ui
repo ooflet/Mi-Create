@@ -133,8 +133,17 @@
      <addaction name="actionFile"/>
      <addaction name="actionLayout"/>
     </widget>
+    <widget class="QMenu" name="menuZoom">
+     <property name="title">
+      <string>Zoom</string>
+     </property>
+     <addaction name="actionZoom_In"/>
+     <addaction name="actionZoom_Out"/>
+    </widget>
     <addaction name="actionExplorer"/>
     <addaction name="actionAttributes"/>
+    <addaction name="separator"/>
+    <addaction name="menuZoom"/>
     <addaction name="separator"/>
     <addaction name="menuToolbars"/>
     <addaction name="separator"/>
@@ -144,12 +153,24 @@
     <property name="title">
      <string>Edit</string>
     </property>
+    <widget class="QMenu" name="menuLayers">
+     <property name="title">
+      <string>Layers</string>
+     </property>
+     <addaction name="actionBring_to_Front"/>
+     <addaction name="actionBring_Forwards"/>
+     <addaction name="separator"/>
+     <addaction name="actionSend_to_Back"/>
+     <addaction name="actionSend_Backwards"/>
+    </widget>
     <addaction name="actionUndo"/>
     <addaction name="actionRedo"/>
     <addaction name="separator"/>
     <addaction name="actionCut"/>
     <addaction name="actionCopy"/>
     <addaction name="actionPaste"/>
+    <addaction name="separator"/>
+    <addaction name="menuLayers"/>
     <addaction name="separator"/>
     <addaction name="actionProject_XML_File"/>
     <addaction name="separator"/>
@@ -289,6 +310,7 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionDelete"/>
    <addaction name="actionUndo"/>
    <addaction name="actionRedo"/>
    <addaction name="actionCut"/>
@@ -343,7 +365,48 @@
      <property name="spacing">
       <number>2</number>
      </property>
-     <item row="0" column="0" colspan="2">
+     <item row="2" column="4">
+      <widget class="QToolButton" name="reloadResource">
+       <property name="text">
+        <string>Reload</string>
+       </property>
+       <property name="icon">
+        <iconset resource="resources/icons.qrc">
+         <normaloff>:/Dark/refresh-cw.png</normaloff>:/Dark/refresh-cw.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="6">
+      <widget class="QToolButton" name="openResourceFolder">
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="resources/icons.qrc">
+         <normaloff>:/Dark/folder.png</normaloff>:/Dark/folder.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0" colspan="7">
+      <widget class="QLineEdit" name="resourceSearch">
+       <property name="inputMask">
+        <string/>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="echoMode">
+        <enum>QLineEdit::Normal</enum>
+       </property>
+       <property name="placeholderText">
+        <string>Search...</string>
+       </property>
+       <property name="clearButtonEnabled">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0" colspan="7">
       <widget class="QListWidget" name="resourceList">
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
@@ -377,6 +440,17 @@
        </property>
        <property name="wordWrap">
         <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="5">
+      <widget class="QToolButton" name="addResource">
+       <property name="text">
+        <string>addImage</string>
+       </property>
+       <property name="icon">
+        <iconset resource="resources/icons.qrc">
+         <normaloff>:/Dark/image-plus.png</normaloff>:/Dark/image-plus.png</iconset>
        </property>
       </widget>
      </item>
@@ -631,7 +705,7 @@
   </action>
   <action name="actionImage_List">
    <property name="icon">
-    <iconset resource="resources/icons.qrc">
+    <iconset>
      <normaloff>:/Dark/gallery-horizontal.png</normaloff>:/Dark/gallery-horizontal.png</iconset>
    </property>
    <property name="text">
@@ -684,6 +758,70 @@
    </property>
    <property name="shortcut">
     <string>F11</string>
+   </property>
+  </action>
+  <action name="actionDelete">
+   <property name="icon">
+    <iconset resource="resources/icons.qrc">
+     <normaloff>:/Dark/x_dim.png</normaloff>:/Dark/x_dim.png</iconset>
+   </property>
+   <property name="text">
+    <string>Delete</string>
+   </property>
+   <property name="shortcut">
+    <string>Backspace</string>
+   </property>
+  </action>
+  <action name="actionBring_to_Front">
+   <property name="icon">
+    <iconset resource="resources/icons.qrc">
+     <normaloff>:/Dark/bring-to-front.png</normaloff>:/Dark/bring-to-front.png</iconset>
+   </property>
+   <property name="text">
+    <string>Bring to Front</string>
+   </property>
+  </action>
+  <action name="actionBring_Forwards">
+   <property name="text">
+    <string>Bring Forwards</string>
+   </property>
+  </action>
+  <action name="actionSend_to_Back">
+   <property name="icon">
+    <iconset resource="resources/icons.qrc">
+     <normaloff>:/Dark/send-to-back.png</normaloff>:/Dark/send-to-back.png</iconset>
+   </property>
+   <property name="text">
+    <string>Send to Back</string>
+   </property>
+  </action>
+  <action name="actionSend_Backwards">
+   <property name="text">
+    <string>Send Backwards</string>
+   </property>
+  </action>
+  <action name="actionZoom_In">
+   <property name="icon">
+    <iconset resource="resources/icons.qrc">
+     <normaloff>:/Dark/zoom-in.png</normaloff>:/Dark/zoom-in.png</iconset>
+   </property>
+   <property name="text">
+    <string>Zoom In</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+=</string>
+   </property>
+  </action>
+  <action name="actionZoom_Out">
+   <property name="icon">
+    <iconset resource="resources/icons.qrc">
+     <normaloff>:/Dark/zoom-out.png</normaloff>:/Dark/zoom-out.png</iconset>
+   </property>
+   <property name="text">
+    <string>Zoom Out</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+-</string>
    </property>
   </action>
  </widget>

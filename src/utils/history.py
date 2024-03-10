@@ -1,3 +1,4 @@
+import logging
 from typing import Any
 from PyQt6.QtGui import QUndoCommand, QUndoStack
 
@@ -18,18 +19,19 @@ class CommandAddWidget(QUndoCommand):
     def undo(self):
         self.commandFunc("undo", self.objectIndex)
 
-class CommandDeleteWidget(QUndoCommand):
-    def __init__(self, objectIndex, objectData, commandFunc, description):
-        super(CommandDeleteWidget, self).__init__(description)
-        self.objectIndex = objectIndex
-        self.objectData = objectData
+class CommandModifyProjectData(QUndoCommand):
+    def __init__(self, prevData, newData, commandFunc, description):
+        logging.debug(f"prevdata {prevData}, newdata {newData}")
+        super(CommandModifyProjectData, self).__init__(description)
+        self.prevData = prevData
+        self.newData = newData
         self.commandFunc = commandFunc
 
     def redo(self):
-        self.commandFunc("redo", self.objectIndex)
+        self.commandFunc(self.newData)
 
     def undo(self):
-        self.commandFunc("undo", self.objectIndex, self.objectData)
+        self.commandFunc(self.prevData)
 
 class CommandModifyProperty(QUndoCommand):
     def __init__(self, name, property, previousValue, currentValue, commandFunc, description):

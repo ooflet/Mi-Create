@@ -1,5 +1,11 @@
 <RCC>
   <qresource prefix="Dark">
+    <file>zoom-in.png</file>
+    <file>zoom-out.png</file>
+    <file>down-arrow.png</file>
+    <file>up-arrow.png</file>
+    <file>refresh-cw.png</file>
+    <file>image-plus.png</file>
     <file>folder.png</file>
     <file>progress.png</file>
     <file>moon.png</file>

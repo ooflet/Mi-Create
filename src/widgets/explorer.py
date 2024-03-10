@@ -15,6 +15,7 @@ class Explorer(QTreeWidget):
 
     def updateExplorer(self, data):
         self.clear()
+        self.items = {}
         def createItem(x):
             objectIcon = QIcon()
             if not self.objectIcon.icon.get(x["@Shape"]):

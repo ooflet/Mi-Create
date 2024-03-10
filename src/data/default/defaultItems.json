@@ -67,11 +67,10 @@
         "@Blanking":"0"
     },
     "42": {
-        "@Shape":"32",
+        "@Shape":"42",
         "@Name":"",
-        "@BitmapList":"",
-        "@X":"",
-        "@Y":"",
+        "@X":"0",
+        "@Y":"0",
         "@Width":"200",
         "@Height":"200",
         "@Alpha":"255",
@@ -89,7 +88,7 @@
         "@Range_Step":"0",
         "@Background_ImageName":"",
         "@Foreground_ImageName":"",
-        "@Range_Max_Src":"",
-        "@Range_Val_Src":""
+        "@Range_Max_Src":"0",
+        "@Range_Val_Src":"0"
     }
 }

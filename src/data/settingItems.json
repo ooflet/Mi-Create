@@ -1,0 +1,28 @@
+{
+    "General": {
+        "Theme": {
+            "string": "Theme",
+            "type": "list",
+            "value": "Dark",
+            "options": []
+        },
+        "Language": {
+            "string": "Language",
+            "type": "list",
+            "value": "English",
+            "options": []
+        }
+    },
+    "Canvas": {
+        "DeviceOutline": {
+            "string": "Device Outline",
+            "type": "bool",
+            "value": true
+        },
+        "Antialiasing": {
+            "string": "Antialiasing",
+            "type": "bool",
+            "value": true
+        }
+    }
+}

@@ -15,6 +15,8 @@ import xmltodict
 import xml
 import xml.dom.minidom as minidom
 
+from PyQt6.QtCore import QProcess
+
 supportedOneFileVersion = "1.0"
 logging.basicConfig(level=logging.DEBUG)
 
@@ -82,11 +84,15 @@ class fprjProject:
         xml_path = os.path.join(path)
         try:
             with open(xml_path, 'r', encoding="utf8") as project:
-                # Parse XML, then encode images in /images dir to Base64
                 xmlsource = project.read()
                 parse = xmltodict.parse(xmlsource)
                 if parse["FaceProject"]:
                     imagesDir = os.path.join(os.path.dirname(path), "images")
+                    # By default, if there's only one widget in the project, it will parse the Widget list as a dict
+                    # This breaks functionality, and it's cumbersome to keep repeating type checks
+                    # So its simply converted to a list
+                    if type(parse["FaceProject"]["Screen"]["Widget"]) == dict:
+                        parse["FaceProject"]["Screen"]["Widget"] = [parse["FaceProject"]["Screen"]["Widget"]]
                 return True, parse, imagesDir
         except Exception as e:
             return False, str(e), traceback.format_exc()
@@ -114,10 +120,13 @@ class fprjProject:
 
     def compile(path, location, compilerLocation):
         logging.info("Compiling project "+path)
-        process = subprocess.Popen(f'{compilerLocation} compile "{path}" "{location}" "{str.split(os.path.basename(path), ".")[0]+".face"}" 0', stdout=subprocess.PIPE)
-        output, err = process.communicate()
-        logging.info(str(output))
-        return output.decode("utf-8")
+        # process = subprocess.Popen(f'{compilerLocation} compile "{path}" "{location}" "{str.split(os.path.basename(path), ".")[0]+".face"}" 0', stdout=subprocess.PIPE)
+        # output, err = process.communicate()
+        # logging.info(str(output))
+        # return output.decode("utf-8")
+        process = QProcess()
+        process.start(compilerLocation, ["compile", path, location, str.split(os.path.basename(path), ".")[0]+".face", "0"])
+        return process
     
 class fprjOneFile:
     def convert(path):

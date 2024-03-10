@@ -3,320 +3,319 @@
         "Shape": "AnalogDisplay",
         "properties": {
             "General": {
-                "WidgetType":[
-                    "Widget Type",
-                    "disabled",
-                    "AnalogDisplay"
-                ],
-                "@Name": [
-                    "Name",
-                    "str",
-                    ""
-                ]
+                "WidgetType": {
+                    "string": "Widget Type",
+                    "type": "disabled",
+                    "value": "AnalogDisplay"
+                },
+                "@Name": {
+                    "string": "Name",
+                    "type": "str",
+                    "value": ""
+                }
             },
             "Position": {
-                "@X": [
-                    "X",
-                    "int",
-                    "",
-                    "-999",
-                    "999"
-                ],
-                "@Y": [
-                    "Y",
-                    "int",
-                    "",
-                    "-999",
-                    "999"
-                ],
-                "@Width": [
-                    "Width",
-                    "int",
-                    "48",
-                    "0",
-                    "999"
-                ],
-                "@Height": [
-                    "Height",
-                    "int",
-                    "48",
-                    "0",
-                    "999"
-                ]
+                "@X": {
+                    "string": "X",
+                    "type": "int",
+                    "value": "",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "@Y": {
+                    "string": "Y",
+                    "type": "int",
+                    "value": "",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "@Width": {
+                    "string": "Width",
+                    "type": "int",
+                    "value": "48",
+                    "min": "0",
+                    "max": "999"
+                },
+                "@Height": {
+                    "string": "Height",
+                    "type": "int",
+                    "value": "48",
+                    "min": "0",
+                    "max": "999"
+                }
             },
             "Appearance": {
-                "@Alpha": [
-                    "Opacity",
-                    "int",
-                    "255",
-                    "0",
-                    "255"
-                ],
-                "@Visible_Src": [
-                    "Visibility Trigger",
-                    "src",
-                    ""
-                ],
-                "@HourhandCorrection_En": [
-                    "Hour Hand Smooth",
-                    "bool",
-                    "0"
-                ],
-                "@MinutehandCorrection_En": [
-                    "Minute Hand Smooth",
-                    "bool",
-                    "0"
-                ]
+                "@Alpha": {
+                    "string": "Opacity",
+                    "type": "int",
+                    "value": "255",
+                    "min": "0",
+                    "max": "255"
+                },
+                "@Visible_Src": {
+                    "string": "Visibility Trigger",
+                    "type": "src",
+                    "value": ""
+                },
+                "@HourhandCorrection_En": {
+                    "string": "Hour Hand Smooth",
+                    "type": "bool",
+                    "value": "0"
+                },
+                "@MinutehandCorrection_En": {
+                    "string": "Minute Hand Smooth",
+                    "type": "bool",
+                    "value": "0"
+                }
             },
             "Analog Properties": {
                 "Background": {
-                    "@Background_ImageName": [
-                        "Image",
-                        "img",
-                        ""
-                    ],
+                    "@Background_ImageName": {
+                        "string": "Image",
+                        "type": "img",
+                        "value": ""
+                    },
                     "Anchor Point": {
-                        "@BgImage_rotate_xc": [
-                            "X",
-                            "int",
-                            "",
-                            "0",
-                            "999"
-                        ],
-                        "@BgImage_rotate_yc": [
-                            "Y",
-                            "int",
-                            "",
-                            "0",
-                            "999"
-                        ]
+                        "@BgImage_rotate_xc": {
+                            "string": "X",
+                            "type": "int",
+                            "value": "",
+                            "min": "0",
+                            "max": "999"
+                        },
+                        "@BgImage_rotate_yc": {
+                            "string": "Y",
+                            "type": "int",
+                            "value": "",
+                            "min": "0",
+                            "max": "999"
+                        }
                     }
-                    
-                 },
-                 "Hour Hand": {
-                    "@HourHand_ImageName": [
-                        "Image",
-                        "img",
-                        ""
-                    ],
+                },
+                "Hour Hand": {
+                    "@HourHand_ImageName": {
+                        "string": "Image",
+                        "type": "img",
+                        "value": ""
+                    },
                     "Anchor Point": {
-                        "@HourImage_rotate_xc": [
-                            "X",
-                            "int",
-                            "",
-                            "0",
-                            "999"
-                        ],
-                        "@HourImage_rotate_yc": [
-                            "Y",
-                            "int",
-                            "",
-                            "0",
-                            "999"
-                        ]
+                        "@HourImage_rotate_xc": {
+                            "string": "X",
+                            "type": "int",
+                            "value": "",
+                            "min": "0",
+                            "max": "999"
+                        },
+                        "@HourImage_rotate_yc": {
+                            "string": "Y",
+                            "type": "int",
+                            "value": "",
+                            "min": "0",
+                            "max": "999"
+                        }
                     }
-                 },
-                 "Minute Hand": {
-                    "@MinuteHand_Image": [
-                        "Image",
-                        "img",
-                        ""
-                    ],
+                },
+                "Minute Hand": {
+                    "@MinuteHand_Image": {
+                        "string": "Image",
+                        "type": "img",
+                        "value": ""
+                    },
                     "Anchor Point": {
-                        "@MinuteImage_rotate_xc": [
-                            "X",
-                            "int",
-                            "",
-                            "0",
-                            "999"
-                        ],
-                        "@MinuteImage_rotate_yc": [
-                            "Y",
-                            "int",
-                            "",
-                            "0",
-                            "999"
-                        ]
+                        "@MinuteImage_rotate_xc": {
+                            "string": "X",
+                            "type": "int",
+                            "value": "",
+                            "min": "0",
+                            "max": "999"
+                        },
+                        "@MinuteImage_rotate_yc": {
+                            "string": "Y",
+                            "type": "int",
+                            "value": "",
+                            "min": "0",
+                            "max": "999"
+                        }
                     }
-                 },
-                 "Second Hand": {
-                    "@SecondHand_Image": [
-                        "Image",
-                        "img",
-                        ""
-                    ],
+                },
+                "Second Hand": {
+                    "@SecondHand_Image": {
+                        "string": "Image",
+                        "type": "img",
+                        "value": ""
+                    },
                     "Anchor Point": {
-                        "@SecondImage_rotate_xc": [
-                            "X",
-                            "int",
-                            "",
-                            "0",
-                            "999"
-                        ],
-                        "@SecondImage_rotate_yc": [
-                            "Y",
-                            "int",
-                            "",
-                            "0",
-                            "999"
-                        ]
+                        "@SecondImage_rotate_xc": {
+                            "string": "X",
+                            "type": "int",
+                            "value": "",
+                            "min": "0",
+                            "max": "999"
+                        },
+                        "@SecondImage_rotate_yc": {
+                            "string": "Y",
+                            "type": "int",
+                            "value": "",
+                            "min": "0",
+                            "max": "999"
+                        }
                     }
-                 }
+                }
             }
         }
     },
     "29": {
-        "Shape":"CircleProgress",
+        "Shape": "CircleProgress",
         "properties": {
             "General": {
-                "WidgetType":[
-                    "Widget Type",
-                    "disabled",
-                    "CircleProgress"
-                ],
-                "@Name": [
-                    "Name",
-                    "str",
-                    ""
-                ]
+                "WidgetType": {
+                    "string": "Widget Type",
+                    "type": "disabled",
+                    "value": "CircleProgress"
+                },
+                "@Name": {
+                    "string": "Name",
+                    "type": "str",
+                    "value": ""
+                }
             },
             "Position": {
-                "@X": [
-                    "X",
-                    "int",
-                    "",
-                    "-999",
-                    "999"
-                ],
-                "@Y": [
-                    "Y",
-                    "int",
-                    "",
-                    "-999",
-                    "999"
-                ],
-                "@Width": [
-                    "Width",
-                    "disabled",
-                    "48"
-                ],
-                "@Height": [
-                    "Height",
-                    "disabled",
-                    "48"
-                ]
+                "@X": {
+                    "string": "X",
+                    "type": "int",
+                    "value": "",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "@Y": {
+                    "string": "Y",
+                    "type": "int",
+                    "value": "",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "@Width": {
+                    "string": "Width",
+                    "type": "disabled",
+                    "value": "48"
+                },
+                "@Height": {
+                    "string": "Height",
+                    "type": "disabled",
+                    "value": "48"
+                }
             },
             "Appearance": {
-                "@Alpha": [
-                    "Opacity",
-                    "int",
-                    "255",
-                    "0",
-                    "255"
-                ],
-                "@Visible_Src": [
-                    "Visibility Trigger",
-                    "src",
-                    ""
-                ]
+                "@Alpha": {
+                    "string": "Opacity",
+                    "type": "int",
+                    "value": "255",
+                    "min": "0",
+                    "max": "255"
+                },
+                "@Visible_Src": {
+                    "string": "Visibility Trigger",
+                    "type": "src",
+                    "value": ""
+                }
             },
-            "Progress Bar":{
-                "@Rotate_xc": [
-                    "X",
-                    "int",
-                    "0",
-                    "-999",
-                    "999"
-                ],
-                "@Rotate_yc": [
-                    "Y",
-                    "int",
-                    "0",
-                    "-999",
-                    "999"
-                ],
-                "@Radius": [
-                    "Radius",
-                    "int",
-                    "0",
-                    "0",
-                    "999"
-                ],
-                "@Line_Width": [
-                    "Thickness",
-                    "int",
-                    "0",
-                    "999"
-                ],
-                "@StartAngle": [
-                    "Start Angle",
-                    "int",
-                    "0",
-                    "-360",
-                    "360"
-                ],
-                "@EndAngle": [
-                    "End Angle",
-                    "int",
-                    "0",
-                    "-360",
-                    "360"
-                ]
-                
+            "Progress Bar": {
+                "@Rotate_xc": {
+                    "string": "X",
+                    "type": "int",
+                    "value": "0",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "@Rotate_yc": {
+                    "string": "Y",
+                    "type": "int",
+                    "value": "0",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "@Radius": {
+                    "string": "Radius",
+                    "type": "int",
+                    "value": "0",
+                    "min": "0",
+                    "max": "999"
+                },
+                "@Line_Width": {
+                    "string": "Thickness",
+                    "type": "int",
+                    "value": "0",
+                    "min": "0",
+                    "max": "999"
+                },
+                "@StartAngle": {
+                    "string": "Start Angle",
+                    "type": "int",
+                    "value": "0",
+                    "min": "-360",
+                    "max": "360"
+                },
+                "@EndAngle": {
+                    "string": "End Angle",
+                    "type": "int",
+                    "value": "0",
+                    "min": "-360",
+                    "max": "360"
+                }
             },
             "Range": {
-                "@Range_Min": [
-                    "Minimum Value",
-                    "int",
-                    "0",
-                    "0",
-                    "100"
-                ],
-                "@Range_Max": [
-                    "Maximum Value",
-                    "int",
-                    "0",
-                    "0",
-                    "100"
-                ],
-                "@Range_MinStep": [
-                    "Minimum Step Value",
-                    "int",
-                    "0",
-                    "0",
-                    "100"
-                ],
-                "@Range_Step": [
-                    "Step Value",
-                    "int",
-                    "0",
-                    "0",
-                    "100"
-                ]
+                "@Range_Min": {
+                    "string": "Minimum Value",
+                    "type": "int",
+                    "value": "0",
+                    "min": "0",
+                    "max": "100"
+                },
+                "@Range_Max": {
+                    "string": "Maximum Value",
+                    "type": "int",
+                    "value": "0",
+                    "min": "0",
+                    "max": "100"
+                },
+                "@Range_MinStep": {
+                    "string": "Minimum Step Value",
+                    "type": "int",
+                    "value": "0",
+                    "min": "0",
+                    "max": "100"
+                },
+                "@Range_Step": {
+                    "string": "Step Value",
+                    "type": "int",
+                    "value": "0",
+                    "min": "0",
+                    "max": "100"
+                }
             },
             "Data": {
-                "@Range_Val_Src": [
-                    "Data Source",
-                    "src",
-                    ""
-                ],
-                "@Range_Max_Src": [
-                    "Max Value Source",
-                    "src",
-                    ""
-                ]
+                "@Range_Val_Src": {
+                    "string": "Data Source",
+                    "type": "src",
+                    "value": ""
+                },
+                "@Range_Max_Src": {
+                    "string": "Max Value Source",
+                    "type": "src",
+                    "value": ""
+                }
             },
             "Images": {
-                "@Background_ImageName": [
-                    "Background",
-                    "img",
-                    ""
-                ],
-                "@Foreground_ImageName": [
-                    "Progress Bar",
-                    "img",
-                    ""
-                ]
+                "@Background_ImageName": {
+                    "string": "Background",
+                    "type": "img",
+                    "value": ""
+                },
+                "@Foreground_ImageName": {
+                    "string": "Progress Bar",
+                    "type": "img",
+                    "value": ""
+                }
             }
         }
     },
@@ -324,142 +323,141 @@
         "Shape": "Image",
         "properties": {
             "General": {
-                "WidgetType":[
-                    "Widget Type",
-                    "disabled",
-                    "Image"
-                ],
-                "@Name": [
-                    "Name",
-                    "str",
-                    ""
-                ]
+                "WidgetType": {
+                    "string": "Widget Type",
+                    "type": "disabled",
+                    "value": "Image"
+                },
+                "@Name": {
+                    "string": "Name",
+                    "type": "str",
+                    "value": ""
+                }
             },
             "Position": {
-                "@X": [
-                    "X",
-                    "int",
-                    "",
-                    "-999",
-                    "999"
-                ],
-                "@Y": [
-                    "Y",
-                    "int",
-                    "",
-                    "-999",
-                    "999"
-                ],
-                "@Width": [
-                    "Width",
-                    "disabled",
-                    "48"
-                ],
-                "@Height": [
-                    "Height",
-                    "disabled",
-                    "48"
-                ]
+                "@X": {
+                    "string": "X",
+                    "type": "int",
+                    "value": "",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "@Y": {
+                    "string": "Y",
+                    "type": "int",
+                    "value": "",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "@Width": {
+                    "string": "Width",
+                    "type": "disabled",
+                    "value": "48"
+                },
+                "@Height": {
+                    "string": "Height",
+                    "type": "disabled",
+                    "value": "48"
+                }
             },
             "Appearance": {
-                "@Alpha": [
-                    "Opacity",
-                    "int",
-                    "255",
-                    "0",
-                    "255"
-                ],
-                "@Visible_Src": [
-                    "Visibility Trigger",
-                    "src",
-                    ""
-                ]
+                "@Alpha": {
+                    "string": "Opacity",
+                    "type": "int",
+                    "value": "255",
+                    "min": "0",
+                    "max": "255"
+                },
+                "@Visible_Src": {
+                    "string": "Visibility Trigger",
+                    "type": "src",
+                    "value": ""
+                }
             },
             "Image": {
-                "@Bitmap": [
-                    "Image",
-                    "img",
-                    ""
-                ]
+                "@Bitmap": {
+                    "string": "Image",
+                    "type": "img",
+                    "value": ""
+                }
             }
-            
         }
     },
     "31": {
         "Shape": "ImageList",
         "properties": {
             "General": {
-                "WidgetType":[
-                    "Widget Type",
-                    "disabled",
-                    "ImageList"
-                ],
-                "@Name": [
-                    "Name",
-                    "str",
-                    ""
-                ]
+                "WidgetType": {
+                    "string": "Widget Type",
+                    "type": "disabled",
+                    "value": "ImageList"
+                },
+                "@Name": {
+                    "string": "Name",
+                    "type": "str",
+                    "value": ""
+                }
             },
-            "Position":{
-                "@X": [
-                    "X",
-                    "int",
-                    "",
-                    "-999",
-                    "999"
-                ],
-                "@Y": [
-                    "Y",
-                    "int",
-                    "",
-                    "-999",
-                    "999"
-                ],
-                "@Width": [
-                    "Width",
-                    "disabled",
-                    "48"
-                ],
-                "@Height": [
-                    "Height",
-                    "disabled",
-                    "48"
-                ]
+            "Position": {
+                "@X": {
+                    "string": "X",
+                    "type": "int",
+                    "value": "",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "@Y": {
+                    "string": "Y",
+                    "type": "int",
+                    "value": "",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "@Width": {
+                    "string": "Width",
+                    "type": "disabled",
+                    "value": "48"
+                },
+                "@Height": {
+                    "string": "Height",
+                    "type": "disabled",
+                    "value": "48"
+                }
             },
             "Appearance": {
-                "@Alpha": [
-                    "Opacity",
-                    "int",
-                    "255",
-                    "0",
-                    "255"
-                ],
-                "@Visible_Src": [
-                    "Visibility Trigger",
-                    "src",
-                    ""
-                ]
+                "@Alpha": {
+                    "string": "Opacity",
+                    "type": "int",
+                    "value": "255",
+                    "min": "0",
+                    "max": "255"
+                },
+                "@Visible_Src": {
+                    "string": "Visibility Trigger",
+                    "type": "src",
+                    "value": ""
+                }
             },
-            "Data":{
-                "@Index_Src": [
-                    "Data Source",
-                    "src",
-                    ""
-                ]
+            "Data": {
+                "@Index_Src": {
+                    "string": "Data Source",
+                    "type": "src",
+                    "value": ""
+                }
             },
             "Image List": {
-                "@DefaultIndex": [
-                    "Default Index",
-                    "int",
-                    "0",
-                    "0",
-                    "99"
-                ],
-                "@BitmapList": [
-                    "Images",
-                    "imglist",
-                    ""
-                ]
+                "@DefaultIndex": {
+                    "string": "Default Index",
+                    "type": "int",
+                    "value": "0",
+                    "min": "0",
+                    "max": "99"
+                },
+                "@BitmapList": {
+                    "string": "Images",
+                    "type": "imglist",
+                    "value": ""
+                }
             }
         }
     },
@@ -467,251 +465,258 @@
         "Shape": "DigitalNumber",
         "properties": {
             "General": {
-                "WidgetType":[
-                    "Widget Type",
-                    "disabled",
-                    "DigitalNumber"
-                ],
-                "@Name": [
-                    "Name",
-                    "str",
-                    ""
-                ]
+                "WidgetType": {
+                    "string": "Widget Type",
+                    "type": "disabled",
+                    "value": "DigitalNumber"
+                },
+                "@Name": {
+                    "string": "Name",
+                    "type": "str",
+                    "value": ""
+                }
             },
             "Position": {
-                "@X": [
-                    "X",
-                    "int",
-                    "",
-                    "-999",
-                    "999"
-                ],
-                "@Y": [
-                    "Y",
-                    "int",
-                    "",
-                    "-999",
-                    "999"
-                ],
-                "@Width": [
-                    "Width",
-                    "disabled",
-                    ""
-                ],
-                "@Height": [
-                    "Height",
-                    "disabled",
-                    ""
-                ],
-                "@Alignment": [
-                    "Alignment",
-                    "combobox",
-                    "",
-                    ["Left", "Center", "Right"]
-                ]
+                "@X": {
+                    "string": "X",
+                    "type": "int",
+                    "value": "",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "@Y": {
+                    "string": "Y",
+                    "type": "int",
+                    "value": "",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "@Width": {
+                    "string": "Width",
+                    "type": "disabled",
+                    "value": ""
+                },
+                "@Height": {
+                    "string": "Height",
+                    "type": "disabled",
+                    "value": ""
+                },
+                "@Alignment": {
+                    "string": "Alignment",
+                    "type": "list",
+                    "value": "",
+                    "options": [
+                        "Left",
+                        "Center",
+                        "Right"
+                    ]
+                }
             },
             "Appearance": {
-                "@Alpha": [
-                    "Opacity",
-                    "int",
-                    "255",
-                    "0",
-                    "255"
-                ],
-                "@Visible_Src": [
-                    "Visibility Trigger",
-                    "src",
-                    ""
-                ],
-                "@Digits": [
-                    "Digits",
-                    "int",
-                    "1",
-                    "1",
-                    "11"
-                ],
-                "@Spacing": [
-                    "Spacing",
-                    "int",
-                    "",
-                    "0",
-                    "999"
-                ],
-                "@Blanking": [
-                    "Blanking",
-                    "bool",
-                    ""
-                ]
+                "@Alpha": {
+                    "string": "Opacity",
+                    "type": "int",
+                    "value": "255",
+                    "min": "0",
+                    "max": "255"
+                },
+                "@Visible_Src": {
+                    "string": "Visibility Trigger",
+                    "type": "src",
+                    "value": ""
+                },
+                "@Digits": {
+                    "string": "Digits",
+                    "type": "int",
+                    "value": "1",
+                    "min": "1",
+                    "max": "11"
+                },
+                "@Spacing": {
+                    "string": "Spacing",
+                    "type": "int",
+                    "value": "",
+                    "min": "0",
+                    "max": "999"
+                },
+                "@Blanking": {
+                    "string": "Blanking",
+                    "type": "bool",
+                    "value": ""
+                }
             },
             "Data": {
-                "@Value_Src": [
-                    "Data Source",
-                    "src",
-                    ""
-                ]
+                "@Value_Src": {
+                    "string": "Data Source",
+                    "type": "src",
+                    "value": ""
+                }
             },
-           "Images": {
-                "@BitmapList": [
-                    "Images",
-                    "numlist",
-                    "default://numbers/0.png|numbers/1.png|numbers/2.png|numbers/3.png|numbers/4.png|numbers/5.png|numbers/6.png|numbers/7.png|numbers/8.png|numbers/9.png"
-                ]
-           }
+            "Images": {
+                "@BitmapList": {
+                    "string": "Images",
+                    "type": "numlist",
+                    "value": ""
+                }
+            }
         }
     },
     "42": {
-        "Shape":"CircleProgress",
+        "Shape": "CircleProgress",
         "properties": {
             "General": {
-                "WidgetType":[
-                    "Widget Type",
-                    "disabled",
-                    "CircleProgress"
-                ],
-                "@Name": [
-                    "Name",
-                    "str",
-                    ""
-                ]
+                "WidgetType": {
+                    "string": "Widget Type",
+                    "type": "disabled",
+                    "value": "CircleProgress"
+                },
+                "@Name": {
+                    "string": "Name",
+                    "type": "str",
+                    "value": ""
+                }
             },
             "Position": {
-                "@X": [
-                    "X",
-                    "int",
-                    "",
-                    "-999",
-                    "999"
-                ],
-                "@Y": [
-                    "Y",
-                    "int",
-                    "",
-                    "-999",
-                    "999"
-                ],
-                "@Width": [
-                    "Width",
-                    "disabled",
-                    "48"
-                ],
-                "@Height": [
-                    "Height",
-                    "disabled",
-                    "48"
-                ]
+                "@X": {
+                    "string": "X",
+                    "type": "int",
+                    "value": "",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "@Y": {
+                    "string": "Y",
+                    "type": "int",
+                    "value": "",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "@Width": {
+                    "string": "Width",
+                    "type": "int",
+                    "value": "48",
+                    "min": "0",
+                    "max": "999"
+                },
+                "@Height": {
+                    "string": "Height",
+                    "type": "int",
+                    "value": "48",
+                    "min": "0",
+                    "max": "999"
+                }
             },
             "Appearance": {
-                "@Alpha": [
-                    "Opacity",
-                    "int",
-                    "255",
-                    "0",
-                    "255"
-                ],
-                "@Visible_Src": [
-                    "Visibility Trigger",
-                    "src",
-                    ""
-                ]
+                "@Alpha": {
+                    "string": "Opacity",
+                    "type": "int",
+                    "value": "255",
+                    "min": "0",
+                    "max": "255"
+                },
+                "@Visible_Src": {
+                    "string": "Visibility Trigger",
+                    "type": "src",
+                    "value": ""
+                }
             },
-            "Progress Bar":{
-                "@Rotate_xc": [
-                    "X",
-                    "int",
-                    "0",
-                    "-999",
-                    "999"
-                ],
-                "@Rotate_yc": [
-                    "Y",
-                    "int",
-                    "0",
-                    "-999",
-                    "999"
-                ],
-                "@Radius": [
-                    "Radius",
-                    "int",
-                    "0",
-                    "0",
-                    "999"
-                ],
-                "@Line_Width": [
-                    "Thickness",
-                    "int",
-                    "0",
-                    "0",
-                    "999"
-                ],
-                "@StartAngle": [
-                    "Start Angle",
-                    "int",
-                    "0",
-                    "-360",
-                    "360"
-                ],
-                "@EndAngle": [
-                    "End Angle",
-                    "int",
-                    "0",
-                    "-360",
-                    "360"
-                ]
-                
+            "Progress Bar": {
+                "@Rotate_xc": {
+                    "string": "X",
+                    "type": "int",
+                    "value": "0",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "@Rotate_yc": {
+                    "string": "Y",
+                    "type": "int",
+                    "value": "0",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "@Radius": {
+                    "string": "Radius",
+                    "type": "int",
+                    "value": "0",
+                    "min": "0",
+                    "max": "999"
+                },
+                "@Line_Width": {
+                    "string": "Thickness",
+                    "type": "int",
+                    "value": "0",
+                    "min": "0",
+                    "max": "999"
+                },
+                "@StartAngle": {
+                    "string": "Start Angle",
+                    "type": "int",
+                    "value": "0",
+                    "min": "-360",
+                    "max": "360"
+                },
+                "@EndAngle": {
+                    "string": "End Angle",
+                    "type": "int",
+                    "value": "0",
+                    "min": "-360",
+                    "max": "360"
+                }
             },
             "Range": {
-                "@Range_Min": [
-                    "Minimum Value",
-                    "int",
-                    "0",
-                    "0",
-                    "100"
-                ],
-                "@Range_Max": [
-                    "Maximum Value",
-                    "int",
-                    "0",
-                    "0",
-                    "100"
-                ],
-                "@Range_MinStep": [
-                    "Minimum Step Value",
-                    "int",
-                    "0",
-                    "0",
-                    "100"
-                ],
-                "@Range_Step": [
-                    "Step Value",
-                    "int",
-                    "0",
-                    "0",
-                    "100"
-                ]
+                "@Range_Min": {
+                    "string": "Minimum Value",
+                    "type": "int",
+                    "value": "0",
+                    "min": "0",
+                    "max": "100"
+                },
+                "@Range_Max": {
+                    "string": "Maximum Value",
+                    "type": "int",
+                    "value": "0",
+                    "min": "0",
+                    "max": "100"
+                },
+                "@Range_MinStep": {
+                    "string": "Minimum Step Value",
+                    "type": "int",
+                    "value": "0",
+                    "min": "0",
+                    "max": "100"
+                },
+                "@Range_Step": {
+                    "string": "Step Value",
+                    "type": "int",
+                    "value": "0",
+                    "min": "0",
+                    "max": "100"
+                }
             },
             "Data": {
-                "@Range_Val_Src": [
-                    "Data Source",
-                    "src",
-                    ""
-                ],
-                "@Range_Max_Src": [
-                    "Max Value Source",
-                    "src",
-                    ""
-                ]
+                "@Range_Val_Src": {
+                    "string": "Data Source",
+                    "type": "src",
+                    "value": ""
+                },
+                "@Range_Max_Src": {
+                    "string": "Max Value Source",
+                    "type": "src",
+                    "value": ""
+                }
             },
             "Images": {
-                "@Background_ImageName": [
-                    "Background",
-                    "img",
-                    ""
-                ],
-                "@Foreground_ImageName": [
-                    "Progress Bar",
-                    "img",
-                    ""
-                ]
+                "@Background_ImageName": {
+                    "string": "Background",
+                    "type": "img",
+                    "value": ""
+                },
+                "@Foreground_ImageName": {
+                    "string": "Progress Bar",
+                    "type": "img",
+                    "value": ""
+                }
             }
         }
     }
