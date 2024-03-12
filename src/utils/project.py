@@ -65,7 +65,6 @@ class watchData:
 class fprjProject:  
     def create(path, device, name):
         try:
-            path = str.replace(path, "/", "\\")
             template = watchData().watchFileTemplate
             template["FaceProject"]["@DeviceType"] = str(device)
             folder = os.path.join(path, name)

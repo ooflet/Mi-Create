@@ -1,12 +1,19 @@
+import sys
+
+sys.path.append("..")
+
 from PyQt6.QtWidgets import QTreeWidget, QTreeWidgetItem, QFrame
-from PyQt6.QtGui import QIcon
+from PyQt6.QtGui import QContextMenuEvent, QIcon
 from PyQt6.QtCore import Qt, QSize
 
+from utils.contextMenu import ContextMenu
+
 class Explorer(QTreeWidget):
-    def __init__(self, parent, objectIcon):
+    def __init__(self, parent, objectIcon, ui):
         super().__init__(parent)
         self.items = {}
         self.objectIcon = objectIcon
+        self.mainWindowUI = ui
         self.setFrameShape(QFrame.Shape.NoFrame)
         self.setUniformRowHeights(True)
         self.setHeaderHidden(True)

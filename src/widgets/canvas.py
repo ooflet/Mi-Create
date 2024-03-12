@@ -195,6 +195,7 @@ class Canvas(QGraphicsView):
                 dialog = QMessageBox.warning(None, "Confirm", f"The object {i['@Name']} uses the legacy CircleProgress object, it will be automatically converted to the newer CircleProgressPlus object.")
 
             elif i["@Shape"] == "30":    
+                # image
                 imageWidget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), self, QColor(255,255,255,0), i["@Name"], imageFolder)
                 imageWidget.setZValue(index)
                 imageWidget.setData(1, "30")
@@ -213,6 +214,7 @@ class Canvas(QGraphicsView):
                     imageWidget.representNoImage()
                 
             elif i["@Shape"] == "31":
+                # image list
                 imageWidget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), self, QColor(255,255,255,0), i["@Name"], imageFolder)
                 imageWidget.setZValue(index)
                 imageWidget.setData(1, "31")
@@ -237,6 +239,8 @@ class Canvas(QGraphicsView):
                     imageWidget.representNoImage()
 
             elif i["@Shape"] == "32":
+                # digital number
+
                 # Split images from the Bitmaplist
                 imageList = i["@BitmapList"].split("|")
                 imageWidget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), self, QColor(255,255,255,100), i["@Name"], imageFolder)
@@ -252,6 +256,8 @@ class Canvas(QGraphicsView):
                 self.scene.addItem(imageWidget)
 
             elif i["@Shape"] == "42":
+                # progress widget
+                
                 bgImage = QPixmap()
                 bgImage.load(os.path.join(imageFolder, i["@Background_ImageName"]))
             
@@ -422,11 +428,10 @@ class AnalogWidget(BaseWidget):
             self.bgImage.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
 
     def addSecondHand(self, secHandImage, secHandX, secHandY, antialiasing):
-        if secHandImage.isNull():
-            self.color = QColor(255, 0, 0, 100)
-            self.setRect(0,0,100,100)
         self.secHand = QGraphicsPixmapItem(secHandImage, self)
         self.secHand.setOffset(-int(secHandX), -int(secHandY))
+        if secHandImage.isNull():
+            self.color = QColor(255, 0, 0, 100)
         self.secHand.setPos(self.rect().width()/2, self.rect().height()/2)
         if antialiasing:
             self.secHand.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
@@ -434,7 +439,6 @@ class AnalogWidget(BaseWidget):
     def addMinuteHand(self, minHandImage, minHandX, minHandY, antialiasing):
         if minHandImage.isNull():
             self.color = QColor(255, 0, 0, 100)
-            self.setRect(0,0,100,100)
         self.minHand = QGraphicsPixmapItem(minHandImage, self)
         self.minHand.setOffset(-int(minHandX), -int(minHandY))
         self.minHand.setRotation(60)
@@ -445,7 +449,6 @@ class AnalogWidget(BaseWidget):
     def addHourHand(self, hourHandImage, hrHandX, hrHandY, antialiasing):
         if hourHandImage.isNull():
             self.color = QColor(255, 0, 0, 100)
-            self.setRect(0,0,100,100)
         self.hrHand = QGraphicsPixmapItem(hourHandImage, self)
         self.hrHand.setOffset(-int(hrHandX), -int(hrHandY))
         self.hrHand.setRotation(-60)
@@ -498,7 +501,11 @@ class CirclularArcImage(QGraphicsPixmapItem):
 
     def paint(self, painter, option, widget):
         painter.setRenderHint(QPainter.RenderHint.Antialiasing, self.antialiased)
-        brush = QBrush(self.pixmap())
+        if self.pixmap().isNull():
+            brush = QBrush(QColor(255, 0, 0, 100))
+            self.parentItem().setRect(0, 0, 200, 200)
+        else:
+            brush = QBrush(self.pixmap())
         pen = QPen(QColor(255,255,255,255))
         pen.setStyle(Qt.PenStyle.DashLine)
         painter.setBrush(brush)

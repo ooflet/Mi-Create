@@ -555,7 +555,7 @@ class MainWindow(QMainWindow):
         self.ui.workspace.currentChanged.connect(handleTabChange)
 
     def setupExplorer(self):
-        self.Explorer = Explorer(self, ObjectIcon())
+        self.Explorer = Explorer(self, ObjectIcon(), self.ui)
         self.ui.explorerWidget.setWidget(self.Explorer)
         self.Explorer.itemSelectionChanged.connect(lambda: self.updateProjectSelections("explorer"))
 
