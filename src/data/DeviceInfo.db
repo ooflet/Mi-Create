@@ -201,14 +201,16 @@
       
 	  <SRC ID="0811" Name="Hour" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time in 24-hour format, value range 0-23"/>
 	  <SRC ID="0911" Name="Hour Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time, low digit, value range 0..9"/>	  
-	  <SRC ID="10911" Name="Hour High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time, high digit, value range 0..2"/>	  
+	  <SRC ID="1000911" Name="Hour High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time, high digit, value range 0..2"/>	  
       <SRC ID="1011" Name="Minute" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time minute value, value range 0-59"/>
       <SRC ID="1111" Name="Minute Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time minute value, value range 0..9"/>
       <SRC ID="1211" Name="Minute High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time minute value, value range 0..5"/>
       <SRC ID="1811" Name="Second" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0-59"/>
       <SRC ID="1911" Name="Second Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0..9"/>
-      <SRC ID="11911" Name="Second High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0..5"/>
+      <SRC ID="1001911" Name="Second High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0..5"/>
       <SRC ID="1812" Name="Day" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="The value of the day in the date, the first day of the month"/>
+      <SRC ID="1912" Name="Day Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Day, low digit"/>
+      <SRC ID="1001912" Name="Day High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Day, high digit"/>
       <SRC ID="2012" Name="Week" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="The number of days in a week, 0 for Sunday, 1 for Monday, and so on"/>
       <SRC ID="1012" Name="Month" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="The value of the month in the date, the first month of the year"/>
       <SRC ID="0812" Name="Year" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Gregorian year"/>
@@ -302,14 +304,16 @@
       
 	  <SRC ID="0811" Name="Hour" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time in 24-hour format, value range 0-23"/>
 	  <SRC ID="0911" Name="Hour Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time, low digit, value range 0..9"/>	  
-	  <SRC ID="10911" Name="Hour High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time, high digit, value range 0..2"/>	  
+	  <SRC ID="1000911" Name="Hour High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time, high digit, value range 0..2"/>	  
       <SRC ID="1011" Name="Minute" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time minute value, value range 0-59"/>
       <SRC ID="1111" Name="Minute Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time minute value, value range 0..9"/>
       <SRC ID="1211" Name="Minute High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time minute value, value range 0..5"/>
       <SRC ID="1811" Name="Second" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0-59"/>
       <SRC ID="1911" Name="Second Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0..9"/>
-      <SRC ID="11911" Name="Second High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0..5"/>
+      <SRC ID="1001911" Name="Second High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0..5"/>
       <SRC ID="1812" Name="Day" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="The value of the day in the date, the first day of the month"/>
+      <SRC ID="1912" Name="Day Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Day, low digit"/>
+      <SRC ID="1001912" Name="Day High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Day, high digit"/>
       <SRC ID="2012" Name="Week" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="The number of days in a week, 0 for Sunday, 1 for Monday, and so on"/>
       <SRC ID="1012" Name="Month" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="The value of the month in the date, the first month of the year"/>
       <SRC ID="0812" Name="Year" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Gregorian year"/>
@@ -383,14 +387,16 @@
       
 	  <SRC ID="0811" Name="Hour" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time in 24-hour format, value range 0-23"/>
 	  <SRC ID="0911" Name="Hour Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time, low digit, value range 0..9"/>	  
-	  <SRC ID="10911" Name="Hour High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time, high digit, value range 0..2"/>	  
+	  <SRC ID="1000911" Name="Hour High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time, high digit, value range 0..2"/>	  
       <SRC ID="1011" Name="Minute" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time minute value, value range 0-59"/>
       <SRC ID="1111" Name="Minute Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time minute value, value range 0..9"/>
       <SRC ID="1211" Name="Minute High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time minute value, value range 0..5"/>
       <SRC ID="1811" Name="Second" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0-59"/>
       <SRC ID="1911" Name="Second Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0..9"/>
-      <SRC ID="11911" Name="Second High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0..5"/>
+      <SRC ID="1001911" Name="Second High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0..5"/>
       <SRC ID="1812" Name="Day" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="The value of the day in the date, the first day of the month"/>
+      <SRC ID="1912" Name="Day Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Day, low digit"/>
+      <SRC ID="1001912" Name="Day High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Day, high digit"/>
       <SRC ID="2012" Name="Week" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="The number of days in a week, 0 for Sunday, 1 for Monday, and so on"/>
       <SRC ID="1012" Name="Month" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="The value of the month in the date, the first month of the year"/>
       <SRC ID="0812" Name="Year" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Gregorian year"/>
@@ -464,14 +470,16 @@
       
 	  <SRC ID="0811" Name="Hour" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time in 24-hour format, value range 0-23"/>
 	  <SRC ID="0911" Name="Hour Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time, low digit, value range 0..9"/>	  
-	  <SRC ID="10911" Name="Hour High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time, high digit, value range 0..2"/>	  
+	  <SRC ID="1000911" Name="Hour High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time, high digit, value range 0..2"/>	  
       <SRC ID="1011" Name="Minute" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time minute value, value range 0-59"/>
       <SRC ID="1111" Name="Minute Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time minute value, value range 0..9"/>
       <SRC ID="1211" Name="Minute High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time minute value, value range 0..5"/>
       <SRC ID="1811" Name="Second" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0-59"/>
       <SRC ID="1911" Name="Second Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0..9"/>
-      <SRC ID="11911" Name="Second High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0..5"/>
+      <SRC ID="1001911" Name="Second High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0..5"/>
       <SRC ID="1812" Name="Day" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="The value of the day in the date, the first day of the month"/>
+      <SRC ID="1912" Name="Day Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Day, low digit"/>
+      <SRC ID="1001912" Name="Day High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Day, high digit"/>
       <SRC ID="2012" Name="Week" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="The number of days in a week, 0 for Sunday, 1 for Monday, and so on"/>
       <SRC ID="1012" Name="Month" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="The value of the month in the date, the first month of the year"/>
       <SRC ID="0812" Name="Year" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Gregorian year"/>
@@ -545,14 +553,16 @@
       
 	  <SRC ID="0811" Name="Hour" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time in 24-hour format, value range 0-23"/>
 	  <SRC ID="0911" Name="Hour Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time, low digit, value range 0..9"/>	  
-	  <SRC ID="10911" Name="Hour High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time, high digit, value range 0..2"/>	  
+	  <SRC ID="1000911" Name="Hour High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time, high digit, value range 0..2"/>	  
       <SRC ID="1011" Name="Minute" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time minute value, value range 0-59"/>
       <SRC ID="1111" Name="Minute Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time minute value, value range 0..9"/>
       <SRC ID="1211" Name="Minute High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time minute value, value range 0..5"/>
       <SRC ID="1811" Name="Second" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0-59"/>
       <SRC ID="1911" Name="Second Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0..9"/>
-      <SRC ID="11911" Name="Second High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0..5"/>
+      <SRC ID="1001911" Name="Second High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0..5"/>
       <SRC ID="1812" Name="Day" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="The value of the day in the date, the first day of the month"/>
+      <SRC ID="1912" Name="Day Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Day, low digit"/>
+      <SRC ID="1001912" Name="Day High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Day, high digit"/>
       <SRC ID="2012" Name="Week" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="The number of days in a week, 0 for Sunday, 1 for Monday, and so on"/>
       <SRC ID="1012" Name="Month" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="The value of the month in the date, the first month of the year"/>
       <SRC ID="0812" Name="Year" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Gregorian year"/>
@@ -626,14 +636,16 @@
       
 	  <SRC ID="0811" Name="Hour" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time in 24-hour format, value range 0-23"/>
 	  <SRC ID="0911" Name="Hour Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time, low digit, value range 0..9"/>	  
-	  <SRC ID="10911" Name="Hour High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time, high digit, value range 0..2"/>	  
+	  <SRC ID="1000911" Name="Hour High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time, high digit, value range 0..2"/>	  
       <SRC ID="1011" Name="Minute" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time minute value, value range 0-59"/>
       <SRC ID="1111" Name="Minute Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time minute value, value range 0..9"/>
       <SRC ID="1211" Name="Minute High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time minute value, value range 0..5"/>
       <SRC ID="1811" Name="Second" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0-59"/>
       <SRC ID="1911" Name="Second Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0..9"/>
-      <SRC ID="11911" Name="Second High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0..5"/>
+      <SRC ID="1001911" Name="Second High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0..5"/>
       <SRC ID="1812" Name="Day" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="The value of the day in the date, the first day of the month"/>
+      <SRC ID="1912" Name="Day Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Day, low digit"/>
+      <SRC ID="1001912" Name="Day High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Day, high digit"/>
       <SRC ID="2012" Name="Week" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="The number of days in a week, 0 for Sunday, 1 for Monday, and so on"/>
       <SRC ID="1012" Name="Month" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="The value of the month in the date, the first month of the year"/>
       <SRC ID="0812" Name="Year" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Gregorian year"/>
@@ -707,14 +719,16 @@
       
 	  <SRC ID="0811" Name="Hour" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time in 24-hour format, value range 0-23"/>
 	  <SRC ID="0911" Name="Hour Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time, low digit, value range 0..9"/>	  
-	  <SRC ID="10911" Name="Hour High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time, high digit, value range 0..2"/>	  
+	  <SRC ID="1000911" Name="Hour High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time, high digit, value range 0..2"/>	  
       <SRC ID="1011" Name="Minute" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time minute value, value range 0-59"/>
       <SRC ID="1111" Name="Minute Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time minute value, value range 0..9"/>
       <SRC ID="1211" Name="Minute High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time minute value, value range 0..5"/>
       <SRC ID="1811" Name="Second" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0-59"/>
       <SRC ID="1911" Name="Second Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0..9"/>
-      <SRC ID="11911" Name="Second High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0..5"/>
+      <SRC ID="1001911" Name="Second High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0..5"/>
       <SRC ID="1812" Name="Day" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="The value of the day in the date, the first day of the month"/>
+      <SRC ID="1912" Name="Day Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Day, low digit"/>
+      <SRC ID="1001912" Name="Day High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Day, high digit"/>
       <SRC ID="2012" Name="Week" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="The number of days in a week, 0 for Sunday, 1 for Monday, and so on"/>
       <SRC ID="1012" Name="Month" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="The value of the month in the date, the first month of the year"/>
       <SRC ID="0812" Name="Year" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Gregorian year"/>
@@ -788,14 +802,16 @@
       
 	  <SRC ID="0811" Name="Hour" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time in 24-hour format, value range 0-23"/>
 	  <SRC ID="0911" Name="Hour Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time, low digit, value range 0..9"/>	  
-	  <SRC ID="10911" Name="Hour High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time, high digit, value range 0..2"/>	  
+	  <SRC ID="1000911" Name="Hour High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time, high digit, value range 0..2"/>	  
       <SRC ID="1011" Name="Minute" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time minute value, value range 0-59"/>
       <SRC ID="1111" Name="Minute Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time minute value, value range 0..9"/>
       <SRC ID="1211" Name="Minute High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time minute value, value range 0..5"/>
       <SRC ID="1811" Name="Second" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0-59"/>
       <SRC ID="1911" Name="Second Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0..9"/>
-      <SRC ID="11911" Name="Second High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0..5"/>
+      <SRC ID="1001911" Name="Second High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0..5"/>
       <SRC ID="1812" Name="Day" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="The value of the day in the date, the first day of the month"/>
+      <SRC ID="1912" Name="Day Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Day, low digit"/>
+      <SRC ID="1001912" Name="Day High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Day, high digit"/>
       <SRC ID="2012" Name="Week" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="The number of days in a week, 0 for Sunday, 1 for Monday, and so on"/>
       <SRC ID="1012" Name="Month" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="The value of the month in the date, the first month of the year"/>
       <SRC ID="0812" Name="Year" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Gregorian year"/>
@@ -837,7 +853,92 @@
       <ScreenShowEvent Type="1" FaceProgramma_Version="102" Device_Version="1.0.0" UsingNewFileTypeID_En="1"/>
       <SourceTriggerEvent Type="3" FaceProgramma_Version="102" Device_Version="1.0.0" UsingNewFileTypeID_En="1"/>
     </EventList>
-  </DeviceInfo>  
+  </DeviceInfo>
+  <DeviceInfo Version="1.0.0" Type="366" Name="Mi Band 9" Width="192" Height="490" PixelFormat="0" SupportedFaceTypeList="(1/0/1.0.0)|(2/101/1.0.0)|(3/100/1.0.0)" ScreenShape="RoundedRectangle" Radius="90">
+    <WidgetList>
+      <AnalogClock Shape="27" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" ExcludeSourceDataItems="36"/>
+      <CircleProgress Shape="29" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="1" ExcludeSourceDataItems="36"/>
+      <Image Shape="30" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" ExcludeSourceDataItems="36"/>
+      <ImageList Shape="31" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" ExcludeSourceDataItems="15,35,40,41"/>
+      <DigitalNumImage Shape="32" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" ExcludeSourceDataItems="36"/>
+      <Container Shape="34" FaceProgramma_Version="100" Device_Version="1.0.0" UsingNewFileTypeID_En="1" ExcludeSourceDataItems="36"/>
+      <SelectList Shape="35" FaceProgramma_Version="100" Device_Version="1.0.0" UsingNewFileTypeID_En="1" ExcludeSourceDataItems="36"/>
+      <SelectItem Shape="36" FaceProgramma_Version="100" Device_Version="1.0.0" UsingNewFileTypeID_En="1" ExcludeSourceDataItems="36"/>
+      <Selector Shape="37" FaceProgramma_Version="100" Device_Version="1.0.0" UsingNewFileTypeID_En="1" ExcludeSourceDataItems="36"/>
+      <CustomBackgroundImage Shape="38" FaceProgramma_Version="100" Device_Version="1.0.0" UsingNewFileTypeID_En="1" ExcludeSourceDataItems="36"/>
+      <Concatenate Shape="39" FaceProgramma_Version="102" Device_Version="1.0.0" UsingNewFileTypeID_En="1" ExcludeSourceDataItems="36"/>
+      <RotationTextureMapper Shape="40" FaceProgramma_Version="102" Device_Version="1.0.0" UsingNewFileTypeID_En="1" ExcludeSourceDataItems="36"/>
+      <ImageCacheList Shape="41" FaceProgramma_Version="102" Device_Version="1.0.0" UsingNewFileTypeID_En="1" ExcludeSourceDataItems="36"/>
+      <CircleProgressPlus Shape="42" FaceProgramma_Version="102" Device_Version="1.0.0" UsingNewFileTypeID_En="0" ExcludeSourceDataItems="36"/>
+      <CircularGauge Shape="43" FaceProgramma_Version="102" Device_Version="1.0.0" UsingNewFileTypeID_En="1" ExcludeSourceDataItems="36"/>
+      <Box Shape="44" FaceProgramma_Version="102" Device_Version="1.0.0" UsingNewFileTypeID_En="1" ExcludeSourceDataItems="36"/>
+      <WeatherIcon Shape="1000" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" ExcludeSourceDataItems="15,35,40,41"/>
+      <WeekIcon Shape="1001" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" ExcludeSourceDataItems="15,35,40,41"/>
+    </WidgetList>
+    <SourceDataList>
+      <SRC ID="0" Name="None" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="No data source used"/>
+      <SRC ID="1" Name="invalid temperature data" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="A value of 1 means that the temperature data is invalid, 0 means that the temperature data is valid"/>
+      <SRC ID="2" Name="invalid battery data" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="A value of 1 means the battery data is invalid, 0 means the battery data is valid"/>
+      <SRC ID="3" Name="invalid health data" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="A value of 1 means that the health data is invalid, 0 means that the health data is valid"/>
+      <SRC ID="4" Name="invalid temperature data" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="A value of 1 means that the temperature data is valid, 0 means that the temperature data is invalid"/>
+      <SRC ID="5" Name="valid battery data" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="A value of 1 means the battery data is valid, 0 means the battery data is invalid"/>
+      <SRC ID="6" Name="valid health data" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="A value of 1 means that the health data is valid, 0 means that the health data is invalid"/>
+      
+	  <SRC ID="0811" Name="Hour" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time in 24-hour format, value range 0-23"/>
+	  <SRC ID="0911" Name="Hour Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time, low digit, value range 0..9"/>	  
+	  <SRC ID="1000911" Name="Hour High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time, high digit, value range 0..2"/>	  
+      <SRC ID="1011" Name="Minute" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time minute value, value range 0-59"/>
+      <SRC ID="1111" Name="Minute Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time minute value, value range 0..9"/>
+      <SRC ID="1211" Name="Minute High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time minute value, value range 0..5"/>
+      <SRC ID="1811" Name="Second" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0-59"/>
+      <SRC ID="1911" Name="Second Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0..9"/>
+      <SRC ID="1001911" Name="Second High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0..5"/>
+      <SRC ID="1812" Name="Day" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="The value of the day in the date, the first day of the month"/>
+      <SRC ID="1912" Name="Day Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Day, low digit"/>
+      <SRC ID="1001912" Name="Day High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Day, high digit"/>
+      <SRC ID="2012" Name="Week" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="The number of days in a week, 0 for Sunday, 1 for Monday, and so on"/>
+      <SRC ID="1012" Name="Month" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="The value of the month in the date, the first month of the year"/>
+      <SRC ID="0812" Name="Year" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Gregorian year"/>
+      
+	  <SRC ID="0813" Name="AM/PM" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="AM/PM"/>
+
+	  <SRC ID="3031" Name="Weather type (icon)" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Weather type"/>
+      <SRC ID="2031" Name="Weather temp (C)" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Current temperature value in degrees Celsius"/>
+      <SRC ID="40009031" Name="Weather temp (F)" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Current temperature value in degrees Fahrenheit"/>
+
+	  <SRC ID="0841" Name="Battery percent" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Get the current battery remaining percentage value"/>
+	  <SRC ID="1841" Name="Sleep status" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="0 - off, 1 - on"/>
+	  <SRC ID="2041" Name="BT connection status" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="0 - off, 1 - on"/>
+	  <SRC ID="3041" Name="Screen lock status" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="0 - off, 1 - on"/>
+      
+	  <SRC ID="0822" Name="Heart rate" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Get real-time heart rate values"/>
+      <SRC ID="1022" Name="Interval HRM" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="The values obtained range from 1-5 . 1: indicates limit . 2: anaerobic. 3: aerobic. 4: fat burning. 5: warm-up."/>
+      
+	  <SRC ID="0821" Name="Current step count" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Current real-time pedometer"/>
+      <SRC ID="1021" Name="Current step (percent)" SupportedFaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Pedometry goal achievement rate (percentage)"/>
+      
+      <SRC ID="0823" Name="Active Calorie" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Active Calorie"/>
+      <SRC ID="1023" Name="Active Calorie (percent)" SupportedFaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Activity calorie goal achievement rate (percentage)"/>
+
+      <SRC ID="0824" Name="Stand Up value" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Value of current standing"/>
+      <SRC ID="0826" Name="Psychological stress" SupportedFaceProgramma_Version="102" Device_Version="1.0.0" UsingNewFileTypeID_En="1" Tip="Psychological stress value, the value range 0~100"/>
+	  
+	  <SRC ID="5031" Name="Weather something" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Sleep score"/>
+	  <SRC ID="0828" Name="Sleep score" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Sleep score"/>
+
+    </SourceDataList>
+    <AnimationList>
+      <TranslateAnimation Type="0" FaceProgramma_Version="102" Device_Version="1.0.0" UsingNewFileTypeID_En="1"/>
+      <FadeAnimation Type="1" FaceProgramma_Version="102" Device_Version="1.0.0" UsingNewFileTypeID_En="1"/>
+      <FrameAnimation Type="4" FaceProgramma_Version="102" Device_Version="1.0.0" UsingNewFileTypeID_En="1"/>
+    </AnimationList>
+    <EventList>
+      <OtherEventTriggerEvent Type="0" FaceProgramma_Version="102" Device_Version="1.0.0" UsingNewFileTypeID_En="1"/>
+      <ScreenShowEvent Type="1" FaceProgramma_Version="102" Device_Version="1.0.0" UsingNewFileTypeID_En="1"/>
+      <SourceTriggerEvent Type="3" FaceProgramma_Version="102" Device_Version="1.0.0" UsingNewFileTypeID_En="1"/>
+    </EventList>
+  </DeviceInfo>
+
   <DeviceInfo Version="1.0.0" Type="11" Name="Mi Band 8 Pro" Width="336" Height="480" PixelFormat="0" SupportedFaceTypeList="(1/0/1.0.0)|(2/101/1.0.0)|(3/100/1.0.0)" ScreenShape="RoundedRectangle" Radius="28">
     <WidgetList>
       <AnalogClock Shape="27" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" ExcludeSourceDataItems="36"/>
@@ -1000,14 +1101,16 @@
       
 	  <SRC ID="0811" Name="Hour" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time in 24-hour format, value range 0-23"/>
 	  <SRC ID="0911" Name="Hour Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time, low digit, value range 0..9"/>	  
-	  <SRC ID="10911" Name="Hour High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time, high digit, value range 0..2"/>	  
+	  <SRC ID="1000911" Name="Hour High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time, high digit, value range 0..2"/>	  
       <SRC ID="1011" Name="Minute" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time minute value, value range 0-59"/>
       <SRC ID="1111" Name="Minute Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time minute value, value range 0..9"/>
       <SRC ID="1211" Name="Minute High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time minute value, value range 0..5"/>
       <SRC ID="1811" Name="Second" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0-59"/>
       <SRC ID="1911" Name="Second Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0..9"/>
-      <SRC ID="11911" Name="Second High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0..5"/>
+      <SRC ID="1001911" Name="Second High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0..5"/>
       <SRC ID="1812" Name="Day" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="The value of the day in the date, the first day of the month"/>
+      <SRC ID="1912" Name="Day Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Day, low digit"/>
+      <SRC ID="1001912" Name="Day High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Day, high digit"/>
       <SRC ID="2012" Name="Week" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="The number of days in a week, 0 for Sunday, 1 for Monday, and so on"/>
       <SRC ID="1012" Name="Month" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="The value of the month in the date, the first month of the year"/>
       <SRC ID="0812" Name="Year" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Gregorian year"/>
@@ -1155,16 +1258,16 @@
       
 	  <SRC ID="0811" Name="Hour" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time in 24-hour format, value range 0-23"/>
 	  <SRC ID="0911" Name="Hour Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time, low digit, value range 0..9"/>	  
-	  <SRC ID="10911" Name="Hour High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time, high digit, value range 0..2"/>	  
+	  <SRC ID="1000911" Name="Hour High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time, high digit, value range 0..2"/>	  
       <SRC ID="1011" Name="Minute" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time minute value, value range 0-59"/>
       <SRC ID="1111" Name="Minute Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time minute value, value range 0..9"/>
       <SRC ID="1211" Name="Minute High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time minute value, value range 0..5"/>
       <SRC ID="1811" Name="Second" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0-59"/>
       <SRC ID="1911" Name="Second Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0..9"/>
-      <SRC ID="11911" Name="Second High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0..5"/>
+      <SRC ID="1001911" Name="Second High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0..5"/>
       <SRC ID="1812" Name="Day" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="The value of the day in the date, the first day of the month"/>
       <SRC ID="1912" Name="Day Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Day, low digit"/>
-      <SRC ID="11912" Name="Day High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Day, high digit"/>
+      <SRC ID="1001912" Name="Day High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Day, high digit"/>
       <SRC ID="2012" Name="Week" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="The number of days in a week, 0 for Sunday, 1 for Monday, and so on"/>
       <SRC ID="1012" Name="Month" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="The value of the month in the date, the first month of the year"/>
       <SRC ID="1112" Name="Month Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Month, low digit"/>
@@ -1282,16 +1385,16 @@
       
 	  <SRC ID="0811" Name="Hour" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time in 24-hour format, value range 0-23"/>
 	  <SRC ID="0911" Name="Hour Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time, low digit, value range 0..9"/>	  
-	  <SRC ID="10911" Name="Hour High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time, high digit, value range 0..2"/>	  
+	  <SRC ID="1000911" Name="Hour High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Hour value of time, high digit, value range 0..2"/>	  
       <SRC ID="1011" Name="Minute" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time minute value, value range 0-59"/>
       <SRC ID="1111" Name="Minute Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time minute value, value range 0..9"/>
       <SRC ID="1211" Name="Minute High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time minute value, value range 0..5"/>
       <SRC ID="1811" Name="Second" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0-59"/>
       <SRC ID="1911" Name="Second Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0..9"/>
-      <SRC ID="11911" Name="Second High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0..5"/>
+      <SRC ID="1001911" Name="Second High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Time second value, value range 0..5"/>
       <SRC ID="1812" Name="Day" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="The value of the day in the date, the first day of the month"/>
       <SRC ID="1912" Name="Day Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Day, low digit"/>
-      <SRC ID="11912" Name="Day High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Day, high digit"/>
+      <SRC ID="1001912" Name="Day High" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Day, high digit"/>
       <SRC ID="2012" Name="Week" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="The number of days in a week, 0 for Sunday, 1 for Monday, and so on"/>
       <SRC ID="1012" Name="Month" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="The value of the month in the date, the first month of the year"/>
       <SRC ID="1112" Name="Month Low" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Month, low digit"/>
