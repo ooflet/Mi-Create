@@ -260,7 +260,7 @@ class Ui_MainWindow(object):
         self.actionImage.setObjectName("actionImage")
         self.actionImage_List = QtGui.QAction(parent=MainWindow)
         icon16 = QtGui.QIcon()
-        icon16.addPixmap(QtGui.QPixmap(":/Dark/gallery-horizontal.png"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        icon16.addPixmap(QtGui.QPixmap(":/Dark/image-list.png"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         self.actionImage_List.setIcon(icon16)
         self.actionImage_List.setObjectName("actionImage_List")
         self.actionDigital_Number = QtGui.QAction(parent=MainWindow)

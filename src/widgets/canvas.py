@@ -60,6 +60,7 @@ class Canvas(QGraphicsView):
             self.setRenderHints(QPainter.RenderHint.Antialiasing)
 
         self.mainWindowUI = ui
+        self.widgets = {}
 
         self.setDragMode(QGraphicsView.DragMode.RubberBandDrag)
         self.setTransformationAnchor(QGraphicsView.ViewportAnchor.AnchorUnderMouse)
@@ -140,10 +141,7 @@ class Canvas(QGraphicsView):
             print(f"Object '{selected_object}' selected")
 
     def getObject(self, name):
-        for x in self.items():
-            # data(0) is name
-            if x.data(0) == name:
-                return x
+        return self.widgets.get(name)
 
     def selectObject(self, name):
         for x in self.items():
@@ -167,6 +165,7 @@ class Canvas(QGraphicsView):
         self.objectDeleted.emit(name)
 
     def createObject(self, index, i, imageFolder, antialiasing):
+        widget = None
         try:
             if i["@Shape"] == "27":
                 bgImg = QPixmap()
@@ -182,23 +181,22 @@ class Canvas(QGraphicsView):
                 hrImg.load(os.path.join(imageFolder, i["@HourHand_ImageName"]))
 
                 # Create analogwidget
-                analogWidget = AnalogWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), self, QColor(255,255,255,0), i["@Name"])
-                analogWidget.setZValue(index)
-                analogWidget.setData(1, "27")
-                analogWidget.addBackground(bgImg, i["@BgImage_rotate_xc"], i["@BgImage_rotate_yc"], antialiasing)
-                analogWidget.addHourHand(hrImg, i["@HourImage_rotate_xc"], i["@HourImage_rotate_yc"], antialiasing)
-                analogWidget.addMinuteHand(minImg, i["@MinuteImage_rotate_xc"], i["@MinuteImage_rotate_yc"], antialiasing)
-                analogWidget.addSecondHand(secImg, i["@SecondImage_rotate_xc"], i["@SecondImage_rotate_yc"], antialiasing)
-                self.scene.addItem(analogWidget)
+                widget = AnalogWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), self, QColor(255,255,255,0), i["@Name"])
+                widget.setZValue(index)
+                widget.setData(1, "27")
+                widget.addBackground(bgImg, i["@BgImage_rotate_xc"], i["@BgImage_rotate_yc"], antialiasing)
+                widget.addHourHand(hrImg, i["@HourImage_rotate_xc"], i["@HourImage_rotate_yc"], antialiasing)
+                widget.addMinuteHand(minImg, i["@MinuteImage_rotate_xc"], i["@MinuteImage_rotate_yc"], antialiasing)
+                widget.addSecondHand(secImg, i["@SecondImage_rotate_xc"], i["@SecondImage_rotate_yc"], antialiasing)
 
             elif i["@Shape"] == "29":
                 dialog = QMessageBox.warning(None, "Confirm", f"The object {i['@Name']} uses the legacy CircleProgress object, it will be automatically converted to the newer CircleProgressPlus object.")
 
             elif i["@Shape"] == "30":    
                 # image
-                imageWidget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), self, QColor(255,255,255,0), i["@Name"], imageFolder)
-                imageWidget.setZValue(index)
-                imageWidget.setData(1, "30")
+                widget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), self, QColor(255,255,255,0), i["@Name"], imageFolder)
+                widget.setZValue(index)
+                widget.setData(1, "30")
 
                 if i["@Bitmap"] != "":
                     # Get QPixmap from file string
@@ -206,18 +204,16 @@ class Canvas(QGraphicsView):
                     image.load(os.path.join(imageFolder, i["@Bitmap"]))
 
                     # Create imagewidget    
-                    imageWidget.addImage(image, 0, 0, 0, antialiasing)
-                    self.scene.addItem(imageWidget)
+                    widget.addImage(image, 0, 0, 0, antialiasing)
                 else:
-                    self.scene.addItem(imageWidget)
-                    imageWidget.addImage(QPixmap(), 0, 0, 0, antialiasing)
-                    imageWidget.representNoImage()
+                    self.scene.addItem(widget)
+                    widget.representNoImage()
                 
             elif i["@Shape"] == "31":
                 # image list
-                imageWidget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), self, QColor(255,255,255,0), i["@Name"], imageFolder)
-                imageWidget.setZValue(index)
-                imageWidget.setData(1, "31")
+                widget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), self, QColor(255,255,255,0), i["@Name"], imageFolder)
+                widget.setZValue(index)
+                widget.setData(1, "31")
                 
                 # Split image strings from the Bitmaplist
                 imageList = i["@BitmapList"].split("|")
@@ -228,32 +224,26 @@ class Canvas(QGraphicsView):
                     if len(firstImage) >= 2:
                         image = QPixmap()
                         image.load(os.path.join(imageFolder, firstImage[1]))
-                        imageWidget.addImage(image, 0, 0, 0, antialiasing)
+                        widget.addImage(image, 0, 0, 0, antialiasing)
                     else:
-                        imageWidget.representNoImage()
-                    name = i["@Name"]
-                    self.scene.addItem(imageWidget)
+                        widget.representNoImage()
                 else:
-                    self.scene.addItem(imageWidget)
-                    imageWidget.addImage(QPixmap(), 0, 0, 0, antialiasing)
-                    imageWidget.representNoImage()
+                    widget.addImage(QPixmap(), 0, 0, 0, antialiasing)
+                    widget.representNoImage()
 
             elif i["@Shape"] == "32":
                 # digital number
 
                 # Split images from the Bitmaplist
                 imageList = i["@BitmapList"].split("|")
-                imageWidget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), self, QColor(255,255,255,100), i["@Name"], imageFolder)
-                imageWidget.setZValue(index)
-                imageWidget.setData(1, "32")
+                widget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), self, QColor(255,255,255,100), i["@Name"], imageFolder)
+                widget.setZValue(index)
+                widget.setData(1, "32")
 
                 if len(imageList) != 11:
-                    imageWidget.representNoImage()
+                    widget.representNoImage()
                 else:
-                    imageWidget.loadNumbers(i["@Digits"], i["@Spacing"], imageList, antialiasing)
-                    
-                name = i["@Name"]
-                self.scene.addItem(imageWidget)
+                    widget.loadNumbers(i["@Digits"], i["@Spacing"], imageList, antialiasing)
 
             elif i["@Shape"] == "42":
                 # progress widget
@@ -264,14 +254,15 @@ class Canvas(QGraphicsView):
                 fgImage = QPixmap()
                 fgImage.load(os.path.join(imageFolder, i["@Foreground_ImageName"]))
                 
-                progressWidget = ProgressWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), self, QColor(255,255,255,0), i["@Name"], i["@Rotate_xc"], i["@Rotate_yc"], i["@Radius"], i["@Line_Width"], i["@StartAngle"], i["@EndAngle"], bgImage, fgImage, antialiasing)
-                progressWidget.setZValue(index)
-                progressWidget.setData(1, "42")
-                self.scene.addItem(progressWidget)
+                widget = ProgressWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), self, QColor(255,255,255,0), i["@Name"], i["@Rotate_xc"], i["@Rotate_yc"], i["@Radius"], i["@Line_Width"], i["@StartAngle"], i["@EndAngle"], bgImage, fgImage, antialiasing)
+                widget.setZValue(index)
+                widget.setData(1, "42")
 
             else:
                 return False, f"Widget {i['@Shape']} not implemented in canvas, please report as issue."
             
+            self.widgets[i["@Name"]] = widget
+            self.scene.addItem(widget)
             return True, "Success"
         except Exception as e:
             QMessageBox().critical(None, "Error", f"Unable to create object {i['@Name']}: {traceback.format_exc()}")
@@ -280,6 +271,7 @@ class Canvas(QGraphicsView):
     def loadObjects(self, data, imageFolder, antialiasing):
         if data["FaceProject"]["Screen"].get("Widget") != None:
             self.scene.clear()
+            self.widgets.clear()
             self.drawDecorations(self.deviceOutlineVisible)
 
             widgets = data["FaceProject"]["Screen"]["Widget"]
@@ -316,7 +308,6 @@ class Canvas(QGraphicsView):
                 return False, reason 
             else:
                 return True, "Success"
-                
         
 class BaseWidget(QGraphicsRectItem):
     # Basic widget with draggable and selectable controls
@@ -503,7 +494,6 @@ class CirclularArcImage(QGraphicsPixmapItem):
         painter.setRenderHint(QPainter.RenderHint.Antialiasing, self.antialiased)
         if self.pixmap().isNull():
             brush = QBrush(QColor(255, 0, 0, 100))
-            self.parentItem().setRect(0, 0, 200, 200)
         else:
             brush = QBrush(self.pixmap())
         pen = QPen(QColor(255,255,255,255))
@@ -521,7 +511,7 @@ class ProgressWidget(BaseWidget):
     def __init__(self, posX, posY, sizeX, sizeY, canvas, color, name, offsetX, offsetY, radius, thickness, startAngle, endAngle, bgImage, pathImage, isAntialiased):
         super().__init__(posX, posY, sizeX, sizeY, canvas, color, name)
         self.setPos(posX, posY)
-        self.setRect(0, 0, bgImage.width(), bgImage.height())
+        self.setRect(0, 0, sizeX, sizeY)
 
         radius = int(radius)
         thickness = int(thickness)

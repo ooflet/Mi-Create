@@ -11,9 +11,7 @@ sys.path.append("..")
 
 from translate import QCoreApplication
 
-
 from PyQt6 import QtCore, QtGui, QtWidgets
-
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
@@ -41,14 +39,6 @@ class Ui_Dialog(object):
         self.watchfaceName.setSizePolicy(sizePolicy)
         self.watchfaceName.setObjectName("watchfaceName")
         self.gridLayout.addWidget(self.watchfaceName, 2, 0, 1, 1)
-        self.thumbnailLocation = QtWidgets.QLineEdit(parent=self.page_3)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.thumbnailLocation.sizePolicy().hasHeightForWidth())
-        self.thumbnailLocation.setSizePolicy(sizePolicy)
-        self.thumbnailLocation.setObjectName("thumbnailLocation")
-        self.gridLayout.addWidget(self.thumbnailLocation, 6, 0, 1, 1)
         self.label_6 = QtWidgets.QLabel(parent=self.page_3)
         self.label_6.setObjectName("label_6")
         self.gridLayout.addWidget(self.label_6, 3, 0, 1, 1)
@@ -66,6 +56,10 @@ class Ui_Dialog(object):
         self.label_5 = QtWidgets.QLabel(parent=self.page_3)
         self.label_5.setObjectName("label_5")
         self.gridLayout.addWidget(self.label_5, 1, 0, 1, 1)
+        self.thumbnailLocation = QtWidgets.QComboBox(parent=self.page_3)
+        self.thumbnailLocation.setEditable(True)
+        self.thumbnailLocation.setObjectName("thumbnailLocation")
+        self.gridLayout.addWidget(self.thumbnailLocation, 6, 0, 1, 1)
         self.stackedWidget.addWidget(self.page_3)
         self.page = QtWidgets.QWidget()
         self.page.setObjectName("page")
@@ -132,7 +126,6 @@ class Ui_Dialog(object):
 
         self.retranslateUi(Dialog)
         self.stackedWidget.setCurrentIndex(0)
-        QtCore.QMetaObject.connectSlotsByName(Dialog)
 
     def retranslateUi(self, Dialog):
         _translate = QCoreApplication.translate

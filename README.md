@@ -6,7 +6,7 @@ Compatible with all Xiaomi wearables made ~2021 and above (Devices manufactured 
 
 ### Features:
 - Intuitive and elegant user interface
-- Easy to build & unpack watch faces
+- Modern control methods
 - Powerful integrated text editor
 - Language support
 

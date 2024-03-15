@@ -49,6 +49,9 @@ msgstr "Невозможно найти"
 msgid "Select Folder..."
 msgstr "Выберите папку..."
 
+msgid "Add Image..."
+msgstr "Добавить изображение..."
+
 msgid "Are you sure you want to reset all dock widget positions?"
 msgstr "Вы уверены, что хотите сбросить все позиции виджетов доков?"
 

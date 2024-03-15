@@ -4,8 +4,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
-"POT-Creation-Date: 2024-01-02 11:05+1100\n"
-"PO-Revision-Date: 2024-01-05 12:23+1100\n"
+"POT-Creation-Date: 2024-01-05 14:27+1100\n"
+"PO-Revision-Date: 2024-03-12 20:59+1100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ru\n"
@@ -19,7 +19,7 @@ msgid "Mi Create"
 msgstr ""
 
 msgid "Save..."
-msgstr "Спасите..."
+msgstr "Сохранить..."
 
 msgid "Save as..."
 msgstr "Сохранить как..."
@@ -47,6 +47,9 @@ msgstr "Выход"
 
 msgid "Edit"
 msgstr "Редактировать"
+
+msgid "Search..."
+msgstr "Поиск..."
 
 msgid "File"
 msgstr "Файл"
@@ -82,13 +85,13 @@ msgid "Unpack..."
 msgstr "Распакуйте..."
 
 msgid "Cut"
-msgstr "Разрез"
+msgstr "Вырезать"
 
 msgid "Copy"
 msgstr "Копировать"
 
 msgid "Paste"
-msgstr "Паста"
+msgstr "Вставить"
 
 msgid "Project Source Code"
 msgstr "Исходный код проекта"
@@ -212,3 +215,24 @@ msgstr "..."
 
 msgid "Search:"
 msgstr "Поиск:"
+
+msgid "Resources"
+msgstr "Ресурсы"
+
+msgid "Layers"
+msgstr "Слои"
+
+msgid "Bring to Front"
+msgstr "На передний план"
+
+msgid "Bring Forwards"
+msgstr "Принесите вперед"
+
+msgid "Send to Back"
+msgstr "Отправить назад"
+
+msgid "Send Backwards"
+msgstr "Отправьте его назад"
+
+msgid "Delete"
+msgstr "Удалить"

@@ -9,7 +9,7 @@ sys.path.append("..")
 
 import os
 import gettext
-import shutil
+import threading
 import traceback
 import logging
 from typing import Any
@@ -58,6 +58,7 @@ class PropertiesWidget(QWidget):
         self.imageListCategories = []
         self.imageFolder = ""
         self.currentPropertyInput = None
+        self.resourceList = []
 
         self.propertyStyleSheet = """
             QLineEdit {
@@ -169,7 +170,6 @@ class PropertiesWidget(QWidget):
         self.propertyChanged.emit(property, value)
 
     def addProperty(self, srcProperty, name, valueWidget, parent=None):
-        print(srcProperty)
         if parent != None:
             item = QTreeWidgetItem(parent, [_(name), ""])
             self.treeWidget.setItemWidget(item, 1, valueWidget)
@@ -207,7 +207,7 @@ class PropertiesWidget(QWidget):
         button.clicked.connect(onClick)
         return button
     
-    def createResourceEdit(self, text, disabled, propertySignalDisabled, srcProperty=""):
+    def createResourceEdit(self, text, disabled, resourceList, propertySignalDisabled, srcProperty=""):
         def dragEnterEvent(event):
             if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
                 event.acceptProposedAction()
@@ -217,22 +217,33 @@ class PropertiesWidget(QWidget):
                 event.acceptProposedAction()
 
         def dropEvent(event):
-
             model = QStandardItemModel()
             model.dropMimeData(event.mimeData(), Qt.DropAction.CopyAction, 0, 0, QModelIndex())
-            resourceEdit.setText(model.item(0, 0).data(0))
+            if model.item(0, 0).data(0) in resourceList:
+                resourceEdit.setCurrentIndex(resourceList.index(model.item(0, 0).data(0)))
+            else:
+                QMessageBox.information(None, "Properties", f"Image not found in resourceList!")
 
             event.acceptProposedAction()
 
-        resourceEdit = QLineEdit(self)
+        def onChange(event):
+            if resourceEdit.currentText() in resourceList:
+                self.sendPropertyChangedSignal(srcProperty, resourceEdit.currentText())
+            else:
+                QMessageBox.information(None, "Properties", f"Image not found in resourceList!")
+
+        resourceEdit = QComboBox(self)
+        resourceEdit.setEditable(True)
+        resourceEdit.setAcceptDrops(True)
         resourceEdit.setStyleSheet(self.propertyStyleSheet)
-        resourceEdit.setText(text)
+        resourceEdit.addItems(resourceList)
+        resourceEdit.setCurrentText(text)
         resourceEdit.setDisabled(disabled)
         resourceEdit.dragEnterEvent = dragEnterEvent
         resourceEdit.dragMoveEvent = dragMoveEvent
         resourceEdit.dropEvent = dropEvent
         if not propertySignalDisabled:
-            resourceEdit.textChanged.connect(lambda *event: self.sendPropertyChangedSignal(srcProperty, resourceEdit.text()))
+            resourceEdit.currentTextChanged.connect(onChange)
         return resourceEdit
 
     def createSpinBox(self, text, disabled, propertySignalDisabled, srcProperty, minVal=-9999, maxVal=9999):
@@ -313,13 +324,14 @@ class PropertiesWidget(QWidget):
         item.setExpanded(True)
         return item
 
-    def addProperties(self, properties, data, parent, device):
+    def addProperties(self, properties, data, resourceList, parent, device):
         for key, property in properties.items():
             if not property.get("string"):
                 # category
                 categoryItem = self.createCategory(_(key), parent)
-                self.addProperties(property, data, categoryItem, device)  # Recursively add sub-categories
+                self.addProperties(property, data, resourceList, categoryItem, device)  # Recursively add sub-categories
             else:
+                print(property["type"])
                 ignorePropertyCreation = False
                 # property
                 propertyValue = None
@@ -337,7 +349,7 @@ class PropertiesWidget(QWidget):
                 elif property["type"] == "btn":
                     inputWidget = self.createButton(propertyValue, key)
                 elif property["type"] == "img":
-                    inputWidget = self.createResourceEdit(propertyValue, False, False, key)
+                    inputWidget = self.createResourceEdit(propertyValue, False, resourceList, False, key)
                 elif property["type"] == "list":
                     inputWidget = self.createComboBox(property["options"], propertyValue, key, False)
                 elif property["type"] == "imglist":
@@ -345,8 +357,9 @@ class PropertiesWidget(QWidget):
 
                     def imagesChanged(stringIndex, image, index):
                         imageString = f"({stringIndex}):{image}"
-                        if len(imageList) <= index:
-                            image[index] = imageString
+                        print(len(imageList), index)
+                        if len(imageList) - 1 >= index:
+                            imageList[index] = imageString
                         else:
                             imageList.insert(index, imageString)
                         completeString = '|'.join(imageList)
@@ -355,7 +368,7 @@ class PropertiesWidget(QWidget):
                     def createImageCategories(imageList, imageCount):
                         for index in range(0, imageCount):
                             imageCategory = self.createCategory("Image"+str(index), parent)
-                            imageInput = self.createResourceEdit("", False, True, key)
+                            imageInput = self.createResourceEdit("", False, resourceList, True, key)
                             indexInput = self.createSpinBox(None, False, True, key)
                             self.addProperty("", "Image", imageInput, imageCategory)
                             self.addProperty("", "Index", indexInput, imageCategory)
@@ -364,16 +377,14 @@ class PropertiesWidget(QWidget):
                             if len(imageList) > index:
                                 image = imageList[index]
                                 values = image.split(":")
-                                try:
+                                if values[0] != "" and len(values) > 1:
                                     indexInput.setValue(int(values[0].strip("()"))) 
-                                    imageInput.setText(values[1])             
-                                    imageInput.textChanged.connect(lambda text, indexInput=self.imageCategories[index][2], index=index: imagesChanged(indexInput.text(), text, index))
-                                    indexInput.textChanged.connect(lambda text, imageInput=self.imageCategories[index][1], index=index: imagesChanged(text, imageInput.text(), index))
-                                except Exception as e:
-                                    return False, traceback.format_exc()
+                                    imageInput.setCurrentText(values[1])             
+                                imageInput.currentTextChanged.connect(lambda event, indexInput=self.imageCategories[index][2], imageInput=self.imageCategories[index][1], index=index: imagesChanged(indexInput.text(), imageInput.currentText(), index))
+                                indexInput.textChanged.connect(lambda text, imageInput=self.imageCategories[index][1], index=index: imagesChanged(text, imageInput.currentText(), index))
                             else:
-                                imageInput.textChanged.connect(lambda text, indexInput=self.imageCategories[index][2], index=index: imagesChanged(indexInput.text(), text, index))
-                                indexInput.textChanged.connect(lambda text, imageInput=self.imageCategories[index][1], index=index: imagesChanged(text, imageInput.text(), index))
+                                imageInput.currentTextChanged.connect(lambda event, indexInput=self.imageCategories[index][2], imageInput=self.imageCategories[index][1], index=index: imagesChanged(indexInput.text(), imageInput.currentText(), index))
+                                indexInput.textChanged.connect(lambda text, imageInput=self.imageCategories[index][1], index=index: imagesChanged(text, imageInput.currentText(), index))
  
                         return True, None
 
@@ -415,12 +426,12 @@ class PropertiesWidget(QWidget):
                         text = ""
                         if index < len(imageList):
                             text = imageList[index]
-                        imageInput = self.createResourceEdit(text, False, True)
+                        imageInput = self.createResourceEdit(text, False, resourceList, True)
                         if definedText == None:
                             self.addProperty("", "Number "+str(index), imageInput, parent)
                         else:
                             self.addProperty("", definedText, imageInput, parent)
-                        imageInput.textChanged.connect(lambda text, index=index: updateNumberList(index, text))
+                        imageInput.currentTextChanged.connect(lambda *event, index=index: updateNumberList(index, imageInput.currentText()))
 
                     for index in range(0, 10):
                         createInput(index)
@@ -453,13 +464,13 @@ class PropertiesWidget(QWidget):
                     self.addProperty(key, property["string"], inputWidget, parent)
                 inputWidget = None
 
-    def loadProperties(self, properties, data=None, device=None, scrollTo=None):
+    def loadProperties(self, properties, data=None, resourceList=None, device=None, scrollTo=None):
         self.treeWidget.clear()
         self.propertyItems = {}
         if data == None:
-            self.addProperties(properties, data, None, device)
+            self.addProperties(properties, data, resourceList, None, device)
         else:
-            self.addProperties(properties["properties"], data, None, device)
+            self.addProperties(properties["properties"], data, resourceList, None, device)
         if scrollTo != None:
             self.treeWidget.scrollContentsBy(0, scrollTo)
 

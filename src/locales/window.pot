@@ -48,6 +48,9 @@ msgstr ""
 msgid "Edit"
 msgstr ""
 
+msgid "Search..."
+msgstr ""
+
 msgid "File"
 msgstr ""
 
@@ -205,4 +208,31 @@ msgid "..."
 msgstr ""
 
 msgid "Search:"
+msgstr ""
+
+msgid "Resources"
+msgstr ""
+
+msgid "Add Image..."
+msgstr ""
+
+msgid "Layers"
+msgstr ""
+
+msgid "Bring to Front"
+msgstr ""
+
+msgid "Bring Forwards"
+msgstr ""
+
+msgid "Send to Back"
+msgstr ""
+
+msgid "Send Backwards"
+msgstr ""
+
+msgid "Delete"
+msgstr ""
+
+msgid "Layers"
 msgstr ""

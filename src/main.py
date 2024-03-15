@@ -4,6 +4,7 @@
 # TODO
 # Put documentation on code, its a wasteland out there
 # Remove multi-project support in favor of in-line AOD editing (through a toggle)
+# Serialize fprj widgets to improve speed when querying
 # Fix themes
 # Bundle SVG icons
 
@@ -73,6 +74,7 @@ class MainWindow(QMainWindow):
         self.fileChanged = False
         self.clipboard = []
         self.stagedChanges = []
+        self.resourceImages = []
         self.selectionDebounce = False
 
         # Setup Settings
@@ -171,7 +173,7 @@ class MainWindow(QMainWindow):
             if self.currentCompileState == 0:
                 currentProject = self.getCurrentProject()
                 currentProject["data"]["FaceProject"]["Screen"]["@Title"] = self.compileUi.watchfaceName.text()
-                currentProject["data"]["FaceProject"]["Screen"]["@Bitmap"] = self.compileUi.thumbnailLocation.text()
+                currentProject["data"]["FaceProject"]["Screen"]["@Bitmap"] = self.compileUi.thumbnailLocation.currentText()
 
                 reply = QMessageBox.question(self, 'Mi Create', _("Save project before building?"), QMessageBox.StandardButton.Yes, QMessageBox.StandardButton.No)
                 if reply == QMessageBox.StandardButton.Yes:
@@ -410,6 +412,7 @@ class MainWindow(QMainWindow):
             self.ui.resourceList.clear()
         else:
             self.ui.resourceList.clear()
+            self.resourceImages.clear()
             for filename in os.listdir(imageFolder):
                 file = os.path.join(imageFolder, filename)
                 if os.path.isfile(file):
@@ -417,7 +420,8 @@ class MainWindow(QMainWindow):
                     item = QListWidgetItem(QIcon(file), os.path.basename(file))
                     item.setData(0, os.path.basename(file))
                     item.setSizeHint(QSize(64, 64))
-
+                    
+                    self.resourceImages.append(os.path.basename(file))
                     self.ui.resourceList.addItem(item)
 
     def setupWorkspace(self):
@@ -507,7 +511,7 @@ class MainWindow(QMainWindow):
             if currentProject == None or not currentProject.get("imageFolder"):
                 return
             
-            files = QFileDialog.getOpenFileNames(self, 'Add Image...', "%userprofile%\\", "Image File (*.png *.jpeg *.jpg)")
+            files = QFileDialog.getOpenFileNames(self, _("Add Image..."), "%userprofile%\\", "Image File (*.png *.jpeg *.jpg)")
 
             if not files[0]:
                 return
@@ -531,7 +535,8 @@ class MainWindow(QMainWindow):
                 return
             
             if platform.system() == "Windows":
-                os.startfile(currentProject["imageFolder"])
+                path = str.replace(currentProject["imageFolder"], "/", "\\")
+                os.startfile(path)
             elif platform.system() == "Darwin":
                 subprocess.Popen(["open", currentProject["imageFolder"]])
             else:
@@ -597,6 +602,9 @@ class MainWindow(QMainWindow):
                         else:
                             self.showDialogue("warning", "Invalid source name!")
                             return
+                elif property == "@Alignment":
+                    alignmentList = ["Left", "Center", "Right"]
+                    currentItem[property] = str(alignmentList.index(value))
                 elif property == "@Name":
                     if value == widgetName:
                         return
@@ -629,6 +637,8 @@ class MainWindow(QMainWindow):
                 self.ignoreHistoryInvoke = False
                 updateProperty(currentSelected.data(0,101), args[0], args[1])
             else:   
+                if not currentItem.get(args[0]):
+                    currentItem[args[0]] = ""
                 command = CommandModifyProperty(currentItem["@Name"], args[0], currentItem[args[0]], args[1], updateProperty, f"Change property {args[0]} to {args[1]}")
                 self.historySystem.undoStack.push(command)
                 self.ignoreHistoryInvoke = False
@@ -647,7 +657,7 @@ class MainWindow(QMainWindow):
                 currentProject = self.getCurrentProject()
                 for index, object in enumerate(currentProject["data"]["FaceProject"]["Screen"]["Widget"]):
                     if object["@Name"] == item:
-                        self.propertiesWidget.loadProperties(self.propertyJson[itemType], currentProject["data"]["FaceProject"]["Screen"]["Widget"][index], currentProject["data"]["FaceProject"]["@DeviceType"])
+                        self.propertiesWidget.loadProperties(self.propertyJson[itemType], currentProject["data"]["FaceProject"]["Screen"]["Widget"][index], self.resourceImages, currentProject["data"]["FaceProject"]["@DeviceType"])
                         break
                 else:
                     return    
@@ -791,7 +801,6 @@ class MainWindow(QMainWindow):
             self.ignoreHistoryInvoke = False
         else:
             def commandFunc(data):
-                projectWidgets = currentProject["data"]["FaceProject"]["Screen"]["Widget"]
                 currentProject["data"]["FaceProject"]["Screen"]["Widget"] = data
                 currentProject["canvas"].loadObjects(currentProject["data"], currentProject["imageFolder"], self.settings["Canvas"]["Antialiasing"]["value"])
                 self.Explorer.updateExplorer(currentProject["data"])
@@ -825,6 +834,9 @@ class MainWindow(QMainWindow):
 
         for item in self.clipboard:
             print(item)
+            prevData = currentProject["data"]["FaceProject"]["Screen"]["Widget"]
+            newData = prevData.copy()
+
             sameNameWidgets = list(filter(lambda widget: widget["@Name"] == item["@Name"],  currentProject["data"]["FaceProject"]["Screen"]["Widget"]))
             count = len(sameNameWidgets)
 
@@ -839,10 +851,16 @@ class MainWindow(QMainWindow):
 
                 modifiedItem["@Name"] = f"{item['@Name']}{name_suffix * index}"
 
-            currentProject["data"]["FaceProject"]["Screen"]["Widget"].append(modifiedItem)
-            currentProject["canvas"].loadObjects(currentProject["data"], currentProject["imageFolder"], self.settings["Canvas"]["Antialiasing"]["value"])
-            self.Explorer.updateExplorer(currentProject["data"])
-            currentProject["canvas"].selectObject(modifiedItem["@Name"])
+            newData.append(modifiedItem)
+
+            def commandFunc(data):
+                currentProject["data"]["FaceProject"]["Screen"]["Widget"] = data
+                currentProject["canvas"].loadObjects(currentProject["data"], currentProject["imageFolder"], self.settings["Canvas"]["Antialiasing"]["value"])
+                self.Explorer.updateExplorer(currentProject["data"])
+                currentProject["canvas"].selectObject(modifiedItem["@Name"])
+
+            command = CommandModifyProjectData(prevData, newData, commandFunc, f"Paste objects through ModifyProjectData command")
+            self.historySystem.undoStack.push(command)
 
     def zoomCanvas(self, zoom):
         currentProject = self.getCurrentProject()
@@ -1233,7 +1251,8 @@ class MainWindow(QMainWindow):
         self.compileUi.buttonBox.addButton("Cancel", QDialogButtonBox.ButtonRole.RejectRole)
 
         self.compileUi.watchfaceName.setText(currentProject["data"]["FaceProject"]["Screen"]["@Title"])
-        self.compileUi.thumbnailLocation.setText(currentProject["data"]["FaceProject"]["Screen"]["@Bitmap"])
+        self.compileUi.thumbnailLocation.addItems(self.resourceImages)
+        self.compileUi.thumbnailLocation.setCurrentText(currentProject["data"]["FaceProject"]["Screen"]["@Bitmap"])
 
         self.compileDialog.setModal(True)
         self.compileDialog.show()

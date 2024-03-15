@@ -705,8 +705,8 @@
   </action>
   <action name="actionImage_List">
    <property name="icon">
-    <iconset>
-     <normaloff>:/Dark/gallery-horizontal.png</normaloff>:/Dark/gallery-horizontal.png</iconset>
+    <iconset resource="resources/icons.qrc">
+     <normaloff>:/Dark/image-list.png</normaloff>:/Dark/image-list.png</iconset>
    </property>
    <property name="text">
     <string>Image List</string>

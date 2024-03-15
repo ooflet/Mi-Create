@@ -11,7 +11,6 @@ sys.path.append("..")
 
 from translate import QCoreApplication
 
-
 from PyQt6 import QtCore, QtGui, QtWidgets
 
 

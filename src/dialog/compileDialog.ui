@@ -62,16 +62,6 @@
          </property>
         </widget>
        </item>
-       <item row="6" column="0">
-        <widget class="QLineEdit" name="thumbnailLocation">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-        </widget>
-       </item>
        <item row="3" column="0">
         <widget class="QLabel" name="label_6">
          <property name="text">
@@ -112,6 +102,13 @@
         <widget class="QLabel" name="label_5">
          <property name="text">
           <string>Watchface name</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0">
+        <widget class="QComboBox" name="thumbnailLocation">
+         <property name="editable">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
