@@ -21,7 +21,7 @@ os.chdir(os.path.dirname(os.path.realpath(__file__))) # switch working directory
 from PyQt6.QtWidgets import (QMainWindow, QDialog, QInputDialog, QMessageBox, QApplication, QGraphicsScene, QPushButton, 
                                QDialogButtonBox, QTreeWidgetItem, QFileDialog, QToolButton, QToolBar, QWidget, QVBoxLayout, 
                                QFrame, QColorDialog, QFontDialog, QSplashScreen, QGridLayout, QLabel, QListWidgetItem,
-                               QSpacerItem, QSizePolicy, QAbstractItemView, QUndoView, QTextBrowser)
+                               QSpacerItem, QSizePolicy, QAbstractItemView, QUndoView, QTextBrowser, QGraphicsBlurEffect)
 from PyQt6.QtGui import QIcon, QPixmap, QDesktopServices, QDrag
 from PyQt6.QtCore import Qt, QSettings, QSize, QUrl, QFileInfo, QItemSelectionModel
 
@@ -1000,7 +1000,6 @@ class MainWindow(QMainWindow):
         # Create the project
         canvas.setAcceptDrops(True)
         canvas.scene.selectionChanged.connect(lambda: self.updateProjectSelections("canvas"))
-        canvas.scene.selectionChanged
         canvas.onObjectChange.connect(propertyChange)
         canvas.onObjectPosChange.connect(posChange)
 
@@ -1024,30 +1023,8 @@ class MainWindow(QMainWindow):
                 "hasFileChanged": False
             }
 
-            # Setup Insert Menu
-            insertButton = QToolButton()
-            insertButton.setMenu(self.ui.menuInsert)
-            insertButton.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
-            insertButton.setIcon(QIcon(":Dark/plus.png"))
-            insertButton.setText(_("Create Widget"))
-            insertButton.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
-
-            # Setup AOD Switch
-            # AODSwitch = QToolButton()
-            # AODSwitch.setIcon(QPixmap(":Dark/moon.png"))
-            # AODSwitch.setIconSize(QSize(16,16))
-            # AODSwitch.setText("Toggle AOD")
-            # AODSwitch.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
-            # AODSwitch.setCheckable(True)
-
-            canvasToolbar = QToolBar()
-            canvasToolbar.setStyleSheet("background-color: palette(base); padding-left: 20px; ")
-            canvasToolbar.addWidget(insertButton)
-            # canvasToolbar.addWidget(AODSwitch)
-
             widget = QWidget()
             layout = QVBoxLayout()
-            layout.addWidget(canvasToolbar)
             layout.addWidget(canvas)
             layout.setContentsMargins(0,0,0,0)
             layout.setSpacing(0)
@@ -1260,6 +1237,7 @@ class MainWindow(QMainWindow):
 
     def decompileProject(self):
         self.showDialogue("error", "Will add later, apologies.")
+        self.reopen()
         # self.showDialogue("warning", "Please note that images may be glitched when unpacking.")
         # file = QFileDialog.getOpenFileName(self, 'Unpack File...', "%userprofile%/", "Compiled Watchface Binaries (*.face)")
 
@@ -1322,13 +1300,12 @@ class MainWindow(QMainWindow):
             logging.error(f"Error dump: \nprojects: {pformat(self.projects)}\n------------------------\nsettings: {pformat(self.settings)}")
             MessageBox.setIcon(QMessageBox.Icon.Critical)
         MessageBox.exec()
-            
+
 if __name__ == "__main__":
     logging.debug("-- Starting Mi Create --")
 
     app = QApplication(sys.argv)
 
-    # splash
     pixmap = QPixmap(":/Images/MiCreateSplash.png")
     splash = QSplashScreen(pixmap)
     splash.show()
@@ -1346,8 +1323,7 @@ if __name__ == "__main__":
         main_window.openProject(None, sys.argv[1:])
 
     main_window.show()
-    
     splash.finish(main_window)
     main_window.checkForUpdates()
-
     sys.exit(app.exec())
+    

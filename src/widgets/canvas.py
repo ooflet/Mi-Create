@@ -16,7 +16,7 @@ from utils.project import watchData
 from PyQt6.QtCore import pyqtSignal, QPointF, QModelIndex, QSize, QRectF, QRect, Qt
 from PyQt6.QtGui import QPainter, QPainterPath, QPen, QColor, QStandardItemModel, QPixmap, QIcon, QBrush, QImage, QCursor
 from PyQt6.QtWidgets import (QApplication, QGraphicsPathItem, QGraphicsScene, QGraphicsSceneMouseEvent, QGraphicsView, QGraphicsItem, QGraphicsRectItem, 
-                               QGraphicsEllipseItem, QMenu, QGraphicsPixmapItem, QMessageBox, QRubberBand)
+                               QGraphicsEllipseItem, QMenu, QToolButton, QGraphicsPixmapItem, QMessageBox, QRubberBand)
 
 from utils.contextMenu import ContextMenu
 
@@ -51,7 +51,6 @@ class Canvas(QGraphicsView):
     onObjectAdded = pyqtSignal(QPointF, str)
     onObjectChange = pyqtSignal(str, str, object) # hate hacky workarounds, just support any type already Qt
     onObjectPosChange = pyqtSignal()
-    onObjectLayerChange = pyqtSignal(str, str)
 
     def __init__(self, device, antialiasingEnabled, deviceOutlineVisible, ui, parent=None):
         super().__init__(parent)
@@ -88,6 +87,15 @@ class Canvas(QGraphicsView):
         background.setPen(QPen(Qt.PenStyle.NoPen))
         background.setBrush(QColor(0, 0, 0, 255))
         
+        insertButton = QToolButton(self)
+        insertButton.setGeometry(20, 20, 38, 25)
+        insertButton.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
+        insertButton.setMenu(self.mainWindowUI.menuInsert)
+        insertButton.setIcon(QIcon(":Dark/plus.png"))
+        insertButton.setIconSize(QSize(18, 18))
+        insertButton.setToolTip("Create Widget")
+        insertButton.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
+
         self.scene.addItem(background)
 
         if deviceOutlineVisible:
@@ -326,12 +334,6 @@ class BaseWidget(QGraphicsRectItem):
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemSendsGeometryChanges, True)
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsFocusable, True)
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemClipsChildrenToShape, True)
-
-    def objectDeleted(self, name):
-        pass
-
-    def objectLayerAction(self, name, action):
-        pass
 
     def boundingRect(self):
         # Ensure the bounding rectangle accounts for any changes that affect the item's appearance

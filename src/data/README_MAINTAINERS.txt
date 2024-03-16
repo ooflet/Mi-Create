@@ -52,27 +52,22 @@ The properties key contains a dictionary containing all the properties.
 Individual properties always start with an @, as they identify XML tags which are not present 
 in json and Python dictionaries.
 
-Each property contains an array with at most 5 values:
+Each property contains keys identifying important things:
 
 "properties": {
    "Property Category": {
-      "@SourcePropertyName": [
-         "Property Name",
-         "Property Identifier",
-         "Fallback Value",
-         "Minimum Value"/["Combobox", "List", "Array"],
-         "Maximum Value",
-      ] 
+      "@SourcePropertyName": {
+         string = "Property Name",
+         type = "Property Type",
+         value = "Fallback Value",
+         min = "Minimum Value",
+         options = "["Combobox", "List", "Array"]"
+         max = "Maximum Value",
+      }
    }
 }
 
-- "properties" is the properties key in a widget
-- "Property Category" is a category containing a list of properties. 
-- "@SourcePropertyName" is the property tag, which represents the property in XML.
-- "Property Name" is the string which gets shown in the properties list.
-- "Property Identifier" identifies which property type it is and what input field to display.
-  
-  The list of identifiers are:
+The list of types are:
   - disabled (disabled text input)
   - text
   - img
@@ -96,10 +91,10 @@ Each property contains an array with at most 5 values:
 Both Property Category and Property Name get automatically translated to properties.mo
 
 ------------------------------------------------------------------------------------------------
-ABOUT settings.json
+ABOUT settingItems.json
 ------------------------------------------------------------------------------------------------
 
-settings.json contains configuration values for the program. It uses the same system as
-properties.json.
+settingItems.json contains the template for configuration values for the program. It uses the 
+same system as properties.json.
 
 The actual settings are stored in Registry Computer\HKEY_CURRENT_USER\Software\Mi Create\Preferences.
