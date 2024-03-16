@@ -413,7 +413,9 @@ class MainWindow(QMainWindow):
         else:
             self.ui.resourceList.clear()
             self.resourceImages.clear()
-            for filename in os.listdir(imageFolder):
+            directory = os.listdir(imageFolder)
+            directory.sort()
+            for filename in directory:
                 file = os.path.join(imageFolder, filename)
                 if os.path.isfile(file):
                     logging.debug("Creating file entry for "+os.path.basename(file))
