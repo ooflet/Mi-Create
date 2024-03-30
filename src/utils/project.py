@@ -61,9 +61,11 @@ class watchData:
     def getWatchModel(self, id):
         return self.watchID[id]
 
-        
 class fprjProject:  
-    def create(path, device, name):
+    def __init__(self):
+        pass
+
+    def create(self, path, device, name):
         try:
             template = watchData().watchFileTemplate
             template["FaceProject"]["@DeviceType"] = str(device)
@@ -78,32 +80,54 @@ class fprjProject:
             return True, os.path.join(folder, f"{name}.fprj")
         except Exception as e:
             return False, str(e), traceback.format_exc()
+        
+    def serialise(self, widgetList):
+        # Serialise widgets so its faster to access
+        widgetDict = {}
+        for widget in widgetList:
+            if widgetDict.get(widget["@Name"]):
+                return False, "Duplicate widget name!", f"Cannot serialise widget {widget['@Name']} because there already is another widget named the same"
+            widgetDict[widget["@Name"]] = widget
+        return widgetDict
+    
+    def unserialise(self, widgets):
+        # Unserialise widgets to a list
+        widgetList = []
+        for widget in widgets:
+            widgetList.append(widgets[widget])
+        return widgetList
 
-    def load(path):
+    def load(self, path):
         xml_path = os.path.join(path)
+
         try:
             with open(xml_path, 'r', encoding="utf8") as project:
                 xmlsource = project.read()
                 parse = xmltodict.parse(xmlsource)
                 if parse["FaceProject"]:
                     imagesDir = os.path.join(os.path.dirname(path), "images")
-                    # By default, if there's only one widget in the project, it will parse the Widget list as a dict
-                    # This breaks functionality, and it's cumbersome to keep repeating type checks
-                    # So its simply converted to a list
                     if type(parse["FaceProject"]["Screen"]["Widget"]) == dict:
                         parse["FaceProject"]["Screen"]["Widget"] = [parse["FaceProject"]["Screen"]["Widget"]]
-                return True, parse, imagesDir
+
+                    parse["FaceProject"]["Screen"]["Widget"] = self.serialise(parse["FaceProject"]["Screen"]["Widget"])
+
+                    return True, parse, imagesDir
+                else:
+                    return False, "Not a FaceProject!", ""
         except Exception as e:
             return False, str(e), traceback.format_exc()
 
-    def unparse(data):
+    def unparse(self, data):
         raw = xmltodict.unparse(data)
         dom = xml.dom.minidom.parseString(raw)
         pretty_xml = dom.toprettyxml()
 
         return pretty_xml
 
-    def save(path, data):
+    def save(self, path, data):
+        
+        data["FaceProject"]["Screen"]["Widget"] = self.unserialise(data["FaceProject"]["Screen"]["Widget"])
+
         raw = xmltodict.unparse(data)
         dom = xml.dom.minidom.parseString(raw)
         pretty_xml = dom.toprettyxml()
@@ -114,17 +138,23 @@ class fprjProject:
             return True, "success"
             
         except Exception as e:
-            return False, e
-            
+            return False, e        
 
-    def compile(path, location, compilerLocation):
+    def compile(self, path, location, compilerLocation):
         logging.info("Compiling project "+path)
-        # process = subprocess.Popen(f'{compilerLocation} compile "{path}" "{location}" "{str.split(os.path.basename(path), ".")[0]+".face"}" 0', stdout=subprocess.PIPE)
-        # output, err = process.communicate()
-        # logging.info(str(output))
-        # return output.decode("utf-8")
         process = QProcess()
-        process.start(compilerLocation, ["compile", path, location, str.split(os.path.basename(path), ".")[0]+".face", "0"])
+        process.setProgram(compilerLocation)
+        process.setArguments(["compile", path, location, str.split(os.path.basename(path), ".")[0]+".face", "0"])
+        process.start()
+        return process
+    
+    def decompile(self, path, location, compilerLocation):
+        logging.info("Decompiling project "+path)
+        process = QProcess()
+        process.setWorkingDirectory(location)
+        process.setProgram(compilerLocation)
+        process.setArguments(path)
+        process.start()
         return process
     
 class fprjOneFile:

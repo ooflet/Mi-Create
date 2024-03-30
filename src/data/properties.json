@@ -55,7 +55,8 @@
                 "@Visible_Src": {
                     "string": "Visibility Trigger",
                     "type": "src",
-                    "value": ""
+                    "value": "",
+                    "visibleOn": [0, 1, 3, 4]
                 },
                 "@HourhandCorrection_En": {
                     "string": "Hour Hand Smooth",
@@ -216,7 +217,8 @@
                 "@Visible_Src": {
                     "string": "Visibility Trigger",
                     "type": "src",
-                    "value": ""
+                    "value": "",
+                    "visibleOn": [0, 1, 3, 4]
                 }
             },
             "Progress Bar": {
@@ -371,7 +373,8 @@
                 "@Visible_Src": {
                     "string": "Visibility Trigger",
                     "type": "src",
-                    "value": ""
+                    "value": "",
+                    "visibleOn": [0, 1, 3, 4]
                 }
             },
             "Image": {
@@ -435,7 +438,8 @@
                 "@Visible_Src": {
                     "string": "Visibility Trigger",
                     "type": "src",
-                    "value": ""
+                    "value": "",
+                    "visibleOn": [0, 1, 3, 4]
                 }
             },
             "Data": {
@@ -523,7 +527,8 @@
                 "@Visible_Src": {
                     "string": "Visibility Trigger",
                     "type": "src",
-                    "value": ""
+                    "value": "",
+                    "visibleOn": [0, 1, 3, 4]
                 },
                 "@Digits": {
                     "string": "Digits",
@@ -617,7 +622,8 @@
                 "@Visible_Src": {
                     "string": "Visibility Trigger",
                     "type": "src",
-                    "value": ""
+                    "value": "",
+                    "visibleOn": [0, 1, 3, 4]
                 }
             },
             "Progress Bar": {

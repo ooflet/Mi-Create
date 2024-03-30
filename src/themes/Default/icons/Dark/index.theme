@@ -1,0 +1,20 @@
+[Icon Theme]
+Name=Dark
+Comment=Dark icons from lucide.dev
+
+# Directory List
+Directories=actions/24,mimetypes/24
+
+[actions/24]
+Size=24
+Type=Scalable
+MinSize=1
+MaxSize=256
+Context=Actions
+
+[mimetypes/24]
+Size=24
+Type=Scalable
+MinSize=1
+MaxSize=256
+Context=MimeTypes

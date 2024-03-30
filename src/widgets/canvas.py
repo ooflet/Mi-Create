@@ -2,7 +2,7 @@
 # tostr 2023
 
 # Responsible for rendering parsed EasyFace XML projects via QGraphicsView library.
-# Parse an xml file to a dictionary, create a Canvas object and call loadObjectsFromData
+# Parse a fprj/xml file to a dictionary, create a Canvas object and call loadObjectsFromData
 
 import os
 import sys
@@ -13,10 +13,10 @@ from tracemalloc import start
 sys.path.append("..")
 from utils.project import watchData
 
-from PyQt6.QtCore import pyqtSignal, QPointF, QModelIndex, QSize, QRectF, QRect, Qt
-from PyQt6.QtGui import QPainter, QPainterPath, QPen, QColor, QStandardItemModel, QPixmap, QIcon, QBrush, QImage, QCursor
-from PyQt6.QtWidgets import (QApplication, QGraphicsPathItem, QGraphicsScene, QGraphicsSceneMouseEvent, QGraphicsView, QGraphicsItem, QGraphicsRectItem, 
-                               QGraphicsEllipseItem, QMenu, QToolButton, QGraphicsPixmapItem, QMessageBox, QRubberBand)
+from PyQt6.QtCore import pyqtSignal, QPointF, QSize, QRect, QRectF, Qt
+from PyQt6.QtGui import QPainter, QPainterPath, QPen, QColor, QPixmap, QIcon, QBrush
+from PyQt6.QtWidgets import (QApplication, QGraphicsPathItem, QGraphicsScene, QGraphicsView, QGraphicsItem, QGraphicsRectItem, 
+                            QToolButton, QGraphicsPixmapItem, QMessageBox)
 
 from utils.contextMenu import ContextMenu
 
@@ -24,11 +24,11 @@ class ObjectIcon:
     def __init__(self):
         super().__init__()
         self.icon = {
-            "27":":Dark/analog.png",
-            "30":":Dark/image.png",
-            "31":":Dark/image-list.png",
-            "32":":Dark/numbers.png",
-            "42":":Dark/progress.png"
+            "27":"widget-analogdisplay",
+            "30":"widget-image",
+            "31":"widget-imagelist",
+            "32":"widget-digitalnumber",
+            "42":"widget-arcprogress"
         }
 
 class DeviceOutline(QGraphicsPathItem):
@@ -42,6 +42,17 @@ class DeviceOutline(QGraphicsPathItem):
         self.setPen(QPen(QColor(200, 200, 200, 100), thickness, Qt.PenStyle.SolidLine))
         self.setBrush(QColor(0,0,0,0))
         self.setZValue(9999)
+
+class DeviceFrame(QGraphicsPathItem):
+    # Shape that crops the screen to the border radius
+    def __init__(self, size):
+        super().__init__()
+        outline = QPainterPath()
+        outline.addRoundedRect(0, 0, size[0], size[1], size[2], size[2])
+        self.setPath(outline)
+        self.setBrush(QColor(0,0,0,255))
+        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemClipsChildrenToShape, True)
+        self.setZValue(0)
 
 class Scene(QGraphicsScene):
     def __init__(self, parent=None):
@@ -75,6 +86,8 @@ class Canvas(QGraphicsView):
         self.scene = Scene()
         self.scene.setSceneRect(0,0,self.deviceSize[0],self.deviceSize[1])
 
+        self.deviceOutline = DeviceOutline(self.deviceSize)
+        
         self.drawDecorations(deviceOutlineVisible)
 
         self.setScene(self.scene)
@@ -83,10 +96,6 @@ class Canvas(QGraphicsView):
         self.onObjectPosChange.emit()
 
     def drawDecorations(self, deviceOutlineVisible):
-        background = QGraphicsRectItem(0, 0, self.deviceSize[0], self.deviceSize[1])
-        background.setPen(QPen(Qt.PenStyle.NoPen))
-        background.setBrush(QColor(0, 0, 0, 255))
-        
         insertButton = QToolButton(self)
         insertButton.setGeometry(20, 20, 38, 25)
         insertButton.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
@@ -96,10 +105,6 @@ class Canvas(QGraphicsView):
         insertButton.setToolTip("Create Widget")
         insertButton.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
 
-        self.scene.addItem(background)
-
-        if deviceOutlineVisible:
-            self.scene.addItem(DeviceOutline(self.deviceSize))
 
     def contextMenuEvent(self, event):
         scenePos = self.mapToScene(event.pos())
@@ -172,8 +177,14 @@ class Canvas(QGraphicsView):
     def onObjectDeleted(self, name, widget):
         self.objectDeleted.emit(name)
 
-    def createObject(self, index, i, imageFolder, antialiasing):
+    def createObject(self, index, i, imageFolder, interpolation):
         widget = None
+
+        if interpolation == "Bilinear":
+            interpolation = True
+        else:
+            interpolation = False
+
         try:
             if i["@Shape"] == "27":
                 bgImg = QPixmap()
@@ -189,20 +200,20 @@ class Canvas(QGraphicsView):
                 hrImg.load(os.path.join(imageFolder, i["@HourHand_ImageName"]))
 
                 # Create analogwidget
-                widget = AnalogWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), self, QColor(255,255,255,0), i["@Name"])
+                widget = AnalogWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), self.frame, self, QColor(255,255,255,0), i["@Name"])
                 widget.setZValue(index)
                 widget.setData(1, "27")
-                widget.addBackground(bgImg, i["@BgImage_rotate_xc"], i["@BgImage_rotate_yc"], antialiasing)
-                widget.addHourHand(hrImg, i["@HourImage_rotate_xc"], i["@HourImage_rotate_yc"], antialiasing)
-                widget.addMinuteHand(minImg, i["@MinuteImage_rotate_xc"], i["@MinuteImage_rotate_yc"], antialiasing)
-                widget.addSecondHand(secImg, i["@SecondImage_rotate_xc"], i["@SecondImage_rotate_yc"], antialiasing)
+                widget.addBackground(bgImg, i["@BgImage_rotate_xc"], i["@BgImage_rotate_yc"], interpolation)
+                widget.addHourHand(hrImg, i["@HourImage_rotate_xc"], i["@HourImage_rotate_yc"], interpolation)
+                widget.addMinuteHand(minImg, i["@MinuteImage_rotate_xc"], i["@MinuteImage_rotate_yc"], interpolation)
+                widget.addSecondHand(secImg, i["@SecondImage_rotate_xc"], i["@SecondImage_rotate_yc"], interpolation)
 
             elif i["@Shape"] == "29":
                 dialog = QMessageBox.warning(None, "Confirm", f"The object {i['@Name']} uses the legacy CircleProgress object, it will be automatically converted to the newer CircleProgressPlus object.")
 
             elif i["@Shape"] == "30":    
                 # image
-                widget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), self, QColor(255,255,255,0), i["@Name"], imageFolder)
+                widget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), self.frame, self, QColor(255,255,255,0), i["@Name"], imageFolder)
                 widget.setZValue(index)
                 widget.setData(1, "30")
 
@@ -212,14 +223,14 @@ class Canvas(QGraphicsView):
                     image.load(os.path.join(imageFolder, i["@Bitmap"]))
 
                     # Create imagewidget    
-                    widget.addImage(image, 0, 0, 0, antialiasing)
+                    widget.addImage(image, 0, 0, 0, interpolation)
                 else:
                     self.scene.addItem(widget)
                     widget.representNoImage()
                 
             elif i["@Shape"] == "31":
                 # image list
-                widget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), self, QColor(255,255,255,0), i["@Name"], imageFolder)
+                widget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), self.frame, self, QColor(255,255,255,0), i["@Name"], imageFolder)
                 widget.setZValue(index)
                 widget.setData(1, "31")
                 
@@ -232,11 +243,11 @@ class Canvas(QGraphicsView):
                     if len(firstImage) >= 2:
                         image = QPixmap()
                         image.load(os.path.join(imageFolder, firstImage[1]))
-                        widget.addImage(image, 0, 0, 0, antialiasing)
+                        widget.addImage(image, 0, 0, 0, interpolation)
                     else:
                         widget.representNoImage()
                 else:
-                    widget.addImage(QPixmap(), 0, 0, 0, antialiasing)
+                    widget.addImage(QPixmap(), 0, 0, 0, interpolation)
                     widget.representNoImage()
 
             elif i["@Shape"] == "32":
@@ -244,14 +255,14 @@ class Canvas(QGraphicsView):
 
                 # Split images from the Bitmaplist
                 imageList = i["@BitmapList"].split("|")
-                widget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), self, QColor(255,255,255,100), i["@Name"], imageFolder)
+                widget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), self.frame, self, QColor(255,255,255,100), i["@Name"], imageFolder)
                 widget.setZValue(index)
                 widget.setData(1, "32")
 
                 if len(imageList) != 11:
                     widget.representNoImage()
                 else:
-                    widget.loadNumbers(i["@Digits"], i["@Spacing"], imageList, antialiasing)
+                    widget.loadNumbers(i["@Digits"], i["@Spacing"], imageList, interpolation)
 
             elif i["@Shape"] == "42":
                 # progress widget
@@ -262,7 +273,7 @@ class Canvas(QGraphicsView):
                 fgImage = QPixmap()
                 fgImage.load(os.path.join(imageFolder, i["@Foreground_ImageName"]))
                 
-                widget = ProgressWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), self, QColor(255,255,255,0), i["@Name"], i["@Rotate_xc"], i["@Rotate_yc"], i["@Radius"], i["@Line_Width"], i["@StartAngle"], i["@EndAngle"], bgImage, fgImage, antialiasing)
+                widget = ProgressWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), self.frame, self, QColor(255,255,255,0), i["@Name"], i["@Rotate_xc"], i["@Rotate_yc"], i["@Radius"], i["@Line_Width"], i["@StartAngle"], i["@EndAngle"], bgImage, fgImage, interpolation)
                 widget.setZValue(index)
                 widget.setData(1, "42")
 
@@ -276,29 +287,26 @@ class Canvas(QGraphicsView):
             QMessageBox().critical(None, "Error", f"Unable to create object {i['@Name']}: {traceback.format_exc()}")
             return False, str(e)
 
-    def loadObjects(self, data, imageFolder, antialiasing):
+    def loadObjects(self, data, imageFolder, interpolation):
+        self.frame = DeviceFrame(self.deviceSize)
         if data["FaceProject"]["Screen"].get("Widget") != None:
             self.scene.clear()
             self.widgets.clear()
-            self.drawDecorations(self.deviceOutlineVisible)
+            self.scene.addItem(self.frame)
 
             widgets = data["FaceProject"]["Screen"]["Widget"]
-            if type(widgets) == list:
-                for index, i in enumerate(widgets):     
-                    result, reason = self.createObject(index, i, imageFolder, antialiasing)
+            if type(widgets) == dict:
+                for index, key in enumerate(widgets):     
+                    result, reason = self.createObject(index, widgets[key], imageFolder, interpolation)
                     if not result:
-                        return False, reason 
+                        return False, reason
                 return True, "Success"
-            else:
-                result, reason = self.createObject(0, widgets, imageFolder, antialiasing)
-                if not result:
-                    return False, reason 
-                else:
-                    return True, "Success"
+            
         else:
+            self.scene.addItem(self.frame)
             return True, "Success"
         
-    def reloadObject(self, objectName, objectData, imageFolder, antialiasing):
+    def reloadObject(self, objectName, objectData, imageFolder, interpolation):
         object = None
         objectZValue = None
 
@@ -311,7 +319,7 @@ class Canvas(QGraphicsView):
 
         if object != None:
             object.scene().removeItem(object)
-            result, reason = self.createObject(objectZValue, objectData, imageFolder, antialiasing)
+            result, reason = self.createObject(objectZValue, objectData, imageFolder, interpolation)
             if not result:
                 return False, reason 
             else:
@@ -319,11 +327,12 @@ class Canvas(QGraphicsView):
         
 class BaseWidget(QGraphicsRectItem):
     # Basic widget with draggable and selectable controls
+    # Allows for snap to guides
     # Adding child QGraphicsItems to this widget extends functionality 
 
-    def __init__(self, posX, posY, sizeX, sizeY, canvas, color, name):
+    def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, name):
         # Initialize the shape.
-        super().__init__(posX, posY, sizeX, sizeY)
+        super().__init__(posX, posY, sizeX, sizeY, parent)
         self.setRect(0, 0, sizeX, sizeY)
         self.color = color
         self.canvas = canvas
@@ -336,10 +345,11 @@ class BaseWidget(QGraphicsRectItem):
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemClipsChildrenToShape, True)
 
     def boundingRect(self):
-        # Ensure the bounding rectangle accounts for any changes that affect the item's appearance
+        # Patches bounding box ghosting
+        print("bound")
         outline_width = 2.0  # Adjust this value as needed
         return self.rect().adjusted(-outline_width, -outline_width, outline_width, outline_width)
-    
+
     def mouseReleaseEvent(self, event):
         super().mouseReleaseEvent(event)
         if event.button() != Qt.MouseButton.RightButton:
@@ -364,8 +374,8 @@ class ImageWidget(BaseWidget):
     # All ImageList related things are handled in the addImage function
     # Live previews of animations are planned with this widget
 
-    def __init__(self, posX, posY, sizeX, sizeY, canvas, color, name, srcDir):
-        super().__init__(posX, posY, sizeX, sizeY, canvas, color, name)
+    def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, name, srcDir):
+        super().__init__(posX, posY, sizeX, sizeY, parent, canvas, color, name)
         self.srcDir = srcDir
         self.imageItems = []
         self.setPos(posX, posY)
@@ -408,8 +418,8 @@ class ImageWidget(BaseWidget):
 class AnalogWidget(BaseWidget):
     # Widget for handling AnalogDisplays
     
-    def __init__(self, posX, posY, sizeX, sizeY, canvas, color, name):
-        super().__init__(posX, posY, sizeX, sizeY, canvas, color, name)
+    def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, name):
+        super().__init__(posX, posY, sizeX, sizeY, parent, canvas, color, name)
         self.setPos(posX, posY)
 
     def addBackground(self, backgroundImage, bgX, bgY, antialiasing):
@@ -510,8 +520,8 @@ class CirclularArcImage(QGraphicsPixmapItem):
         painter.drawPath(CircularArcItem(arc_rect, self.startAngle, self.endAngle, self.pixmap().width(), self.thickness).createArcPath())
 
 class ProgressWidget(BaseWidget):
-    def __init__(self, posX, posY, sizeX, sizeY, canvas, color, name, offsetX, offsetY, radius, thickness, startAngle, endAngle, bgImage, pathImage, isAntialiased):
-        super().__init__(posX, posY, sizeX, sizeY, canvas, color, name)
+    def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, name, offsetX, offsetY, radius, thickness, startAngle, endAngle, bgImage, pathImage, isAntialiased):
+        super().__init__(posX, posY, sizeX, sizeY, parent, canvas, color, name)
         self.setPos(posX, posY)
         self.setRect(0, 0, sizeX, sizeY)
 
@@ -519,6 +529,20 @@ class ProgressWidget(BaseWidget):
         thickness = int(thickness)
         startAngle = int(startAngle)
         endAngle = int(endAngle)
+
+        # self.arcRect = QRectF(int(offsetX) - radius - (thickness / 2), int(offsetY) - radius - (thickness / 2), radius * 2 + thickness, radius * 2 + thickness)
+        # print(self.arcRect)
+
+        # self.arcPath = QPainterPath()
+        # self.arcPath.moveTo(radius, radius)
+        # self.arcPath.arcTo(self.arcRect, startAngle, endAngle)
+
+        # self.arcImage = QBrush(bgImage)
+
+        # self.arcPen = QPen()
+        # self.arcPen.setBrush(self.arcImage)
+        # self.arcPen.setWidth(thickness)
+        # self.arcPen.setCapStyle(Qt.PenCapStyle.RoundCap)
 
         self.backgroundImage = QGraphicsPixmapItem(bgImage, self)
 

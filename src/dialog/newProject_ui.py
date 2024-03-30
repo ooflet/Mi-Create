@@ -114,6 +114,9 @@ class Ui_Dialog(object):
         self.buttonBox.accepted.connect(Dialog.accept) # type: ignore
         self.buttonBox.rejected.connect(Dialog.reject) # type: ignore
         QtCore.QMetaObject.connectSlotsByName(Dialog)
+        Dialog.setTabOrder(self.deviceSelection, self.projectName)
+        Dialog.setTabOrder(self.projectName, self.folderShow)
+        Dialog.setTabOrder(self.folderShow, self.folderLocation)
 
     def retranslateUi(self, Dialog):
         _translate = QCoreApplication.translate

@@ -186,6 +186,12 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>deviceSelection</tabstop>
+  <tabstop>projectName</tabstop>
+  <tabstop>folderShow</tabstop>
+  <tabstop>folderLocation</tabstop>
+ </tabstops>
  <resources>
   <include location="../resources/icons.qrc"/>
  </resources>

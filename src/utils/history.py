@@ -2,7 +2,7 @@ import logging
 from typing import Any
 from PyQt6.QtGui import QUndoCommand, QUndoStack
 
-class historySystem:
+class History:
     def __init__(self):
         self.undoStack = QUndoStack()
 

@@ -63,6 +63,7 @@ Each property contains keys identifying important things:
          min = "Minimum Value",
          options = "["Combobox", "List", "Array"]"
          max = "Maximum Value",
+         visibleOn = [1, 2]
       }
    }
 }
@@ -83,10 +84,12 @@ The list of types are:
   all image entries to the end of the properties list when refreshing (e.g when image number 
   increases) 
 
-- "Fallback Value" is the value that is set when no value is given in the project file. This 
+- The tag "value" is the value that is set when no value is given in the project file. This 
   value is optional and you can leave it empty.
-- "Minimum Value" & "Maximum Value" both identify min and max range for int properties.
-- ["Combobox", "List", "Array"] contins an array of a combobox items.
+- "min" & "max" both identify min and max range for int properties.
+- "options" contins an array of a combobox items.
+- "visibleOn" contains a list of device IDs to show the property on
+
 
 Both Property Category and Property Name get automatically translated to properties.mo
 

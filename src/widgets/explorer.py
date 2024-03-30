@@ -1,12 +1,8 @@
 import sys
 
-sys.path.append("..")
-
 from PyQt6.QtWidgets import QTreeWidget, QTreeWidgetItem, QFrame
 from PyQt6.QtGui import QContextMenuEvent, QIcon
 from PyQt6.QtCore import Qt, QSize
-
-from utils.contextMenu import ContextMenu
 
 class Explorer(QTreeWidget):
     def __init__(self, parent, objectIcon, ui):
@@ -23,19 +19,17 @@ class Explorer(QTreeWidget):
     def updateExplorer(self, data):
         self.clear()
         self.items = {}
-        def createItem(x):
-            objectIcon = QIcon()
-            if not self.objectIcon.icon.get(x["@Shape"]):
-                self.showDialogue("error", f"Widget {x['@Shape']} not implemented in self.objectIcon, please report as issue.")
+        def createItem(item):
+            if not self.objectIcon.icon.get(item["@Shape"]):
+                #self.showDialogue("error", f"Widget {item['@Shape']} not implemented in self.objectIcon, please report as issue.")
                 return
-            objectIcon.addFile(self.objectIcon.icon[x["@Shape"]], QSize(), QIcon.Mode.Normal, QIcon.State.Off)
             object = QTreeWidgetItem(root)
-            object.setText(0, x["@Name"])
-            object.setIcon(0, objectIcon)
+            object.setText(0, item["@Name"])
+            object.setIcon(0, QIcon.fromTheme(self.objectIcon.icon[item["@Shape"]]))
             object.setFlags(object.flags() | Qt.ItemFlag.ItemIsEditable)
-            object.setData(0, 100, x["@Shape"])
-            object.setData(0, 101, x["@Name"])
-            self.items[x["@Name"]] = object
+            object.setData(0, 100, item["@Shape"])
+            object.setData(0, 101, item["@Name"])
+            self.items[item["@Name"]] = object
         
         icon = QIcon()
         icon.addFile(u":/Dark/watch.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
@@ -50,10 +44,7 @@ class Explorer(QTreeWidget):
         root.setData(0, 100, "00")
         root.setFlags(root.flags() | Qt.ItemFlag.ItemIsEditable)
         if data["FaceProject"]["Screen"].get("Widget") != None:
-            if type(data["FaceProject"]["Screen"].get("Widget")) == list:
-                for x in data["FaceProject"]["Screen"]["Widget"]:
-                    createItem(x)      
-            else:
-                createItem(data["FaceProject"]["Screen"].get("Widget"))  
+            for x in data["FaceProject"]["Screen"]["Widget"]:
+                createItem(data["FaceProject"]["Screen"]["Widget"][x]) 
             
         self.expandAll()

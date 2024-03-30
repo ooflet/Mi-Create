@@ -770,7 +770,7 @@
       <SourceTriggerEvent Type="3" FaceProgramma_Version="102" Device_Version="1.0.0" UsingNewFileTypeID_En="1"/>
     </EventList>
   </DeviceInfo> 
-  <DeviceInfo Version="1.0.0" Type="9" Name="Mi Band 8" Width="192" Height="490" PixelFormat="0" SupportedFaceTypeList="(1/0/1.0.0)|(2/101/1.0.0)|(3/100/1.0.0)" ScreenShape="RoundedRectangle" Radius="90">
+  <DeviceInfo Version="1.0.0" Type="9" Name="Mi Band 8" Width="192" Height="490" PixelFormat="0" SupportedFaceTypeList="(1/0/1.0.0)|(2/101/1.0.0)|(3/100/1.0.0)" ScreenShape="RoundedRectangle" Radius="95">
     <WidgetList>
       <AnalogClock Shape="27" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" ExcludeSourceDataItems="36"/>
       <CircleProgress Shape="29" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="1" ExcludeSourceDataItems="36"/>

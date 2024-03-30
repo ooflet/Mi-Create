@@ -97,14 +97,14 @@
        <item row="3" column="0">
         <widget class="QLabel" name="label_6">
          <property name="text">
-          <string>Unpack location</string>
+          <string>Project location</string>
          </property>
         </widget>
        </item>
        <item row="1" column="0">
         <widget class="QLabel" name="label_5">
          <property name="text">
-          <string>Watchface binary (.FACE)</string>
+          <string>Watchface binary (.bin, .face)</string>
          </property>
         </widget>
        </item>
@@ -120,7 +120,7 @@
           <string notr="true">QLabel { font-size: 18pt;}</string>
          </property>
          <property name="text">
-          <string>Unpack project...</string>
+          <string>Open Binary...</string>
          </property>
         </widget>
        </item>
@@ -145,71 +145,6 @@
            <normaloff>:/Dark/folder-open.png</normaloff>:/Dark/folder-open.png</iconset>
          </property>
         </widget>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="page">
-      <layout class="QVBoxLayout" name="verticalLayout_2">
-       <property name="topMargin">
-        <number>0</number>
-       </property>
-       <item>
-        <widget class="QLabel" name="label">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QLabel { font-size: 18pt;}</string>
-         </property>
-         <property name="text">
-          <string>Unpack project...</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_2">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string>Unpacking project...</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QProgressBar" name="progressBar">
-         <property name="maximum">
-          <number>0</number>
-         </property>
-         <property name="value">
-          <number>0</number>
-         </property>
-         <property name="textVisible">
-          <bool>false</bool>
-         </property>
-         <property name="invertedAppearance">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
        </item>
       </layout>
      </widget>

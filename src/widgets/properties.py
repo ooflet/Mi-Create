@@ -9,8 +9,6 @@ sys.path.append("..")
 
 import os
 import gettext
-import threading
-import traceback
 import logging
 from typing import Any
 from PyQt6.QtWidgets import (QStyledItemDelegate, QWidget, QFileDialog, QTreeWidget, QFrame, QHeaderView, QPushButton,
@@ -19,6 +17,8 @@ from PyQt6.QtWidgets import (QStyledItemDelegate, QWidget, QFileDialog, QTreeWid
 from PyQt6.QtCore import Qt, pyqtSignal, QPoint, QSize, QModelIndex
 from PyQt6.QtGui import QColor, QPen, QGuiApplication, QIcon, QPalette, QStandardItemModel
 from pprint import pprint
+
+from translate import QCoreApplication
 
 _ = gettext.gettext
 
@@ -154,7 +154,11 @@ class PropertiesWidget(QWidget):
         self.treeWidget.setItemDelegate(GridDelegate())
         self.treeWidget.setStyleSheet("QTreeWidget::item{height:24px;}")
 
+        # self.searchWidget = QLineEdit(self)
+        # self.searchWidget.setPlaceholderText(QCoreApplication.translate("MainWindow", "Search..."))
+
         layout = QVBoxLayout(self)
+        # layout.addWidget(self.searchWidget)
         layout.addWidget(self.treeWidget)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
@@ -227,10 +231,7 @@ class PropertiesWidget(QWidget):
             event.acceptProposedAction()
 
         def onChange(event):
-            if resourceEdit.currentText() in resourceList:
-                self.sendPropertyChangedSignal(srcProperty, resourceEdit.currentText())
-            else:
-                QMessageBox.information(None, "Properties", f"Image not found in resourceList!")
+            self.sendPropertyChangedSignal(srcProperty, resourceEdit.currentText())
 
         resourceEdit = QComboBox(self)
         resourceEdit.setEditable(True)
@@ -276,6 +277,8 @@ class PropertiesWidget(QWidget):
         comboBox.setStyleSheet(self.propertyStyleSheet)
         if editable:
             comboBox.setEditable(True)
+        else:
+            comboBox.setCursor(Qt.CursorShape.PointingHandCursor)
         if selected:
             if not selected.isnumeric():
                 comboBox.setCurrentIndex(items.index(selected))
@@ -331,7 +334,6 @@ class PropertiesWidget(QWidget):
                 categoryItem = self.createCategory(_(key), parent)
                 self.addProperties(property, data, resourceList, categoryItem, device)  # Recursively add sub-categories
             else:
-                print(property["type"])
                 ignorePropertyCreation = False
                 # property
                 propertyValue = None
@@ -460,8 +462,15 @@ class PropertiesWidget(QWidget):
                             break   
                     else:
                         QMessageBox.critical(None, "Properties", f"Data source not found.")
+                        inputWidget = self.createComboBox(self.sourceList[str(device)], False, key, True)
                 if not ignorePropertyCreation:
-                    self.addProperty(key, property["string"], inputWidget, parent)
+                    if property.get("visibleOn") != None:
+                        print(device, property["visibleOn"])
+                        if int(device) in property["visibleOn"]:
+                            self.addProperty(key, property["string"], inputWidget, parent)
+                    else:
+                        self.addProperty(key, property["string"], inputWidget, parent)
+
                 inputWidget = None
 
     def loadProperties(self, properties, data=None, resourceList=None, device=None, scrollTo=None):

@@ -14,8 +14,8 @@
         }
     },
     "Canvas": {
-        "DeviceOutline": {
-            "string": "Device Outline",
+        "ClipDeviceShape": {
+            "string": "Clip to Device Shape",
             "type": "bool",
             "value": true
         },
@@ -23,6 +23,12 @@
             "string": "Antialiasing",
             "type": "bool",
             "value": true
+        },
+        "Interpolation": {
+            "string": "Image Interpolation",
+            "type": "list",
+            "value": "Bilinear",
+            "options": ["Bilinear", "Nearest Neighbour"]
         }
     }
 }
