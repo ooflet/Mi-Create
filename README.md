@@ -16,12 +16,12 @@ Download the latest installer from the [releases](https://github.com/ooflet/Mi-C
 ### Running source code
 If there are no prebuilt packages for your OS, you may opt to run directly from source:
 - Clone repo
-- Install Python version >3.8 & install dependencies through pip: PyQt6, PyQt6-QScintilla, xmltodict, nuitka
+- Install Python version >3.8 & install dependencies through pip: PyQt6, PyQt6-QScintilla, xmltodict
 - Execute main.py
 
 Executing from source however will not create log files, it will output logs to console.
 
-If you would like to build a package for your platform, use Nuitka as there are some Nuitka-specific checks (specifically the `__compiled__` global check in main.py:36).
+If you would like to build a package for your platform, use Nuitka as there are some Nuitka-specific checks (specifically the `__compiled__` global check in main.py).
 
 ### Help
 If you are looking for a tutorial on Mi Create, please view the documentation at https://ooflet.github.io/docs. If you have any further questions that are not covered by the documentation, feel free to ask on the [discussions](https://github.com/ooflet/Mi-Create/discussions) tab. Otherwise, if there is a bug or issue with Mi Create, submit an [issue](https://github.com/ooflet/Mi-Create/issues) report.

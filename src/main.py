@@ -1,10 +1,9 @@
 # Mi Create
-# tostr 2023-2024
+# tostr <ooflet@proton.me>
 
 # TODO
 # Put documentation on code, its a wasteland out there
 # Remove multi-project support in favor of in-line AOD editing (through a toggle)
-# Fix themes
 
 import os
 import sys
@@ -232,7 +231,7 @@ class MainWindow(QMainWindow):
         else:
             self.showFullScreen()
 
-    def getCurrentProject(self):
+    def getCurrentProject(self) -> dict:
         # tab paths are stored in the tabToolTip string.
         # temporary, only for multi-project support
         # this will be replaced in order to remove multi-project support
@@ -707,6 +706,7 @@ class MainWindow(QMainWindow):
                 if type == "undo":
                     currentProject["data"]["FaceProject"]["Screen"]["Widget"].pop(key)   
                 elif type == "redo":
+                    print(currentProject["data"]["FaceProject"]["Screen"]["Widget"])
                     currentProject["data"]["FaceProject"]["Screen"]["Widget"][key] = object
                 currentProject["canvas"].loadObjects(currentProject["data"], currentProject["imageFolder"], self.settings["Canvas"]["Interpolation"]["value"])
                 self.Explorer.updateExplorer(currentProject["data"])
@@ -1133,6 +1133,7 @@ class MainWindow(QMainWindow):
                             except Exception as e:
                                 self.showDialog("error", _("Failed to createNewWorkspace: ") + e, traceback.format_exc())
                         else:
+                            print(project[1], project[2])
                             self.showDialog("error", _('Cannot open project: ')+{project[1]}, project[2])
                     else:
                         self.showDialog("error", _("Failed to create a new project: ") + newProject[1], newProject[2])
@@ -1241,7 +1242,7 @@ class MainWindow(QMainWindow):
                     self.compileUi.buttonBox.setDisabled(False)
 
                 formattedDir = compileDirectory.replace("\\", "/")
-                append(f"!! The .face file is your watchface binary. It is located at {formattedDir}. Rename the file extension to .bin if you have to. !!\n\n")
+                append(f"Please read https://ooflet.github.io/docs/quickstart/testing to see how you can test your project\n\n")
                 process = self.fprjProject.compile(currentProject["path"], compileDirectory, "compiler/compile.exe")
                 process.readyReadStandardOutput.connect(lambda: append(bytearray(process.readAll()).decode("utf-8")))
                 process.finished.connect(lambda: self.compileUi.buttonBox.setDisabled(False))

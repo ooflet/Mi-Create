@@ -15,7 +15,7 @@ from utils.project import watchData
 
 from PyQt6.QtCore import pyqtSignal, QPointF, QSize, QRect, QRectF, Qt
 from PyQt6.QtGui import QPainter, QPainterPath, QPen, QColor, QPixmap, QIcon, QBrush
-from PyQt6.QtWidgets import (QApplication, QGraphicsPathItem, QGraphicsScene, QGraphicsView, QGraphicsItem, QGraphicsRectItem, 
+from PyQt6.QtWidgets import (QWidget, QApplication, QGraphicsPathItem, QGraphicsScene, QGraphicsView, QGraphicsItem, QGraphicsRectItem, 
                             QToolButton, QGraphicsPixmapItem, QMessageBox)
 
 from utils.contextMenu import ContextMenu
@@ -63,21 +63,22 @@ class Canvas(QGraphicsView):
     onObjectChange = pyqtSignal(str, str, object) # hate hacky workarounds, just support any type already Qt
     onObjectPosChange = pyqtSignal()
 
-    def __init__(self, device, antialiasingEnabled, deviceOutlineVisible, ui, parent=None):
+    def __init__(self, device: int, antialiasingEnabled: bool, deviceOutlineVisible: bool, ui: object, parent=None):
         super().__init__(parent)
 
         if antialiasingEnabled:
             self.setRenderHints(QPainter.RenderHint.Antialiasing)
 
-        self.mainWindowUI = ui
+        self.mainWindowUI = ui # used for ContextMenu, it needs window UI to access QActions
         self.widgets = {}
 
-        self.setDragMode(QGraphicsView.DragMode.RubberBandDrag)
-        self.setTransformationAnchor(QGraphicsView.ViewportAnchor.AnchorUnderMouse)
+        self.setDragMode(QGraphicsView.DragMode.RubberBandDrag) # default drag multiselect implementation for now.
+                                                                # need to make custom implementation for more optimizations
+        self.setTransformationAnchor(QGraphicsView.ViewportAnchor.AnchorUnderMouse) # positions scene to zoom under mouse
 
         self.deviceOutlineVisible = deviceOutlineVisible
         self.origin = None
-        self.setAcceptDrops(True)
+        self.setAcceptDrops(True) # just in case i implement image drag & drop
 
         self.zoomValue = 0
 
@@ -88,23 +89,23 @@ class Canvas(QGraphicsView):
 
         self.deviceOutline = DeviceOutline(self.deviceSize)
         
-        self.drawDecorations(deviceOutlineVisible)
+        self.drawDecorations()
 
         self.setScene(self.scene)
 
     def fireObjectPositionChanged(self):
         self.onObjectPosChange.emit()
 
-    def drawDecorations(self, deviceOutlineVisible):
+    def drawDecorations(self):
         insertButton = QToolButton(self)
-        insertButton.setGeometry(20, 20, 38, 25)
+        insertButton.setGeometry(20, 20, 40, 25)
         insertButton.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
         insertButton.setMenu(self.mainWindowUI.menuInsert)
         insertButton.setIcon(QIcon(":Dark/plus.png"))
         insertButton.setIconSize(QSize(18, 18))
         insertButton.setToolTip("Create Widget")
+        insertButton.setText("Create")
         insertButton.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
-
 
     def contextMenuEvent(self, event):
         scenePos = self.mapToScene(event.pos())
@@ -138,7 +139,6 @@ class Canvas(QGraphicsView):
             delta = event.angleDelta().y()
             zoom_factor = 1.25 if delta > 0 else 1 / 1.25
             self.scale(zoom_factor, zoom_factor)
-
         elif modifiers == Qt.KeyboardModifier.AltModifier:
             scroll_delta = event.angleDelta().x()
             scroll_value = self.horizontalScrollBar().value() - scroll_delta
@@ -147,6 +147,7 @@ class Canvas(QGraphicsView):
             scroll_delta = event.angleDelta().y()
             scroll_value = self.verticalScrollBar().value() - scroll_delta
             self.verticalScrollBar().setValue(scroll_value)
+            
 
     def handleObjectSelectionChange(self):
         selected_object = self.getSelectedObject()
@@ -164,7 +165,7 @@ class Canvas(QGraphicsView):
             else:
                 x.setSelected(False)
 
-    def selectObjectsFromPropertyList(self, names):
+    def selectObjectsFromPropertyList(self, names: list):
         for name in names:
             for x in self.items():
                 # data(0) is name
@@ -209,7 +210,8 @@ class Canvas(QGraphicsView):
                 widget.addSecondHand(secImg, i["@SecondImage_rotate_xc"], i["@SecondImage_rotate_yc"], interpolation)
 
             elif i["@Shape"] == "29":
-                dialog = QMessageBox.warning(None, "Confirm", f"The object {i['@Name']} uses the legacy CircleProgress object, it will be automatically converted to the newer CircleProgressPlus object.")
+                #dialog = QMessageBox.warning(None, "Confirm", f"The object {i['@Name']} uses the legacy CircleProgress object, it will be automatically converted to the newer CircleProgressPlus object.")
+                pass
 
             elif i["@Shape"] == "30":    
                 # image
@@ -334,8 +336,13 @@ class BaseWidget(QGraphicsRectItem):
         # Initialize the shape.
         super().__init__(posX, posY, sizeX, sizeY, parent)
         self.setRect(0, 0, sizeX, sizeY)
+        self.setPen(QPen(QColor(0,0,0,0)))
         self.color = color
         self.canvas = canvas
+        self.selectionHighlight = QGraphicsPathItem()
+        self.highlightThickness = 2
+        self.selectionHighlight.setPen(QPen(QColor(0, 205, 255), 2, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin))
+        self.scene().addItem(self.selectionHighlight)
         self.setAcceptHoverEvents(True)
         self.setData(0, name)
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsMovable, True)
@@ -346,7 +353,10 @@ class BaseWidget(QGraphicsRectItem):
 
     def boundingRect(self):
         # Patches bounding box ghosting
-        print("bound")
+        highlightOutline = QPainterPath()
+        highlightRadius = 3
+        highlightOutline.addRoundedRect(self.pos().x(), self.pos().y(), self.rect().width(), self.rect().height(), highlightRadius, highlightRadius)
+        self.selectionHighlight.setPath(highlightOutline)
         outline_width = 2.0  # Adjust this value as needed
         return self.rect().adjusted(-outline_width, -outline_width, outline_width, outline_width)
 
@@ -360,12 +370,12 @@ class BaseWidget(QGraphicsRectItem):
 
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         painter.setBrush(QBrush(self.color))
+        painter.setPen(self.pen())
 
         if self.isSelected():
-            outline_width = 2.0  # Adjust this value as needed
-            painter.setPen(QPen(QColor(0, 205, 255), outline_width, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin))
+            self.selectionHighlight.show()
         else:
-            painter.setPen(QPen(QColor(0, 0, 0, 0), 0, Qt.PenStyle.SolidLine))
+            self.selectionHighlight.hide()
 
         painter.drawRect(self.rect())
 

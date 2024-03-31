@@ -15,6 +15,7 @@ import xmltodict
 import xml
 import xml.dom.minidom as minidom
 
+from copy import deepcopy
 from PyQt6.QtCore import QProcess
 
 supportedOneFileVersion = "1.0"
@@ -109,7 +110,11 @@ class fprjProject:
                     if type(parse["FaceProject"]["Screen"]["Widget"]) == dict:
                         parse["FaceProject"]["Screen"]["Widget"] = [parse["FaceProject"]["Screen"]["Widget"]]
 
-                    parse["FaceProject"]["Screen"]["Widget"] = self.serialise(parse["FaceProject"]["Screen"]["Widget"])
+                    print(parse["FaceProject"]["Screen"]["Widget"])
+
+                    if parse["FaceProject"]["Screen"]["Widget"] != None:
+                        print("serialize")
+                        parse["FaceProject"]["Screen"]["Widget"] = self.serialise(parse["FaceProject"]["Screen"]["Widget"])
 
                     return True, parse, imagesDir
                 else:
@@ -124,11 +129,14 @@ class fprjProject:
 
         return pretty_xml
 
-    def save(self, path, data):
+    def save(self, path, data: dict):
         
-        data["FaceProject"]["Screen"]["Widget"] = self.unserialise(data["FaceProject"]["Screen"]["Widget"])
+        rawdata = deepcopy(data)
+        print(rawdata)
+        rawdata["FaceProject"]["Screen"]["Widget"] = self.unserialise(rawdata["FaceProject"]["Screen"]["Widget"])
+        print(rawdata)
 
-        raw = xmltodict.unparse(data)
+        raw = xmltodict.unparse(rawdata)
         dom = xml.dom.minidom.parseString(raw)
         pretty_xml = dom.toprettyxml()
 
