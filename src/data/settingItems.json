@@ -11,6 +11,11 @@
             "type": "list",
             "value": "English",
             "options": []
+        },
+        "CheckUpdate": {
+            "string": "Check for Updates",
+            "type": "bool",
+            "value": true
         }
     },
     "Canvas": {

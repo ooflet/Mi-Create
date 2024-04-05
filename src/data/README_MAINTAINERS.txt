@@ -1,22 +1,4 @@
 ------------------------------------------------------------------------------------------------
-ABOUT TRANSLATIONS
-------------------------------------------------------------------------------------------------
-
-Translations are done to the 3 required translation files located at the locales folder:
-
-- main.pot
-- properties.pot
-- window.pot
-
-main.pot contains translation data for main.py. This mostly includes dialogs.
-properties.pot contains translation data for properties and property categories.
-window.pot contains translation data for "auto-compiled" windows/dialogs.
-
-Translation can be done by using a program like Poedit
-
-DeviceInfo.db is currently not possible to be translated
-
-------------------------------------------------------------------------------------------------
 ABOUT DeviceInfo.db
 ------------------------------------------------------------------------------------------------
 
@@ -26,7 +8,8 @@ The program does not use every entry in DeviceInfo. It only uses:
 - SRC ID
 - DeviceInfo: Type, Name, Width, Height & Radius
 
-Everything else gets ignored because it is either hardcoded or not used at all.
+Everything else gets ignored because it is either hardcoded in the program itself or not used at 
+all.
 
 Mi Create can recognize hex strings in source ID and automatically convert it so it's cross
 compatible with EasyFace projects.

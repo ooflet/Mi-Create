@@ -201,8 +201,8 @@
         </widget>
        </item>
        <item>
-        <widget class="QTextBrowser" name="textEdit">
-         <property name="openExternalLinks">
+        <widget class="QTextEdit" name="textEdit">
+         <property name="readOnly">
           <bool>true</bool>
          </property>
         </widget>

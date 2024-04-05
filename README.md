@@ -16,7 +16,7 @@ Download the latest installer from the [releases](https://github.com/ooflet/Mi-C
 ### Running source code
 If there are no prebuilt packages for your OS, you may opt to run directly from source:
 - Clone repo
-- Install Python version >3.8 & install dependencies through pip: PyQt6, PyQt6-QScintilla, xmltodict
+- Install Python version >3.8 & install dependencies through pip: PyQt6, PyQt6-QScintilla, xmltodict, requests
 - Execute main.py
 
 Executing from source however will not create log files, it will output logs to console.

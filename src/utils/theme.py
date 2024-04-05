@@ -3,6 +3,7 @@
 import os
 
 from PyQt6.QtGui import QPalette, QColor, QIcon
+from PyQt6.QtWidgets import QMessageBox
 import logging
 import configparser
 import json
@@ -39,13 +40,18 @@ class Theme:
 
     def loadTheme(self, app, themeName):
         themeName = themeName.split(" ")
+
         print(themeName)
         if len(themeName) < 2:
             if not self.themes.get("Default"):
                 raise NameError("No default theme found!")
+            elif not self.themes["Default"]["colorSchemes"].get(themeName[0]):
+                return False
             theme = self.themes["Default"]
             scheme = themeName[0]
         else:
+            if not self.themes.get(themeName[0]) or not self.themes[themeName[0]]["colorSchemes"].get(themeName[1]):
+                return False
             theme = self.themes[themeName[0]]
             scheme = themeName[1]
 
@@ -70,3 +76,5 @@ class Theme:
 
         with open(theme["stylesheet"]) as stylesheet:
             app.setStyleSheet(stylesheet.read())
+
+        return True

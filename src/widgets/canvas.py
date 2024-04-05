@@ -15,8 +15,8 @@ from utils.project import watchData
 
 from PyQt6.QtCore import pyqtSignal, QPointF, QSize, QRect, QRectF, Qt
 from PyQt6.QtGui import QPainter, QPainterPath, QPen, QColor, QPixmap, QIcon, QBrush
-from PyQt6.QtWidgets import (QWidget, QApplication, QGraphicsPathItem, QGraphicsScene, QGraphicsView, QGraphicsItem, QGraphicsRectItem, 
-                            QToolButton, QGraphicsPixmapItem, QMessageBox)
+from PyQt6.QtWidgets import (QApplication, QGraphicsPathItem, QGraphicsScene, QGraphicsView, QGraphicsItem, QGraphicsRectItem, 
+                            QToolButton, QGraphicsPixmapItem, QMessageBox, QRubberBand)
 
 from utils.contextMenu import ContextMenu
 
@@ -72,8 +72,8 @@ class Canvas(QGraphicsView):
         self.mainWindowUI = ui # used for ContextMenu, it needs window UI to access QActions
         self.widgets = {}
 
-        self.setDragMode(QGraphicsView.DragMode.RubberBandDrag) # default drag multiselect implementation for now.
-                                                                # need to make custom implementation for more optimizations
+        self.rubberBand = QRubberBand(QRubberBand.Shape.Rectangle, self)
+
         self.setTransformationAnchor(QGraphicsView.ViewportAnchor.AnchorUnderMouse) # positions scene to zoom under mouse
 
         self.deviceOutlineVisible = deviceOutlineVisible
@@ -104,8 +104,30 @@ class Canvas(QGraphicsView):
         insertButton.setIcon(QIcon(":Dark/plus.png"))
         insertButton.setIconSize(QSize(18, 18))
         insertButton.setToolTip("Create Widget")
-        insertButton.setText("Create")
         insertButton.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
+
+    def mousePressEvent(self, event):
+        if self.items(event.pos()) == []:
+            self.rubberBandOrigin = event.pos()
+            self.rubberBand.setGeometry(QRect(self.rubberBandOrigin, QSize()))
+            self.rubberBand.show()
+        return super().mousePressEvent(event)
+
+    def mouseMoveEvent(self, event):
+        if not self.rubberBand.isHidden():
+            self.rubberBand.setGeometry(QRect(self.rubberBandOrigin, event.pos()).normalized())
+        return super().mouseMoveEvent(event)
+
+    def mouseReleaseEvent(self, event):
+        self.rubberBand.hide()
+        print("--------release----------")
+        for item in self.items(self.rubberBand.geometry()):
+            print(item)
+            if isinstance(item, BaseWidget):
+                print("yep")
+                item.setSelected(True)
+        self.rubberBand.setGeometry(QRect(0,0,0,0))
+        return super().mouseReleaseEvent(event)
 
     def contextMenuEvent(self, event):
         scenePos = self.mapToScene(event.pos())
@@ -125,7 +147,7 @@ class Canvas(QGraphicsView):
 
         if topLevelItem != None:
             if not topLevelItem.isSelected():
-                self.selectObject(topLevelItem.data(0))
+                topLevelItem.setSelected(True)
             menu = ContextMenu("shape", viewPos, self.mainWindowUI)
         else:
             menu = ContextMenu("default", viewPos, self.mainWindowUI)
@@ -309,18 +331,11 @@ class Canvas(QGraphicsView):
             return True, "Success"
         
     def reloadObject(self, objectName, objectData, imageFolder, interpolation):
-        object = None
-        objectZValue = None
-
-        for x in self.items():
-            # data(0) is name
-            if x.data(0) == objectName:
-                object = x
-                objectZValue = object.zValue()
-                break
+        object = self.widgets[objectName]
+        objectZValue = object.zValue()
 
         if object != None:
-            object.scene().removeItem(object)
+            object.delete()
             result, reason = self.createObject(objectZValue, objectData, imageFolder, interpolation)
             if not result:
                 return False, reason 
@@ -364,6 +379,10 @@ class BaseWidget(QGraphicsRectItem):
         super().mouseReleaseEvent(event)
         if event.button() != Qt.MouseButton.RightButton:
             self.canvas.fireObjectPositionChanged()
+    
+    def delete(self):
+        self.scene().removeItem(self.selectionHighlight)
+        self.scene().removeItem(self)
 
     def paint(self, painter, option, widget=None):
         # Paint the node in the graphic view.

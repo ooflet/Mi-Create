@@ -6,8 +6,10 @@
 # Remove multi-project support in favor of in-line AOD editing (through a toggle)
 
 import os
+import select
 import sys
 import shutil
+import requests
 import subprocess
 import platform
 import gettext
@@ -41,7 +43,7 @@ import traceback
 
 from translate import QCoreApplication
 from utils.theme import Theme
-from utils.legacyUpdater import Updater
+from utils.updater import Updater
 from utils.project import watchData, fprjProject
 from utils.history import History, CommandAddWidget, CommandModifyProperty, CommandModifyPosition, CommandModifyProjectData
 from widgets.canvas import Canvas, ObjectIcon
@@ -61,7 +63,7 @@ from dialog.compileDialog_ui import Ui_Dialog as Ui_CompileDialog
 _ = gettext.gettext
 
 currentDir = os.getcwd()
-currentVersion = '0.3-beta'
+currentVersion = 'v0.3'
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -251,24 +253,24 @@ class MainWindow(QMainWindow):
     def loadWindowState(self):
         settings = QSettings("Mi Create", "Workspace")
         if settings.value("usesNewLayout") == None:
-            logging.warn("State and Geometry settings reset due to a new update.")
-            self.showDialog("warning", "Application and DockWidget layouts have been reset due to an update.")
-            settings.setValue("geometry", None)
-            settings.setValue("state", None)
+            logging.warning("State and Geometry settings reset due to a new update.")
+            settings.clear()
             settings.setValue("usesNewLayout", True)
         if settings.value("geometry") == None or settings.value("state") == None:
             return
         self.restoreGeometry(settings.value("geometry"))
         self.restoreState(settings.value("state"))
 
-    def saveSettings(self, retranslate):
+    def saveSettings(self, retranslate, loadSettings=True):
         settings = QSettings("Mi Create", "Settings")
         for property, value in self.stagedChanges:
             settings.setValue(property, value)
 
         self.settingsDialog.close()
-        self.loadSettings()
-        self.loadTheme()
+        print(loadSettings)
+        if loadSettings:
+            self.loadSettings()
+            self.loadTheme()
         if retranslate:
             self.loadLanguage(True)
 
@@ -319,22 +321,29 @@ class MainWindow(QMainWindow):
 
     def launchUpdater(self):
         self.closeWithoutWarning = True
-        self.close()
-        Updater().start()
+        self.hide()
+        Updater()
         sys.exit()
 
     def checkForUpdates(self):
         # Contacts GitHub server for current version and compares installed to current version
-        # I haven't bothered to make this work yet
-        version = currentVersion
+        try:
+            #check for updated version
+            response = requests.get("https://api.github.com/repos/ooflet/Mi-Create/releases/latest")
+            release_info = response.json()
+            version = release_info["tag_name"]
+        except Exception as e:
+            logging.warning(f"Update check resulted in an exception: {e}")
+            return
+
         if version > currentVersion:
             if version[-1] == 'u':
                 self.showDialog('info', _('An urgent update {version} was released! The app will now update.').format(version=version))
                 self.launchUpdater()
             else:
-                reply = QMessageBox.question(self, _('A new update has been found (v{version}). Would you like to update now?').format(version=version), QMessageBox.Yes, QMessageBox.No)
+                reply = self.showDialog("question", _('A new update has been found ({version}). Would you like to update now?').format(version=version), "", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.Yes)
 
-                if reply == QMessageBox.Yes:
+                if reply == QMessageBox.StandardButton.Yes:
                     self.launchUpdater()
 
     def setupThemes(self):
@@ -349,7 +358,13 @@ class MainWindow(QMainWindow):
         #     self.showDialog('info', 'Icons in light theme have not been implemented yet. Sorry!')
         # elif themeName == "Dark":
         #     styles.dark(app)
-        self.themes.loadTheme(app, themeName)
+        success = self.themes.loadTheme(app, themeName)
+        print(success)
+        if not success:
+            self.showDialog("warning", f"An error occured while loading the theme {themeName}. Theme settings have been reset.")
+            self.settings["General"]["Theme"]["value"] = "Dark"
+            self.stagedChanges.append(["Theme", "Dark"])
+            self.saveSettings(False, False)
 
     def createWelcomePage(self):
         Welcome = QWidget()
@@ -396,6 +411,7 @@ class MainWindow(QMainWindow):
                 if os.path.isfile(file):
                     logging.debug("Creating file entry for "+os.path.basename(file))
                     item = QListWidgetItem(QIcon(file), os.path.basename(file))
+                    item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
                     item.setData(0, os.path.basename(file))
                     item.setSizeHint(QSize(64, 64))
                     
@@ -1342,6 +1358,10 @@ if __name__ == "__main__":
     splash = QSplashScreen(pixmap)
     splash.show()
 
+    if sys.argv[1:] == ["--ResetSettings"]:
+        QSettings("Mi Create", "Settings").clear()
+        QSettings("Mi Create", "Workspace").clear()
+
     try:
         main_window = MainWindow()
     except Exception as e:
@@ -1356,6 +1376,7 @@ if __name__ == "__main__":
 
     main_window.show()
     splash.finish(main_window)
-    main_window.checkForUpdates()
+    if main_window.settings["General"]["CheckUpdate"]["value"] == True:
+        main_window.checkForUpdates()
     sys.exit(app.exec())
     
