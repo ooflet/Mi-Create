@@ -4,9 +4,10 @@
 # TODO
 # Put documentation on code, its a wasteland out there
 # Remove multi-project support in favor of in-line AOD editing (through a toggle)
+# Transition welcome screen to QML
 
 import os
-import select
+import time
 import sys
 import shutil
 import requests
@@ -63,7 +64,7 @@ from dialog.compileDialog_ui import Ui_Dialog as Ui_CompileDialog
 _ = gettext.gettext
 
 currentDir = os.getcwd()
-currentVersion = 'v0.3'
+currentVersion = 'v0.4'
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -321,7 +322,6 @@ class MainWindow(QMainWindow):
 
     def launchUpdater(self):
         self.closeWithoutWarning = True
-        self.hide()
         Updater()
         sys.exit()
 
@@ -538,7 +538,7 @@ class MainWindow(QMainWindow):
             else:
                 subprocess.Popen(["xdg-open", currentProject["imageFolder"]])
 
-        #self.ui.resourceList.startDrag = startDrag
+        self.ui.resourceList.startDrag = startDrag
         self.ui.resourceSearch.textChanged.connect(search)
         self.ui.reloadResource.clicked.connect(reloadResource)
         self.ui.addResource.clicked.connect(addResource)
@@ -703,7 +703,7 @@ class MainWindow(QMainWindow):
             return
         
         if not currentProject["data"]["FaceProject"]["Screen"].get("Widget"):
-            currentProject["data"]["FaceProject"]["Screen"]["Widget"] = []
+            currentProject["data"]["FaceProject"]["Screen"]["Widget"] = {}
 
         for key in currentProject["data"]["FaceProject"]["Screen"]["Widget"]:
             if "widget-" in key:
@@ -1361,6 +1361,8 @@ if __name__ == "__main__":
     if sys.argv[1:] == ["--ResetSettings"]:
         QSettings("Mi Create", "Settings").clear()
         QSettings("Mi Create", "Workspace").clear()
+        logging.info("Settings reset")
+        time.sleep(1)
 
     try:
         main_window = MainWindow()

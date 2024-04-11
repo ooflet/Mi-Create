@@ -57,6 +57,13 @@ class DeviceFrame(QGraphicsPathItem):
 class Scene(QGraphicsScene):
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.objectMap = {
+            "X": [],
+            "Y": []
+        }
+
+    def getAdjacentObjects(self, object):
+        pass
 
 class Canvas(QGraphicsView):
     onObjectAdded = pyqtSignal(QPointF, str)
@@ -356,6 +363,7 @@ class BaseWidget(QGraphicsRectItem):
         self.canvas = canvas
         self.selectionHighlight = QGraphicsPathItem()
         self.highlightThickness = 2
+        self.highlightRadius = 3
         self.selectionHighlight.setPen(QPen(QColor(0, 205, 255), 2, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin))
         self.scene().addItem(self.selectionHighlight)
         self.setAcceptHoverEvents(True)
@@ -367,11 +375,10 @@ class BaseWidget(QGraphicsRectItem):
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemClipsChildrenToShape, True)
 
     def boundingRect(self):
-        # Patches bounding box ghosting
-        highlightOutline = QPainterPath()
-        highlightRadius = 3
-        highlightOutline.addRoundedRect(self.pos().x(), self.pos().y(), self.rect().width(), self.rect().height(), highlightRadius, highlightRadius)
-        self.selectionHighlight.setPath(highlightOutline)
+        # Creates outline and patches bounding box ghosting
+        self.highlightOutline = QPainterPath()
+        self.highlightOutline.addRoundedRect(self.pos().x(), self.pos().y(), self.rect().width(), self.rect().height(), self.highlightRadius, self.highlightRadius)
+        self.selectionHighlight.setPath(self.highlightOutline)
         outline_width = 2.0  # Adjust this value as needed
         return self.rect().adjusted(-outline_width, -outline_width, outline_width, outline_width)
 

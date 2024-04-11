@@ -10,6 +10,7 @@ sys.path.append("..")
 import os
 import gettext
 import logging
+import threading
 from typing import Any
 from PyQt6.QtWidgets import (QStyledItemDelegate, QWidget, QFileDialog, QTreeWidget, QFrame, QHeaderView, QPushButton,
                                QDialog, QDialogButtonBox, QVBoxLayout, QListWidgetItem, QTreeWidgetItem, QLineEdit, 

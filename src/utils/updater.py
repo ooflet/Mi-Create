@@ -5,12 +5,14 @@ import threading
 import subprocess
 
 from PyQt6.QtCore import Qt, QSize, QMetaObject
-from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import QDialog, QLabel, QProgressBar, QWidget, QVBoxLayout
+from PyQt6.QtGui import QCloseEvent, QIcon
+from PyQt6.QtWidgets import QDialog, QLabel, QProgressBar, QWidget, QVBoxLayout, QMessageBox
 
 class Updater(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.quitWithoutMsg = False
+
         self.setWindowTitle("Updater")
         self.setWindowIcon(QIcon(":Images/MiCreate48x48.png"))
         self.resize(500, 300)
@@ -35,8 +37,19 @@ class Updater(QDialog):
         self.widgetLayout.addWidget(self.progress)
         self.setLayout(self.widgetLayout)
         self.downloadThread = threading.Thread(target=self.startDownload, args=[self.startInstall])
+        self.downloadThread.daemon = True
         self.downloadThread.start()
         self.exec()
+
+    def closeEvent(self, event):
+        if self.quitWithoutMsg:
+            event.acccept()
+        else:
+            response = QMessageBox.question(self, 'Updater', "Cancel installation and quit?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+            if response == QMessageBox.StandardButton.Yes:
+                event.accept()
+            else:
+                event.ignore()
 
     def startDownload(self, callback):
         url = "https://github.com/ooflet/Mi-Create/releases/latest/download/setup.exe"

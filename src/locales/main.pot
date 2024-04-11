@@ -20,7 +20,7 @@ msgstr ""
 msgid "An urgent update {version} was released! The app will now update."
 msgstr ""
 
-msgid "A new update has been found (v{version}). Would you like to update now?"
+msgid "A new update has been found ({version}). Would you like to update now?"
 msgstr ""
 
 msgid "Widget {shape} not implemented in ObjectIcon(), please report as issue."

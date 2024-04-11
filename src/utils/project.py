@@ -85,6 +85,8 @@ class fprjProject:
     def serialise(self, widgetList):
         # Serialise widgets so its faster to access
         widgetDict = {}
+        if widgetList == None:
+            return widgetDict
         for widget in widgetList:
             if widgetDict.get(widget["@Name"]):
                 return False, "Duplicate widget name!", f"Cannot serialise widget {widget['@Name']} because there already is another widget named the same"
@@ -110,11 +112,9 @@ class fprjProject:
                     if type(parse["FaceProject"]["Screen"]["Widget"]) == dict:
                         parse["FaceProject"]["Screen"]["Widget"] = [parse["FaceProject"]["Screen"]["Widget"]]
 
-                    print(parse["FaceProject"]["Screen"]["Widget"])
+                    parse["FaceProject"]["Screen"]["Widget"] = self.serialise(parse["FaceProject"]["Screen"]["Widget"])
 
-                    if parse["FaceProject"]["Screen"]["Widget"] != None:
-                        print("serialize")
-                        parse["FaceProject"]["Screen"]["Widget"] = self.serialise(parse["FaceProject"]["Screen"]["Widget"])
+                    print(parse["FaceProject"]["Screen"]["Widget"], parse)
 
                     return True, parse, imagesDir
                 else:
