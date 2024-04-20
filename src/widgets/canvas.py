@@ -13,9 +13,9 @@ from tracemalloc import start
 sys.path.append("..")
 from utils.project import watchData
 
-from PyQt6.QtCore import pyqtSignal, QPointF, QSize, QRect, QRectF, Qt
+from PyQt6.QtCore import pyqtSignal, QPointF, QSize, QRect, QRectF, QLineF, Qt
 from PyQt6.QtGui import QPainter, QPainterPath, QPen, QColor, QPixmap, QIcon, QBrush
-from PyQt6.QtWidgets import (QApplication, QGraphicsPathItem, QGraphicsScene, QGraphicsView, QGraphicsItem, QGraphicsRectItem, 
+from PyQt6.QtWidgets import (QApplication, QGraphicsPathItem, QGraphicsScene, QGraphicsSceneMouseEvent, QGraphicsView, QGraphicsItem, QGraphicsRectItem, 
                             QToolButton, QGraphicsPixmapItem, QMessageBox, QRubberBand)
 
 from utils.contextMenu import ContextMenu
@@ -57,13 +57,84 @@ class DeviceFrame(QGraphicsPathItem):
 class Scene(QGraphicsScene):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.objectMap = {
+        self.positionMap = {
             "X": [],
             "Y": []
         }
+        self.posLines = []
 
-    def getAdjacentObjects(self, object):
-        pass
+    def updatePosMap(self):
+        self.positionMap = {"X":[], "Y":[]}
+        for item in self.items():
+            if isinstance(item, BaseWidget):
+                self.positionMap["X"].append(item.pos().x())
+                self.positionMap["X"].append(item.pos().x() + item.rect().width())
+                self.positionMap["Y"].append(item.pos().y())
+                self.positionMap["Y"].append(item.pos().y() + item.rect().height())
+
+    def getAdjacentPos(self, object: QGraphicsItem):
+        catchRange = 10 # pixel offset before the object gets snapped
+        adjacentPosList = []
+        pos = [None, None, None, None] # x1, y1, x2, y2
+
+        """
+        x1, y1  •───────────┐
+                │           │
+                │           │
+                │           │
+                │           │
+                └───────────• x2, y2
+        """
+
+        # filter function
+        def posFilter(x, objPos):
+            if x - catchRange <= objPos <= x + catchRange:
+                return True
+            else:
+                return False
+    
+        # filter both X & Y pos and place in a list
+        adjacentPosList1 = [list(filter(lambda x, objPos=object.pos().x(): posFilter(x, objPos), self.positionMap["X"])), list(filter(lambda x, objPos=object.pos().y(): posFilter(x, objPos), self.positionMap["Y"]))]
+        adjacentPosList2 = [list(filter(lambda x, objPos=object.pos().x()+object.rect().width(): posFilter(x, objPos), self.positionMap["X"])), list(filter(lambda x, objPos=object.pos().y()+object.rect().height(): posFilter(x, objPos), self.positionMap["Y"]))]
+
+        if adjacentPosList1[0] != []:
+            pos[0] = (min(adjacentPosList1[0], key=lambda x:abs(x-object.pos().x())))
+
+        if adjacentPosList1[1] != []:
+            pos[1] = (min(adjacentPosList1[1], key=lambda x:abs(x-object.pos().y())))
+
+        if adjacentPosList2[0] != []:
+            pos[2] = (min(adjacentPosList2[0], key=lambda x:abs(x-object.pos().x()+object.rect().width())))
+
+        if adjacentPosList2[1] != []:
+            pos[3] = (min(adjacentPosList2[1], key=lambda x:abs(x-object.pos().y()+object.rect().height())))
+
+        print(pos)
+        return pos
+    
+    def drawSnapLines(self, pos):
+        for line in self.posLines:
+            self.removeItem(line)
+
+        self.posLines.clear()
+
+        if pos[0] != None:
+            self.posLines.append(self.addRect(pos[0], 0, 1, self.sceneRect().height(), QPen(Qt.PenStyle.NoPen), self.palette().highlight()))
+
+        if pos[1] != None:
+            self.posLines.append(self.addRect(0, pos[1], self.sceneRect().width(), 1, QPen(Qt.PenStyle.NoPen), self.palette().highlight()))
+        
+        if pos[2] != None:
+            self.posLines.append(self.addRect(pos[2], 0, 1, self.sceneRect().height(), QPen(Qt.PenStyle.NoPen), self.palette().highlight()))
+
+        if pos[3] != None:
+            self.posLines.append(self.addRect(0, pos[3], self.sceneRect().width(), 1, QPen(Qt.PenStyle.NoPen), self.palette().highlight()))
+
+    def clearSnapLines(self):
+        for line in self.posLines:
+            self.removeItem(line)
+
+        self.posLines.clear()
 
 class Canvas(QGraphicsView):
     onObjectAdded = pyqtSignal(QPointF, str)
@@ -91,16 +162,17 @@ class Canvas(QGraphicsView):
 
         self.deviceSize = watchData().modelSize[str(device)]
 
-        self.scene = Scene()
-        self.scene.setSceneRect(0,0,self.deviceSize[0],self.deviceSize[1])
+        self.graphicsScene = Scene()
+        self.graphicsScene.setSceneRect(0,0,self.deviceSize[0],self.deviceSize[1])
 
         self.deviceOutline = DeviceOutline(self.deviceSize)
         
         self.drawDecorations()
 
-        self.setScene(self.scene)
+        self.setScene(self.graphicsScene)
 
     def fireObjectPositionChanged(self):
+        self.scene().updatePosMap()
         self.onObjectPosChange.emit()
 
     def drawDecorations(self):
@@ -114,7 +186,7 @@ class Canvas(QGraphicsView):
         insertButton.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
 
     def mousePressEvent(self, event):
-        if self.items(event.pos()) == []:
+        if not any(isinstance(item, BaseWidget) for item in self.items(event.pos())):
             self.rubberBandOrigin = event.pos()
             self.rubberBand.setGeometry(QRect(self.rubberBandOrigin, QSize()))
             self.rubberBand.show()
@@ -127,18 +199,15 @@ class Canvas(QGraphicsView):
 
     def mouseReleaseEvent(self, event):
         self.rubberBand.hide()
-        print("--------release----------")
         for item in self.items(self.rubberBand.geometry()):
-            print(item)
             if isinstance(item, BaseWidget):
-                print("yep")
                 item.setSelected(True)
         self.rubberBand.setGeometry(QRect(0,0,0,0))
         return super().mouseReleaseEvent(event)
 
     def contextMenuEvent(self, event):
         scenePos = self.mapToScene(event.pos())
-        view = self.scene.views()[0]  # Get the first view
+        view = self.scene().views()[0]  # Get the first view
         viewPos = view.mapToGlobal(view.mapFromScene(scenePos))
 
         topLevelItem = None
@@ -154,6 +223,7 @@ class Canvas(QGraphicsView):
 
         if topLevelItem != None:
             if not topLevelItem.isSelected():
+                self.scene().clearSelection()
                 topLevelItem.setSelected(True)
             menu = ContextMenu("shape", viewPos, self.mainWindowUI)
         else:
@@ -187,22 +257,17 @@ class Canvas(QGraphicsView):
         return self.widgets.get(name)
 
     def selectObject(self, name):
-        for x in self.items():
-            # data(0) is name
-            if x.data(0) == name:
-                x.setSelected(True)
-            else:
-                x.setSelected(False)
+        if name == None:
+            return
+        self.scene().clearSelection()
+        self.widgets[name].setSelected(True)
 
-    def selectObjectsFromPropertyList(self, names: list):
-        for name in names:
-            for x in self.items():
-                # data(0) is name
-                if x.data(0) == name["Name"]:
-                    x.setSelected(True)
+    def selectObjectsFromPropertyList(self, items: list):
+        for item in items:
+            self.widgets[item["Name"]].setSelected(True)
 
     def getSelectedObjects(self):
-        return self.scene.selectedItems()
+        return self.scene().selectedItems()
 
     def onObjectDeleted(self, name, widget):
         self.objectDeleted.emit(name)
@@ -256,7 +321,7 @@ class Canvas(QGraphicsView):
                     # Create imagewidget    
                     widget.addImage(image, 0, 0, 0, interpolation)
                 else:
-                    self.scene.addItem(widget)
+                    self.scene().addItem(widget)
                     widget.representNoImage()
                 
             elif i["@Shape"] == "31":
@@ -312,7 +377,7 @@ class Canvas(QGraphicsView):
                 return False, f"Widget {i['@Shape']} not implemented in canvas, please report as issue."
             
             self.widgets[i["@Name"]] = widget
-            self.scene.addItem(widget)
+            self.scene().addItem(widget)
             return True, "Success"
         except Exception as e:
             QMessageBox().critical(None, "Error", f"Unable to create object {i['@Name']}: {traceback.format_exc()}")
@@ -321,9 +386,9 @@ class Canvas(QGraphicsView):
     def loadObjects(self, data, imageFolder, interpolation):
         self.frame = DeviceFrame(self.deviceSize)
         if data["FaceProject"]["Screen"].get("Widget") != None:
-            self.scene.clear()
+            self.scene().clear()
             self.widgets.clear()
-            self.scene.addItem(self.frame)
+            self.scene().addItem(self.frame)
 
             widgets = data["FaceProject"]["Screen"]["Widget"]
             if type(widgets) == dict:
@@ -331,10 +396,11 @@ class Canvas(QGraphicsView):
                     result, reason = self.createObject(index, widgets[key], imageFolder, interpolation)
                     if not result:
                         return False, reason
+                self.scene().updatePosMap()
                 return True, "Success"
             
         else:
-            self.scene.addItem(self.frame)
+            self.scene().addItem(self.frame)
             return True, "Success"
         
     def reloadObject(self, objectName, objectData, imageFolder, interpolation):
@@ -347,6 +413,7 @@ class Canvas(QGraphicsView):
             if not result:
                 return False, reason 
             else:
+                self.scene().updatePosMap()
                 return True, "Success"
         
 class BaseWidget(QGraphicsRectItem):
@@ -359,13 +426,15 @@ class BaseWidget(QGraphicsRectItem):
         super().__init__(posX, posY, sizeX, sizeY, parent)
         self.setRect(0, 0, sizeX, sizeY)
         self.setPen(QPen(QColor(0,0,0,0)))
+        self.size = QPointF(sizeX, sizeY)
         self.color = color
         self.canvas = canvas
-        self.selectionHighlight = QGraphicsPathItem()
+        self.selectionPos = None
+        self.selectionPath = QGraphicsPathItem()
+        self.selectionPainterPath = QPainterPath()
         self.highlightThickness = 2
         self.highlightRadius = 3
-        self.selectionHighlight.setPen(QPen(QColor(0, 205, 255), 2, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin))
-        self.scene().addItem(self.selectionHighlight)
+        self.scene().addItem(self.selectionPath)
         self.setAcceptHoverEvents(True)
         self.setData(0, name)
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsMovable, True)
@@ -376,19 +445,50 @@ class BaseWidget(QGraphicsRectItem):
 
     def boundingRect(self):
         # Creates outline and patches bounding box ghosting
-        self.highlightOutline = QPainterPath()
-        self.highlightOutline.addRoundedRect(self.pos().x(), self.pos().y(), self.rect().width(), self.rect().height(), self.highlightRadius, self.highlightRadius)
-        self.selectionHighlight.setPath(self.highlightOutline)
-        outline_width = 2.0  # Adjust this value as needed
+        if self.selectionPos == None or self.pos().x() != self.selectionPos.x() or self.pos().y() != self.selectionPos.y():
+            self.selectionPos = self.pos()
+            self.selectionPainterPath.clear()
+            self.selectionPainterPath.addRoundedRect(self.pos().x(), self.pos().y(), self.rect().width(), self.rect().height(), self.highlightRadius, self.highlightRadius)
+            self.selectionPath.setPath(self.selectionPainterPath)
+            self.selectionPath.setPen(QPen(self.scene().palette().highlight(), 2, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin))
+
+        outline_width = 2  # Adjust this value as needed
         return self.rect().adjusted(-outline_width, -outline_width, outline_width, outline_width)
+    
+    def getRect(self):
+        return self.rect()
+    
+    def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent):
+        super().mouseMoveEvent(event)
+
+        # handle snap
+        snapPos = self.scene().getAdjacentPos(self)
+
+        if snapPos == [None, None]:
+            return
+        
+        self.scene().drawSnapLines(snapPos)
+
+        if snapPos[0] != None:
+            self.setX(snapPos[0])
+            
+        if snapPos[1] != None:
+            self.setY(snapPos[1])
+
+        if snapPos[2] != None:
+            self.setX(snapPos[2] - self.rect().width())
+            
+        if snapPos[3] != None:
+            self.setY(snapPos[3] - self.rect().height())
 
     def mouseReleaseEvent(self, event):
         super().mouseReleaseEvent(event)
+        self.scene().clearSnapLines()
         if event.button() != Qt.MouseButton.RightButton:
             self.canvas.fireObjectPositionChanged()
     
     def delete(self):
-        self.scene().removeItem(self.selectionHighlight)
+        self.scene().removeItem(self.selectionPath)
         self.scene().removeItem(self)
 
     def paint(self, painter, option, widget=None):
@@ -399,9 +499,9 @@ class BaseWidget(QGraphicsRectItem):
         painter.setPen(self.pen())
 
         if self.isSelected():
-            self.selectionHighlight.show()
+            self.selectionPath.show()
         else:
-            self.selectionHighlight.hide()
+            self.selectionPath.hide()
 
         painter.drawRect(self.rect())
 

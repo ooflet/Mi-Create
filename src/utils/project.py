@@ -82,19 +82,20 @@ class fprjProject:
         except Exception as e:
             return False, str(e), traceback.format_exc()
         
-    def serialise(self, widgetList):
-        # Serialise widgets so its faster to access
+    def formatToKeys(self, widgetList):
+        # Format list to dict for fast access
+        # Uses the @Name property for the key
         widgetDict = {}
         if widgetList == None:
             return widgetDict
         for widget in widgetList:
             if widgetDict.get(widget["@Name"]):
-                return False, "Duplicate widget name!", f"Cannot serialise widget {widget['@Name']} because there already is another widget named the same"
+                return False, "Duplicate widget name!", f"Cannot format {widget['@Name']} because there already is another widget named the same"
             widgetDict[widget["@Name"]] = widget
         return widgetDict
     
-    def unserialise(self, widgets):
-        # Unserialise widgets to a list
+    def formatToList(self, widgets):
+        # Format dict to list
         widgetList = []
         for widget in widgets:
             widgetList.append(widgets[widget])
@@ -107,12 +108,15 @@ class fprjProject:
             with open(xml_path, 'r', encoding="utf8") as project:
                 xmlsource = project.read()
                 parse = xmltodict.parse(xmlsource)
-                if parse["FaceProject"]:
+                print(parse)
+                if parse.get("FaceProject"):
                     imagesDir = os.path.join(os.path.dirname(path), "images")
+                    if not parse["FaceProject"]["Screen"].get("Widget"):
+                        parse["FaceProject"]["Screen"]["Widget"] = []
                     if type(parse["FaceProject"]["Screen"]["Widget"]) == dict:
                         parse["FaceProject"]["Screen"]["Widget"] = [parse["FaceProject"]["Screen"]["Widget"]]
 
-                    parse["FaceProject"]["Screen"]["Widget"] = self.serialise(parse["FaceProject"]["Screen"]["Widget"])
+                    parse["FaceProject"]["Screen"]["Widget"] = self.formatToKeys(parse["FaceProject"]["Screen"]["Widget"])
 
                     print(parse["FaceProject"]["Screen"]["Widget"], parse)
 
@@ -133,7 +137,7 @@ class fprjProject:
         
         rawdata = deepcopy(data)
         print(rawdata)
-        rawdata["FaceProject"]["Screen"]["Widget"] = self.unserialise(rawdata["FaceProject"]["Screen"]["Widget"])
+        rawdata["FaceProject"]["Screen"]["Widget"] = self.formatToList(rawdata["FaceProject"]["Screen"]["Widget"])
         print(rawdata)
 
         raw = xmltodict.unparse(rawdata)

@@ -18,7 +18,7 @@ import gettext
 os.chdir(os.path.dirname(os.path.realpath(__file__))) # switch working directory to program location
                                                       # so that data files can be found
 
-from PyQt6.QtWidgets import (QMainWindow, QDialog, QInputDialog, QMessageBox, QApplication, QGraphicsScene, QPushButton, 
+from PyQt6.QtWidgets import (QMainWindow, QDialog, QInputDialog, QMessageBox, QApplication, QGraphicsScene, QProgressBar, 
                                QDialogButtonBox, QTreeWidgetItem, QFileDialog, QToolButton, QToolBar, QWidget, QVBoxLayout, 
                                QFrame, QColorDialog, QFontDialog, QSplashScreen, QGridLayout, QLabel, QListWidgetItem,
                                QSpacerItem, QSizePolicy, QAbstractItemView, QUndoView, QTextBrowser, QRubberBand)
@@ -58,7 +58,6 @@ import resources.icons_rc # resource import required because it sets up the icon
 
 from window_ui import Ui_MainWindow
 from dialog.newProject_ui import Ui_Dialog as Ui_NewProject
-from dialog.resourceDialog_ui import Ui_Dialog as Ui_ResourceDialog
 from dialog.compileDialog_ui import Ui_Dialog as Ui_CompileDialog
 
 _ = gettext.gettext
@@ -205,7 +204,7 @@ class MainWindow(QMainWindow):
             logging.debug("-- Exiting Mi Create --")
             currentProject = self.getCurrentProject()
             if not currentProject == None and currentProject.get("canvas"):
-                currentProject["canvas"].scene.selectionChanged.disconnect()
+                currentProject["canvas"].scene().selectionChanged.disconnect()
             logging.debug("Saving Window State")
             self.saveWindowState()
             logging.debug("Quitting")
@@ -605,6 +604,12 @@ class MainWindow(QMainWindow):
                         self.showDialog("info", "Another widget has this name! Please change it to something else.")
                         return
                     else:
+                        # need to do this hack, otherwise order gets messed up
+                        # i really need to stop using xmltodict, but its too engrained into the code
+                        # that it becomes too hard to replace without breaking the hell out of everything
+                        self.fprjProject.formatToList(currentProject["data"]["FaceProject"]["Screen"]["Widget"])
+                        currentProject["data"]["FaceProject"]["Screen"]["Widget"][value] = currentItem
+                        del currentProject["data"]["FaceProject"]["Screen"]["Widget"][currentItem[property]]
                         currentItem[property] = value
                 elif isinstance(value, bool):
                     if value == True:
@@ -712,8 +717,8 @@ class MainWindow(QMainWindow):
         defaultScaffold = json.loads(self.defaultSource)
         widgetData = defaultScaffold[id]
         widgetData["@Name"] = "widget-" + str(count)
-        widgetData["@X"] = int(currentProject["canvas"].scene.sceneRect().width()/2 - int(widgetData["@Width"])/2)
-        widgetData["@Y"] = int(currentProject["canvas"].scene.sceneRect().height()/2 - int(widgetData["@Height"])/2)
+        widgetData["@X"] = int(currentProject["canvas"].scene().sceneRect().width()/2 - int(widgetData["@Width"])/2)
+        widgetData["@Y"] = int(currentProject["canvas"].scene().sceneRect().height()/2 - int(widgetData["@Height"])/2)
         self.Explorer.updateExplorer(currentProject["data"])
         if self.ignoreHistoryInvoke:
             self.ignoreHistoryInvoke = False
@@ -747,9 +752,9 @@ class MainWindow(QMainWindow):
         prevData = currentProject["data"]["FaceProject"]["Screen"]["Widget"]
         newData = prevData.copy()
 
-        newData = self.fprjProject.unserialise(newData)
+        newData = self.fprjProject.formatToList(newData)
 
-        for index, obj in enumerate(self.fprjProject.unserialise(prevData)):
+        for index, obj in enumerate(self.fprjProject.formatToList(prevData)):
             print(obj["@Name"], currentCanvasSelected)
             if obj["@Name"] in currentCanvasSelected:
                 newData.pop(newData.index(obj))
@@ -762,7 +767,7 @@ class MainWindow(QMainWindow):
                 elif changeType == "bottom":
                     newData.insert(0, obj)
 
-        newData = self.fprjProject.serialise(newData)
+        newData = self.fprjProject.formatToKeys(newData)
 
         def commandFunc(data):
             projectWidgets = currentProject["data"]["FaceProject"]["Screen"]["Widget"]
@@ -865,7 +870,7 @@ class MainWindow(QMainWindow):
         if currentProject == None or not currentProject.get("canvas") or self.selectionDebounce:
             return
 
-        for item in currentProject["canvas"].scene.selectedItems():
+        for item in currentProject["canvas"].scene().selectedItems():
             currentCanvasSelected.append(item.data(0))
 
         for item in self.Explorer.selectedItems():
@@ -984,7 +989,7 @@ class MainWindow(QMainWindow):
 
         # Create the project
         canvas.setAcceptDrops(True)
-        canvas.scene.selectionChanged.connect(lambda: self.updateProjectSelections("canvas"))
+        canvas.scene().selectionChanged.connect(lambda: self.updateProjectSelections("canvas"))
         canvas.onObjectChange.connect(propertyChange)
         canvas.onObjectPosChange.connect(posChange)
 
@@ -1286,7 +1291,7 @@ class MainWindow(QMainWindow):
             return
         
         data = deepcopy(currentProject["data"])
-        data["FaceProject"]["Screen"]["Widget"] = self.fprjProject.unserialise(data["FaceProject"]["Screen"]["Widget"])
+        data["FaceProject"]["Screen"]["Widget"] = self.fprjProject.formatToList(data["FaceProject"]["Screen"]["Widget"])
 
         pprint(currentProject.get("data"))
 
@@ -1310,7 +1315,7 @@ class MainWindow(QMainWindow):
 
     def showAboutWindow(self):
         dialog = QMessageBox(self)
-        dialog.setText(f'<html><head/><body><p>Mi Create v{currentVersion}<br/><a href="https://github.com/ooflet/Mi-Create/"><span style=" text-decoration: underline; color:#55aaff;">https://github.com/ooflet/Mi-Create/</span></a></p><p>tostr 2024</p></body></html>')
+        dialog.setText(f'<html><head/><body><p>Mi Create {currentVersion}<br/><a href="https://github.com/ooflet/Mi-Create/"><span style=" text-decoration: underline; color:#55aaff;">https://github.com/ooflet/Mi-Create/</span></a></p><p>tostr 2024</p></body></html>')
         dialog.setIconPixmap(QPixmap(":/Images/MiCreate48x48.png"))
         dialog.setWindowTitle("About Mi Create")
         dialog.exec()
@@ -1320,7 +1325,6 @@ class MainWindow(QMainWindow):
         dialog.setText('<html><head/><body><p><span style=" text-decoration: underline;">Third Party Notices</span></p><p><a href="https://www.riverbankcomputing.com/software/pyqt/"><span style=" text-decoration: underline; color:#55aaff;"> Qt6 + PyQt6</span></a> - Under GPLv3 License<br/><a href="https://lucide.dev"><span style=" text-decoration: underline; color:#55aaff;">Lucide Icons</span></a> - Under MIT License<br/>m0tral\'s Compiler - Under explicit permission</p></body></html>')
         dialog.setWindowTitle("Third Party Notices")
         dialog.exec()
-        self.launchUpdater()
 
     def showDialog(self, type, text, detailedText="", buttons=None, defaultButton=None):
         MessageBox = QMessageBox(self)

@@ -1,0 +1,4 @@
+PyQt6
+PyQt6-QScintilla
+xmltodict
+requests
