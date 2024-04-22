@@ -240,3 +240,16 @@ class fprjOneFile:
                     return False, "fprjOneFile version unsupported!", f"Project version {data['version']} > Supported version {supportedOneFileVersion}"
         except Exception as e:
             return False, str(e), traceback.format_exc()
+        
+class NewFormat:
+    def load(folder):
+        # check all directories are there
+        # unfortunately, no mac os support just yet
+
+        # TODO
+        # Get manifest.xml parsed properly
+        # Use minidom instead of xmltodict
+
+        logging.info("Opening "+folder)
+
+        logging.info("Parsing ")

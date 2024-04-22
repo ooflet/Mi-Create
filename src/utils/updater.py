@@ -1,3 +1,8 @@
+# Native Qt Updater
+# tostr 2024
+
+# Created this to replace the redundant Tkinter based updater
+
 import os
 import requests
 import tempfile
@@ -5,13 +10,13 @@ import threading
 import subprocess
 
 from PyQt6.QtCore import Qt, QSize, QMetaObject
-from PyQt6.QtGui import QCloseEvent, QIcon
-from PyQt6.QtWidgets import QDialog, QLabel, QProgressBar, QWidget, QVBoxLayout, QMessageBox
+from PyQt6.QtGui import QIcon
+from PyQt6.QtWidgets import QDialog, QLabel, QProgressBar, QVBoxLayout, QMessageBox
 
 class Updater(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.quitWithoutMsg = False
+        self.installComplete = False
 
         self.setWindowTitle("Updater")
         self.setWindowIcon(QIcon(":Images/MiCreate48x48.png"))
@@ -42,8 +47,8 @@ class Updater(QDialog):
         self.exec()
 
     def closeEvent(self, event):
-        if self.quitWithoutMsg:
-            event.acccept()
+        if self.installComplete:
+            event.accept()
         else:
             response = QMessageBox.question(self, 'Updater', "Cancel installation and quit?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
             if response == QMessageBox.StandardButton.Yes:
@@ -83,4 +88,5 @@ class Updater(QDialog):
         self.progress.setRange(0, 0)
         self.status.setText("Installing...")
         subprocess.run([self.temp_file, "/verysilent"])
+        self.installComplete = True
         QMetaObject.invokeMethod(self, "close", Qt.ConnectionType.DirectConnection)

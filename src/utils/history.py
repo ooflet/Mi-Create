@@ -1,3 +1,8 @@
+# History System
+# tostr 2024
+
+# Uses Qt's Command-based history system
+
 import logging
 from typing import Any
 from PyQt6.QtGui import QUndoCommand, QUndoStack

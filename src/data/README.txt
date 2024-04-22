@@ -40,13 +40,14 @@ Each property contains keys identifying important things:
 "properties": {
    "Property Category": {
       "@SourcePropertyName": {
-         string = "Property Name",
-         type = "Property Type",
-         value = "Fallback Value",
-         min = "Minimum Value",
-         options = "["Combobox", "List", "Array"]"
-         max = "Maximum Value",
-         visibleOn = [1, 2]
+         "string": "Property Name",
+         "type": "Property Type",
+         "value": "Fallback Value",
+         "min": "Minimum Value",
+         "options": "["Combobox", "List", "Array"]"
+         "max": "Maximum Value",
+         "enabledOn": ["@SourcePropertyName", true]
+         "visibleOn": [1, 2]
       }
    }
 }
@@ -71,7 +72,9 @@ The list of types are:
   value is optional and you can leave it empty.
 - "min" & "max" both identify min and max range for int properties.
 - "options" contins an array of a combobox items.
-- "visibleOn" contains a list of device IDs to show the property on
+- "enabledOn" contains a property which controls if the current property will be enabled or
+  disabled based on the value provided in the second argument.
+- "visibleOn" contains a list of device IDs to show the property on.
 
 
 Both Property Category and Property Name get automatically translated to properties.mo

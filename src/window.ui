@@ -100,7 +100,7 @@
     </property>
     <addaction name="actionNewFile"/>
     <addaction name="actionOpenFile"/>
-    <addaction name="actionOpen_Binary"/>
+    <addaction name="actionOpen_NewFormat"/>
     <addaction name="separator"/>
     <addaction name="actionSave"/>
     <addaction name="separator"/>
@@ -356,127 +356,127 @@
    <addaction name="actionBuild"/>
   </widget>
   <widget class="QDockWidget" name="dockWidget">
-    <property name="minimumSize">
-     <size>
-      <width>200</width>
-      <height>262</height>
-     </size>
-    </property>
-    <property name="windowTitle">
-     <string>Resources</string>
-    </property>
-    <attribute name="dockWidgetArea">
-     <number>1</number>
-    </attribute>
-    <widget class="QWidget" name="dockWidgetContents_3">
-     <layout class="QGridLayout" name="gridLayout_3">
-      <property name="leftMargin">
-       <number>0</number>
-      </property>
-      <property name="topMargin">
-       <number>0</number>
-      </property>
-      <property name="rightMargin">
-       <number>0</number>
-      </property>
-      <property name="bottomMargin">
-       <number>0</number>
-      </property>
-      <property name="spacing">
-       <number>2</number>
-      </property>
-      <item row="2" column="4">
-       <widget class="QToolButton" name="reloadResource">
-        <property name="text">
-         <string>Reload</string>
-        </property>
-        <property name="icon">
-         <iconset resource="resources/icons.qrc">
-          <normaloff>:/Dark/refresh-cw.png</normaloff>:/Dark/refresh-cw.png</iconset>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="6">
-       <widget class="QToolButton" name="openResourceFolder">
-        <property name="text">
-         <string>...</string>
-        </property>
-        <property name="icon">
-         <iconset resource="resources/icons.qrc">
-          <normaloff>:/Dark/folder.png</normaloff>:/Dark/folder.png</iconset>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0" colspan="7">
-       <widget class="QLineEdit" name="resourceSearch">
-        <property name="inputMask">
-         <string/>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="echoMode">
-         <enum>QLineEdit::Normal</enum>
-        </property>
-        <property name="placeholderText">
-         <string>Search...</string>
-        </property>
-        <property name="clearButtonEnabled">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0" colspan="7">
-       <widget class="QListWidget" name="resourceList">
-        <property name="frameShape">
-         <enum>QFrame::NoFrame</enum>
-        </property>
-        <property name="showDropIndicator" stdset="0">
-         <bool>false</bool>
-        </property>
-        <property name="dragEnabled">
-         <bool>true</bool>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>64</width>
-          <height>64</height>
-         </size>
-        </property>
-        <property name="flow">
-         <enum>QListView::TopToBottom</enum>
-        </property>
-        <property name="isWrapping" stdset="0">
-         <bool>false</bool>
-        </property>
-        <property name="resizeMode">
-         <enum>QListView::Adjust</enum>
-        </property>
-        <property name="viewMode">
-         <enum>QListView::ListMode</enum>
-        </property>
-        <property name="uniformItemSizes">
-         <bool>false</bool>
-        </property>
-        <property name="wordWrap">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="5">
-       <widget class="QToolButton" name="addResource">
-        <property name="text">
-         <string>addImage</string>
-        </property>
-        <property name="icon">
-         <iconset resource="resources/icons.qrc">
-          <normaloff>:/Dark/image-plus.png</normaloff>:/Dark/image-plus.png</iconset>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
+   <property name="minimumSize">
+    <size>
+     <width>200</width>
+     <height>262</height>
+    </size>
+   </property>
+   <property name="windowTitle">
+    <string>Resources</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_3">
+    <layout class="QGridLayout" name="gridLayout_3">
+     <property name="leftMargin">
+      <number>0</number>
+     </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
+     <property name="spacing">
+      <number>2</number>
+     </property>
+     <item row="2" column="4">
+      <widget class="QToolButton" name="reloadResource">
+       <property name="text">
+        <string>Reload</string>
+       </property>
+       <property name="icon">
+        <iconset resource="resources/icons.qrc">
+         <normaloff>:/Dark/refresh-cw.png</normaloff>:/Dark/refresh-cw.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="6">
+      <widget class="QToolButton" name="openResourceFolder">
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="resources/icons.qrc">
+         <normaloff>:/Dark/folder.png</normaloff>:/Dark/folder.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0" colspan="7">
+      <widget class="QLineEdit" name="resourceSearch">
+       <property name="inputMask">
+        <string/>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="echoMode">
+        <enum>QLineEdit::Normal</enum>
+       </property>
+       <property name="placeholderText">
+        <string>Search...</string>
+       </property>
+       <property name="clearButtonEnabled">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0" colspan="7">
+      <widget class="QListWidget" name="resourceList">
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
+       </property>
+       <property name="showDropIndicator" stdset="0">
+        <bool>false</bool>
+       </property>
+       <property name="dragEnabled">
+        <bool>true</bool>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>64</width>
+         <height>64</height>
+        </size>
+       </property>
+       <property name="flow">
+        <enum>QListView::TopToBottom</enum>
+       </property>
+       <property name="isWrapping" stdset="0">
+        <bool>false</bool>
+       </property>
+       <property name="resizeMode">
+        <enum>QListView::Adjust</enum>
+       </property>
+       <property name="viewMode">
+        <enum>QListView::ListMode</enum>
+       </property>
+       <property name="uniformItemSizes">
+        <bool>false</bool>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="5">
+      <widget class="QToolButton" name="addResource">
+       <property name="text">
+        <string>addImage</string>
+       </property>
+       <property name="icon">
+        <iconset resource="resources/icons.qrc">
+         <normaloff>:/Dark/image-plus.png</normaloff>:/Dark/image-plus.png</iconset>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </widget>
+  </widget>
   <action name="actionSave">
    <property name="icon">
     <iconset theme="document-save">
@@ -840,9 +840,9 @@
     <string>Ctrl+-</string>
    </property>
   </action>
-  <action name="actionOpen_Binary">
+  <action name="actionOpen_NewFormat">
    <property name="text">
-    <string>Open Binary...</string>
+    <string>Open New Format...</string>
    </property>
   </action>
  </widget>

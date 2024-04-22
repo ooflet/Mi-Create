@@ -19,10 +19,26 @@
         }
     },
     "Canvas": {
+        "Snap": {
+            "string": "Snap to Guides",
+            "type": "bool",
+            "value": true
+        },
         "ClipDeviceShape": {
             "string": "Clip to Device Shape",
             "type": "bool",
             "value": true
+        },
+        "ShowDeviceOutline": {
+            "string": "Show Device Outline",
+            "type": "bool",
+            "value": true,
+            "enabledOn": ["ClipDeviceShape", false]
+        },
+        "LegacyOutlines": {
+            "string": "Performance Outlines",
+            "type": "bool",
+            "value": false
         },
         "Antialiasing": {
             "string": "Antialiasing",

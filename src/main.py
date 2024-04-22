@@ -21,7 +21,7 @@ os.chdir(os.path.dirname(os.path.realpath(__file__))) # switch working directory
 from PyQt6.QtWidgets import (QMainWindow, QDialog, QInputDialog, QMessageBox, QApplication, QGraphicsScene, QProgressBar, 
                                QDialogButtonBox, QTreeWidgetItem, QFileDialog, QToolButton, QToolBar, QWidget, QVBoxLayout, 
                                QFrame, QColorDialog, QFontDialog, QSplashScreen, QGridLayout, QLabel, QListWidgetItem,
-                               QSpacerItem, QSizePolicy, QAbstractItemView, QUndoView, QTextBrowser, QRubberBand)
+                               QSpacerItem, QSizePolicy, QAbstractItemView, QUndoView, QCheckBox)
 from PyQt6.QtGui import QIcon, QPixmap, QDesktopServices, QDrag
 from PyQt6.QtCore import Qt, QSettings, QSize, QUrl, QFileInfo, QItemSelectionModel
 
@@ -43,6 +43,7 @@ import json
 import traceback
 
 from translate import QCoreApplication
+from utils.dialog import MultiFieldDialog
 from utils.theme import Theme
 from utils.updater import Updater
 from utils.project import watchData, fprjProject
@@ -57,7 +58,6 @@ from translate import QCoreApplication
 import resources.icons_rc # resource import required because it sets up the icons
 
 from window_ui import Ui_MainWindow
-from dialog.newProject_ui import Ui_Dialog as Ui_NewProject
 from dialog.compileDialog_ui import Ui_Dialog as Ui_CompileDialog
 
 _ = gettext.gettext
@@ -75,10 +75,17 @@ class MainWindow(QMainWindow):
         self.resourceImages = []
         self.selectionDebounce = False
 
+        # Setup projects (tabs) 
+        self.projects = {
+            "Welcome": {
+                "hasFileChanged": False
+            }
+        } 
+
         self.fprjProject = fprjProject()
 
         # Setup Settings
-        logging.debug("Loading App Settings")
+        logging.info("Loading App Settings")
         
         def close():
             self.settingsDialog.close()
@@ -90,11 +97,11 @@ class MainWindow(QMainWindow):
         self.languageNames = []
 
         config = configparser.ConfigParser()
-        logging.debug("Initializing Language Files")
+        logging.info("Initializing Language Files")
         for file in os.listdir("locales"):
             languageDir = os.path.join("locales", file)
             if os.path.isdir(languageDir):
-                logging.debug("Language directory found: "+languageDir)
+                logging.info("Language directory found: "+languageDir)
                 config.read_file(open(os.path.join(languageDir, "CONFIG.ini"), encoding="utf8"))
                 self.languages.append(
                     {
@@ -106,7 +113,7 @@ class MainWindow(QMainWindow):
                 )
                 self.languageNames.append(config.get('config', 'language'))
 
-        logging.debug("Initializing Settings")
+        logging.info("Initializing Settings")
         self.settingsDialog = QDialog(self) 
         self.settingsDialog.setFixedSize(500, 300)
         self.settingsDialog.setWindowTitle("Settings")
@@ -136,21 +143,16 @@ class MainWindow(QMainWindow):
                 
         self.settingsWidget.loadProperties(self.settings)
         self.settingsWidget.propertyChanged.connect(lambda property, value: self.stagedChanges.append([property, value]))
-
-        # Setup projects (tabs) 
-        self.projects = {
-            "Welcome": {
-                "hasFileChanged": False
-            }
-        } 
  
         # Setup WatchData 
-        logging.debug("Initializing watchData")
+        logging.info("Initializing watchData")
         self.watchData = watchData() 
 
         # Setup History System
         self.History = History()
         self.ignoreHistoryInvoke = False
+
+        # Undo History Dialog
         # self.undoLayout = QVBoxLayout()
         # self.undoDialog = QDialog(self)
         # self.undoView = QUndoView(self.History.undoStack)
@@ -163,12 +165,6 @@ class MainWindow(QMainWindow):
         self.projectXML = None 
 
         # Setup Dialog 
-        logging.debug("Initializing pre-compiled dialogs")
- 
-        # Setup New Project Dialog 
-        self.newProjectDialog = QDialog(self) 
-        self.newProjectUi = Ui_NewProject() 
-        self.newProjectUi.setupUi(self.newProjectDialog) 
 
         self.compileDialog = QDialog(self) 
         self.compileUi = Ui_CompileDialog() 
@@ -177,37 +173,39 @@ class MainWindow(QMainWindow):
         self.compileUi.buttonBox.rejected.connect(self.compileDialog.close)
  
         # Setup Main Window 
-        logging.debug("Initializing MainWindow")
+        logging.info("Initializing MainWindow")
         self.ui = Ui_MainWindow() 
         self.ui.setupUi(self) 
-        logging.debug("Loading Scaffold")
+        logging.info("Loading Scaffold")
         self.setupScaffold() 
-        logging.debug("Initializing Application Widgets")
+        logging.info("Initializing Application Widgets")
         self.setupWidgets() 
-        logging.debug("Initializing Workspace")
+        logging.info("Initializing Workspace")
         self.setupWorkspace() 
-        logging.debug("Initializing Explorer")
+        logging.info("Initializing Explorer")
         self.setupExplorer() 
-        logging.debug("Initializing Watch Properties")
+        logging.info("Initializing Watch Properties")
         self.setupProperties()
-        logging.debug("Initializing Misc") 
-        self.setupNewProjectDialog()
-        self.loadWindowState()
+        logging.info("Loading Language")
         self.loadLanguage(True)
+        logging.info("Initializing Dialogs")
+        self.setupDialogs()
+        logging.info("Initializing Misc")
+        self.loadWindowState()
         self.createWelcomePage()
-        logging.debug("Launch!!")
+        logging.info("Launch!!")
         self.statusBar().showMessage("Ready", 3000) 
 
     def closeEvent(self, event):
-        logging.debug("Exit requested!") 
+        logging.info("Exit requested!") 
         def quitWindow():
-            logging.debug("-- Exiting Mi Create --")
+            logging.info("-- Exiting Mi Create --")
             currentProject = self.getCurrentProject()
             if not currentProject == None and currentProject.get("canvas"):
                 currentProject["canvas"].scene().selectionChanged.disconnect()
-            logging.debug("Saving Window State")
+            logging.info("Saving Window State")
             self.saveWindowState()
-            logging.debug("Quitting")
+            logging.info("Quitting")
             event.accept()
 
         if self.fileChanged == True: 
@@ -215,7 +213,7 @@ class MainWindow(QMainWindow):
             reply = self.showDialog("warning", quit_msg, "", QMessageBox.StandardButton.SaveAll | QMessageBox.StandardButton.Discard | QMessageBox.StandardButton.Cancel)
 
             if reply == QMessageBox.StandardButton.SaveAll:
-                logging.debug("Saving all unsaved projects") 
+                logging.info("Saving all unsaved projects") 
                 self.saveProjects("all")
                 quitWindow()
             
@@ -234,9 +232,7 @@ class MainWindow(QMainWindow):
             self.showFullScreen()
 
     def getCurrentProject(self) -> dict:
-        # tab paths are stored in the tabToolTip string.
-        # temporary, only for multi-project support
-        # this will be replaced in order to remove multi-project support
+        # tab paths are stored in the tabToolTip string
         currentIndex = self.ui.workspace.currentIndex()
         currentProject = None
         if self.ui.workspace.tabToolTip(currentIndex) != "":
@@ -278,24 +274,29 @@ class MainWindow(QMainWindow):
         # settings are stored through QSettings, not the settingItems.json file
         # on windows its located at Computer\HKEY_CURRENT_USER\Software\Mi Create
         # on linux its located at /home/user/.config/Mi Create/
-        settings = QSettings("Mi Create", "Settings")
+        savedSettings = QSettings("Mi Create", "Settings")
         with open("data/settingItems.json") as file:
             self.settings = json.load(file)
-            logging.debug("settingItems.json loaded")
+            logging.info("settingItems.json loaded")
             self.settings["General"]["Theme"]["options"] = self.themes.themeNames
             self.settings["General"]["Language"]["options"] = self.languageNames
 
-        for key in settings.allKeys():
+        for key in savedSettings.allKeys():
             for category, properties in self.settings.items():
                 for property, value in properties.items():
                     if key == property:
-                        logging.debug("Property load "+property)
-                        if settings.value(key) == "true":
+                        logging.info("Property load "+property)
+                        # convert string to bool
+                        if savedSettings.value(key) == "true":
                             value["value"] = True
-                        elif settings.value(key) == "false":
+                        elif savedSettings.value(key) == "false":
                             value["value"] = False
                         else:
-                            value["value"] = settings.value(key)
+                            value["value"] = savedSettings.value(key)
+        
+        for project in self.projects.values():
+            if project.get("canvas"):
+                project["canvas"].loadObjects(project["data"], project["imageFolder"], self.settings["Canvas"]["Interpolation"]["value"])
 
     def loadLanguage(self, retranslate):
         selectedLanguage = None
@@ -305,15 +306,14 @@ class MainWindow(QMainWindow):
                 break
 
         if selectedLanguage != None:
-            translation = gettext.translation('main', localedir='locales', languages=[os.path.basename(selectedLanguage["directory"])])
-            translation.install()
+            mainTranslation = gettext.translation('main', localedir='locales', languages=[os.path.basename(selectedLanguage["directory"])])
+            mainTranslation.install()
             global _ # fetch global translation variable (gettext)
-            _ = translation.gettext
+            _ = mainTranslation.gettext
             QCoreApplication.loadLanguage(os.path.basename(selectedLanguage["directory"]))
             self.propertiesWidget.loadLanguage(os.path.basename(selectedLanguage["directory"]))
             self.ui.retranslateUi(self) # function on each precompiled window/dialog
             self.compileUi.retranslateUi(self.compileDialog)
-            self.newProjectUi.retranslateUi(self.newProjectDialog)
             # retranslate relies on the translate.py module
             # the translate module reimplements CoreApplication's translate function to rely on gettext instead
         else:
@@ -340,10 +340,13 @@ class MainWindow(QMainWindow):
                 self.showDialog('info', _('An urgent update {version} was released! The app will now update.').format(version=version))
                 self.launchUpdater()
             else:
-                reply = self.showDialog("question", _('A new update has been found ({version}). Would you like to update now?').format(version=version), "", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.Yes)
+                reply, dontCheck = self.showDialog("question", _('A new update has been found ({version}). Would you like to update now?').format(version=version), "", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.Yes, "Never check for updates", False)
 
                 if reply == QMessageBox.StandardButton.Yes:
                     self.launchUpdater()
+                elif dontCheck:
+                    self.stagedChanges.append(["CheckUpdate", False])
+                    self.saveSettings(False)
 
     def setupThemes(self):
         self.themes = Theme()
@@ -408,7 +411,7 @@ class MainWindow(QMainWindow):
             for filename in directory:
                 file = os.path.join(imageFolder, filename)
                 if os.path.isfile(file):
-                    logging.debug("Creating file entry for "+os.path.basename(file))
+                    logging.info("Creating file entry for "+os.path.basename(file))
                     item = QListWidgetItem(QIcon(file), os.path.basename(file))
                     item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
                     item.setData(0, os.path.basename(file))
@@ -429,8 +432,8 @@ class MainWindow(QMainWindow):
             project = self.ui.workspace.tabToolTip(index)
 
             if project == "":
+                self.ui.workspace.widget(index).setParent(None)
                 self.ui.workspace.removeTab(index)
-                self.fileChanged = False
                 return
 
             if self.projects.get(project) and self.projects[project]["hasFileChanged"]:
@@ -442,6 +445,7 @@ class MainWindow(QMainWindow):
                     return
 
             delProjectItem(index)
+            self.ui.workspace.widget(index).setParent(None)
             self.ui.workspace.removeTab(index)
             self.fileChanged = False
 
@@ -459,7 +463,7 @@ class MainWindow(QMainWindow):
             if currentProject.get("canvas") != None:
                 self.selectionDebounce = False
                 self.Explorer.updateExplorer(currentProject["data"])
-                logging.debug("Explorer updated") 
+                logging.info("Explorer updated") 
                 thread = threading.Thread(target=lambda: self.reloadImages(currentProject["imageFolder"]))
                 thread.start()
             else:
@@ -575,7 +579,7 @@ class MainWindow(QMainWindow):
             if "*" not in self.ui.workspace.tabText(self.ui.workspace.currentIndex()):
                 self.ui.workspace.setTabText(self.ui.workspace.currentIndex(), self.ui.workspace.tabText(self.ui.workspace.currentIndex())+"*")
 
-            logging.debug(f"Set property {args[0]}, {args[1]} for widget {currentSelected.data(0,101)}")
+            logging.info(f"Set property {args[0]}, {args[1]} for widget {currentSelected.data(0,101)}")
             # search for item by name, and if available set as currentItem
             currentItem = currentProject["data"]["FaceProject"]["Screen"]["Widget"][currentSelected.data(0,101)]
 
@@ -672,25 +676,14 @@ class MainWindow(QMainWindow):
             self.defaultSource = raw.read()
         self.defaultScaffold = json.loads(self.defaultSource)
 
-    def setupNewProjectDialog(self):
-        def check():
-            if self.newProjectUi.projectName.text() != "":
-                if self.newProjectUi.folderLocation.text() != "":
-                    self.newProjectUi.buttonBox.button(QDialogButtonBox.StandardButton.Ok).setEnabled(True)
-                else:
-                    self.newProjectUi.buttonBox.button(QDialogButtonBox.StandardButton.Ok).setEnabled(False)
-            else:
-                self.newProjectUi.buttonBox.button(QDialogButtonBox.StandardButton.Ok).setEnabled(False)
+    def setupDialogs(self):
+        self.newProjectDialog = MultiFieldDialog(self, _("New Project..."), "New Project...")
+        self.newProjectDialog.deviceSelection = self.newProjectDialog.addDropdown("Select device", self.watchData.models)
+        self.newProjectDialog.projectName = self.newProjectDialog.addTextField("Project name", "", "", True)
+        self.newProjectDialog.projectLocation = self.newProjectDialog.addFolderField("Project location", "", "", True)
+        self.newProjectDialog.buttonBox = self.newProjectDialog.addButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
 
-        def openFolderDialog():
-            location = QFileDialog.getExistingDirectory(self, _('Select Folder...'), "")
-            self.newProjectUi.folderLocation.setText(str(location))
-
-        check()
-        self.newProjectUi.deviceSelection.addItems(self.watchData.models)
-        self.newProjectUi.projectName.textChanged.connect(check)
-        self.newProjectUi.folderLocation.textChanged.connect(check)
-        self.newProjectUi.folderShow.clicked.connect(openFolderDialog)
+        self.compileDialog = MultiFieldDialog(self, _("Compile Project..."), "Compile Project...")
 
     def changeSelectionInExplorer(self, name):
         if isinstance(name, str):
@@ -1111,28 +1104,13 @@ class MainWindow(QMainWindow):
             os.execl(sys.executable, os.path.abspath(__file__), *sys.argv) 
 
     def newProject(self):
-        self.newProjectDialogAccepted = False
+        def accepted():
+            self.newProjectDialog.accept()
 
-        def accept():
-            self.newProjectDialogAccepted = True
-
-        self.newProjectDialog.accepted.connect(accept)
-
-        # Get where to save the project
-        self.newProjectDialog.exec()
-        
-        if self.newProjectDialogAccepted:
             # Get file location from dialog
-            file = self.newProjectUi.folderLocation.text()
-            projectName = self.newProjectUi.projectName.text()
-            watchModel = self.newProjectUi.deviceSelection.currentText()
-
-            # Clear dialog text
-            self.newProjectUi.folderLocation.setText("")
-            self.newProjectUi.projectName.setText("")
-            
-            file_extension = QFileInfo(file).suffix()
-            isFprj = False
+            file = self.newProjectDialog.projectLocation.text()
+            projectName = self.newProjectDialog.projectName.text()
+            watchModel = self.newProjectDialog.deviceSelection.currentText()
 
             # Check if file was selected
             if file:
@@ -1159,10 +1137,34 @@ class MainWindow(QMainWindow):
                     else:
                         self.showDialog("error", _("Failed to create a new project: ") + newProject[1], newProject[2])
 
+        self.newProjectDialog.buttonBox.accepted.connect(accepted)
+        self.newProjectDialog.buttonBox.rejected.connect(self.newProjectDialog.reject)
+        self.newProjectDialog.exec()
+
     def openProject(self, event, file=None): 
         # Get where to open the project from
         if file == None:
             file = QFileDialog.getOpenFileName(self, _('Open Project...'), "%userprofile%/", "Watchface Project (*.fprj)")
+        file_extension = QFileInfo(file[0]).suffix()
+
+        # Check if file was selected
+        if file[0]:
+            if file_extension == "fprj":
+                project = self.fprjProject.load(file[0])
+                if project[0]:
+                    try:
+                        self.createNewWorkspace(os.path.dirname(file[0]), file[0], project[1], project[2])    
+                    except Exception as e:
+                        self.showDialog("error", _("Failed to open project: ") + str(e), traceback.format_exc())
+                else:
+                    self.showDialog("error", _('Cannot open project: ') + project[1], project[2])
+
+    def openNewFormatProject(self, event, file=None): 
+        self.showDialog("info", "New format projects are currently view only.")
+
+        # Get where to open the project from
+        if file == None:
+            file = QFileDialog.getExistingDirectory(self, _('Open Project...'))
         file_extension = QFileInfo(file[0]).suffix()
 
         # Check if file was selected
@@ -1326,7 +1328,7 @@ class MainWindow(QMainWindow):
         dialog.setWindowTitle("Third Party Notices")
         dialog.exec()
 
-    def showDialog(self, type, text, detailedText="", buttons=None, defaultButton=None):
+    def showDialog(self, type, text, detailedText="", buttons=None, defaultButton=None, checkbox=None, checkboxTicked=None):
         MessageBox = QMessageBox(self)
         MessageBox.setWindowTitle("Mi Create")
         MessageBox.setWindowIcon(QIcon(":/Images/MiCreate48x48.png"))
@@ -1345,16 +1347,24 @@ class MainWindow(QMainWindow):
             logging.error(f"Error dump: \nprojects: {pformat(self.projects)}\n------------------------\nsettings: {pformat(self.settings)}")
             MessageBox.setIcon(QMessageBox.Icon.Critical)
         
+        if checkbox != None:
+            messageCheckBox = QCheckBox(checkbox, MessageBox)
+            messageCheckBox.setChecked(checkboxTicked)
+            MessageBox.setCheckBox(messageCheckBox)
+
         if buttons != None:
             MessageBox.setStandardButtons(buttons)
             MessageBox.setDefaultButton(defaultButton)
             result = MessageBox.exec()
-            return result
+            if checkbox != None:
+                return result, messageCheckBox.isChecked()
+            else:
+                return result
         else:
             MessageBox.exec()
 
 if __name__ == "__main__":
-    logging.debug("-- Starting Mi Create --")
+    logging.info("-- Starting Mi Create --")
 
     app = QApplication(sys.argv)
 
@@ -1377,7 +1387,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     if sys.argv[1:] != []:
-        logging.debug("Opening file from argument 1")
+        logging.info("Opening file from argument 1")
         main_window.openProject(None, sys.argv[1:])
 
     main_window.show()

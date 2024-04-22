@@ -1,4 +1,5 @@
-# Theme Management
+# Theme Manager
+# tostr 2024
 
 import os
 

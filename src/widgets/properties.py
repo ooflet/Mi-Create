@@ -55,6 +55,7 @@ class PropertiesWidget(QWidget):
 
         self.clearOnRefresh = True
 
+        self.treeWidgetItems = []
         self.propertyItems = {}
         self.imageListCategories = []
         self.imageFolder = ""
@@ -164,8 +165,7 @@ class PropertiesWidget(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
-    @staticmethod
-    def loadLanguage(language):
+    def loadLanguage(self, language):
         translation = gettext.translation('properties', localedir='locales', languages=[language])
         translation.install()
         global _
@@ -187,6 +187,7 @@ class PropertiesWidget(QWidget):
             self.propertyItems[srcProperty] = valueWidget
 
         item.setExpanded(True)
+        return item
 
     def createLineEdit(self, text, disabled, propertySignalDisabled, srcProperty=""):
         def onDeselect():
@@ -466,17 +467,34 @@ class PropertiesWidget(QWidget):
                         inputWidget = self.createComboBox(self.sourceList[str(device)], False, key, True)
                 if not ignorePropertyCreation:
                     if property.get("visibleOn") != None:
-                        print(device, property["visibleOn"])
                         if int(device) in property["visibleOn"]:
                             self.addProperty(key, property["string"], inputWidget, parent)
+
+                    if property.get("enabledOn") != None:
+                        # store in variables to allow for update function to access
+                        enabledOn = property["enabledOn"]
+                        updateWidget = inputWidget
+                        # only works on bool properties for now
+                        def update():
+                            print(enabledOn)
+                            if self.propertyItems[enabledOn[0]].isChecked() == enabledOn[1]:
+                                updateWidget.setDisabled(False)
+                                item.setDisabled(False)
+                            else:
+                                updateWidget.setDisabled(True)
+                                item.setDisabled(True)
+
+                        item = self.addProperty(key, property["string"], inputWidget, parent)
+                        self.propertyItems[enabledOn[0]].stateChanged.connect(update)
+                        update()
+
                     else:
                         self.addProperty(key, property["string"], inputWidget, parent)
 
                 inputWidget = None
 
     def loadProperties(self, properties, data=None, resourceList=None, device=None, scrollTo=None):
-        self.treeWidget.clear()
-        self.propertyItems = {}
+        self.clearProperties()
         if data == None:
             self.addProperties(properties, data, resourceList, None, device)
         else:
@@ -485,5 +503,7 @@ class PropertiesWidget(QWidget):
             self.treeWidget.scrollContentsBy(0, scrollTo)
 
     def clearProperties(self):
+        for item in self.propertyItems.values():
+            item.setParent(None)
         self.treeWidget.clear()
         self.propertyItems = {}
