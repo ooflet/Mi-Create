@@ -631,7 +631,7 @@ class MainWindow(QMainWindow):
                     currentProject["canvas"].selectObject(value)
                 else:
                     self.propertiesWidget.clearOnRefresh = False
-                    currentProject["canvas"].reloadObject(widgetName, currentItem, currentProject["imageFolder"], self.settings["Canvas"]["Interpolation"]["value"])
+                    currentProject["canvas"].reloadObject(widgetName, currentItem, self.settings["Canvas"]["Interpolation"]["value"])
                     currentProject["canvas"].selectObject(widgetName)
 
             if self.ignoreHistoryInvoke:

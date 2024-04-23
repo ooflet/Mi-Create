@@ -156,7 +156,7 @@ class Canvas(QGraphicsView):
 
         self.deviceOutlineVisible = deviceOutlineVisible
         self.origin = None
-        self.setAcceptDrops(True) # just in case i implement image drag & drop
+        self.setAcceptDrops(True) # just in case item implement image drag & drop
 
         self.zoomValue = 0
 
@@ -272,7 +272,103 @@ class Canvas(QGraphicsView):
     def onObjectDeleted(self, name, widget):
         self.objectDeleted.emit(name)
 
-    def createObject(self, index, i, imageFolder, interpolation):
+    def createAnalogDisplay(self, name, pos, zValue, backgroundImage, hourHandImage, minuteHandImage, secondHandImage, itemAnchors, interpolationStyle):
+        # Create widget
+        widget = AnalogWidget(int(pos.x()), int(pos.y()), int(pos.width()), int(pos.height()), self.frame, self, QColor(255,255,255,0), name)
+        widget.setZValue(zValue)
+        widget.setData(1, "27") # Item ID (Used for legacy fprj format)
+
+        # Add images
+
+        bgImg = QPixmap()
+        bgImg.load(os.path.join(self.imageFolder, backgroundImage))
+
+        hrImg = QPixmap()
+        hrImg.load(os.path.join(self.imageFolder, hourHandImage))
+
+        minImg = QPixmap()
+        minImg.load(os.path.join(self.imageFolder, minuteHandImage))
+        
+        secImg = QPixmap()
+        secImg.load(os.path.join(self.imageFolder, secondHandImage))
+
+        widget.addBackground(bgImg, itemAnchors["background"]["x"], itemAnchors["background"]["y"], interpolationStyle)
+        widget.addHourHand(hrImg, itemAnchors["hour"]["x"], itemAnchors["hour"]["y"], interpolationStyle)
+        widget.addMinuteHand(minImg, itemAnchors["minute"]["x"], itemAnchors["minute"]["y"], interpolationStyle)
+        widget.addSecondHand(secImg, itemAnchors["second"]["x"], itemAnchors["second"]["y"], interpolationStyle)
+        
+        return widget
+
+    def createImage(self, name, rect, zValue, image, interpolationStyle):
+        # Create widget
+        widget = ImageWidget(int(rect.x()), int(rect.y()), int(rect.width()), int(rect.height()), self.frame, self, QColor(255,255,255,0), name)
+        widget.setZValue(zValue)
+        widget.setData(1, "30") # Item ID (Used for legacy fprj format)
+
+        # Add image
+        pixmap = QPixmap()
+        pixmap.load(os.path.join(self.imageFolder, image))
+
+        widget.addImage(pixmap, 0, 0, 0, interpolationStyle)
+        
+        return widget
+
+    def createImageList(self, name, rect, zValue, bitmapList, interpolationStyle):
+        # Create widget
+        widget = ImageWidget(int(rect.x()), int(rect.y()), int(rect.width()), int(rect.height()), self.frame, self, QColor(255,255,255,0), name)
+        widget.setZValue(zValue)
+        widget.setData(1, "31") # Item ID (Used for legacy fprj format)
+
+        # Split image strings from the Bitmaplist
+        imageList = bitmapList.split("|")
+        firstImage = imageList[0].split(":")
+
+        if bitmapList != "":
+            # Get Image
+            if len(firstImage) >= 2:
+                image = QPixmap()
+                image.load(os.path.join(self.imageFolder, firstImage[1]))
+                widget.addImage(image, 0, 0, 0, interpolationStyle)
+            else:
+                widget.representNoImage()
+        else:
+            widget.addImage(QPixmap(), 0, 0, 0, interpolationStyle)
+            
+        return widget
+
+    def createDigitalNumber(self, name, rect, zValue, numList, digits, spacing, interpolationStyle):
+        imageList = numList.split("|")
+        widget = ImageWidget(rect.x(), rect.y(), rect.width(), rect.height(), self.frame, self, QColor(255,255,255,0), name)
+        widget.setZValue(zValue)
+        widget.setData(1, "31") # Item ID (Used for legacy fprj format)
+
+        for x in range(int(digits)):
+            # Get QPixmap from file string
+            if len(imageList) == 11:
+                image = QPixmap()
+                image.load(os.path.join(self.imageFolder, imageList[x]))
+
+                widget.addImage(image, (image.size().width() * x) + (int(spacing) * x), 0, int(spacing), interpolationStyle)
+            else:
+                self.representNoImage()
+                
+        return widget
+
+    def createProgressArc(self, name, rect, zValue, backgroundImage, arcImage, arcX, arcY, radius, lineWidth, startAngle, endAngle, interpolationStyle):
+        bgImage = QPixmap()
+        bgImage.load(os.path.join(self.imageFolder, backgroundImage))
+    
+        fgImage = QPixmap()
+        fgImage.load(os.path.join(self.imageFolder, arcImage))
+        
+        # the amount of arguments is horrific, but im too lazy to fix it
+        widget = ProgressWidget(rect.x(), rect.y(), rect.width(), rect.height(), self.frame, self, QColor(255,255,255,0), name, arcX, arcY, radius, lineWidth, startAngle, endAngle, bgImage, fgImage, interpolationStyle)
+        widget.setZValue(zValue)
+        widget.setData(1, "42")
+
+        return widget
+
+    def createObject(self, index, item, interpolation):
         widget = None
 
         if interpolation == "Bilinear":
@@ -281,106 +377,135 @@ class Canvas(QGraphicsView):
             interpolation = False
 
         try:
-            if i["@Shape"] == "27":
-                bgImg = QPixmap()
-                bgImg.load(os.path.join(imageFolder, i["@Background_ImageName"]))
+            if item["@Shape"] == "27":
+                widget = self.createAnalogDisplay(
+                    item["@Name"], 
+                    QRect(
+                        int(item["@X"]), 
+                        int(item["@Y"]), 
+                        int(item["@Width"]), 
+                        int(item["@Height"])               
+                    ),
+                    index,
+                    item["@Background_ImageName"],
+                    item["@HourHand_ImageName"],
+                    item["@MinuteHand_Image"],
+                    item["@SecondHand_Image"], 
+                    {
+                        "background": {
+                            "x": item["@BgImage_rotate_xc"],
+                            "y": item["@BgImage_rotate_yc"],
+                        },  
+                        "hour": {
+                            "x": item["@HourImage_rotate_xc"],
+                            "y": item["@HourImage_rotate_yc"],
+                        },  
+                        "minute": {
+                            "x": item["@MinuteImage_rotate_xc"],
+                            "y": item["@MinuteImage_rotate_yc"],
+                        },  
+                        "second": {
+                            "x": item["@SecondImage_rotate_xc"],
+                            "y": item["@SecondImage_rotate_yc"],
+                        },  
+                    },
+                    interpolation
+                )
 
-                secImg = QPixmap()
-                secImg.load(os.path.join(imageFolder, i["@SecondHand_Image"]))
+            elif item["@Shape"] == "29":
+                widget = self.createProgressArc(
+                    item["@Name"], 
+                    QRect(
+                        int(item["@X"]), 
+                        int(item["@Y"]), 
+                        int(item["@Width"]), 
+                        int(item["@Height"])               
+                    ),
+                    index,
+                    item["@Background_ImageName"],
+                    item["@Foreground_ImageName"],
+                    item["@Rotate_xc"], 
+                    item["@Rotate_yc"], 
+                    item["@Radius"], 
+                    item["@Line_Width"], 
+                    item["@StartAngle"], 
+                    item["@EndAngle"], 
+                    interpolation
+                )
 
-                minImg = QPixmap()
-                minImg.load(os.path.join(imageFolder, i["@MinuteHand_Image"]))
-
-                hrImg = QPixmap()
-                hrImg.load(os.path.join(imageFolder, i["@HourHand_ImageName"]))
-
-                # Create analogwidget
-                widget = AnalogWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), self.frame, self, QColor(255,255,255,0), i["@Name"])
-                widget.setZValue(index)
-                widget.setData(1, "27")
-                widget.addBackground(bgImg, i["@BgImage_rotate_xc"], i["@BgImage_rotate_yc"], interpolation)
-                widget.addHourHand(hrImg, i["@HourImage_rotate_xc"], i["@HourImage_rotate_yc"], interpolation)
-                widget.addMinuteHand(minImg, i["@MinuteImage_rotate_xc"], i["@MinuteImage_rotate_yc"], interpolation)
-                widget.addSecondHand(secImg, i["@SecondImage_rotate_xc"], i["@SecondImage_rotate_yc"], interpolation)
-
-            elif i["@Shape"] == "29":
-                #dialog = QMessageBox.warning(None, "Confirm", f"The object {i['@Name']} uses the legacy CircleProgress object, it will be automatically converted to the newer CircleProgressPlus object.")
-                pass
-
-            elif i["@Shape"] == "30":    
-                # image
-                widget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), self.frame, self, QColor(255,255,255,0), i["@Name"], imageFolder)
-                widget.setZValue(index)
-                widget.setData(1, "30")
-
-                if i["@Bitmap"] != "":
-                    # Get QPixmap from file string
-                    image = QPixmap()
-                    image.load(os.path.join(imageFolder, i["@Bitmap"]))
-
-                    # Create imagewidget    
-                    widget.addImage(image, 0, 0, 0, interpolation)
-                else:
-                    self.scene().addItem(widget)
-                    widget.representNoImage()
+            elif item["@Shape"] == "30":    
+                widget = self.createImage(
+                    item["@Name"], 
+                    QRect(
+                        int(item["@X"]), 
+                        int(item["@Y"]), 
+                        int(item["@Width"]), 
+                        int(item["@Height"])               
+                    ),
+                    index,
+                    item["@Bitmap"],
+                    interpolation
+                )
                 
-            elif i["@Shape"] == "31":
-                # image list
-                widget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), self.frame, self, QColor(255,255,255,0), i["@Name"], imageFolder)
-                widget.setZValue(index)
-                widget.setData(1, "31")
-                
-                # Split image strings from the Bitmaplist
-                imageList = i["@BitmapList"].split("|")
-                firstImage = imageList[0].split(":")
+            elif item["@Shape"] == "31":
+                widget = self.createImageList(
+                    item["@Name"], 
+                    QRect(
+                        int(item["@X"]), 
+                        int(item["@Y"]), 
+                        int(item["@Width"]), 
+                        int(item["@Height"])               
+                    ),
+                    index,
+                    item["@BitmapList"],
+                    interpolation
+                )
 
-                if i["@BitmapList"] != "":
-                    # Get Image
-                    if len(firstImage) >= 2:
-                        image = QPixmap()
-                        image.load(os.path.join(imageFolder, firstImage[1]))
-                        widget.addImage(image, 0, 0, 0, interpolation)
-                    else:
-                        widget.representNoImage()
-                else:
-                    widget.addImage(QPixmap(), 0, 0, 0, interpolation)
-                    widget.representNoImage()
+            elif item["@Shape"] == "32":
+                widget = self.createDigitalNumber(
+                    item["@Name"], 
+                    QRect(
+                        int(item["@X"]), 
+                        int(item["@Y"]), 
+                        int(item["@Width"]), 
+                        int(item["@Height"])               
+                    ),
+                    index,
+                    item["@BitmapList"],
+                    item["@Digits"],
+                    item["@Spacing"],
+                    interpolation
+                )
 
-            elif i["@Shape"] == "32":
-                # digital number
-
-                # Split images from the Bitmaplist
-                imageList = i["@BitmapList"].split("|")
-                widget = ImageWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), self.frame, self, QColor(255,255,255,100), i["@Name"], imageFolder)
-                widget.setZValue(index)
-                widget.setData(1, "32")
-
-                if len(imageList) != 11:
-                    widget.representNoImage()
-                else:
-                    widget.loadNumbers(i["@Digits"], i["@Spacing"], imageList, interpolation)
-
-            elif i["@Shape"] == "42":
-                # progress widget
-                
-                bgImage = QPixmap()
-                bgImage.load(os.path.join(imageFolder, i["@Background_ImageName"]))
-            
-                fgImage = QPixmap()
-                fgImage.load(os.path.join(imageFolder, i["@Foreground_ImageName"]))
-                
-                widget = ProgressWidget(int(i["@X"]), int(i["@Y"]), int(i["@Width"]), int(i["@Height"]), self.frame, self, QColor(255,255,255,0), i["@Name"], i["@Rotate_xc"], i["@Rotate_yc"], i["@Radius"], i["@Line_Width"], i["@StartAngle"], i["@EndAngle"], bgImage, fgImage, interpolation)
-                widget.setZValue(index)
-                widget.setData(1, "42")
+            elif item["@Shape"] == "42":
+                widget = self.createProgressArc(
+                    item["@Name"], 
+                    QRect(
+                        int(item["@X"]), 
+                        int(item["@Y"]), 
+                        int(item["@Width"]), 
+                        int(item["@Height"])               
+                    ),
+                    index,
+                    item["@Background_ImageName"],
+                    item["@Foreground_ImageName"],
+                    item["@Rotate_xc"], 
+                    item["@Rotate_yc"], 
+                    item["@Radius"], 
+                    item["@Line_Width"], 
+                    item["@StartAngle"], 
+                    item["@EndAngle"], 
+                    interpolation
+                )
 
             else:
-                return False, f"Widget {i['@Shape']} not implemented in canvas, please report as issue."
+                return False, f"Widget {item['@Shape']} not implemented in canvas, please report as issue."
             
-            self.widgets[i["@Name"]] = widget
+            self.widgets[item["@Name"]] = widget
             self.scene().addItem(widget)
             return True, "Success"
         except Exception as e:
-            QMessageBox().critical(None, "Error", f"Unable to create object {i['@Name']}: {traceback.format_exc()}")
+            QMessageBox().critical(None, "Error", f"Unable to create object {item['@Name']}: {traceback.format_exc()}")
             return False, str(e)
 
     def loadObjects(self, data, imageFolder, interpolation):
@@ -389,11 +514,13 @@ class Canvas(QGraphicsView):
             self.scene().clear()
             self.widgets.clear()
             self.scene().addItem(self.frame)
+ 
+            self.imageFolder = imageFolder
 
             widgets = data["FaceProject"]["Screen"]["Widget"]
             if type(widgets) == dict:
                 for index, key in enumerate(widgets):     
-                    result, reason = self.createObject(index, widgets[key], imageFolder, interpolation)
+                    result, reason = self.createObject(index, widgets[key], interpolation)
                     if not result:
                         return False, reason
                 self.scene().updatePosMap()
@@ -403,13 +530,13 @@ class Canvas(QGraphicsView):
             self.scene().addItem(self.frame)
             return True, "Success"
         
-    def reloadObject(self, objectName, objectData, imageFolder, interpolation):
+    def reloadObject(self, objectName, objectData, interpolation):
         object = self.widgets[objectName]
         objectZValue = object.zValue()
 
         if object != None:
             object.delete()
-            result, reason = self.createObject(objectZValue, objectData, imageFolder, interpolation)
+            result, reason = self.createObject(objectZValue, objectData, interpolation)
             if not result:
                 return False, reason 
             else:
@@ -510,36 +637,20 @@ class ImageWidget(BaseWidget):
     # All ImageList related things are handled in the addImage function
     # Live previews of animations are planned with this widget
 
-    def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, name, srcDir):
+    def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, name):
         super().__init__(posX, posY, sizeX, sizeY, parent, canvas, color, name)
-        self.srcDir = srcDir
         self.imageItems = []
         self.setPos(posX, posY)
 
-    def loadNumbers(self, digits, spacing, numList,  antialiasing):
-        self.digits = digits
-        self.numList = numList
-        self.spacing = spacing
-        self.antialiasing = antialiasing
-        # Loop through digits
-        for x in range(int(digits)):
-            # Get QPixmap from file string
-            if len(numList) == 11:
-                image = QPixmap()
-                image.load(os.path.join(self.srcDir, numList[x]))
-
-                self.addImage(image, image.size().width()*x+(int(self.spacing)*x), 0, int(self.spacing), antialiasing)
-            else:
-                self.representNoImage()
-
     def addImage(self, qPixmap, posX, posY, spacing, isAntialiased):
+        if qPixmap.isNull():
+            self.representNoImage()
+            return
         item = QGraphicsPixmapItem(qPixmap, self)
         item.setPos(posX, posY)
         self.imageItems.append(item)
         if isAntialiased:
             item.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
-        self.color = QColor(0,0,0,0)
-        self.setBrush(QBrush(self.color))
         self.setRect(0, 0, qPixmap.width()*len(self.imageItems)+spacing*len(self.imageItems)-spacing, qPixmap.height())
 
     def clearImages(self):

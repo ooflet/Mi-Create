@@ -14,6 +14,7 @@ import json
 import xmltodict
 import xml
 import xml.dom.minidom as minidom
+from lxml import etree
 
 from copy import deepcopy
 from PyQt6.QtCore import QProcess
@@ -243,13 +244,35 @@ class fprjOneFile:
         
 class NewFormat:
     def load(folder):
-        # check all directories are there
-        # unfortunately, no mac os support just yet
 
         # TODO
-        # Get manifest.xml parsed properly
-        # Use minidom instead of xmltodict
+        # Get manifest.xml parsed properly and resources
+        # Use lxml instead of xmltodict
+
+        # NOTE
+        # There are 2 important files
+        # - description.xml located at top level
+        # - manifest.xml located at /resources
+        # description.xml contains, well, descriptions about the watchface
+        # manifest.xml contains a list of resources and widgets in the watchface
+
+        def joinPath(path, file):
+            # on the rare off chance that windows does not like forward slashes, just replace all forward slashes
+            # with backslashes
+            return path+"/"+file
 
         logging.info("Opening "+folder)
 
-        logging.info("Parsing ")
+        # Get file locations
+
+        # folders
+        previewFolder = joinPath(folder, "preview")
+        resourceFolder = joinPath(folder, "resources")
+
+        logging.info("Parsing description.xml & manifest.xml")
+
+        # xml source files
+        description = etree.parse(joinPath(folder, "description.xml"))
+        manifest = etree.parse(joinPath(resourceFolder, "manifest.xml"))
+
+        print(etree.tostring(description), manifest)
