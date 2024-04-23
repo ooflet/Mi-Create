@@ -1,9 +1,9 @@
 # Project Manager for Mi Create
-# tostr 2023
+# tostr 2024
 
 # Responsible for saving and loading project formats
-# Also contains code for fprjOneFile (originally mprj), an unused json based format
-# May use fprjOneFile for easy distribution of watchface files? idk
+# ProjectV1 uses the old EasyFace fprj format
+# ProjectV2 uses the official Xiaomi watchface format
 
 import os
 import subprocess
@@ -22,7 +22,7 @@ from PyQt6.QtCore import QProcess
 supportedOneFileVersion = "1.0"
 logging.basicConfig(level=logging.DEBUG)
 
-class watchData:
+class WatchData:
     def __init__(self):
         super().__init__()
     
@@ -63,13 +63,13 @@ class watchData:
     def getWatchModel(self, id):
         return self.watchID[id]
 
-class fprjProject:  
+class ProjectV1:  
     def __init__(self):
         pass
 
     def create(self, path, device, name):
         try:
-            template = watchData().watchFileTemplate
+            template = WatchData().watchFileTemplate
             template["FaceProject"]["@DeviceType"] = str(device)
             folder = os.path.join(path, name)
             os.makedirs(os.path.join(folder, "images"))
@@ -170,81 +170,9 @@ class fprjProject:
         process.start()
         return process
     
-class fprjOneFile:
-    def convert(path):
-        # Converts .fprj to one file project
-        xml_path = os.path.join(path)
-        try:
-            with open(xml_path, 'r') as xml:
-                # Parse XML, then encode images in /images dir to Base64
-                logging.info(f"Reading project {path}")
-                xmlsource = xml.read()
-                parse = xmltodict.parse(xmlsource)
-                if parse["FaceProject"]:
-                    imagesDir = os.path.join(os.path.dirname(path), "images")
-                    imagesData = {}
-                    for root, dirs, files in os.walk(imagesDir):
-                        for filename in files:
-                            file_path = os.path.join(root, filename)
-                            with open(file_path, 'rb') as img_file:
-                                logging.info(f"Encoding image {filename}")
-                                imgData = img_file.read()
-                                img_base64 = base64.b64encode(imgData).decode('utf-8')
-                                imagesData[filename] = img_base64
-
-                    # Write into file
-                    file = {}
-
-                    try:
-                        with open(os.path.splitext(path)[0]+".ofprj", "w") as dataFile:
-                            file["version"] = "1.0"
-                            file["data"] = parse
-                            file["imgdata"] = imagesData
-                            logging.info(f"Writing data to {os.path.splitext(path)[0]+'.ofprj'}")
-                            dataFile.write(json.dumps(file, indent=4))
-                    except Exception as e:
-                        return False, str(e), traceback.format_exc()
-
-                    return True
-                else:
-                    return False, "Not a FaceProject! Check that the provided files are correct."
-        except Exception as e:
-            return False, str(e), traceback.format_exc()
-
-    def unpack(path, folder):
-        # Converts one file project to fprj
-        try:
-            logging.info(f"Opening project {path}")
-            with open(path) as dataFile:
-                raw = str(dataFile.read())
-                data = json.loads(raw)
-                if str(data["version"]) <= supportedOneFileVersion:
-                    logging.info("Reading data")
-                    rawXml = xmltodict.unparse(data["data"])
-                    logging.info("Parsing to XML")
-                    dom = minidom.parseString(rawXml)
-                    prettyXml = dom.toprettyxml()
-                    name = data["data"]["FaceProject"]["Screen"]["@Title"]+".fprj"
-                    logging.info(f"Writing data to {name}")
-                    with open(os.path.join(folder, name), "w") as fprjFile:
-                        fprjFile.write(prettyXml)
-                    imagesPath = os.path.join(folder, "images")
-                    logging.info(f"Creating image directory at {imagesPath}")
-                    os.mkdir(imagesPath)
-                    for i, v in data["imgdata"].items():
-                        logging.info(f"Decoding and writing image {i}")
-                        with open(os.path.join(imagesPath, i), "wb") as image:
-                            image.write(base64.b64decode(v))
-                    logging.info("Creating output folder")
-                    os.mkdir(os.path.join(folder, "output"))
-                else:
-                    return False, "fprjOneFile version unsupported!", f"Project version {data['version']} > Supported version {supportedOneFileVersion}"
-        except Exception as e:
-            return False, str(e), traceback.format_exc()
-        
-class NewFormat:
-    def load(folder):
-
+# ProjectV2 uses proper OOP instead of half assed static functions
+class ProjectV2:
+    def __init__(self, folder):
         # TODO
         # Get manifest.xml parsed properly and resources
         # Use lxml instead of xmltodict
@@ -255,7 +183,44 @@ class NewFormat:
         # - manifest.xml located at /resources
         # description.xml contains, well, descriptions about the watchface
         # manifest.xml contains a list of resources and widgets in the watchface
+        self.descriptionBlank = """
+        <?xml version="1.0" encoding="utf-8"?>
+        <watch>
+            <name></name>
+            <deviceType></deviceType>
+            <version>5.0</version>
+            <pkgName></pkgName>
+            <size></size>
+            <author></author>
+            <description></description>
+            <romVersion>1</romVersion>
+            <imageCompression>true</imageCompression>
+            <watchFaceLanguages>false</watchFaceLanguages>
+            <langData></langData>
+            <_recolorEnable>false</_recolorEnable>
+            <recolorTable>undefined</recolorTable>
+            <nameCHT></nameCHT>
+            <nameEN></nameEN>
+        </watch>
+        """
 
+        self.manifestBlank = """
+        <?xml version="1.0" encoding="utf-8"?>
+        <Watchface width="" height="" editable="false" id="" _recolorEnable="" recolorTable="" compressMethod="" name="">
+            <Resources>
+            </Resources>
+            <Theme type="normal" name="theme1" bg="" isPhotoAlbumWatchface="false" preview="">
+            </Theme>
+        </Watchface>
+        """
+        
+        self.description = None
+        self.manifest = None
+        
+    def fromBlank(self):
+        pass
+        
+    def fromExisting(self, folder):
         def joinPath(path, file):
             # on the rare off chance that windows does not like forward slashes, just replace all forward slashes
             # with backslashes
@@ -266,13 +231,24 @@ class NewFormat:
         # Get file locations
 
         # folders
-        previewFolder = joinPath(folder, "preview")
-        resourceFolder = joinPath(folder, "resources")
+        self.previewFolder = joinPath(folder, "preview")
+        self.resourceFolder = joinPath(folder, "resources")
 
         logging.info("Parsing description.xml & manifest.xml")
 
         # xml source files
         description = etree.parse(joinPath(folder, "description.xml"))
-        manifest = etree.parse(joinPath(resourceFolder, "manifest.xml"))
+        manifest = etree.parse(joinPath(self.resourceFolder, "manifest.xml"))
 
-        print(etree.tostring(description), manifest)
+        # process manifest elements
+        self.description = description.getroot()
+        self.manifest = manifest.getroot()
+        
+    def getAllWidgets(self):
+        pass
+
+    def getWidget(self, name):
+        pass
+
+    def save(self, folder):
+        pass
