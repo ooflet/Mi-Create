@@ -16,7 +16,7 @@ class Explorer(QTreeWidget):
         self.setAnimated(True)
         self.clear()
 
-    def updateExplorer(self, data):
+    def updateExplorer(self, project):
         self.clear()
         self.items = {}
         def createItem(item):
@@ -34,17 +34,17 @@ class Explorer(QTreeWidget):
         icon = QIcon()
         icon.addFile(u":/Dark/watch.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         name = None
-        if data["FaceProject"]["Screen"]["@Title"] == "":
+        if project.getTitle() == "":
             name = "Watchface"
         else:
-            name = data["FaceProject"]["Screen"]["@Title"]
+            name = project.getTitle()
         root = QTreeWidgetItem(self)
         root.setText(0, name)
         root.setIcon(0, icon)
         root.setData(0, 100, "00")
         root.setFlags(root.flags() | Qt.ItemFlag.ItemIsEditable)
-        if data["FaceProject"]["Screen"].get("Widget") != None:
-            for x in data["FaceProject"]["Screen"]["Widget"]:
-                createItem(data["FaceProject"]["Screen"]["Widget"][x]) 
+        if project.getAllWidgets() != None:
+            for x in project.getAllWidgets():
+                createItem(x) 
             
         self.expandAll()

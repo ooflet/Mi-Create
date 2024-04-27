@@ -11,7 +11,7 @@ import logging
 from tracemalloc import start
 
 sys.path.append("..")
-from utils.project import watchData
+from utils.project import WatchData
 
 from PyQt6.QtCore import pyqtSignal, QPointF, QSize, QRect, QRectF, QLineF, Qt
 from PyQt6.QtGui import QPainter, QPainterPath, QPen, QColor, QPixmap, QIcon, QBrush
@@ -19,6 +19,7 @@ from PyQt6.QtWidgets import (QApplication, QGraphicsPathItem, QGraphicsScene, QG
                             QToolButton, QGraphicsPixmapItem, QMessageBox, QRubberBand)
 
 from utils.contextMenu import ContextMenu
+from utils.project import ProjectV1
 
 class ObjectIcon:
     def __init__(self):
@@ -160,7 +161,7 @@ class Canvas(QGraphicsView):
 
         self.zoomValue = 0
 
-        self.deviceSize = watchData().modelSize[str(device)]
+        self.deviceSize = WatchData().modelSize[str(device)]
 
         self.graphicsScene = Scene()
         self.graphicsScene.setSceneRect(0,0,self.deviceSize[0],self.deviceSize[1])
@@ -508,23 +509,25 @@ class Canvas(QGraphicsView):
             QMessageBox().critical(None, "Error", f"Unable to create object {item['@Name']}: {traceback.format_exc()}")
             return False, str(e)
 
-    def loadObjects(self, data, imageFolder, interpolation):
+    def loadObjects(self, project: ProjectV1, interpolation):
         self.frame = DeviceFrame(self.deviceSize)
-        if data["FaceProject"]["Screen"].get("Widget") != None:
+        if project.widgets != None:
             self.scene().clear()
             self.widgets.clear()
             self.scene().addItem(self.frame)
  
-            self.imageFolder = imageFolder
+            self.imageFolder = project.imageDirectory
 
-            widgets = data["FaceProject"]["Screen"]["Widget"]
-            if type(widgets) == dict:
-                for index, key in enumerate(widgets):     
-                    result, reason = self.createObject(index, widgets[key], interpolation)
+            widgets = project.widgets
+            if type(widgets) == list:
+                for index, widget in enumerate(widgets):    
+                    result, reason = self.createObject(index, widget, interpolation)
                     if not result:
                         return False, reason
                 self.scene().updatePosMap()
                 return True, "Success"
+            else:
+                return False, "Widgets not in list!"
             
         else:
             self.scene().addItem(self.frame)

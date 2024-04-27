@@ -22,7 +22,7 @@ from PyQt6.QtWidgets import (QMainWindow, QDialog, QInputDialog, QMessageBox, QA
                                QDialogButtonBox, QTreeWidgetItem, QFileDialog, QToolButton, QToolBar, QWidget, QVBoxLayout, 
                                QFrame, QColorDialog, QFontDialog, QSplashScreen, QGridLayout, QLabel, QListWidgetItem,
                                QSpacerItem, QSizePolicy, QAbstractItemView, QUndoView, QCheckBox)
-from PyQt6.QtGui import QIcon, QPixmap, QDesktopServices, QDrag
+from PyQt6.QtGui import QIcon, QPixmap, QDesktopServices, QDrag, QImage, QPainter
 from PyQt6.QtCore import Qt, QSettings, QSize, QUrl, QFileInfo, QItemSelectionModel
 
 from pprint import pprint, pformat
@@ -105,10 +105,10 @@ class MainWindow(QMainWindow):
                 config.read_file(open(os.path.join(languageDir, "CONFIG.ini"), encoding="utf8"))
                 self.languages.append(
                     {
-                    "languageName": config.get('config', 'language'), 
-                    "directory": languageDir, 
-                    "authorMessage": config.get('config', 'authorMessage'), 
-                    "authorContact": config.get('config', 'contact')
+                        "languageName": config.get('config', 'language'), 
+                        "directory": languageDir, 
+                        "authorMessage": config.get('config', 'authorMessage'), 
+                        "authorContact": config.get('config', 'contact')
                     }
                 )
                 self.languageNames.append(config.get('config', 'language'))
@@ -462,9 +462,9 @@ class MainWindow(QMainWindow):
             
             if currentProject.get("canvas") != None:
                 self.selectionDebounce = False
-                self.Explorer.updateExplorer(currentProject["data"])
+                self.Explorer.updateExplorer(currentProject["project"])
                 logging.info("Explorer updated") 
-                thread = threading.Thread(target=lambda: self.reloadImages(currentProject["imageFolder"]))
+                thread = threading.Thread(target=lambda: self.reloadImages(currentProject["project"].imageDirectory))
                 thread.start()
             else:
                 self.clearExplorer()
@@ -654,9 +654,9 @@ class MainWindow(QMainWindow):
 
     def updateProperties(self, item, itemType=None):
         currentProject = self.getCurrentProject()
-        if item and currentProject["data"]["FaceProject"]["Screen"]["Widget"].get(item) != None:
+        if item and currentProject["project"].getWidget(item) != None:
             if self.propertiesWidget.clearOnRefresh:
-                self.propertiesWidget.loadProperties(self.propertyJson[itemType], currentProject["data"]["FaceProject"]["Screen"]["Widget"][item], self.resourceImages, currentProject["data"]["FaceProject"]["@DeviceType"])
+                self.propertiesWidget.loadProperties(self.propertyJson[itemType], currentProject["project"], item, self.resourceImages, currentProject["project"].getDeviceType())
             else:
                 self.propertiesWidget.clearOnRefresh = True
         else:
@@ -910,11 +910,11 @@ class MainWindow(QMainWindow):
 
             self.selectionDebounce = False
 
-    def createNewWorkspace(self, directory, xmlPath, data, imagePath):
+    def createNewWorkspace(self, project):
         # projects are technically "tabs"
         self.previousSelected = None
-        if self.projects.get(directory):
-            self.ui.workspace.setCurrentIndex(self.ui.workspace.indexOf(self.projects[directory]['canvas']))
+        if self.projects.get(project.directory):
+            self.ui.workspace.setCurrentIndex(self.ui.workspace.indexOf(self.projects[project.directory]['canvas']))
             return
 
         def propertyChange(objectName, propertyName, propertyValue):
@@ -939,7 +939,7 @@ class MainWindow(QMainWindow):
             currentPos = []
 
             for object in selectedObjects:
-                widget = currentProject["data"]["FaceProject"]["Screen"]["Widget"][object.data(0)]
+                widget = currentProject["project"].getWidget(object.data(0))
                 
                 if int(widget["@X"]) == round(object.pos().x()) and int(widget["@Y"]) == round(object.pos().y()):
                     return
@@ -978,7 +978,7 @@ class MainWindow(QMainWindow):
         self.Explorer.clear()
             
         # Create a Canvas (QGraphicsScene & QGraphicsView)
-        canvas = Canvas(data["FaceProject"]["@DeviceType"], self.settings["Canvas"]["Antialiasing"]["value"], self.settings["Canvas"]["ClipDeviceShape"]["value"], self.ui, self)
+        canvas = Canvas(project.getDeviceType(), self.settings["Canvas"]["Antialiasing"]["value"], self.settings["Canvas"]["ClipDeviceShape"]["value"], self.ui, self)
 
         # Create the project
         canvas.setAcceptDrops(True)
@@ -992,17 +992,14 @@ class MainWindow(QMainWindow):
         success = True
 
         # Render objects onto the canvas
-        if data is not False:
-            success = canvas.loadObjects(data, imagePath, self.settings["Canvas"]["Interpolation"]["value"])
+        if project is not False:
+            success = canvas.loadObjects(project, self.settings["Canvas"]["Interpolation"]["value"])
             
         if success[0]:
-            self.projects[directory] = {
+            self.projects[project.directory] = {
                 "type": "workspace",
                 "canvas": canvas, 
-                "data": data, 
-                "directory": directory,
-                "path": xmlPath,
-                "imageFolder": imagePath, 
+                "project": project,
                 "hasFileChanged": False
             }
 
@@ -1013,128 +1010,10 @@ class MainWindow(QMainWindow):
             layout.setSpacing(0)
             widget.setLayout(layout)
 
-            if data["FaceProject"]["Screen"]["@Title"] == "":
-                name = os.path.basename(xmlPath)
-            else:
-                name = data["FaceProject"]["Screen"]["@Title"]
+            name = os.path.basename(project.name)
 
             index = self.ui.workspace.addTab(widget, icon, name)
-            self.ui.workspace.setTabToolTip(index, directory)
-            self.ui.workspace.setCurrentIndex(index)
-            canvas.setFrameShape(QFrame.Shape.NoFrame)
-        else:
-            self.showDialog("error", "Cannot render project!" + success[1], success[1])
-
-    def createProjectV2Workspace(self, directory, data, imagePath):
-        # projects are technically "tabs"
-        self.previousSelected = None
-        if self.projects.get(directory):
-            self.ui.workspace.setCurrentIndex(self.ui.workspace.indexOf(self.projects[directory]['canvas']))
-            return
-
-        def propertyChange(objectName, propertyName, propertyValue):
-            propertyField = self.propertiesWidget.propertyItems.get(propertyName)
-            
-            if not propertyField:
-                return
-
-            if isinstance(propertyValue, list):
-                propertyValue = propertyValue[0]
-
-            if propertyField.metaObject().className() == "QSpinBox":
-                propertyField.setValue(int(propertyValue))
-            else:
-                propertyField.setText(propertyValue)
-
-        def posChange():
-            currentProject = self.getCurrentProject()
-            selectedObjects = currentProject["canvas"].getSelectedObjects()
-
-            prevPos = []
-            currentPos = []
-
-            for object in selectedObjects:
-                widget = currentProject["data"]["FaceProject"]["Screen"]["Widget"][object.data(0)]
-                
-                if int(widget["@X"]) == round(object.pos().x()) and int(widget["@Y"]) == round(object.pos().y()):
-                    return
-                
-                prevPosObject = {
-                    "Name": widget["@Name"],
-                    "X": widget["@X"],
-                    "Y": widget["@Y"]
-                }
-                currentPosObject = {
-                    "Name": object.data(0),
-                    "X": round(object.pos().x()),
-                    "Y": round(object.pos().y())
-                }
-                prevPos.append(prevPosObject)
-                currentPos.append(currentPosObject)
-            
-            if "*" not in self.ui.workspace.tabText(self.ui.workspace.currentIndex()):
-                self.ui.workspace.setTabText(self.ui.workspace.currentIndex(), self.ui.workspace.tabText(self.ui.workspace.currentIndex())+"*")
-                self.fileChanged = True
-                currentProject["hasFileChanged"] = True
-
-            def commandFunc(objects):
-                widgetList = currentProject["data"]["FaceProject"]["Screen"]["Widget"]
-                for object in objects:
-                    widgetList[object["Name"]]["@X"] = int(object["X"])
-                    widgetList[object["Name"]]["@Y"] = int(object["Y"])
-                currentProject["canvas"].loadObjects(currentProject["data"], currentProject["imageFolder"], self.settings["Canvas"]["Interpolation"]["value"])
-                currentProject["canvas"].selectObjectsFromPropertyList(objects)
-
-            command = CommandModifyPosition(prevPos, currentPos, commandFunc, f"Change object pos")
-            self.History.undoStack.push(command)
-
-        # Setup Project
-        self.projectXML = xml
-        self.Explorer.clear()
-            
-        # Create a Canvas (QGraphicsScene & QGraphicsView)
-        canvas = Canvas(data["FaceProject"]["@DeviceType"], self.settings["Canvas"]["Antialiasing"]["value"], self.settings["Canvas"]["ClipDeviceShape"]["value"], self.ui, self)
-
-        # Create the project
-        canvas.setAcceptDrops(True)
-        canvas.scene().selectionChanged.connect(lambda: self.updateProjectSelections("canvas"))
-        canvas.onObjectChange.connect(propertyChange)
-        canvas.onObjectPosChange.connect(posChange)
-
-        # Add Icons
-        icon = QIcon(":/Dark/folder-clock.png")
-
-        success = True
-
-        # Render objects onto the canvas
-        if data is not False:
-            success = canvas.loadObjects(data, imagePath, self.settings["Canvas"]["Interpolation"]["value"])
-            
-        if success[0]:
-            self.projects[directory] = {
-                "type": "workspace",
-                "canvas": canvas, 
-                "data": data, 
-                "directory": directory,
-                "path": xmlPath,
-                "imageFolder": imagePath, 
-                "hasFileChanged": False
-            }
-
-            widget = QWidget()
-            layout = QVBoxLayout()
-            layout.addWidget(canvas)
-            layout.setContentsMargins(0,0,0,0)
-            layout.setSpacing(0)
-            widget.setLayout(layout)
-
-            if data["FaceProject"]["Screen"]["@Title"] == "":
-                name = os.path.basename(xmlPath)
-            else:
-                name = data["FaceProject"]["Screen"]["@Title"]
-
-            index = self.ui.workspace.addTab(widget, icon, name)
-            self.ui.workspace.setTabToolTip(index, directory)
+            self.ui.workspace.setTabToolTip(index, project.directory)
             self.ui.workspace.setCurrentIndex(index)
             canvas.setFrameShape(QFrame.Shape.NoFrame)
         else:
@@ -1174,7 +1053,6 @@ class MainWindow(QMainWindow):
         # file
         self.ui.actionNewFile.triggered.connect(self.newProject)
         self.ui.actionOpenFile.triggered.connect(self.openProject)
-        self.ui.actionOpen_NewFormat.triggered.connect(self.openNewFormatProject)
         self.ui.actionSave.triggered.connect(lambda: self.saveProjects("current"))
         self.ui.actionExit.triggered.connect(self.close)
 
@@ -1239,17 +1117,13 @@ class MainWindow(QMainWindow):
                         accepted = False
 
                 if accepted:
-                    newProject = self.ProjectV1.create(file, self.WatchData.modelID[str(watchModel)], projectName)
-                    if newProject[0]:
-                        project = self.ProjectV1.load(newProject[1])
-                        if project[0]:
-                            try:
-                                self.createNewWorkspace(os.path.dirname(newProject[1]), newProject[1], project[1], project[2])    
-                            except Exception as e:
-                                self.showDialog("error", _("Failed to createNewWorkspace: ") + e, traceback.format_exc())
-                        else:
-                            print(project[1], project[2])
-                            self.showDialog("error", _('Cannot open project: ')+{project[1]}, project[2])
+                    newProject = ProjectV1()
+                    create = newProject.fromBlank(file, self.WatchData.modelID[str(watchModel)], projectName)
+                    if create[0]:
+                        try:
+                            self.createNewWorkspace(newProject)    
+                        except Exception as e:
+                            self.showDialog("error", _("Failed to createNewWorkspace: ") + e, traceback.format_exc())
                     else:
                         self.showDialog("error", _("Failed to create a new project: ") + newProject[1], newProject[2])
 
@@ -1266,25 +1140,15 @@ class MainWindow(QMainWindow):
         # Check if file was selected
         if file[0]:
             if file_extension == "fprj":
-                project = self.ProjectV1.load(file[0])
-                if project[0]:
+                project = ProjectV1()
+                load = project.fromExisting(file[0])
+                if load[0]:
                     try:
-                        self.createNewWorkspace(os.path.dirname(file[0]), file[0], project[1], project[2])    
+                        self.createNewWorkspace(project)    
                     except Exception as e:
                         self.showDialog("error", _("Failed to open project: ") + str(e), traceback.format_exc())
                 else:
                     self.showDialog("error", _('Cannot open project: ') + project[1], project[2])
-
-    def openProjectV2(self, event, file=None): 
-        self.showDialog("info", "New format projects are currently view only. Attempting to edit may cause a crash!")
-
-        # Get where to open the project from
-        if file == None:
-            file = QFileDialog.getExistingDirectory(self, _('Open Project...'))
-
-        # Check if file was selected
-        if file[0]:
-            pass
 
     def saveProjects(self, projectsToSave):
         if projectsToSave == "all":
@@ -1322,6 +1186,22 @@ class MainWindow(QMainWindow):
             if "*" in self.ui.workspace.tabText(self.ui.workspace.currentIndex()):
                 self.ui.workspace.setTabText(self.ui.workspace.currentIndex(), self.ui.workspace.tabText(self.ui.workspace.currentIndex()).replace("*", ""))
 
+    def createPreview(self):
+        currentProject = self.getCurrentProject()
+
+        scene = currentProject["canvas"].scene()
+        scene.clearSelection()  # Clear selection
+        scene.setSceneRect(scene.itemsBoundingRect())  # Adjust scene rectangle
+        image = QImage(scene.sceneRect().size().toSize(), QImage.Format.Format_ARGB32)  # Create image
+        image.fill(Qt.GlobalColor.transparent)  # Fill image with transparent pixels
+
+        # Render scene onto the image
+        painter = QPainter(image)
+        scene.render(painter)
+        painter.end()
+
+        # Save the image
+        image.save("file_name.png")
     
     def compileProject(self, stage):
         print(stage)
@@ -1483,7 +1363,7 @@ if __name__ == "__main__":
     if sys.argv[1:] == ["--ResetSettings"]:
         QSettings("Mi Create", "Settings").clear()
         QSettings("Mi Create", "Workspace").clear()
-        logging.info("Settings reset")
+        QMessageBox.information(None, 'Mi Create', "Settings reset.", QMessageBox.StandardButton.Ok)
         time.sleep(1)
 
     try:
