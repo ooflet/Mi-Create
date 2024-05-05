@@ -1,0 +1,1379 @@
+
+/* ==========================================================================================
+ * QtVSCodeStyle.
+ *
+ *  Copyright (c) 2013-2014 Colin Duquesnoy
+ *  Copyright (c) 2021- Yunosuke Ohsugi
+ *
+ *  Distributed under the terms of the MIT License.
+ *   see https://github.com/spyder-ide/qtawesome/blob/master/LICENSE.txt
+ *
+ * Original code:
+ *   https://github.com/ColinDuquesnoy/QDarkStyleSheet/blob/master/qdarkstyle/dark/style.qss
+ *
+ * (see NOTICE.md in the QtVSCodeStyle root directory for details)
+ * ==========================================================================================
+ */
+
+* {
+    padding: 0px;
+    margin: 0px;
+    border: 0px;
+    border-style: none;
+    border-image: none;
+    outline: 0;
+}
+QToolBar * {
+    margin: 0px;
+    padding: 0px;
+}
+
+/* QWidget ----------------------------------------------------------------
+
+--------------------------------------------------------------------------- */
+QWidget {
+    background-color: $editor_background;
+    color: $foreground;
+    selection-color: $foreground;
+    selection-background-color: $selection_background;
+}
+QWidget:disabled {
+    color: $foreground_disabled;
+    selection-color: $foreground_disabled;
+}
+
+/* Override default icons -------------------------------------------------
+
+document: https://doc.qt.io/qt-5/stylesheet-reference.html#list-of-icons
+
+--------------------------------------------------------------------------- */
+QWidget {
+    backward-icon: $url{"icon": "arrow-left.svg", "id": "icon_foreground", "rotate": "0"};
+    forward-icon: $url{"icon": "arrow-right.svg", "id": "icon_foreground", "rotate": "0"};
+    leftarrow-icon: $url{"icon": "arrow-left.svg", "id": "icon_foreground", "rotate": "0"};
+    rightarrow-icon: $url{"icon": "arrow-right.svg", "id": "icon_foreground", "rotate": "0"};
+
+    dialog-ok-icon: $url{"icon": "pass-filled.svg", "id": "icon_foreground", "rotate": "0"};
+    dialog-cancel-icon: $url{"icon": "close.svg", "id": "icon_foreground", "rotate": "0"};
+    dialog-yes-icon: $url{"icon": "close.svg", "id": "icon_foreground", "rotate": "0"};
+    dialog-no-icon: $url{"icon": "close.svg", "id": "icon_foreground", "rotate": "0"};
+    dialog-apply-icon: $url{"icon": "check.svg", "id": "icon_foreground", "rotate": "0"};
+    dialog-reset-icon: $url{"icon": "debug-restart.svg", "id": "icon_foreground", "rotate": "0"};
+    dialog-save-icon: $url{"icon": "save.svg", "id": "icon_foreground", "rotate": "0"};
+    dialog-discard-icon: $url{"icon": "discard.svg", "id": "icon_foreground", "rotate": "0"};
+    dialog-close-icon: $url{"icon": "close.svg", "id": "icon_foreground", "rotate": "0"};
+    dialog-open-icon: $url{"icon": "folder-opened.svg", "id": "icon_foreground", "rotate": "0"};
+    dialog-help-icon: $url{"icon": "help.svg", "id": "icon_foreground", "rotate": "0"};
+
+    filedialog-parent-directory-icon: $url{"icon": "arrow-up.svg", "id": "icon_foreground", "rotate": "0"};
+    filedialog-new-directory-icon: $url{"icon": "new-folder.svg", "id": "icon_foreground", "rotate": "0"};
+    filedialog-detailedview-icon: $url{"icon": "list-flat.svg", "id": "icon_foreground", "rotate": "0"};
+    filedialog-listview-icon: $url{"icon": "table.svg", "id": "icon_foreground", "rotate": "0"};
+    titlebar-close-icon: $url{"icon": "close.svg", "id": "icon_foreground", "rotate": "0"};
+    titlebar-normal-icon: $url{"icon": "flip_to_front.svg", "id": "icon_foreground", "rotate": "0"};
+}
+
+QCommandLinkButton {
+    qproperty-icon: $url{"icon": "arrow-right.svg", "id": "icon_foreground", "rotate": "0"};
+}
+
+
+/* QMainWindow ------------------------------------------------------------
+
+This adjusts the splitter in the dock widget, not qsplitter
+examples: https://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qmainwindow
+
+--------------------------------------------------------------------------- */
+QMainWindow::separator {
+    width: 4px;
+    height: 4px;
+    background-color: $editorGroup_border;
+}
+QMainWindow::separator:horizontal {
+    border-top: 1px solid $contrastBorder;
+}
+QMainWindow::separator:vertical {
+    border-right: 1px solid $contrastBorder;
+}
+QMainWindow::separator:hover,
+QMainWindow::separator:pressed {
+    background-color: $focusBorder;
+    border: none;
+}
+
+/* QToolTip ---------------------------------------------------------------
+
+examples: https://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qtooltip
+
+--------------------------------------------------------------------------- */
+QToolTip {
+    background-color: $editorHoverWidget_background;
+    color: $editorHoverWidget_foreground;
+    border: 1px solid $editorHoverWidget_border;
+}
+
+/* QSizeGrip --------------------------------------------------------------
+
+examples: https://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qsizegrip
+
+--------------------------------------------------------------------------- */
+/* There is no size grip in modern apps. So we hide size grip. */
+QSizeGrip {
+  width: 0;
+  height: 0;
+  image: none;
+}
+
+/* QStatusBar -------------------------------------------------------------
+
+examples: https://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qstatusbar
+
+--------------------------------------------------------------------------- */
+QStatusBar {
+    color: $statusBar_foreground;
+    background-color: $statusBar_background;
+    border-top: 1px solid $statusBar_border;
+    max-height: 24px;
+}
+QStatusBar::item {
+    border: none;
+}
+
+QStatusBar QWidget {
+    background-color: transparent;
+    border-radius: 0;
+    border: 1px;
+    padding: 1px;
+}
+QStatusBar QWidget:!checked:hover {
+    background-color: $statusBarItem_hoverBackground;
+}
+QStatusBar QWidget:pressed {
+    background-color: $statusBarItem_activeBackground;
+}
+QStatusBar QWidget:disabled {
+    background-color: $statusBarItem_hoverBackground_disabled;
+}
+QStatusBar QWidget:checked {
+    background-color: $statusBarItem_hoverBackground;
+}
+
+/* QCheckBox, QRadioButton ------------------------------------------------
+
+examples: https://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qcheckbox
+examples: https://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qradiobutton
+
+--------------------------------------------------------------------------- */
+QCheckBox, QRadioButton {
+    spacing: 8px;
+}
+QCheckBox::indicator, QRadioButton::indicator {
+    height: 18px;
+    width: 18px;
+    top: 1px;
+    margin-bottom: 1px;
+}
+
+QRadioButton::indicator:checked {
+    image: $url{"icon": "radio_button_checked.svg", "id": "checkbox_foreground", "rotate": "0"};
+}
+QRadioButton::indicator:checked:disabled {
+    image: $url{"icon": "radio_button_checked.svg", "id": "checkbox_foreground_disabled", "rotate": "0"};
+}
+QRadioButton::indicator:unchecked {
+    image: $url{"icon": "radio_button_unchecked.svg", "id": "checkbox_foreground", "rotate": "0"};
+}
+QRadioButton::indicator:unchecked:disabled {
+    image: $url{"icon": "radio_button_unchecked.svg", "id": "checkbox_foreground_disabled", "rotate": "0"};
+}
+
+/* QGroupBox --------------------------------------------------------------
+
+examples: https://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qgroupbox
+
+--------------------------------------------------------------------------- */
+QGroupBox {
+    font-weight: bold;
+    border: 1px solid $editorGroup_border;
+    border-radius: 4px;
+    padding: 2px;
+    margin: 9px 0 4px 0;
+}
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    left: 7px;
+    top: 2px;
+    spacing: 6px;
+    margin: 0 2px 0 2px;
+}
+
+/* QMenuBar ---------------------------------------------------------------
+
+examples: https://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qmenubar
+
+--------------------------------------------------------------------------- */
+QMenuBar {
+    background-color: $titleBar_activeBackground;
+    padding: 2px;
+    border-bottom: 1px solid $titleBar_border;
+}
+QMenuBar::item {
+    background-color: transparent;
+    padding: 4px;
+    border-right: 1px solid transparent;
+    border-left: 1px solid transparent;
+}
+QMenuBar::item:selected {
+    color: $menubar_selectionForeground;
+    background-color: $menubar_selectionBackground;
+    border-right: 1px solid $menubar_selectionBorder;
+    border-left: 1px solid $menubar_selectionBorder;
+}
+
+/* QToolBar ---------------------------------------------------------------
+
+examples: https://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qtoolbar
+
+--------------------------------------------------------------------------- */
+QToolBar {
+    background-color: $debugToolBar_background;
+    padding: 1px;
+    font-weight: bold;
+    spacing: 2px;
+    margin: 1px;
+    border: 1px solid $debugToolBar_border;
+}
+QToolBar::handle:horizontal {
+    width: 20px;
+    image: $url{"icon": "gripper.svg", "id": "icon_foreground", "rotate": "0"};
+}
+QToolBar::handle:vertical {
+    height: 20px;
+    image: $url{"icon": "gripper.svg", "id": "icon_foreground", "rotate": "90"};
+}
+QToolBar::separator {
+    background-color: $menu_separatorBackground;
+}
+QToolBar::separator:horizontal {
+    width: 2px;
+    margin: 0 6px;
+}
+QToolBar::separator:vertical {
+    height: 2px;
+    margin: 6px 0;
+}
+
+QToolBar > QToolButton {
+    background-color: transparent;
+    padding: 3px;
+}
+QToolBar > QToolButton#qt_toolbar_ext_button,
+QToolBar[orientation="1"] > QToolButton#qt_toolbar_ext_button {
+    qproperty-icon: none;
+    image: $url{"icon": "fold-up.svg", "id": "icon_foreground", "rotate": "90"};
+}
+QToolBar > QToolButton#qt_toolbar_ext_button:disabled,
+QToolBar[orientation="1"] > QToolButton#qt_toolbar_ext_button:disabled {
+    image: $url{"icon": "fold-up.svg", "id": "icon_foreground_disabled", "rotate": "90"};
+}
+QToolBar > QToolButton#qt_toolbar_ext_button {
+    qproperty-icon: none;
+    image: $url{"icon": "fold-up.svg", "id": "icon_foreground", "rotate": "180"};
+}
+QToolBar[orientation="2"] > QToolButton#qt_toolbar_ext_button:disabled {
+    image: $url{"icon": "fold-up.svg", "id": "icon_foreground_disabled", "rotate": "180"};
+}
+
+/* QMenu ------------------------------------------------------------------
+
+examples: https://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qmenu
+
+--------------------------------------------------------------------------- */
+QMenu {
+    color: $menu_foreground;
+    background-color: $menu_background;
+    padding: 5px 0 5px 0;
+    border: 1px solid $menu_border;
+}
+QMenu::separator {
+    height: 1px;
+    background-color: $menu_separatorBackground;
+    margin: 7px 6px 7px 6px;
+}
+QMenu::item {
+    padding: 4px 28px;
+    border: 1px solid transparent;
+}
+QMenu::item:selected {
+    color: $menu_selectionForeground;
+    background-color: $menu_selectionBackground;
+    border-color: $menu_selectionBorder;
+}
+QMenu::icon, QMenu::indicator {
+    padding-left: 10px;
+    width: 14px;
+    height: 14px;
+}
+QMenu::right-arrow {
+    margin: 2px;
+    padding-left: 12px;
+    height: 20px;
+    width: 20px;
+    image: $url{"icon": "chevron-right.svg", "id": "icon_foreground", "rotate": "0"};
+}
+QMenu::right-arrow:disabled {
+    image: $url{"icon": "chevron-right.svg", "id": "icon_foreground_disabled", "rotate": "0"};
+}
+
+/* QScrollBar -------------------------------------------------------------
+
+examples: https://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qscrollbar
+
+--------------------------------------------------------------------------- */
+QScrollBar:horizontal {
+    height: 12px;
+    margin: 0 12px;
+}
+QScrollBar:vertical {
+    width: 12px;
+    margin: 12px 0;
+}
+QScrollBar::handle {
+    background-color: $scrollbarSlider_background;
+    margin: 1px;
+}
+QScrollBar::handle:hover:enabled,
+QScrollBar::handle:active:enabled {
+    background-color: $scrollbarSlider_hoverBackground;
+}
+QScrollBar::handle:horizontal {
+    min-width: 8px;
+}
+QScrollBar::handle:vertical {
+    min-height: 8px;
+}
+/* There is no support button in modern apps. So we hide button of QScrollBar. */
+QScrollBar::sub-line, QScrollBar::add-line {
+    width: 0;
+    height: 0;
+}
+/* We hide background of QScrollBar */
+QScrollBar::sub-page, QScrollBar::add-page {
+    background-color: transparent;
+}
+
+/* QProgressBar -----------------------------------------------------------
+
+examples: https://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qprogressbar
+
+--------------------------------------------------------------------------- */
+QProgressBar {
+    border: 1px solid transparent;
+    text-align: center;
+}
+QProgressBar::chunk {
+    background-color: $progressBar_background;
+}
+QProgressBar::chunk:disabled {
+    background-color: $progressBar_background_disabled;
+}
+
+/* QPushButton ------------------------------------------------------------
+
+examples: https://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qpushbutton
+
+--------------------------------------------------------------------------- */
+QPushButton {
+    border: 2px solid $button_border;
+    padding: 4px 8px;
+    color: $button_foreground;
+    background-color: $button_background;
+}
+QPushButton:hover {
+    background-color: $button_hoverBackground;
+}
+QPushButton:pressed {
+    background-color: $button_background_active;
+}
+QPushButton:checked {
+    /* background-color: $button_background_active; */
+    border-color: $button_border_active;
+    $type_patch{"types": "hc", "value": "border-color: $focusBorder;"};
+}
+QPushButton:disabled {
+    background-color: $button_background_disabled;
+}
+QPushButton:checked:disabled {
+    border-color: transparent;
+}
+
+QPushButton[flat=true] {
+    background-color: transparent;
+}
+QPushButton[flat=true]:hover {
+    background-color: $button_flatBackground_hover;
+}
+QPushButton[flat=true]:pressed {
+    background-color: $button_flatBackground_active;
+}
+QPushButton[flat=true]:checked {
+    border-color: $focusBorder;
+}
+
+/* QDialogButtonBox -------------------------------------------------------
+
+--------------------------------------------------------------------------- */
+QDialogButtonBox QPushButton {
+    min-width: 65px;
+}
+
+/* QToolButton ------------------------------------------------------------
+
+examples: https://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qtoolbutton
+
+--------------------------------------------------------------------------- */
+QToolButton {
+    padding: 5px;
+    spacing: 2px;
+}
+QToolButton::menu-button {
+    padding: 1px;
+    border-radius: 4px;
+    width: 12px;
+}
+QToolButton::menu-button:hover,
+QToolButton::menu-button:checked:hover {
+    border: 1px solid $toolbar_hoverBackground;
+}
+QToolButton::menu-indicator,
+QToolButton::menu-arrow {
+    height: 16px;
+    width: 16px;
+    image: $url{"icon": "chevron-down.svg", "id": "icon_foreground", "rotate": "0"};
+}
+QToolButton::menu-indicator:disabled,
+QToolButton::menu-arrow {
+    image: $url{"icon": "chevron-down.svg", "id": "icon_foreground_disabled", "rotate": "0"};
+}
+QToolButton::menu-indicator {
+    top: 6px;
+    left: 3px;
+}
+QToolButton[popupMode="1"] { /* MenuButtonPopup */
+    padding-right: 14px;
+}
+
+
+/* QComboBox --------------------------------------------------------------
+
+examples: https://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qcombobox
+
+--------------------------------------------------------------------------- */
+QComboBox {
+    border: 1px solid $dropdown_border;
+    min-height: 1.5em;
+    padding: 0 4px;
+    color: $dropdown_foreground;
+    background-color: $dropdown_background;
+}
+QComboBox:focus, QComboBox:open {
+    border-color: $focusBorder;
+}
+QComboBox::drop-down {
+    subcontrol-position: center right;
+    border: none;
+    padding-right: 4px;
+}
+QComboBox::down-arrow {
+    margin-right: 7px;
+    height: 18px;
+    width: 18px;
+    image: $url{"icon": "chevron-down.svg", "id": "foreground", "rotate": "0"};
+}
+QComboBox::down-arrow:disabled {
+    image: $url{"icon": "chevron-down.svg", "id": "foreground_disabled", "rotate": "0"};
+}
+/* Remove indicator. Warning: This setting is not mentioned in the documentation.*/
+QComboBox::indicator {
+    border: none;
+}
+/* Setting color background color of selected item when editable is false. */
+QComboBox::item:selected {
+    border: 1px solid $focusBorder;
+    background-color: $list_activeSelectionBackground;
+    color: $list_activeSelectionForeground;
+}
+
+/* Setting color background color of selected item when editable is true. */
+QComboBox QAbstractItemView {
+    border: 1px solid $focusBorder;
+    background-color: $dropdown_listBackground;
+    selection-background-color: $list_activeSelectionBackground;
+    selection-color: $list_activeSelectionForeground;
+}
+
+/* QSlider ----------------------------------------------------------------
+
+examples: https://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qslider
+
+--------------------------------------------------------------------------- */
+QSlider {
+    padding: 2px 0;
+}
+QSlider:focus {
+    border: none;
+}
+QSlider::groove {
+    border-radius: 2px;
+}
+QSlider::groove:horizontal {
+    height: 4px;
+}
+QSlider::groove:vertical {
+    width: 4px;
+}
+QSlider::sub-page, QSlider::handle {
+    background-color: $focusBorder;
+}
+QSlider::sub-page:disabled, QSlider::handle:disabled {
+    background-color: $focusBorder_disabled;
+}
+QSlider::add-page {
+    background-color: $editorGroup_border;;
+}
+QSlider::handle:horizontal {
+    width: 16px;
+    height: 8px;
+    margin: -6px 0;
+    border-radius: 8px;
+}
+QSlider::handle:vertical {
+    width: 8px;
+    height: 16px;
+    margin: 0 -6px;
+    border-radius: 8px;
+}
+
+/* QTabWidget QTabBar -----------------------------------------------------
+
+examples: https://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qtabwidget-and-qtabbar
+
+--------------------------------------------------------------------------- */
+QTabBar::close-button:selected {
+    image: $url{"icon": "chrome-close.svg", "id": "icon_foreground", "rotate": "0"};
+}
+QTabBar::close-button, QTabBar::close-button:disabled {
+    image: $url{"icon": "chrome-close.svg", "id": "icon_foreground_disabled", "rotate": "0"};
+}
+QTabBar::tab {
+    padding: 3px;
+    margin: 1px;
+    background-color: $tab_inactiveBackground;
+}
+QTabBar::tab:hover {
+    background-color: $tab_hoverBackground;
+}
+QTabBar::tab:selected {
+    color: $tab_activeForeground;
+    background-color: $tab_activeBackground;
+}
+QTabBar::tab:selected:disabled {
+    color: $foreground_disabled;
+}
+
+/* Border */
+QTabWidget::pane {
+    border: 1px solid $editorGroup_border;
+}
+QTabBar {
+    border: 1px solid $tab_border;
+}
+QTabBar::tab {
+    border: 1px solid $tab_border;
+}
+QTabBar::tab:last {
+    border-right-color: transparent;
+}
+QTabBar::tab:selected {
+    $type_patch{"types": "hc", "value": "border-color: $focusBorder;"};
+}
+QTabBar::tab:!selected:hover {
+    $type_patch{
+        "types": "hc",
+        "value": [
+            "border-color: $focusBorder;",
+            "border-style: dashed;"
+        ]
+    };
+}
+
+/* QDockWiget -------------------------------------------------------------
+
+--------------------------------------------------------------------------- */
+QDockWidget {
+    border: 1px solid $editorGroup_border;
+}
+QDockWidget::title {
+  /* Better size for title bar */
+    padding: 3px;
+    spacing: 4px;
+    border: none;
+    background-color: $titleBar_activeBackground;
+}
+
+/* QFrame -----------------------------------------------------------------
+
+https://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qframe
+
+--------------------------------------------------------------------------- */
+QFrame {
+    border: 1px solid $editorGroup_border;
+    padding: 1px;
+}
+
+/* QLCDNumber -------------------------------------------------------------
+
+--------------------------------------------------------------------------- */
+QLCDNumber {
+    min-width: 2em;
+    margin: 2px;
+}
+
+/* QLabel -----------------------------------------------------------------
+
+https://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qframe
+
+--------------------------------------------------------------------------- */
+QLabel {
+    border: none;
+}
+
+/* QStackedWidget ---------------------------------------------------------
+
+--------------------------------------------------------------------------- */
+QStackedWidget {
+    border: none;
+}
+
+/* QToolBox ---------------------------------------------------------------
+
+examples: https://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qtoolbox
+
+--------------------------------------------------------------------------- */
+QToolBox {
+    border: 2px solid $editorGroup_border;
+}
+QToolBox:selected {
+    border: 2px solid $focusBorder;
+}
+QToolBox::tab {
+    background-color: $tab_inactiveBackground;
+    border-bottom: 2px solid transparent;
+    $type_patch{"types": "hc", "value": "border-color: $editorGroup_border;"};
+}
+QToolBox::tab:selected {
+    border-color: $focusBorder;
+}
+QToolBox::tab:selected:disabled {
+    border-color: $focusBorder_disabled;
+}
+
+/* QSplitter --------------------------------------------------------------
+
+examples: https://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qsplitter
+
+--------------------------------------------------------------------------- */
+QSplitter {
+    border: none;
+}
+QSplitter::handle {
+    background-color: $editorGroup_border;
+    margin: 1px 3px;
+}
+QSplitter::handle:hover {
+    background-color: $focusBorder;
+}
+QSplitter::handle:horizontal {
+    width: 5px;
+    image: $url{"icon": "vertical_line.svg", "id": "icon_foreground", "rotate": "0"};
+}
+QSplitter::handle:horizontal:disabled {
+    image: $url{"icon": "vertical_line.svg", "id": "icon_foreground_disabled", "rotate": "0"};
+}
+QSplitter::handle:vertical {
+    height: 5px;
+    image: $url{"icon": "vertical_line.svg", "id": "icon_foreground", "rotate": "90"};
+}
+QSplitter::handle:vertical:disabled {
+    image: $url{"icon": "vertical_line.svg", "id": "icon_foreground_disabled", "rotate": "90"};
+}
+
+/*
+QSplitterHandle is the QSplitter handle class.
+[QSplitter::handle:hover] is enabled by the following settings.
+Warning: This setting is not mentioned in the documentation.
+*/
+QSplitterHandle::item:hover {}
+
+/* QAbstractScrollArea ----------------------------------------------------
+
+examples: https://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qabstractscrollarea
+
+--------------------------------------------------------------------------- */
+QAbstractScrollArea {
+    selection-background-color: $editor_selectionBackground;
+    selection-color: $editor_selectionForeground;
+}
+QAbstractScrollArea QScrollBar:horizontal {
+    height: 7px;
+}
+QAbstractScrollArea QScrollBar:vertical {
+    width: 7px;
+}
+
+/* QTextEdit QPlainTextEdit------------------------------------------------
+
+examples: https://doc.qt.io/qt-5/stylesheet-examples.html#customizing-specific-widgets
+
+--------------------------------------------------------------------------- */
+QTextEdit, QPlainTextEdit {
+    color: $editor_foreground;
+    background-color: $editor_background;
+}
+QTextEdit:focus,
+QTextEdit:selected,
+QPlainTextEdit:focus,
+QPlainTextEdit:selected {
+    border: 1px solid $focusBorder;
+    selection-color: $editor_selectionForeground;
+    selection-background-color: $editor_selectionBackground;
+}
+
+/* In version +5.15, [!active] state is disabled. */
+/* In version -5.15, [!focus] state is disabled. */
+QTextEdit:!focus,
+QPlainTextEdit:!focus {
+    $env_patch{"version": ">=5.15", "value": "selection-background-color: $editor_inactiveSelectionBackground"};
+}
+QTextEdit:!active,
+QPlainTextEdit:!active {
+    $env_patch{"version": "<5.15", "value": "selection-background-color: $editor_inactiveSelectionBackground"};
+}
+
+/* QAbstractItemView ------------------------------------------------------
+
+--------------------------------------------------------------------------- */
+QAbstractItemView {
+    alternate-background-color: $sideBar_background;
+    background-color: $editor_background;
+    selection-background-color: $editor_background;
+}
+QAbstractItemView:selected:!active,
+QAbstractItemView:selected:!focus,
+QAbstractItemView::item:selected:!active,
+QTreeView::branch:selected:!active {
+    background-color: $list_inactiveSelectionBackground;
+    color: $list_inactiveSelectionForeground;
+}
+QAbstractItemView::item:selected,
+QTreeView::branch:selected {
+    background-color: $list_activeSelectionBackground;
+    color: $list_activeSelectionForeground;
+}
+QAbstractItemView::item:!selected:hover,
+QTreeView::branch:!selected:hover {
+    background-color: $list_hoverBackground;
+}
+QAbstractItemView::item:selected:disabled {
+    color: $foreground_disabled;
+}
+
+QAbstractItemView QLineEdit {
+    padding: 2px;
+}
+
+/* QListView  QTreeView ---------------------------------------------------
+
+examples: https://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qlistview
+examples: https://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qtreeview
+
+--------------------------------------------------------------------------- */
+QListView::item,
+QTreeView::item {
+    border: 1px solid transparent;
+}
+QListView::item:selected {
+    border-color: $focusBorder;
+}
+QTreeView::branch {
+    padding: 2px;
+}
+QTreeView::branch:selected,
+QTreeView::branch:selected:!active {
+    border-width: 1px;
+    padding: 1px;
+}
+/* dark or light */
+QListView::item:selected:!active,
+QTreeView::item:selected:!active,
+QTreeView::branch:selected:!active {
+    $type_patch{"types": "dark | light", "value": "border-color: transparent;"};
+}
+QTreeView::branch:selected {
+    $type_patch{
+        "types": "dark | light",
+        "value": [
+            "border-color: $focusBorder transparent $focusBorder $focusBorder;",
+            "border-width: 1px;",
+            "border-style: solid;"
+        ]
+    };
+}
+QTreeView::branch:selected:!has-children {
+    $type_patch{
+        "types": "dark | light",
+        "value": "border-color: transparent;"
+    };
+}
+QTreeView::item:selected {
+    $type_patch{
+        "types": "dark | light",
+        "value": "border-color: $focusBorder $focusBorder $focusBorder transparent;"
+    };
+}
+QTreeView::item:first:selected:!has-children {
+    $type_patch{"types": "dark | light", "value": "border-color: $focusBorder;"};
+}
+QTreeView::item:first:selected:!has-children:!active {
+    $type_patch{"types": "dark | light", "value": "border-color: transparent;"};
+}
+/* hc */
+QTreeView::item:selected {
+    $type_patch{
+        "types": "hc",
+        "value": "border-color: $focusBorder $focusBorder $focusBorder transparent;"
+    };
+}
+QTreeView::branch:selected {
+    $type_patch{
+        "types": "hc",
+        "value": "border: 1px solid $focusBorder;"
+    };
+}
+QListView::item:selected:!active,
+QTreeView::item:selected:!active {
+    $type_patch{"types": "hc", "value": "border-style: dotted;"};
+}
+QTreeView::branch:selected:!active {
+    $type_patch{
+        "types": "hc",
+        "value": "border: 1px dotted $focusBorder;"
+    };
+}
+QTreeView::branch:selected:!active:!has-children {
+    $type_patch{
+        "types": "hc",
+        "value": [
+            "border-width: 1px;",
+            "border-style: dotted;",
+            "border-color: $focusBorder $focusBorder $focusBorder transparent;"
+        ]
+    };
+}
+QListView::item:hover:!selected,
+QTreeView::item:hover:!selected,
+QTreeView::branch:hover:!selected {
+    $type_patch{"types": "hc", "value": "border-style: dashed;"};
+}
+QTreeView::branch:hover:!selected {
+    $type_patch{
+        "types": "hc",
+        "value": [
+            "border-width: 1px;",
+            "border-color: $focusBorder;"
+        ]
+    };
+}
+QListView::item:hover:!selected {
+    $type_patch{"types": "hc", "value": "border-color: $focusBorder;"};
+}
+QTreeView::item:hover:!selected {
+    $type_patch{
+        "types": "hc",
+        "value": [
+            "border: 1px dotted $focusBorder;",
+            "border-color: $focusBorder $focusBorder $focusBorder transparent;"
+        ]
+    };
+}
+QTreeView::branch:selected:!has-children,
+QTreeView::branch:selected:!has-children:!active,
+QTreeView::branch:hover:!selected:!has-children {
+    $type_patch{
+        "types": "hc",
+        "value": "border-color: transparent $focusBorder transparent transparent;"
+    };
+}
+
+
+QTreeView::branch {
+    border-image: $url{"icon": "vertical_line.svg", "id": "tree_indentGuidesStroke_inActive", "rotate": "0"} 0;
+}
+QTreeView::branch:active {
+    border-image: $url{"icon": "vertical_line.svg", "id": "tree_indentGuidesStroke", "rotate": "0"} 0;
+}
+QTreeView::branch:disabled {
+    border-image: $url{"icon": "vertical_line.svg", "id": "tree_indentGuidesStroke_disabled", "rotate": "0"} 0;
+}
+QTreeView::branch:has-siblings:adjoins-item,
+QTreeView::branch:!has-children:!has-siblings:adjoins-item {
+    border-image: none;
+}
+QTreeView::branch:has-children:!has-siblings:closed,
+QTreeView::branch:has-children:has-siblings:closed {
+    border-image: none;
+    image: $url{"icon": "chevron-right.svg", "id": "icon_foreground", "rotate": "0"};
+}
+QTreeView::branch:selected:has-children:!has-siblings:closed,
+QTreeView::branch:selected:closed:has-children:has-siblings {
+    border-image: none;
+    image: $url{"icon": "chevron-right.svg", "id": "list_activeSelectionIconForeground", "rotate": "0"};
+}
+QTreeView::branch:selected:has-children:!has-siblings:closed:disabled,
+QTreeView::branch:selected:closed:has-children:has-siblings:disabled,
+QTreeView::branch:has-children:!has-siblings:closed:disabled,
+QTreeView::branch:has-children:has-siblings:closed:disabled {
+    image: $url{"icon": "chevron-right.svg", "id": "icon_foreground_disabled", "rotate": "0"};
+}
+QTreeView::branch:open:has-children:!has-siblings,
+QTreeView::branch:open:has-children:has-siblings,
+QTreeView::branch:open:has-children:!has-siblings,
+QTreeView::branch:open:has-children:has-siblings  {
+    border-image: none;
+    image: $url{"icon": "chevron-down.svg", "id": "icon_foreground", "rotate": "0"};
+}
+QTreeView::branch:selected:open:has-children:!has-siblings,
+QTreeView::branch:selected:open:has-children:has-siblings  {
+    border-image: none;
+    image: $url{"icon": "chevron-down.svg", "id": "list_activeSelectionIconForeground", "rotate": "0"};
+}
+QTreeView::branch:selected:open:has-children:!has-siblings:disabled,
+QTreeView::branch:selected:open:has-children:has-siblings:disabled,
+QTreeView::branch:open:has-children:!has-siblings:disabled,
+QTreeView::branch:open:has-children:has-siblings:disabled  {
+    image: $url{"icon": "chevron-down.svg", "id": "icon_foreground_disabled", "rotate": "0"};
+}
+
+/* QTableView -------------------------------------------------------------
+
+Set the background color to black.
+examples: https://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qtableview
+
+--------------------------------------------------------------------------- */
+QTableView {
+    gridline-color: $tree_indentGuidesStroke;
+    selection-background-color: $focusBorder;
+}
+QTableView:item {
+    spacing: 6px;
+    border-color: transparent;
+}
+QTableView::item:selected {
+    background-color: $focusBorder;
+}
+
+QTableView QTableCornerButton::section {
+    border: none;
+    border-right: 2px solid transparent;
+    border-bottom: 2px solid transparent;
+    background-color: transparent;
+    /* Same color as the QHeaderView selction. */
+    image: $url{"icon": "corner_button.svg", "id": "debugToolBar_background", "rotate": "0"};
+
+    $type_patch{
+        "types": "hc",
+        "value": "image: $url{\"icon\": \"corner_button.svg\", \"id\": \"editorGroup_border\", \"rotate\": \"30\"}"
+    };
+}
+QTableView QTableCornerButton::section:pressed {
+    image: $url{"icon": "corner_button.svg", "id": "focusBorder", "rotate": "0"};
+}
+
+/* QHeaderView ------------------------------------------------------------
+
+examples: https://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qheaderview
+
+--------------------------------------------------------------------------- */
+QHeaderView {
+    padding: 0;
+    margin: 0;
+    border: none;
+}
+QHeaderView::section {
+    color: $titleBar_activeForeground;
+    background-color: $debugToolBar_background;
+    text-align: left;
+    font-size: 13px;
+    padding: 0 4px;
+    border: none;
+    $type_patch{"types": "dark | light", "value": "background-color: $debugToolBar_background;"};
+    $type_patch{"types": "hc", "value": "border-color: $editorGroup_border;"};
+}
+QHeaderView::section:disabled {
+    color: $titleBar_activeForeground_disabled;
+}
+QHeaderView::section:horizontal {
+    border-top: 2px solid transparent;
+    margin-right: 1px;
+}
+QHeaderView::section:vertical {
+    border-left: 2px solid transparent;
+    margin-bottom: 1px;
+}
+QHeaderView::section:horizontal:on,
+QHeaderView::section:vertical:on {
+    border-color: $focusBorder;
+}
+QHeaderView::section:horizontal:on:disabled,
+QHeaderView::section:vertical:on:disabled {
+    border-color: $focusBorder_disabled;
+}
+QHeaderView::section::last, QHeaderView::section::only-one {
+    margin: 0;
+}
+QHeaderView::down-arrow {
+    image: $url{"icon": "chevron-down.svg", "id": "icon_foreground", "rotate": "0"};
+}
+QHeaderView::down-arrow:disabled {
+    image: $url{"icon": "chevron-down.svg", "id": "icon_foreground_disabled", "rotate": "0"};
+}
+QHeaderView::up-arrow {
+    image: $url{"icon": "chevron-up.svg", "id": "icon_foreground", "rotate": "0"};
+}
+QHeaderView::up-arrow:disabled {
+    image: $url{"icon": "chevron-up.svg", "id": "icon_foreground_disabled", "rotate": "0"};
+}
+QHeaderView::down-arrow::horizontal,
+QHeaderView::up-arrow::horizontal {
+    width: 15px;
+    padding-right: 2px;
+}
+QHeaderView::down-arrow::vertical,
+QHeaderView::up-arrow::vertical {
+    height: 0px;
+}
+
+QTreeView[sortingEnabled="false"] QHeaderView::down-arrow,
+QTreeView[sortingEnabled="false"] QHeaderView::up-arrow,
+QTableView[sortingEnabled="false"] QHeaderView::down-arrow,
+QTableView[sortingEnabled="false"] QHeaderView::up-arrow {
+    width: 0;
+    padding: 0;
+}
+
+/* QCalendarWidget --------------------------------------------------------
+
+--------------------------------------------------------------------------- */
+QCalendarWidget {
+    border: 1px solid $editorGroup_border;
+}
+
+QCalendarWidget QTableView {
+    alternate-background-color: $titleBar_activeBackground;
+}
+
+/* QAbstractSpinBox, QLineEdit --------------------------------------------
+
+examples: https://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qlineedit
+examples: hhttps://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qspinbox
+
+--------------------------------------------------------------------------- */
+QLineEdit,
+QAbstractSpinBox {
+    border: 1px solid $input_border;
+    padding: 3px 4px;
+    /* Adjust the min-height of QLineEdit to the height of the characters. */
+    min-height: 1em;
+    color: $input_foreground;
+    background-color: $input_background;
+}
+QLineEdit:focus,
+QAbstractSpinBox:focus {
+    border-color: $focusBorder;
+}
+QAbstractSpinBox::up-button,
+QAbstractSpinBox::down-button {
+    subcontrol-origin: border;
+    width: 16px;
+}
+QAbstractSpinBox::up-button {
+    subcontrol-position: top right;
+    margin: 1px 5px 0 0;
+    padding: 2px 1px 0 1px;
+}
+QAbstractSpinBox::up-arrow {
+    height: 11px;
+    image: $url{"icon": "triangle-up.svg", "id": "icon_foreground", "rotate": "0"};
+}
+QAbstractSpinBox::up-arrow:disabled {
+    image: $url{"icon": "triangle-up.svg", "id": "icon_foreground_disabled", "rotate": "0"};
+}
+QAbstractSpinBox::down-button {
+    subcontrol-position: bottom right;
+    margin: 0 5px 1px 0;
+    padding: 0 1px 2px 1px;
+}
+QAbstractSpinBox::down-arrow {
+    height: 11px;
+    image: $url{"icon": "triangle-down.svg", "id": "icon_foreground", "rotate": "0"};
+}
+QAbstractSpinBox::down-arrow:disabled {
+    image: $url{"icon": "triangle-down.svg", "id": "icon_foreground_disabled", "rotate": "0"};
+}
+
+/* QDateTimeEdit ----------------------------------------------------------
+
+--------------------------------------------------------------------------- */
+QDateTimeEdit::drop-down {
+    subcontrol-position: center right;
+    border: none;
+    padding-right: 4px;
+    margin-right: 1px;
+    width: 16px;
+    image: $url{"icon": "calendar.svg", "id": "icon_foreground", "rotate": "0"};
+}
+QDateTimeEdit::drop-down:disabled {
+    image: $url{"icon": "calendar.svg", "id": "icon_foreground_disabled", "rotate": "0"};
+}
+/*
+There is a bug in Qt, where the down-arrow icon show when `calendarPopup = True`.
+So hide down-arrow icon when `calendarPopup = True`.
+*/
+QDateTimeEdit::down-arrow[calendarPopup="true"] {
+    image: none;
+}
+
+/*
+Fix bug where the last line was off the calendar.
+*/
+QDateTimeEdit QCalendarWidget QAbstractItemView {
+    padding: -1px;
+    border: none;
+}
+
+/* Check indicator --------------------------------------------------------
+
+document: https://doc.qt.io/qt-5/stylesheet-reference.html#list-of-sub-controls
+
+--------------------------------------------------------------------------- */
+QCheckBox::indicator,
+QGroupBox::indicator,
+QAbstractItemView::indicator {
+    background-color: $checkbox_background;
+    border-radius: 2px;
+    border: 1px solid $checkbox_border_inActive;
+}
+QCheckBox::indicator:hover,
+QGroupBox::indicator:hover,
+QAbstractItemView::indicator:hover {
+    border-color: $checkbox_border_active;
+}
+QGroupBox::indicator,
+QAbstractItemView::indicator {
+    height: 14px;
+    width: 14px;
+}
+QAbstractItemView::indicator:checked,
+QCheckBox::indicator:checked,
+QGroupBox::indicator:checked,
+QTreeView::indicator:checked,
+QMenu::indicator:checked {
+    image: $url{"icon": "check.svg", "id": "checkbox_foreground", "rotate": "0"};
+}
+QAbstractItemView::indicator:checked:disabled,
+QCheckBox::indicator:checked:disabled,
+QGroupBox::indicator:checked:disabled,
+QTreeView::indicator:checked:disabled,
+QMenu::indicator:checked:disabled {
+    image: $url{"icon": "check.svg", "id": "checkbox_foreground_disabled", "rotate": "0"};
+}
+QAbstractItemView::indicator:indeterminate,
+QCheckBox::indicator:indeterminate,
+QTreeView::indicator:indeterminate {
+    image: $url{"icon": "tristate.svg", "id": "checkbox_foreground", "rotate": "0"};
+}
+QAbstractItemView::indicator:indeterminate:disabled,
+QCheckBox::indicator:indeterminate:disabled,
+QTreeView::indicator:indeterminate:disabled {
+    image: $url{"icon": "tristate.svg", "id": "checkbox_foreground_disabled", "rotate": "0"};
+}
+
+/* Action -----------------------------------------------------------------
+
+--------------------------------------------------------------------------- */
+QToolButton,
+QTabBar::close-button,
+QDockWidget::close-button,
+QDockWidget::float-button,
+QAbstractSpinBox::up-button,
+QAbstractSpinBox::down-button {
+    border: 1px solid transparent;
+    $type_patch{"types": "dark | light", "value": "border-radius: 2px;"};
+}
+QToolButton:!checked:hover,
+QTabBar::close-button:hover,
+QDockWidget::close-button:hover,
+QDockWidget::float-button:hover,
+QAbstractSpinBox::up-button:hover,
+QAbstractSpinBox::down-button:hover {
+    background-color: $toolbar_hoverBackground;
+    border-color: $toolbar_hoverOutline;
+    $type_patch{"types": "hc", "value": "border-style: dashed;"};
+}
+QToolButton:pressed,
+QTabBar::close-button:pressed,
+QDockWidget::close-button:pressed,
+QDockWidget::float-button:pressed,
+QAbstractSpinBox::up-button:pressed,
+QAbstractSpinBox::down-button:pressed {
+    background-color: $toolbar_activeBackground;
+    border: 1px solid $toolbar_hoverOutline;
+}
+QToolButton:selected,
+QToolButton:checked {
+    background-color: $focusBorder;
+    border-color: $toolbar_hoverOutline;
+}
+QToolButton:checked:disabled {
+    background-color: transparent;
+}
+
+QToolBar > QToolButton {
+    $type_patch{"types": "dark | light", "value": "border-radius: 4px;"};
+}
+
+
+/* PyQtGraph
+=========================================================================== */
+
+/* PlotWidget -------------------------------------------------------------
+
+--------------------------------------------------------------------------- */
+PlotWidget {
+    /* Fix cut labels in plots
+    https://github.com/ColinDuquesnoy/QDarkStyleSheet/issues/134 */
+    padding: 0px;
+}
+
+/* Custom Style
+=========================================================================== */
+
+/* QPushButton ------------------------------------------------------------
+
+--------------------------------------------------------------------------- */
+/* ===Secondary Button=== */
+QPushButton[type="secondary"] {
+    background-color: $button_secondaryBackground;
+    color: $button_secondaryForeground;
+}
+QPushButton[type="secondary"]:hover {
+    background-color: $button_secondaryHoverBackground;
+}
+QPushButton[type="secondary"]:pressed {
+    background-color: $button_secondaryBackground_active;
+}
+QPushButton[type="secondary"]:checked {
+    border-color: $focusBorder;
+}
+QPushButton[type="secondary"]:disabled {
+    background-color: $button_secondaryBackground_disabled;
+    color: $foreground_disabled;
+}
+QPushButton:checked:disabled {
+    border-color: transparent;
+}
+
+/* QToolBar -----------------------------------------------------
+
+--------------------------------------------------------------------------- */
+/* ===Activity Bar=== */
+QToolBar[type="activitybar"] {
+    margin: 0px;
+    background-color: $activityBar_background;
+    border: none;
+    border-right: 1px solid $activityBar_border;
+}
+QToolBar[type="activitybar"]::handle,
+QToolBar[type="activitybar"]::separator {
+    width: 0;
+    height: 0;
+    image: none;
+    background-color: transparent;
+}
+QToolBar[type="activitybar"] > QToolButton {
+    width: 35px;
+    height: 35px;
+    $type_patch{"types": "dark | light", "value": "border-left: 2px solid transparent;"};
+}
+QToolBar[type="activitybar"] > QToolButton:hover,
+QToolBar[type="activitybar"] > QToolButton:pressed,
+QToolBar[type="activitybar"] > QToolButton:disabled,
+QToolBar[type="activitybar"] > QToolButton:checked {
+    background-color: transparent;
+    border-radius: 0;
+}
+QToolBar[type="activitybar"] > QToolButton:checked {
+    $type_patch{"types": "dark | light", "value": "border-left: 2px solid $activityBar_activeBorder;"};
+}
+QToolBar[type="activitybar"] > QToolButton:pressed {
+    $type_patch{"types": "hc", "value": "border-style: solid;"};
+}
+/* Hides the menu indicator on activitybar. */
+QToolBar[type="activitybar"] > QToolButton::menu-indicator {
+    width: 0;
+}
+QToolBar[type="activitybar"] > QToolButton#qt_toolbar_ext_button {
+    image: $url{"icon": "fold-up.svg", "id": "icon_foreground", "rotate": "45"};
+}
+QToolBar[type="activitybar"] > QToolButton#qt_toolbar_ext_button:disabled {
+    image: $url{"icon": "fold-up.svg", "id": "icon_foreground_disabled", "rotate": "90"};
+}
+
+/* QLineEdit --------------------------------------------------------------
+
+--------------------------------------------------------------------------- */
+/* ===Error State=== */
+QLineEdit[state="error"] {
+    border: 1px solid $inputValidation_errorBorder;
+}
+QLineEdit[state="error"]:disabled {
+    border: 1px solid $inputValidation_errorBorder_disabled;
+}
+
+/* ===Warning State=== */
+QLineEdit[state="warning"] {
+    border: 1px solid $inputValidation_warningBorder;
+}
+QLineEdit[state="warning"]:disabled {
+    border: 1px solid $inputValidation_warningBorder_disabled;
+}
+
+/* QFrame------------------------------------------------------------------
+`frameShape` and `frameShadow` properties cannot be used with Qt6.
+We create a custom property and apply the style for VLine and HLine.
+--------------------------------------------------------------------------- */
+/* === Horizontal Line === */
+QFrame[type="h_line"] {
+    border: none;
+    background-color: $editorGroup_border;
+    min-height: 1px;
+    max-height: 1px;
+}
+/* === Vertical Line === */
+QFrame[type="v_line"] {
+    border: none;
+    background-color: $editorGroup_border;
+    min-width: 1px;
+    max-width: 1px;
+}

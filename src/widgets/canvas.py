@@ -19,7 +19,7 @@ from PyQt6.QtWidgets import (QApplication, QGraphicsPathItem, QGraphicsScene, QG
                             QToolButton, QGraphicsPixmapItem, QMessageBox, QRubberBand)
 
 from utils.contextMenu import ContextMenu
-from utils.project import ProjectV1
+from utils.project import MotralProject
 
 class ObjectIcon:
     def __init__(self):
@@ -369,7 +369,7 @@ class Canvas(QGraphicsView):
 
         return widget
 
-    def createObject(self, index, item, interpolation):
+    def createMotralProjectWidget(self, index, item, interpolation):
         widget = None
 
         if interpolation == "Bilinear":
@@ -509,7 +509,7 @@ class Canvas(QGraphicsView):
             QMessageBox().critical(None, "Error", f"Unable to create object {item['@Name']}: {traceback.format_exc()}")
             return False, str(e)
 
-    def loadObjects(self, project: ProjectV1, interpolation):
+    def loadObjects(self, project, interpolation):
         self.frame = DeviceFrame(self.deviceSize)
         if project.widgets != None:
             self.scene().clear()
@@ -519,15 +519,19 @@ class Canvas(QGraphicsView):
             self.imageFolder = project.imageDirectory
 
             widgets = project.widgets
-            if type(widgets) == list:
-                for index, widget in enumerate(widgets):    
-                    result, reason = self.createObject(index, widget, interpolation)
-                    if not result:
-                        return False, reason
-                self.scene().updatePosMap()
-                return True, "Success"
+            if isinstance(project, MotralProject): # project v1 and project v2 have different standards
+                if type(widgets) == list:
+                    for index, widget in enumerate(widgets):    
+                        result, reason = self.createMotralProjectWidget(index, widget, interpolation)
+                        if not result:
+                            return False, reason
+                    self.scene().updatePosMap()
+                    return True, "Success"
+                else:
+                    return False, "Widgets not in list!"
+                
             else:
-                return False, "Widgets not in list!"
+                return False, "Project class unsurported!"
             
         else:
             self.scene().addItem(self.frame)

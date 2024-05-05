@@ -1,41 +1,27 @@
+/*
+
+Reserved for modernization of UI
+
 QPushButton {
-    background-color: transparent;
+    background-color: rgb(76, 80, 82);
     min-width: 3.5em;
-    padding: 4px 8px;
+    border: 2px solid rgb(94, 96, 96);
+    padding: 2px 8px;
     border-radius: 4px;
-    border: 1px solid palette(midlight);
 }
 
 QPushButton:default {
-    border-color: palette(highlight);
-    background-color: palette(highlight);
+    background-color: rgb(54, 88, 128);
+    min-width: 3.5em;
+    border: 2px solid rgb(76, 112, 140);
+    padding: 2px 8px;
+    border-radius: 4px;
 }
 
-QPushButton:focus {
-    outline: none;
-}
+*/
 
-QPushButton:checked {
-    background-color: palette(midlight);
-}
-
-QPushButton:disabled {
-    border-color: rgba(0, 0, 0, 0);
-}
-
-QToolButton {
-    border-radius: 5px;
-    padding: 4px;
-    background-color: transparent;
-    border: none;
-}
-
-QToolButton:hover{
-    background-color: palette(button);
-}
-
-QToolButton:pressed {
-    background-color: palette(link-visited)
+QDialogButtonBox {
+  dialogbuttonbox-buttons-have-icons: 0;
 }
 
 /*
@@ -68,25 +54,6 @@ QDockWidget{
 /*
  * QTabBar
  */
-
-QTabWidget::pane {
-  border: none;
-}
-
-QTabBar::tab{
-  background: palette(window);
-  padding: 4px 4px;
-  border: 3px solid transparent;
-  text-align: left;
-}
-
-QTabBar::tab:hover {
-  border-bottom-color: palette(button);
-}
-
-QTabBar::tab:selected {
-  border-bottom-color: palette(highlight);
-}
 
 QTabBar::close-button {
 	image: url(:/Dark/x_dim.png);
@@ -203,17 +170,4 @@ QTreeView {
 
 QListView {
   background-color: palette(window);
-}
-
-QMenu {
-    background-color: palette(window);
-    border: 1px solid palette(alternate-base);
-}
-
-QMenu::item {
-
-}
-
-QMenu::item:selected {
-    background: palette(alternate-base)
 }

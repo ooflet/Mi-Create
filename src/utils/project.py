@@ -1,14 +1,23 @@
-# Project Classes
+# Watchface Projects
 # tostr 2024
 
-# ProjectV1 uses the old EasyFace fprj format
-# ProjectV2 uses the official Xiaomi watchface format
+# XiaomiProject uses the official Xiaomi watchface format.
+# MotralProject uses m0tral's XML format for use with m0tral's compiler.
+# GMFProject uses GiveMeFive's JSON based format for use with GMF's compiler
+
+# The project classes are abstractions to assist with modularity and ease of use.
+# This requires some standards to be in place for them to work.
+
+# Note that getWidget function must return a dict
+
+# Processes like compilation are handled by Qt's QProcess class because it is discreet and robust. 
+# If you are planning to port the code over to your own project, make sure you either:
+# - install PyQt/PySide libraries if you are fine with the extra bloat
+# - port to Python's subprocess
 
 import os
-import subprocess
 import traceback
 import logging
-import base64
 import json
 import xmltodict
 import xml
@@ -52,8 +61,12 @@ class WatchData:
 
     def getWatchModel(self, id):
         return self.watchID[id]
+    
+class ProjectTools:
+    def __init__(self):
+        pass
 
-class ProjectV1:  
+class MotralProject:  
     def __init__(self):
         # TODO
         # Use proper object oriented design
@@ -133,22 +146,32 @@ class ProjectV1:
     def getDeviceType(self):
         return self.data["FaceProject"]["@DeviceType"]
         
-    def getAllWidgets(self, type=None, theme=None): # type and theme are for theme support sometime over the rainbow
+    def getAllWidgets(self, type=None, theme=None): # type and theme are for theme support someday over the rainbow
         return self.widgets
     
     def getWidget(self, name):
-        return [ self.widgets for widget in self.widgets if widget.get("@Name") == name ]
+        widget = list(filter(lambda widget: widget["@Name"] == name, self.widgets))
+        if len(widget) == 0:
+            return None
+        else:
+            return widget[0]
     
     def getProperty(self, name, property):
-        widget = [ self.widgets for widget in self.widgets if widget.get("@Name") == name ]
-        return widget[property]
+        widget = list(filter(lambda widget: widget["@Name"] == name, self.widgets))
+        if len(widget) == 0:
+            return None
+        else:
+            return widget[0].get(property)
     
     def getTitle(self):
         return self.data["FaceProject"]["Screen"]["@Title"]
 
     def setProperty(self, name, property, value):
-        widget = [ self.widgets for widget in self.widgets if widget.get("@Name") == name ]
-        widget[property] = value
+        widget = list(filter(lambda widget: widget["@Name"] == name, self.widgets))
+        if len(widget) == 0:
+            return "Widget does not exist!"
+        else:
+            widget[0][property] = value
         
     def setTitle(self, value):
         self.data["FaceProject"]["Screen"] = value
@@ -160,18 +183,13 @@ class ProjectV1:
 
         return pretty_xml
 
-    def save(self, path, data: dict):
-        rawdata = deepcopy(data)
-        print(rawdata)
-        rawdata["FaceProject"]["Screen"]["Widget"] = self.formatToList(rawdata["FaceProject"]["Screen"]["Widget"])
-        print(rawdata)
-
-        raw = xmltodict.unparse(rawdata)
+    def save(self):
+        raw = xmltodict.unparse(self.data)
         dom = xml.dom.minidom.parseString(raw)
         pretty_xml = dom.toprettyxml()
 
         try:
-            with open(path, "w", encoding="utf8") as file:
+            with open(self.dataPath, "w", encoding="utf8") as file:
                 file.write(pretty_xml)
             return True, "success"
             
@@ -195,8 +213,7 @@ class ProjectV1:
         process.start()
         return process
     
-# ProjectV2 uses proper OOP instead of half assed static functions
-class ProjectV2:
+class XiaomiProject:
     def __init__(self):
         # TODO
         # Get manifest.xml parsed properly and resources
@@ -278,4 +295,8 @@ class ProjectV2:
         return [ widgets for widget in widgets if widget.get(name) == theme ]
 
     def save(self, folder):
+        pass
+
+class GMFProject:
+    def __init__(self):
         pass

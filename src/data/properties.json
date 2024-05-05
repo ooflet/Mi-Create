@@ -540,8 +540,8 @@
                 "@Spacing": {
                     "string": "Spacing",
                     "type": "int",
-                    "value": "",
-                    "min": "0",
+                    "value": "0",
+                    "min": "-999",
                     "max": "999"
                 },
                 "@Blanking": {

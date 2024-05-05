@@ -17,7 +17,8 @@ Download the latest installer from the [releases](https://github.com/ooflet/Mi-C
 If there are no prebuilt packages for your OS, you may opt to run directly from source:
 - Clone repo
 - Install Python version >3.8 & install dependencies:
-`pip install -r requirements.txt`
+`pip install -r requirements.txt` or `python -m pip install -r requirements.txt`
+- In the packages folder run `pip install PyQt6_Ads-4.4.1-cp38-abi3-win_amd64.whl` to install the [Qt Advanced Docking System for PyQt6](https://github.com/char101/Qt-Advanced-Docking-System/releases/tag/4.4.1). If you have any expertise in uploading wheels to PyPI, please contribute: <https://github.com/githubuser0xFFFF/Qt-Advanced-Docking-System/issues/556>
 - Execute main.py
 
 Executing from source however will not create log files, it will output logs to console.

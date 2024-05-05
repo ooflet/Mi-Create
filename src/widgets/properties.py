@@ -12,7 +12,7 @@ import gettext
 import logging
 import threading
 from typing import Any
-from utils.project
+from utils.project import MotralProject, XiaomiProject
 
 from PyQt6.QtWidgets import (QStyledItemDelegate, QWidget, QFileDialog, QTreeWidget, QFrame, QHeaderView, QPushButton,
                                QDialog, QDialogButtonBox, QVBoxLayout, QListWidgetItem, QTreeWidgetItem, QLineEdit, 
@@ -331,18 +331,21 @@ class PropertiesWidget(QWidget):
         item.setExpanded(True)
         return item
 
-    def addProperties(self, properties, data, resourceList, parent, device):
+    def addProperties(self, properties, project=None, widgetName=None, resourceList=None, parent=None, device=None):
+        if project != None:
+            widget = project.getWidget(widgetName)
+            
         for key, property in properties.items():
             if not property.get("string"):
                 # category
                 categoryItem = self.createCategory(_(key), parent)
-                self.addProperties(property, data, resourceList, categoryItem, device)  # Recursively add sub-categories
+                self.addProperties(property, project, widgetName, resourceList, categoryItem, device)  # Recursively add sub-categories
             else:
                 ignorePropertyCreation = False
                 # property
                 propertyValue = None
-                if data != None and data.get(key) != None:
-                    propertyValue = data.get(key)
+                if project != None and widget.get(key) != None:
+                    propertyValue = widget.get(key)
                 else:
                     propertyValue = property["value"]
 
@@ -446,7 +449,7 @@ class PropertiesWidget(QWidget):
 
                 elif property["type"] == "int":
                     if len(property) < 5:
-                        QMessageBox.critical(None, "Properties", f"Int property for {property['string']} requires a min/max val, provided in list 3/4 ")
+                        QMessageBox.critical(None, "Properties", f"Int property for {property['string']} requires a min/max val")
                     inputWidget = self.createSpinBox(propertyValue, False, False, key, int(property["min"]), int(property["max"]))
                 elif property["type"] == "bool":
                     inputWidget = self.createCheckBox(propertyValue, key)
@@ -495,12 +498,14 @@ class PropertiesWidget(QWidget):
 
                 inputWidget = None
 
-    def loadProperties(self, properties, data=None, resourceList=None, device=None, scrollTo=None):
+    def loadProperties(self, properties, project=None, widgetName=None, resourceList=None, device=None, scrollTo=None):
         self.clearProperties()
-        if data == None:
-            self.addProperties(properties, data, resourceList, None, device)
+        if project == None:
+            self.addProperties(properties) # for generic usage (like a config/settings menu)
+                                           # make sure if using like this to not use special input fields like numlist
+                                           # otherwise will crash, i will add error handling one day
         else:
-            self.addProperties(properties["properties"], data, resourceList, None, device)
+            self.addProperties(properties["properties"], project, widgetName, resourceList, None, device)
         if scrollTo != None:
             self.treeWidget.scrollContentsBy(0, scrollTo)
 
