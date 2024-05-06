@@ -1,5 +1,13 @@
 <RCC>
   <qresource prefix="Dark">
+    <file>radio_checked.svg</file>
+    <file>radio_checked_disabled.svg</file>
+    <file>radio_unchecked.svg</file>
+    <file>radio_unchecked_disabled.svg</file>
+    <file>checkbox_partial.svg</file>
+    <file>checkbox_partial_disabled.svg</file>
+    <file>checkbox_checked_disabled.svg</file>
+    <file>checkbox_unchecked_disabled.svg</file>
     <file>zoom-in.png</file>
     <file>zoom-out.png</file>
     <file>down-arrow.png</file>
@@ -42,6 +50,8 @@
     <file>package.png</file>
     <file>package-open.png</file>
     <file>plus.png</file>
+    <file>checkbox_checked.svg</file>
+    <file>checkbox_unchecked.svg</file>
   </qresource>
   <qresource prefix="Light"/>
   <qresource prefix="Images">

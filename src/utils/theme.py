@@ -3,8 +3,9 @@
 
 import os
 
-from PyQt6.QtGui import QPalette, QColor, QIcon
-from PyQt6.QtWidgets import QMessageBox
+from PyQt6.QtGui import QPalette, QColor, QIcon, QPixmap, QPainter
+from PyQt6.QtWidgets import QMessageBox, QProxyStyle
+from PyQt6.QtCore import Qt
 import logging
 import configparser
 import json

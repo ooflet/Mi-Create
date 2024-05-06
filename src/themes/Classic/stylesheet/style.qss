@@ -1,24 +1,22 @@
-/*
-
-Reserved for modernization of UI
-
-QPushButton {
-    background-color: rgb(76, 80, 82);
-    min-width: 3.5em;
-    border: 2px solid rgb(94, 96, 96);
-    padding: 2px 8px;
-    border-radius: 4px;
+TitleBarButton {
+    qproperty-normalColor: white;
+    qproperty-normalBackgroundColor: transparent;
+    qproperty-hoverColor: white;
+    qproperty-hoverBackgroundColor: palette(light);
+    qproperty-pressedColor: white;
+    qproperty-pressedBackgroundColor: palette(base);
 }
 
-QPushButton:default {
-    background-color: rgb(54, 88, 128);
-    min-width: 3.5em;
-    border: 2px solid rgb(76, 112, 140);
-    padding: 2px 8px;
-    border-radius: 4px;
+TitleBarButton#closeButton {
+    qproperty-hoverColor: white;
+    qproperty-hoverBackgroundColor: rgb(196, 43, 28);
+    qproperty-pressedColor: white;
+    qproperty-pressedBackgroundColor: rgb(158, 35, 24);
 }
 
-*/
+QMenuBar {
+  padding: 5px
+}
 
 QDialogButtonBox {
   dialogbuttonbox-buttons-have-icons: 0;
@@ -65,67 +63,6 @@ QTabBar::close-button:hover {
 }
 
 /*
- * QScrollBar
- */
-
-QScrollBar:vertical {
-  background: palette(base);
-  border-top-right-radius: 2px;
-  border-bottom-right-radius: 2px;
-  width: 8px;
-  margin: 0px;
-}
-
-QScrollBar::handle:vertical {
-  background-color: palette(midlight);
-  min-height: 20px;
-}
-
-QScrollBar::handle:vertical:hover, QScrollBar::handle:horizontal:hover, QScrollBar::handle:vertical:pressed, QScrollBar::handle:horizontal:pressed {
-  background-color:palette(highlight);
-}
-
-QScrollBar::add-line:vertical {
-  background: none;
-  height: 0px;
-  subcontrol-position: right;
-  subcontrol-origin: margin;
-}
-
-QScrollBar::sub-line:vertical {
-  background: none;
-  height: 0px;
-  subcontrol-position: left;
-  subcontrol-origin: margin;
-}
-
-QScrollBar:horizontal{
-  background: palette(base);
-  height: 8px;
-  margin: 0px;
-}
-
-QScrollBar::handle:horizontal {
-  background-color: palette(midlight);
-  min-width: 8px;
-}
-
-
-QScrollBar::add-line:horizontal {
-  background: none;
-  width: 0px;
-  subcontrol-position: bottom;
-  subcontrol-origin: margin;
-}
-
-QScrollBar::sub-line:horizontal {
-  background: none;
-  width: 0px;
-  subcontrol-position: top;
-  subcontrol-origin: margin;
-}
-
-/*
  * QScrollArea
  */
 
@@ -135,28 +72,6 @@ QScrollArea {
 
 QScrollArea > QWidget > QWidget {
   background-color: palette(alternate-base);
-}
-
-/*
- * QSlider
- */
-
-QSlider::handle:horizontal {
-  border-radius: 5px;
-  background-color: palette(light);
-  max-height: 20px;
-}
-
-QSlider::add-page:horizontal {
-  background: palette(base);
-}
-
-QSlider::sub-page:horizontal {
-  background: palette(highlight);
-}
-
-QSlider::sub-page:horizontal:disabled {
-  background-color: palette(light);
 }
 
 QTableView {

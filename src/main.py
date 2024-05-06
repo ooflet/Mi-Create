@@ -21,10 +21,11 @@ os.chdir(os.path.dirname(os.path.realpath(__file__))) # switch working directory
 from PyQt6.QtWidgets import (QMainWindow, QDialog, QInputDialog, QMessageBox, QApplication, QGraphicsScene, QProgressBar, 
                                QDialogButtonBox, QTreeWidgetItem, QFileDialog, QToolButton, QToolBar, QWidget, QVBoxLayout, 
                                QFrame, QColorDialog, QFontDialog, QSplashScreen, QGridLayout, QLabel, QListWidgetItem,
-                               QSpacerItem, QSizePolicy, QAbstractItemView, QUndoView, QCheckBox, QPushButton)
+                               QSpacerItem, QSizePolicy, QAbstractItemView, QUndoView, QCheckBox, QSlider)
 from PyQt6.QtGui import QIcon, QPixmap, QDesktopServices, QDrag, QImage, QPainter
 from PyQt6.QtCore import Qt, QSettings, QSize, QUrl, QFileInfo, QItemSelectionModel
 from PyQt6.QtAds import CDockManager, CDockWidget
+from window import FramelessMainWindow
 
 from pprint import pprint, pformat
 from copy import deepcopy
@@ -49,6 +50,7 @@ from utils.dialog import MultiFieldDialog
 from utils.theme import Theme
 from utils.updater import Updater
 from utils.history import History, CommandAddWidget, CommandModifyProperty, CommandModifyPosition, CommandModifyProjectData
+from utils.widgetgallery import WidgetGallery
 from widgets.canvas import Canvas, ObjectIcon
 from widgets.explorer import Explorer
 from widgets.properties import PropertiesWidget
@@ -66,7 +68,7 @@ _ = gettext.gettext
 currentDir = os.getcwd()
 currentVersion = 'v0.4'
 
-class MainWindow(QMainWindow):
+class MainWindow(FramelessMainWindow):
     def __init__(self):
         super().__init__()
 
@@ -175,6 +177,10 @@ class MainWindow(QMainWindow):
         logging.info("Initializing MainWindow")
         self.ui = Ui_MainWindow() 
         self.ui.setupUi(self) 
+        self.titleBar.layout().insertWidget(0, self.ui.menubar, 0, Qt.AlignmentFlag.AlignLeft)
+        self.titleBar.layout().insertStretch(1, 1)
+        self.ui.menuLogo.setDisabled(True)
+        self.setMenuWidget(self.titleBar)
         logging.info("Loading Scaffold")
         self.setupScaffold() 
         logging.info("Initializing Application Widgets")
@@ -192,7 +198,7 @@ class MainWindow(QMainWindow):
         logging.info("Initializing Misc")
         self.loadWindowState()
         self.createWelcomePage()
-
+        self.ui.workspace.addTab(WidgetGallery(), "gallery") 
         logging.info("Launch!!")
         self.statusBar().showMessage("Ready", 3000) 
 
@@ -420,6 +426,31 @@ class MainWindow(QMainWindow):
                     self.resourceImages.append(os.path.basename(file))
                     self.ui.resourceList.addItem(item)
 
+    def setIconState(self, disabled):
+        self.ui.actionSave.setDisabled(disabled)
+
+        # edit
+        self.ui.actionDelete.setDisabled(disabled)
+        self.ui.actionCut.setDisabled(disabled)
+        self.ui.actionCopy.setDisabled(disabled)
+        self.ui.actionPaste.setDisabled(disabled)
+        self.ui.actionUndo.setDisabled(disabled)
+        self.ui.actionRedo.setDisabled(disabled)
+        self.ui.actionBring_to_Front.setDisabled(disabled)
+        self.ui.actionBring_Forwards.setDisabled(disabled)
+        self.ui.actionSend_to_Back.setDisabled(disabled)
+        self.ui.actionSend_Backwards.setDisabled(disabled)
+        self.ui.actionProject_XML_File.setDisabled(disabled)
+
+        # view
+        self.ui.actionZoom_In.setDisabled(disabled)
+        self.ui.actionZoom_Out.setDisabled(disabled)
+
+        # compile
+        self.ui.actionBuild.setDisabled(disabled)
+        self.ui.actionUnpack.setDisabled(disabled)
+
+
     def setupWorkspace(self):
         def handleTabClose(index):
             # Fires when tab closes
@@ -455,18 +486,21 @@ class MainWindow(QMainWindow):
             currentProject = self.getCurrentProject()
             self.setWindowTitle(tabName+" - Mi Create")
             if currentProject == None or tabName == "Project XML":
+                self.setIconState(False)
                 self.clearExplorer()
                 self.updateProperties(False)
                 self.reloadImages(None)
                 return
             
             if currentProject.get("canvas") != None:
+                self.setIconState(False)
                 self.selectionDebounce = False
                 self.Explorer.updateExplorer(currentProject["project"])
                 logging.info("Explorer updated") 
                 thread = threading.Thread(target=lambda: self.reloadImages(currentProject["project"].imageDirectory))
                 thread.start()
             else:
+                self.setIconState(True)
                 self.clearExplorer()
                 self.updateProperties(False)
                 self.reloadImages(None)
@@ -1104,8 +1138,6 @@ class MainWindow(QMainWindow):
 
     def newProject(self):
         def accepted():
-            self.newProjectDialog.accept()
-
             # Get file location from dialog
             file = self.newProjectDialog.projectLocation.text()
             projectName = self.newProjectDialog.projectName.text()
@@ -1115,13 +1147,14 @@ class MainWindow(QMainWindow):
             if file:
                 accepted = True
                 if file[0] != "C" and file[0] != "/":
-                    reply = QMessageBox.question(self, 'Confirm Path', _("Are you sure you want to create your project in the directory of this program?"), QMessageBox.Yes, QMessageBox.No)
-                    if reply == QMessageBox.Yes:
+                    reply = self.showDialog("question",  _("Are you sure you want to create your project in the directory of this program?"), "", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.Yes)
+                    if reply == QMessageBox.StandardButton.Yes:
                         accepted = True
                     else:
                         accepted = False
 
                 if accepted:
+                    self.newProjectDialog.accept()
                     newProject = MotralProject()
                     create = newProject.fromBlank(file, self.WatchData.modelID[str(watchModel)], projectName)
                     if create[0]:
@@ -1372,6 +1405,7 @@ if __name__ == "__main__":
         time.sleep(1)
 
     try:
+        app.setAttribute(Qt.ApplicationAttribute.AA_DontCreateNativeWidgetSiblings)
         main_window = MainWindow()
     except Exception as e:
         error_message = "Critical error during initialization: "+traceback.format_exc()

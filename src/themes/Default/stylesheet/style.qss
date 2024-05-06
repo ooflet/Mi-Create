@@ -1,9 +1,98 @@
+TitleBarButton {
+    qproperty-normalColor: palette(text);
+    qproperty-normalBackgroundColor: transparent;
+    qproperty-hoverColor: palette(text);
+    qproperty-hoverBackgroundColor: palette(alternate-base);
+    qproperty-pressedColor: palette(text);
+    qproperty-pressedBackgroundColor: palette(light);
+}
+
+TitleBarButton#closeButton {
+    qproperty-hoverColor: white;
+    qproperty-hoverBackgroundColor: rgb(196, 43, 28);
+    qproperty-pressedColor: white;
+    qproperty-pressedBackgroundColor: rgb(139, 34, 24);
+}
+
+QCheckBox, QRadioButton {
+    spacing: 8px;
+}
+
+QCheckBox::indicator, QRadioButton::indicator {
+    width: 14px;
+    height: 14px;
+}
+
+QRadioButton::indicator:checked {
+    image: url(:/Dark/radio_checked.svg);
+}
+
+QRadioButton::indicator:unchecked {
+    image: url(:/Dark/radio_unchecked.svg);
+}
+
+QRadioButton::indicator:checked:disabled {
+    image: url(:/Dark/radio_checked_disabled.svg);
+}
+
+QRadioButton::indicator:unchecked:disabled {
+    image: url(:/Dark/radio_unchecked_disabled.svg);
+}
+
+QAbstractItemView::indicator:checked,
+QCheckBox::indicator:checked,
+QGroupBox::indicator:checked,
+QTreeView::indicator:checked,
+QMenu::indicator:checked {
+    image: url(:/Dark/checkbox_checked.svg);
+}
+
+QAbstractItemView::indicator:unchecked,
+QCheckBox::indicator:unchecked,
+QGroupBox::indicator:unchecked,
+QTreeView::indicator:unchecked,
+QMenu::indicator:unchecked {
+    image: url(:/Dark/checkbox_unchecked.svg);
+}
+
+QAbstractItemView::indicator:indeterminate,
+QCheckBox::indicator:indeterminate,
+QGroupBox::indicator:indeterminate,
+QTreeView::indicator:indeterminate,
+QMenu::indicator:indeterminate {
+    image: url(:/Dark/checkbox_partial.svg);
+}
+
+QAbstractItemView::indicator:checked:disabled,
+QCheckBox::indicator:checked:disabled,
+QGroupBox::indicator:checked:disabled,
+QTreeView::indicator:checked:disabled,
+QMenu::indicator:checked:disabled {
+    image: url(:/Dark/checkbox_checked_disabled.svg);
+}
+
+QAbstractItemView::indicator:unchecked:disabled,
+QCheckBox::indicator:unchecked:disabled,
+QGroupBox::indicator:unchecked:disabled,
+QTreeView::indicator:unchecked:disabled,
+QMenu::indicator:unchecked:disabled {
+    image: url(:/Dark/checkbox_unchecked_disabled.svg);
+}
+
+QAbstractItemView::indicator:indeterminate:disabled,
+QCheckBox::indicator:indeterminate:disabled,
+QGroupBox::indicator:indeterminate:disabled,
+QTreeView::indicator:indeterminate:disabled,
+QMenu::indicator:indeterminate:disabled {
+    image: url(:/Dark/checkbox_partial_disabled.svg);
+}
+
 QPushButton {
     background-color: transparent;
     min-width: 3.5em;
     padding: 4px 8px;
     border-radius: 4px;
-    border: 1px solid palette(midlight);
+    border: 1px solid palette(light);
 }
 
 QPushButton:default {
@@ -16,11 +105,61 @@ QPushButton:focus {
 }
 
 QPushButton:checked {
-    background-color: palette(midlight);
+    background-color: palette(light);
 }
 
 QPushButton:disabled {
-    border-color: rgba(0, 0, 0, 0);
+    background-color: palette(alternate-base);
+}
+
+QLineEdit {
+    padding: 4px;
+    background-color: transparent;
+    border: 1px solid palette(light);
+    border-radius: 4px;
+    placeholder-text-color: palette(light)
+}
+
+QLineEdit:focus {
+    border-color: palette(highlight);
+}
+
+QSpinBox {
+    padding: 4px;
+    background-color: transparent;
+    border: 1px solid palette(light);
+    border-radius: 4px;
+    placeholder-text-color: palette(light)
+}
+
+QSpinBox:focus {
+    border-color: palette(highlight);
+}
+
+QSpinBox::up-button {
+    background-color: transparent;
+    width: 0px;
+}
+
+QSpinBox::down-button {
+    background-color: transparent;
+    width: 0px;
+}
+
+QComboBox {
+    padding: 4px;
+    background-color: transparent;
+    border: 1px solid palette(light);
+    border-radius: 4px;
+}
+
+QComboBox::indicator{
+    selection-background-color:transparent;
+    selection-color:transparent;
+}
+
+QComboBox::item:selected {
+    background-color: palette(highlight)
 }
 
 QToolButton {
@@ -30,12 +169,19 @@ QToolButton {
     border: none;
 }
 
+QToolButton#inputField-button {
+    border-radius: 5px;
+    padding: 4px;
+    background-color: transparent;
+    border: 1px solid palette(light);
+}
+
 QToolButton:hover{
     background-color: palette(button);
 }
 
 QToolButton:pressed {
-    background-color: palette(link-visited)
+    background-color: palette(link-visited);
 }
 
 /*
@@ -58,6 +204,13 @@ QGroupBox::title {
 
 QToolBar {
   border: none;
+  padding-left: 6px;
+}
+
+QToolBar::separator {
+    width: 1px;
+    background-color: palette(light);
+    margin: 2px 6px 2px 6px;
 }
 
 QDockWidget{
@@ -76,12 +229,12 @@ QTabWidget::pane {
 QTabBar::tab{
   background: palette(window);
   padding: 4px 4px;
-  border: 3px solid transparent;
+  border: 2px solid transparent;
   text-align: left;
 }
 
 QTabBar::tab:hover {
-  border-bottom-color: palette(button);
+  border-bottom-color: palette(light);
 }
 
 QTabBar::tab:selected {
@@ -102,19 +255,21 @@ QTabBar::close-button:hover {
  */
 
 QScrollBar:vertical {
-  background: palette(base);
-  border-top-right-radius: 2px;
-  border-bottom-right-radius: 2px;
+  background: transparent;
   width: 8px;
   margin: 0px;
 }
 
 QScrollBar::handle:vertical {
-  background-color: palette(midlight);
+  background-color: palette(button);
   min-height: 20px;
 }
 
-QScrollBar::handle:vertical:hover, QScrollBar::handle:horizontal:hover, QScrollBar::handle:vertical:pressed, QScrollBar::handle:horizontal:pressed {
+QScrollBar::handle:vertical:hover, QScrollBar::handle:horizontal:hover {
+  background-color:palette(link-visited);
+}
+
+QScrollBar::handle:vertical:pressed, QScrollBar::handle:horizontal:pressed {
   background-color:palette(highlight);
 }
 
@@ -133,13 +288,13 @@ QScrollBar::sub-line:vertical {
 }
 
 QScrollBar:horizontal{
-  background: palette(base);
+  background: transparent;
   height: 8px;
   margin: 0px;
 }
 
 QScrollBar::handle:horizontal {
-  background-color: palette(midlight);
+  background-color: palette(button);
   min-width: 8px;
 }
 
@@ -156,6 +311,16 @@ QScrollBar::sub-line:horizontal {
   width: 0px;
   subcontrol-position: top;
   subcontrol-origin: margin;
+}
+
+QProgressBar {
+    border: 0px solid transparent;
+    max-height: 2px;
+}
+
+QProgressBar::chunk {
+    background-color: palette(highlight);
+    width: 0.5px;
 }
 
 /*
@@ -175,7 +340,7 @@ QScrollArea > QWidget > QWidget {
  */
 
 QSlider::handle:horizontal {
-  border-radius: 5px;
+  border-radius: 4px;
   background-color: palette(light);
   max-height: 20px;
 }
@@ -189,7 +354,7 @@ QSlider::sub-page:horizontal {
 }
 
 QSlider::sub-page:horizontal:disabled {
-  background-color: palette(light);
+  background-color: palette(midlight);
 }
 
 QTableView {
@@ -205,15 +370,44 @@ QListView {
   background-color: palette(window);
 }
 
+QMenuBar {
+    background-color: palette(window);
+    border-bottom: 1px solid transparent;
+}
+
+QMenuBar::item {
+    background-color: transparent;
+    padding: 4px;
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+    border-right: 2px solid transparent;
+    border-left: 2px solid transparent;
+}
+
+QMenuBar::item:selected {
+    background-color: palette(alternate-base);
+}
+
 QMenu {
     background-color: palette(window);
+    padding: 5px 0 5px 0;
     border: 1px solid palette(alternate-base);
 }
 
-QMenu::item {
+QMenu::separator {
+    height: 1px;
+    background-color: palette(alternate-base);
+    margin: 2px 6px 2px 6px;
+}
 
+QMenu::item {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    background-color: palette(window)
 }
 
 QMenu::item:selected {
-    background: palette(alternate-base)
+    background-color: palette(highlight);
 }

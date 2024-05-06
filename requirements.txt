@@ -1,5 +1,5 @@
 PyQt6
 PyQt6-QScintilla
-pyqt-toast-notification
+PyQt6-Frameless-Window
 xmltodict
 requests

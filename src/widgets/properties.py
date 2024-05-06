@@ -66,7 +66,8 @@ class PropertiesWidget(QWidget):
 
         self.propertyStyleSheet = """
             QLineEdit {
-                background-color: rgba(0, 0, 0, 0); 
+                border-color: transparent;
+                background-color: transparent;
                 border-radius: 0px;
                 padding-left: 2px;
             }
@@ -77,7 +78,8 @@ class PropertiesWidget(QWidget):
             }
 
             QSpinBox {
-                background-color: rgba(0, 0, 0, 0); 
+                border-color: transparent;
+                background-color: transparent;
                 border-radius: 0px;
                 padding-left: 2px;
             }
@@ -114,7 +116,8 @@ class PropertiesWidget(QWidget):
             }
 
             QComboBox {
-                background-color: rgba(0, 0, 0, 0); 
+                border-color: transparent;
+                background-color: transparent;
                 border-radius: 0px;
                 padding-left: 2px;
             }
