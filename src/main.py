@@ -21,11 +21,11 @@ os.chdir(os.path.dirname(os.path.realpath(__file__))) # switch working directory
 from PyQt6.QtWidgets import (QMainWindow, QDialog, QInputDialog, QMessageBox, QApplication, QGraphicsScene, QProgressBar, 
                                QDialogButtonBox, QTreeWidgetItem, QFileDialog, QToolButton, QToolBar, QWidget, QVBoxLayout, 
                                QFrame, QColorDialog, QFontDialog, QSplashScreen, QGridLayout, QLabel, QListWidgetItem,
-                               QSpacerItem, QSizePolicy, QAbstractItemView, QUndoView, QCheckBox, QSlider)
+                               QSpacerItem, QSizePolicy, QAbstractItemView, QUndoView, QCheckBox, QSlider, QHBoxLayout)
 from PyQt6.QtGui import QIcon, QPixmap, QDesktopServices, QDrag, QImage, QPainter
 from PyQt6.QtCore import Qt, QSettings, QSize, QUrl, QFileInfo, QItemSelectionModel
-from PyQt6.QtAds import CDockManager, CDockWidget
-from window import FramelessMainWindow
+#from PyQt6.QtAds import CDockManager, CDockWidget
+from window import FramelessMainWindow, FramelessDialog
 
 from pprint import pprint, pformat
 from copy import deepcopy
@@ -179,7 +179,6 @@ class MainWindow(FramelessMainWindow):
         self.ui.setupUi(self) 
         self.titleBar.layout().insertWidget(0, self.ui.menubar, 0, Qt.AlignmentFlag.AlignLeft)
         self.titleBar.layout().insertStretch(1, 1)
-        self.ui.menuLogo.setDisabled(True)
         self.setMenuWidget(self.titleBar)
         logging.info("Loading Scaffold")
         self.setupScaffold() 
@@ -1342,10 +1341,29 @@ class MainWindow(FramelessMainWindow):
         self.settingsDialog.exec()
 
     def showAboutWindow(self):
-        dialog = QMessageBox(self)
-        dialog.setText(f'<html><head/><body><p>Mi Create {currentVersion}<br/><a href="https://github.com/ooflet/Mi-Create/"><span style=" text-decoration: underline; color:#55aaff;">https://github.com/ooflet/Mi-Create/</span></a></p><p>tostr 2024</p></body></html>')
-        dialog.setIconPixmap(QPixmap(":/Images/MiCreate48x48.png"))
-        dialog.setWindowTitle("About Mi Create")
+        dialog = FramelessDialog(self)
+        dialog.setFixedSize(350, 175)
+        dialog.setContentsMargins(20, 30, 5, 5)
+        aboutIcon = QLabel()
+        aboutIcon.setPixmap(QPixmap(":/Images/MiCreate48x48.png"))
+        aboutText = QLabel()
+        aboutText.setText(f'<html><head/><body><p>Mi Create {currentVersion}<br/><a href="https://github.com/ooflet/Mi-Create/"><span style=" text-decoration: underline; color:#55aaff;">https://github.com/ooflet/Mi-Create/</span></a></p><p>tostr 2024</p></body></html>')
+        buttonBox = QDialogButtonBox()
+        buttonBox.setStandardButtons(QDialogButtonBox.StandardButton.Ok)
+        buttonBox.accepted.connect(dialog.close)
+        textLayout = QHBoxLayout()
+        textLayout.setSpacing(20)
+        textLayout.addWidget(aboutIcon)
+        textLayout.addWidget(aboutText)
+        textLayout.addStretch()
+        textLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        dialogLayout = QVBoxLayout()
+        dialogLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        dialogLayout.addLayout(textLayout)
+        dialogLayout.addStretch()
+        dialogLayout.addWidget(buttonBox)
+        dialog.setLayout(dialogLayout)
+        dialog.titleBar.raise_()
         dialog.exec()
 
     def showThirdPartyNotices(self):

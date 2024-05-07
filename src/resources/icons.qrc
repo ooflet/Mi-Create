@@ -8,44 +8,22 @@
     <file>checkbox_partial_disabled.svg</file>
     <file>checkbox_checked_disabled.svg</file>
     <file>checkbox_unchecked_disabled.svg</file>
-    <file>zoom-in.png</file>
-    <file>zoom-out.png</file>
     <file>down-arrow.png</file>
     <file>up-arrow.png</file>
     <file>refresh-cw.png</file>
     <file>image-plus.png</file>
-    <file>folder.png</file>
     <file>progress.png</file>
     <file>moon.png</file>
-    <file>analog.png</file>
-    <file>text.png</file>
-    <file>watch.png</file>
     <file>numbers.png</file>
-    <file>arrow-up-right-from-circle.png</file>
     <file>file-code-2.png</file>
-    <file>image-list.png</file>
     <file>image.png</file>
-    <file>rainbow.png</file>
     <file>mountain-snow.png</file>
     <file>folder-clock.png</file>
     <file>file-clock.png</file>
-    <file>file-box.png</file>
-    <file>clipboard-paste.png</file>
     <file>file-plus.png</file>
-    <file>clipboard-paste.png</file>
-    <file>copy(1).png</file>
-    <file>scissors.png</file>
-    <file>save.png</file>
     <file>x_dim.png</file>
     <file>x.png</file>
-    <file>copy.png</file>
-    <file>redo-2.png</file>
-    <file>undo-2.png</file>
-    <file>bring-to-front.png</file>
-    <file>send-to-back.png</file>
     <file>MiFaceStudioFavicon.png</file>
-    <file>MiFaceStudioFaviconWhite.png</file>
-    <file>save.png</file>
     <file>folder-open.png</file>
     <file>package.png</file>
     <file>package-open.png</file>
@@ -56,6 +34,7 @@
   <qresource prefix="Light"/>
   <qresource prefix="Images">
     <file>MiCreate48x48.png</file>
+    <file>mb8.png</file>
     <file>MiCreateSplash.png</file>
   </qresource>
 </RCC>

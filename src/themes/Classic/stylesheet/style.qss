@@ -1,17 +1,17 @@
 TitleBarButton {
-    qproperty-normalColor: white;
+    qproperty-normalColor: palette(text);
     qproperty-normalBackgroundColor: transparent;
-    qproperty-hoverColor: white;
-    qproperty-hoverBackgroundColor: palette(light);
-    qproperty-pressedColor: white;
-    qproperty-pressedBackgroundColor: palette(base);
+    qproperty-hoverColor: palette(text);
+    qproperty-hoverBackgroundColor: palette(alternate-base);
+    qproperty-pressedColor: palette(text);
+    qproperty-pressedBackgroundColor: palette(light);
 }
 
 TitleBarButton#closeButton {
     qproperty-hoverColor: white;
     qproperty-hoverBackgroundColor: rgb(196, 43, 28);
     qproperty-pressedColor: white;
-    qproperty-pressedBackgroundColor: rgb(158, 35, 24);
+    qproperty-pressedBackgroundColor: rgb(139, 34, 24);
 }
 
 QMenuBar {
@@ -83,6 +83,93 @@ QTreeView {
   background-color: palette(window);
 }
 
+QTreeWidget::item{
+  height:18px;
+}
+
+QTreeWidget#propertiesList::item{
+  height:24px;
+}
+
+
 QListView {
   background-color: palette(window);
 }
+
+QLineEdit#propertyField-input {
+    border-color: transparent;
+    background-color: transparent;
+    border-radius: 0px;
+    padding-left: 2px;
+}
+
+QLineEdit:focus#propertyField-input {
+    background-color: palette(dark);
+    border: 1px solid black;
+}
+
+QSpinBox#propertyField-input {
+    border-color: transparent;
+    background-color: transparent;
+    border-radius: 0px;
+    padding-left: 2px;
+}
+
+QSpinBox::up-button#propertyField-input {
+    background-color: palette(dark);
+    subcontrol-position: top right;
+    width: 16px;
+    border-style: none;
+}
+
+QSpinBox::up-arrow#propertyField-input {
+    image: url(:/Dark/up-arrow.png);
+    width: 7px;
+    height: 7px;
+}
+
+QSpinBox::down-button#propertyField-input {
+    background-color: palette(dark);
+    subcontrol-position: bottom right;
+    width: 16px;
+    border-style: none;
+}
+
+QSpinBox::down-arrow#propertyField-input {
+    image: url(:/Dark/down-arrow.png);
+    width: 7px;
+    height: 7px;
+}
+
+QSpinBox:focus#propertyField-input {
+    background-color: palette(dark);
+    border: 1px solid black;
+}
+
+QComboBox#propertyField-input {
+    border-color: transparent;
+    background-color: transparent;
+    border-radius: 0px;
+    padding-left: 2px;
+}
+
+QComboBox:!editable#propertyField-input {
+    padding-left: 4px;
+}
+
+QComboBox::drop-down#propertyField-input {
+    background-color: palette(dark);
+    border-style: none;
+    width: 16px;
+}
+
+QComboBox::down-arrow#propertyField-input {
+    image: url(:/Dark/down-arrow.png);
+    width: 7px;
+    height: 7px;
+}
+
+QComboBox:focus#propertyField-input {
+    background-color: palette(dark);
+    border: 1px solid black;
+}  

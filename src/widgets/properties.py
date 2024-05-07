@@ -64,90 +64,11 @@ class PropertiesWidget(QWidget):
         self.currentPropertyInput = None
         self.resourceList = []
 
-        self.propertyStyleSheet = """
-            QLineEdit {
-                border-color: transparent;
-                background-color: transparent;
-                border-radius: 0px;
-                padding-left: 2px;
-            }
-
-            QLineEdit:focus {
-                background-color: palette(dark);
-                border: 1px solid black;
-            }
-
-            QSpinBox {
-                border-color: transparent;
-                background-color: transparent;
-                border-radius: 0px;
-                padding-left: 2px;
-            }
-
-            QSpinBox::up-button {
-                background-color: palette(dark);
-                subcontrol-position: top right;
-                width: 16px;
-                border-style: none;
-            }
-
-            QSpinBox::up-arrow {
-                image: url(:/Dark/up-arrow.png);
-                width: 7px;
-                height: 7px;
-            }
-            
-            QSpinBox::down-button {
-                background-color: palette(dark);
-                subcontrol-position: bottom right;
-                width: 16px;
-                border-style: none;
-            }
-
-            QSpinBox::down-arrow {
-                image: url(:/Dark/down-arrow.png);
-                width: 7px;
-                height: 7px;
-            }
-            
-            QSpinBox:focus {
-                background-color: palette(dark);
-                border: 1px solid black;
-            }
-
-            QComboBox {
-                border-color: transparent;
-                background-color: transparent;
-                border-radius: 0px;
-                padding-left: 2px;
-            }
-
-            QComboBox:!editable {
-                padding-left: 4px;
-            }
-
-            QComboBox::drop-down {
-                background-color: palette(dark);
-                border-style: none;
-                width: 16px;
-            }
-
-            QComboBox::down-arrow {
-                image: url(:/Dark/down-arrow.png);
-                width: 7px;
-                height: 7px;
-            }
-
-            QComboBox:focus {
-                background-color: palette(dark);
-                border: 1px solid black;
-            }  
-        """
-
         self.sourceList = srcList
         self.sourceData = srcData
 
         self.treeWidget = QTreeWidget(self)
+        self.treeWidget.setObjectName("propertiesList")
         self.treeWidget.setHeaderHidden(True)
         self.treeWidget.setFrameShape(QFrame.Shape.NoFrame)
         self.treeWidget.setRootIsDecorated(True)
@@ -159,7 +80,6 @@ class PropertiesWidget(QWidget):
         self.treeWidget.header().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
         self.treeWidget.setHeaderLabels(["Property", "Value"])
         self.treeWidget.setItemDelegate(GridDelegate())
-        self.treeWidget.setStyleSheet("QTreeWidget::item{height:24px;}")
 
         # self.searchWidget = QLineEdit(self)
         # self.searchWidget.setPlaceholderText(QCoreApplication.translate("MainWindow", "Search..."))
@@ -202,7 +122,7 @@ class PropertiesWidget(QWidget):
                 self.sendPropertyChangedSignal(srcProperty, lineEdit.text())
 
         lineEdit = QLineEdit(self)
-        lineEdit.setStyleSheet(self.propertyStyleSheet)
+        lineEdit.setObjectName("propertyField-input")
         lineEdit.setText(text)
         lineEdit.setDisabled(disabled)
         lineEdit.editingFinished.connect(onDeselect)
@@ -213,7 +133,7 @@ class PropertiesWidget(QWidget):
             self.sendPropertyChangedSignal(property, "click")
 
         button = QPushButton(self)
-        button.setStyleSheet(self.propertyStyleSheet)
+        button.setObjectName("propertyField-input")
         button.setText(text)
         button.clicked.connect(onClick)
         return button
@@ -243,7 +163,7 @@ class PropertiesWidget(QWidget):
         resourceEdit = QComboBox(self)
         resourceEdit.setEditable(True)
         resourceEdit.setAcceptDrops(True)
-        resourceEdit.setStyleSheet(self.propertyStyleSheet)
+        resourceEdit.setObjectName("propertyField-input")
         resourceEdit.addItems(resourceList)
         resourceEdit.setCurrentText(text)
         resourceEdit.setDisabled(disabled)
@@ -264,7 +184,7 @@ class PropertiesWidget(QWidget):
             self.treeWidget.setCurrentItem(None)
 
         spinBox = QSpinBox(self)
-        spinBox.setStyleSheet(self.propertyStyleSheet)
+        spinBox.setObjectName("propertyField-input")
         spinBox.setRange(minVal, maxVal)
         if text == None:
             text = "0"
@@ -281,7 +201,7 @@ class PropertiesWidget(QWidget):
 
         comboBox = QComboBox(self)
         comboBox.addItems(items)
-        comboBox.setStyleSheet(self.propertyStyleSheet)
+        comboBox.setObjectName("propertyField-input")
         if editable:
             comboBox.setEditable(True)
         else:

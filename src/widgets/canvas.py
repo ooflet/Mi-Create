@@ -32,6 +32,17 @@ class ObjectIcon:
             "42":"widget-arcprogress"
         }
 
+class DeviceRepresentation(QGraphicsPixmapItem):
+    def __init__(self, id, interpolation):
+        super().__init__()
+        self.deviceData = {
+            "9": [":/Images/mb8.png", -325, -180]
+        }
+        self.setPixmap(QPixmap(self.deviceData[id][0]))
+        self.setPos(self.deviceData[id][1], self.deviceData[id][2])
+        if interpolation:
+            self.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
+
 class DeviceOutline(QGraphicsPathItem):
     # Creates the grey outline showing how rounded the screen is
     def __init__(self, size):
@@ -178,6 +189,7 @@ class Canvas(QGraphicsView):
 
     def drawDecorations(self):
         insertButton = QToolButton(self)
+        insertButton.setObjectName("canvasDecoration-button")
         insertButton.setGeometry(20, 20, 40, 25)
         insertButton.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
         insertButton.setMenu(self.mainWindowUI.menuInsert)
@@ -511,9 +523,11 @@ class Canvas(QGraphicsView):
 
     def loadObjects(self, project, interpolation):
         self.frame = DeviceFrame(self.deviceSize)
+        #self.deviceRep = DeviceRepresentation(project.getDeviceType(), interpolation)
         if project.widgets != None:
             self.scene().clear()
             self.widgets.clear()
+            #self.scene().addItem(self.deviceRep)
             self.scene().addItem(self.frame)
  
             self.imageFolder = project.imageDirectory
