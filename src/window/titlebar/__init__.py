@@ -3,18 +3,19 @@ import sys
 
 from PyQt6.QtCore import Qt, QEvent
 from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import QLabel, QHBoxLayout, QWidget
+from PyQt6.QtWidgets import QLabel, QHBoxLayout, QWidget, QFrame
 
 from ..utils import startSystemMove
 from .title_bar_buttons import (CloseButton, MaximizeButton, MinimizeButton,
                                 SvgTitleBarButton, TitleBarButton)
 
 
-class TitleBarBase(QWidget):
+class TitleBarBase(QFrame):
     """ Title bar base class """
 
     def __init__(self, parent):
         super().__init__(parent)
+        self.setObjectName("TitleBar")
         self.minBtn = MinimizeButton(parent=self)
         self.closeBtn = CloseButton(parent=self)
         self.maxBtn = MaximizeButton(parent=self)

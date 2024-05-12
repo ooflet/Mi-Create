@@ -1,3 +1,11 @@
+QWidget#windowTitleBar {
+    background-color: palette(base);
+}
+
+QWidget#dialogTitleBar {
+    background-color: palette(window);
+}
+
 TitleBarButton {
     qproperty-normalColor: palette(text);
     qproperty-normalBackgroundColor: transparent;
@@ -87,6 +95,12 @@ QMenu::indicator:indeterminate:disabled {
     image: url(:/Dark/checkbox_partial_disabled.svg);
 }
 
+QMenu::indicator {
+    width: 16px;
+    height: 16px;
+    padding-right: 4px;
+}
+
 QPushButton {
     background-color: transparent;
     min-width: 3.5em;
@@ -154,7 +168,7 @@ QComboBox {
 }
 
 QComboBox::item {
-    selection-background-color: palette(highlight)
+    selection-background-color: palette(alternate-base);
 }
 
 QToolButton {
@@ -172,10 +186,19 @@ QToolButton#inputField-button {
 }
 
 QToolButton#canvasDecoration-button {
+    background-color: palette(window);
     padding: 0px;
 }
 
+QToolButton::menu-indicator#canvasDecoration-button {
+    image: none;
+}
+
 QToolButton:hover{
+    background-color: palette(button);
+}
+
+QToolButton:hover#canvasDecoration-button {
     background-color: palette(button);
 }
 
@@ -405,8 +428,12 @@ QListView::item:hover:!selected {
     background-color: palette(alternate-base);
 }
 
+QGraphicsView {
+    background-color: palette(base)
+}
+
 QMenuBar {
-    background-color: palette(window);
+    background-color: palette(base);
     border-bottom: 1px solid transparent;
 }
 
@@ -444,7 +471,7 @@ QMenu::item {
 }
 
 QMenu::item:selected {
-    background-color: palette(highlight);
+    background-color: palette(alternate-base);
 }
 
 QLineEdit#propertyField-input {

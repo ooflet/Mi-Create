@@ -43,6 +43,7 @@ class FramelessDialog(QDialog, FramelessWindow):
         super().__init__(parent)
         self.titleBar.minBtn.hide()
         self.titleBar.maxBtn.hide()
+        self.titleBar.setObjectName("dialogTitleBar")
         self.titleBar.setDoubleClickEnabled(False)
         self.windowEffect.disableMaximizeButton(self.winId())
 
@@ -52,3 +53,4 @@ class FramelessMainWindow(QMainWindow, FramelessWindow):
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.titleBar.setObjectName("windowTitleBar")

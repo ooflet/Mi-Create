@@ -45,7 +45,7 @@ import json
 import traceback
 
 from translate import QCoreApplication
-from utils.project import WatchData, MotralProject, XiaomiProject
+from utils.project import WatchData, FprjProject, XiaomiProject
 from utils.dialog import MultiFieldDialog
 from utils.theme import Theme
 from utils.updater import Updater
@@ -326,6 +326,12 @@ class MainWindow(FramelessMainWindow):
 
     def launchUpdater(self):
         self.closeWithoutWarning = True
+        progressBar = QProgressBar()
+        progressBar.setRange(0,0)
+        text = QLabel("Downloading Update...")
+        self.statusBar().addWidget(text, 0)
+        self.statusBar().addWidget(progressBar, 1)
+
         Updater()
         sys.exit()
 
@@ -574,6 +580,8 @@ class MainWindow(FramelessMainWindow):
             else:
                 subprocess.Popen(["xdg-open", currentProject["imageFolder"]])
 
+        self.statusBar().setContentsMargins(4,4,4,4)
+
         self.ui.resourceList.startDrag = startDrag
         self.ui.resourceSearch.textChanged.connect(search)
         self.ui.reloadResource.clicked.connect(reloadResource)
@@ -729,7 +737,7 @@ class MainWindow(FramelessMainWindow):
         count = 0
         currentProject = self.getCurrentProject()
 
-        if not currentProject.get("data"):
+        if not currentProject.get("project"):
             return
         
         if not currentProject["data"]["FaceProject"]["Screen"].get("Widget"):
@@ -777,9 +785,9 @@ class MainWindow(FramelessMainWindow):
         prevData = currentProject["data"]["FaceProject"]["Screen"]["Widget"]
         newData = prevData.copy()
 
-        newData = self.MotralProject.formatToList(newData)
+        newData = self.FprjProject.formatToList(newData)
 
-        for index, obj in enumerate(self.MotralProject.formatToList(prevData)):
+        for index, obj in enumerate(self.FprjProject.formatToList(prevData)):
             print(obj["@Name"], currentCanvasSelected)
             if obj["@Name"] in currentCanvasSelected:
                 newData.pop(newData.index(obj))
@@ -792,7 +800,7 @@ class MainWindow(FramelessMainWindow):
                 elif changeType == "bottom":
                     newData.insert(0, obj)
 
-        newData = self.MotralProject.formatToKeys(newData)
+        newData = self.FprjProject.formatToKeys(newData)
 
         def commandFunc(data):
             projectWidgets = currentProject["data"]["FaceProject"]["Screen"]["Widget"]
@@ -843,7 +851,7 @@ class MainWindow(FramelessMainWindow):
     def pasteWatchfaceWidgets(self):
         currentProject = self.getCurrentProject()
 
-        if not currentProject.get("data") or self.clipboard == []:
+        if not currentProject.get("project") or self.clipboard == []:
             return
 
         for item in self.clipboard:
@@ -975,13 +983,13 @@ class MainWindow(FramelessMainWindow):
             for object in selectedObjects:
                 widget = currentProject["project"].getWidget(object.data(0))
                 
-                if int(widget["@X"]) == round(object.pos().x()) and int(widget["@Y"]) == round(object.pos().y()):
+                if int(widget["widget_pos_x"]) == round(object.pos().x()) and int(widget["widget_pos_y"]) == round(object.pos().y()):
                     return
                 
                 prevPosObject = {
                     "Name": widget["@Name"],
-                    "X": widget["@X"],
-                    "Y": widget["@Y"]
+                    "X": widget["widget_pos_x"],
+                    "Y": widget["widget_pos_y"]
                 }
                 currentPosObject = {
                     "Name": object.data(0),
@@ -997,7 +1005,7 @@ class MainWindow(FramelessMainWindow):
                 currentProject["hasFileChanged"] = True
 
             def commandFunc(objects):
-                if isinstance(currentProject["project"], MotralProject):
+                if isinstance(currentProject["project"], FprjProject):
                     for object in objects:
                         widget = currentProject["project"].getWidget(object["Name"])
                         widget["@X"] = int(object["X"])
@@ -1154,7 +1162,7 @@ class MainWindow(FramelessMainWindow):
 
                 if accepted:
                     self.newProjectDialog.accept()
-                    newProject = MotralProject()
+                    newProject = FprjProject()
                     create = newProject.fromBlank(file, self.WatchData.modelID[str(watchModel)], projectName)
                     if create[0]:
                         try:
@@ -1168,24 +1176,30 @@ class MainWindow(FramelessMainWindow):
         self.newProjectDialog.buttonBox.rejected.connect(self.newProjectDialog.reject)
         self.newProjectDialog.exec()
 
-    def openProject(self, event, file=None): 
+    def openProject(self, event, folder=None): 
         # Get where to open the project from
-        if file == None:
-            file = QFileDialog.getOpenFileName(self, _('Open Project...'), "%userprofile%/", "Watchface Project (*.fprj)")
-        file_extension = QFileInfo(file[0]).suffix()
+        if folder == None:
+            folder = QFileDialog.getExistingDirectory(self, _('Open Project...'))
 
         # Check if file was selected
-        if file[0]:
-            if file_extension == "fprj":
-                project = MotralProject()
-                load = project.fromExisting(file[0])
-                if load[0]:
-                    try:
-                        self.createNewWorkspace(project)    
-                    except Exception as e:
-                        self.showDialog("error", _("Failed to open project: ") + str(e), traceback.format_exc())
-                else:
-                    self.showDialog("error", _('Cannot open project: ') + project[1], project[2])
+        if folder:
+            directory = os.listdir(folder)
+            projectFile = None
+            for file in os.listdir(folder):
+                if file.endswith('.fprj'):
+                    project = FprjProject()
+                    load = project.fromExisting(os.path.join(folder, file))
+                    if load[0]:
+                        try:
+                            self.createNewWorkspace(project)    
+                        except Exception as e:
+                            self.showDialog("error", _("Failed to open project: ") + str(e), traceback.format_exc())
+                    else:
+                        self.showDialog("error", _('Cannot open project: ') + load[1], load[2])
+                    break
+            else:
+                self.showDialog("error", "Invalid project!")
+
 
     def saveProjects(self, projectsToSave):
         if projectsToSave == "all":
@@ -1194,7 +1208,7 @@ class MainWindow(FramelessMainWindow):
                 if project["hasFileChanged"]:
                     if not project.get("data"):
                         return
-                    success, message = self.MotralProject.save(project["path"], project["data"])
+                    success, message = self.FprjProject.save(project["path"], project["data"])
                     if not success:
                         self.showDialog("error", _("Failed to save project: ")+str(message))
                         
@@ -1203,7 +1217,7 @@ class MainWindow(FramelessMainWindow):
             currentProject = self.getCurrentProject()
 
             if currentProject.get("data"):
-                success, message = self.MotralProject.save(currentProject["path"], currentProject["data"])
+                success, message = self.FprjProject.save(currentProject["path"], currentProject["data"])
                 if success:
                     self.statusBar().showMessage(_("Project saved at ")+currentProject["path"], 2000)
                     self.fileChanged = False
@@ -1291,7 +1305,7 @@ class MainWindow(FramelessMainWindow):
 
                 formattedDir = compileDirectory.replace("\\", "/")
                 append(f"Please read https://ooflet.github.io/docs/quickstart/testing to see how you can test your project\n\n")
-                process = self.MotralProject.compile(currentProject["path"], compileDirectory, "compiler/compile.exe")
+                process = self.FprjProject.compile(currentProject["path"], compileDirectory, "compiler/compile.exe")
                 process.readyReadStandardOutput.connect(lambda: append(bytearray(process.readAll()).decode("utf-8")))
                 process.finished.connect(lambda: self.compileUi.buttonBox.setDisabled(False))
                 process.errorOccurred.connect(error)
@@ -1314,11 +1328,11 @@ class MainWindow(FramelessMainWindow):
         currentProject = self.getCurrentProject()
         pprint(currentProject.get("data"))
 
-        if not currentProject.get("data"):
+        if not currentProject.get("project"):
             return
         
         data = deepcopy(currentProject["data"])
-        data["FaceProject"]["Screen"]["Widget"] = self.MotralProject.formatToList(data["FaceProject"]["Screen"]["Widget"])
+        data["FaceProject"]["Screen"]["Widget"] = self.FprjProject.formatToList(data["FaceProject"]["Screen"]["Widget"])
 
         pprint(currentProject.get("data"))
 

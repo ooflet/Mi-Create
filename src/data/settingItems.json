@@ -33,7 +33,7 @@
             "string": "Show Device Outline",
             "type": "bool",
             "value": true,
-            "enabledOn": ["ClipDeviceShape", false]
+            "changeState": ["ClipDeviceShape", "disabled", false]
         },
         "LegacyOutlines": {
             "string": "Performance Outlines",

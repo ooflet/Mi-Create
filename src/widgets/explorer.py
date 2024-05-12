@@ -20,16 +20,16 @@ class Explorer(QTreeWidget):
         self.clear()
         self.items = {}
         def createItem(item):
-            if not self.objectIcon.icon.get(item["@Shape"]):
+            if not self.objectIcon.icon.get(item["widget_type"]):
                 #self.showDialogue("error", f"Widget {item['@Shape']} not implemented in self.objectIcon, please report as issue.")
                 return
             object = QTreeWidgetItem(root)
-            object.setText(0, item["@Name"])
-            object.setIcon(0, QIcon.fromTheme(self.objectIcon.icon[item["@Shape"]]))
+            object.setText(0, item["widget_name"])
+            object.setIcon(0, QIcon.fromTheme(self.objectIcon.icon[item["widget_type"]]))
             object.setFlags(object.flags() | Qt.ItemFlag.ItemIsEditable)
-            object.setData(0, 100, item["@Shape"])
-            object.setData(0, 101, item["@Name"])
-            self.items[item["@Name"]] = object
+            object.setData(0, 100, item["widget_type"])
+            object.setData(0, 101, item["widget_name"])
+            self.items[item["widget_name"]] = object
         
         icon = QIcon()
         icon.addFile(u":/Dark/watch.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
