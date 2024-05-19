@@ -5,15 +5,16 @@
 # FprjProject uses m0tral's XML format for use with m0tral's compiler.
 # GMFProject uses GiveMeFive's JSON based format for use with GMF's compiler
 
-# The project classes are abstractions to assist with modularity and ease of use.
-
-# Note that getWidget function must return a dict
-# Avoid manually changing values in the project's data, always use functions
+# All project manipulation is done through functions
+# There are designated IDs for each property.
 
 # Processes like compilation are handled by Qt's QProcess class because it is discreet and robust. 
 # If you are planning to port the code over to your own project, make sure you either:
 # - install PyQt/PySide libraries if you are fine with the extra bloat
 # - port to Python's subprocess
+
+# TODO
+# Implement plugin system so that formats are installed as seperate plugins
 
 import os
 import traceback
@@ -74,7 +75,7 @@ class FprjProject:
         self.name = None
         self.directory = None
         self.dataPath = None
-        self.imageDirectory = None
+        self.imageFolder = None
 
         self.deviceIds = {
             "0": "xiaomi_color",
@@ -107,11 +108,11 @@ class FprjProject:
         self.propertyIds = {
             "@Alignment": "num_alignment",
             "@Alpha": "widget_alpha",
-            "@Background_ImageName": "analog_background",
+            "@Background_ImageName": "widget_background_bitmap",
             "@BgImage_rotate_xc": "analog_bg_anchor_x",
             "@BgImage_rotate_yc": "analog_bg_anchor_y",
-            "@Bitmap": "widget_image",
-            "@BitmapList": "widget_imagelist",
+            "@Bitmap": "widget_bitmap",
+            "@BitmapList": "widget_bitmaplist",
             "@Blanking": "num_hide_zeros",
             "@DefaultIndex": "imagelist_default_index",
             "@Digits": "num_digits",
@@ -121,13 +122,13 @@ class FprjProject:
             "@HourHand_ImageName": "analog_hour_image",
             "@HourImage_rotate_xc": "analog_hour_anchor_x",
             "@HourImage_rotate_yc": "analog_hour_anchor_y",
-            "@HourhandCorrection_En": "analog_hour_smooth_motion",
+            "@HourHandCorrection_En": "analog_hour_smooth_motion",
             "@Index_Src": "imagelist_source",
             "@Line_Width": "arc_thickness",
             "@MinuteHand_Image": "analog_minute_image",
             "@MinuteImage_rotate_xc": "analog_minute_anchor_x",
             "@MinuteImage_rotate_yc": "analog_minute_anchor_y",
-            "@MinutehandCorrection_En": "analog_minute_smooth_motion",
+            "@MinuteHandCorrection_En": "analog_minute_smooth_motion",
             "@Name": "widget_name",
             "@Radius": "arc_radius",
             "@Range_Max": "arc_max_value",
@@ -182,7 +183,7 @@ class FprjProject:
             self.name = os.path.basename(path)
             self.directory = os.path.dirname(path)
             self.dataPath = os.path.join(folder, f"{name}.fprj")
-            self.imageDirectory = os.path.join(folder, "images")
+            self.imageFolder = os.path.join(folder, "images")
 
             return True, os.path.join(folder, f"{name}.fprj")
         except Exception as e:
@@ -208,68 +209,47 @@ class FprjProject:
                     self.name = os.path.basename(path)
                     self.directory = projectDir
                     self.dataPath = path
-                    self.imageDirectory = imagesDir
-
-                    self.convertToStandard()
+                    self.imageFolder = imagesDir
 
                     return True, "Success"
                 else:
-                    return False, "Not a FaceProject!", ""
+                    return False, "Invalid/corrupted fprj project!", ""
         except Exception as e:
             return False, str(e), traceback.format_exc()
-        
-    
         
     def getDeviceType(self):
         return self.data["FaceProject"]["@DeviceType"]
         
     def getAllWidgets(self, type=None, theme=None): # type and theme are for theme support someday over the rainbow
-        return self.widgets
-    
-    def convertToStandard(self):
-        for index, widget in enumerate(self.widgets):
-            widgetCopy = widget.copy()
-            for key, value in widget.items():
-                print(key)
-                widgetCopy[self.propertyIds[key]] = value
-                del widgetCopy[key]
-                if self.propertyIds[key] == "widget_type":
-                    widgetCopy[self.propertyIds[key]] = self.widgetIds[value]
-            self.widgets[index] = widgetCopy
-        
-    
-    def convertToFprj(self):
-         for widget in self.widgets:
-             for key, value in widget.items():
-                 widget[[k for k, v in self.propertyIds.items() if v == key][0]] = value # get key from value in list comprehension
-                 del widget[key]
+        widgetList = []
+        for widget in self.widgets:
+            widgetList.append(FprjWidget(self, widget))
+        return widgetList
 
     def getWidget(self, name):
-        widget = list(filter(lambda widget: widget["widget_name"] == name, self.widgets))
+        widget = list(filter(lambda widget: widget["@Name"] == name, self.widgets))
         if len(widget) == 0:
             return None
         else:
-            return widget[0]
-    
-    def getProperty(self, name, property):
-        widget = list(filter(lambda widget: widget["widget_name"] == name, self.widgets))
-        if len(widget) == 0:
-            return None
-        else:
-            return widget[0].get(property)
+            return FprjWidget(self, widget[0])
+        
+    def createWidget(self, data):
+        self.widgets
+        
+    def deleteWidget(self, name):
+        for index, item in enumerate(self.widgets):
+            if item["@Name"] == name:
+                self.widgets.pop(index) 
     
     def getTitle(self):
         return self.data["FaceProject"]["Screen"]["@Title"]
 
-    def setProperty(self, name, property, value):
-        widget = list(filter(lambda widget: widget["widget_name"] == name, self.widgets))
-        if len(widget) == 0:
-            return "Widget does not exist!"
-        else:
-            widget[0][property] = value
+    def updateWidget(self, widget):
+        widgetData = list(filter(lambda oldWidgetData: oldWidgetData["@Name"] == widget["@Name"], self.widgets))
+        widgetData[0] = widget.data
 
     def setWidgetPos(self, name, posX, posY):
-        widget = list(filter(lambda widget: widget["widget_name"] == name, self.widgets))
+        widget = list(filter(lambda widget: widget["@Name"] == name, self.widgets))
         if len(widget) == 0:
             return "Widget does not exist!"
         else:
@@ -287,7 +267,7 @@ class FprjProject:
         return pretty_xml
 
     def save(self):
-        self.convertToFprj()
+        self.formatToFprj()
 
         raw = xmltodict.unparse(self.data)
         dom = xml.dom.minidom.parseString(raw)
@@ -317,6 +297,37 @@ class FprjProject:
         process.setArguments(path)
         process.start()
         return process
+    
+class FprjWidget:
+    def __init__(self, project, data):
+        self.project = project
+        self.data = data
+    
+    def getProperty(self, property):
+        property = [k for k, v in self.project.propertyIds.items() if v == property][0]
+        print(property)
+        if property == "WidgetType":
+            return
+
+        if property == "@Shape":
+            return self.project.widgetIds[self.data[property]]
+        elif property == "@BitmapList":
+            bitmapString = self.data[property]
+            bitmapList = bitmapString.split("|")
+            for index, item in enumerate(bitmapList):
+                split = item.split(":")
+                if len(split) > 1:
+                    split[0] = split[0].strip("()")
+                    bitmapList[index] = split
+            return bitmapList
+        else:
+            return self.data[property]
+
+    def setProperty(self, property, value):
+        property = [k for k, v in self.propertyIds.items() if v == property][0]
+        self.data[property] = value
+        self.project.updateWidget(self)
+
     
 class XiaomiProject:
     def __init__(self):

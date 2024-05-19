@@ -110,14 +110,6 @@
     <property name="title">
      <string>View</string>
     </property>
-    <widget class="QMenu" name="menuToolbars">
-     <property name="title">
-      <string>Toolbars</string>
-     </property>
-     <addaction name="actionEdit"/>
-     <addaction name="actionFile"/>
-     <addaction name="actionLayout"/>
-    </widget>
     <widget class="QMenu" name="menuZoom">
      <property name="title">
       <string>Zoom</string>
@@ -125,12 +117,13 @@
      <addaction name="actionZoom_In"/>
      <addaction name="actionZoom_Out"/>
     </widget>
-    <addaction name="actionExplorer"/>
-    <addaction name="actionAttributes"/>
+    <addaction name="actionToggleExplorer"/>
+    <addaction name="actionToggleProperties"/>
+    <addaction name="actionToggleResources"/>
+    <addaction name="separator"/>
+    <addaction name="actionToggleToolbar"/>
     <addaction name="separator"/>
     <addaction name="menuZoom"/>
-    <addaction name="separator"/>
-    <addaction name="menuToolbars"/>
     <addaction name="separator"/>
     <addaction name="actionFull_Screen"/>
    </widget>
@@ -273,7 +266,7 @@
    </widget>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <widget class="QDockWidget" name="dockWidget">
+  <widget class="QDockWidget" name="resourcesWidget">
    <property name="minimumSize">
     <size>
      <width>200</width>
@@ -372,6 +365,12 @@
          <width>64</width>
          <height>64</height>
         </size>
+       </property>
+       <property name="verticalScrollMode">
+        <enum>QAbstractItemView::ScrollPerPixel</enum>
+       </property>
+       <property name="horizontalScrollMode">
+        <enum>QAbstractItemView::ScrollPerPixel</enum>
        </property>
        <property name="flow">
         <enum>QListView::TopToBottom</enum>
@@ -495,7 +494,7 @@
     <string>Ctrl+K</string>
    </property>
   </action>
-  <action name="actionExplorer">
+  <action name="actionToggleExplorer">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -506,7 +505,7 @@
     <string>Explorer</string>
    </property>
   </action>
-  <action name="actionAttributes">
+  <action name="actionToggleProperties">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -514,7 +513,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Attributes</string>
+    <string>Properties</string>
    </property>
   </action>
   <action name="actionExit">
@@ -822,6 +821,28 @@
   <action name="actiontest">
    <property name="text">
     <string>test</string>
+   </property>
+  </action>
+  <action name="actionToggleToolbar">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Toolbar</string>
+   </property>
+  </action>
+  <action name="actionToggleResources">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Resources</string>
    </property>
   </action>
  </widget>

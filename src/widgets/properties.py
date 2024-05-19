@@ -74,6 +74,8 @@ class PropertiesWidget(QWidget):
         self.treeWidget.setRootIsDecorated(True)
         self.treeWidget.setSelectionMode(QTreeWidget.SelectionMode.SingleSelection)
         self.treeWidget.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.treeWidget.setHorizontalScrollMode(QTreeWidget.ScrollMode.ScrollPerPixel)
+        self.treeWidget.setVerticalScrollMode(QTreeWidget.ScrollMode.ScrollPerPixel)
         self.treeWidget.setAnimated(True)
         self.treeWidget.setUniformRowHeights(True)
         
@@ -279,6 +281,7 @@ class PropertiesWidget(QWidget):
     def addProperties(self, properties, project=None, widgetName=None, resourceList=None, parent=None, device=None):
         if project != None:
             widget = project.getWidget(widgetName)
+            pprint(widget)
             
         for key, property in properties.items():
             if not property.get("string"):
@@ -289,10 +292,12 @@ class PropertiesWidget(QWidget):
                 ignorePropertyCreation = False
                 # property
                 propertyValue = None
-                if project != None and widget.get(key) != None:
-                    propertyValue = widget.get(key)
+                if project != None and widget.getProperty(key) != None:
+                    propertyValue = widget.getProperty(key)
                 else:
                     propertyValue = property["value"]
+                
+                print(key, propertyValue)
 
                 inputWidget = None
                 
@@ -311,12 +316,12 @@ class PropertiesWidget(QWidget):
 
                     def imagesChanged(stringIndex, image, index):
                         imageString = f"({stringIndex}):{image}"
-                        print(len(imageList), index)
-                        if len(imageList) - 1 >= index:
-                            imageList[index] = imageString
+                        print(len(propertyValue), index)
+                        if len(propertyValue) - 1 >= index:
+                            propertyValue[index] = imageString
                         else:
-                            imageList.insert(index, imageString)
-                        completeString = '|'.join(imageList)
+                            propertyValue.insert(index, imageString)
+                        completeString = '|'.join(propertyValue)
                         self.sendPropertyChangedSignal(key, completeString)
 
                     def createImageCategories(imageList, imageCount):
@@ -329,11 +334,12 @@ class PropertiesWidget(QWidget):
                             self.imageCategories.append([imageCategory, imageInput, indexInput])
 
                             if len(imageList) > index:
+                                print(imageList)
                                 image = imageList[index]
-                                values = image.split(":")
-                                if values[0] != "" and len(values) > 1:
-                                    indexInput.setValue(int(values[0].strip("()"))) 
-                                    imageInput.setCurrentText(values[1])             
+                                print(image)
+                                if image[0] != "" and len(image) > 1:
+                                    indexInput.setValue(int(image[0])) 
+                                    imageInput.setCurrentText(image[1])             
                                 imageInput.currentTextChanged.connect(lambda event, indexInput=self.imageCategories[index][2], imageInput=self.imageCategories[index][1], index=index: imagesChanged(indexInput.text(), imageInput.currentText(), index))
                                 indexInput.textChanged.connect(lambda text, imageInput=self.imageCategories[index][1], index=index: imagesChanged(text, imageInput.currentText(), index))
                             else:
@@ -351,35 +357,34 @@ class PropertiesWidget(QWidget):
                     def updateImageAmount(value):
                         value = int(value)
                         deleteAllCategories()
-                        createImageCategories(imageList, value)
+                        createImageCategories(propertyValue, value)
 
                     ignorePropertyCreation = True
-                    imageList = propertyValue.split("|")
-                    imageAmountInput = self.createSpinBox(len(imageList), False, True, key, 0, 100)
+                    imageAmountInput = self.createSpinBox(len(propertyValue), False, True, key, 0, 100)
                     imageAmountInput.textChanged.connect(lambda value=imageAmountInput.value(): updateImageAmount(value))
                     self.addProperty("", "Image Count", imageAmountInput, parent)
 
-                    success, message = createImageCategories(imageList, len(imageList))
+                    print(propertyValue)
+
+                    success, message = createImageCategories(propertyValue, len(propertyValue))
 
                     if not success:
                         QMessageBox.critical(None, "Properties", f"Error occured loading images: {message}")
 
                 elif property["type"] == "numlist":
                     ignorePropertyCreation = True
-                    imageList = propertyValue.split("|")
 
                     def updateNumberList(index, text):
-                        if index >= len(imageList):
-                            imageList.insert(index, text)
+                        if index >= len(propertyValue):
+                            propertyValue.insert(index, text)
                         else:
-                            imageList[index] = text
-                        imageString = '|'.join(imageList)
-                        self.sendPropertyChangedSignal(key, imageString)
+                            propertyValue[index] = text
+                        self.sendPropertyChangedSignal(key, propertyValue)
 
                     def createInput(index, definedText=None):
                         text = ""
-                        if index < len(imageList):
-                            text = imageList[index]
+                        if index < len(propertyValue):
+                            text = propertyValue[index]
                         imageInput = self.createResourceEdit(text, False, resourceList, True)
                         if definedText == None:
                             self.addProperty("", "Number "+str(index), imageInput, parent)

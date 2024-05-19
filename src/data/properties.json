@@ -318,7 +318,7 @@
                 }
             },
             "Images": {
-                "analog_background": {
+                "widget_background_bitmap": {
                     "string": "Background",
                     "type": "img",
                     "value": ""
@@ -393,7 +393,7 @@
                 }
             },
             "Image": {
-                "widget_image": {
+                "widget_bitmap": {
                     "string": "Image",
                     "type": "img",
                     "value": ""
@@ -477,7 +477,7 @@
                     "min": "0",
                     "max": "99"
                 },
-                "widget_imagelist": {
+                "widget_bitmaplist": {
                     "string": "Images",
                     "type": "imglist",
                     "value": ""
@@ -583,7 +583,7 @@
                 }
             },
             "Images": {
-                "widget_imagelist": {
+                "widget_bitmaplist": {
                     "string": "Images",
                     "type": "numlist",
                     "value": ""

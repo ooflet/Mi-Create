@@ -23,7 +23,7 @@ from PyQt6.QtWidgets import (QMainWindow, QDialog, QInputDialog, QMessageBox, QA
                                QFrame, QColorDialog, QFontDialog, QSplashScreen, QGridLayout, QLabel, QListWidgetItem,
                                QSpacerItem, QSizePolicy, QAbstractItemView, QUndoView, QCheckBox, QSlider, QHBoxLayout)
 from PyQt6.QtGui import QIcon, QPixmap, QDesktopServices, QDrag, QImage, QPainter
-from PyQt6.QtCore import Qt, QSettings, QSize, QUrl, QFileInfo, QItemSelectionModel
+from PyQt6.QtCore import Qt, QSettings, QSize, QUrl, pyqtSignal
 #from PyQt6.QtAds import CDockManager, CDockWidget
 from window import FramelessMainWindow, FramelessDialog
 
@@ -65,10 +65,10 @@ from dialog.compileDialog_ui import Ui_Dialog as Ui_CompileDialog
 
 _ = gettext.gettext
 
-currentDir = os.getcwd()
-currentVersion = 'v0.4'
+currentVersion = 'v0.2'
 
 class MainWindow(FramelessMainWindow):
+    updateFound = pyqtSignal(str)
     def __init__(self):
         super().__init__()
 
@@ -197,7 +197,7 @@ class MainWindow(FramelessMainWindow):
         logging.info("Initializing Misc")
         self.loadWindowState()
         self.createWelcomePage()
-        self.ui.workspace.addTab(WidgetGallery(), "gallery") 
+        self.updateFound.connect(self.promptUpdate)
         logging.info("Launch!!")
         self.statusBar().showMessage("Ready", 3000) 
 
@@ -229,6 +229,12 @@ class MainWindow(FramelessMainWindow):
                 event.ignore()
         else:
             quitWindow()
+
+    def showEvent(self, event):
+        self.ui.actionToggleExplorer.setChecked(self.ui.explorerWidget.isVisible())
+        self.ui.actionToggleResources.setChecked(self.ui.resourcesWidget.isVisible())
+        self.ui.actionToggleProperties.setChecked(self.ui.propertiesWidget.isVisible())
+        self.ui.actionToggleToolbar.setChecked(self.ui.toolBar.isVisible())
 
     def toggleFullscreen(self):
         if self.isFullScreen():
@@ -268,7 +274,6 @@ class MainWindow(FramelessMainWindow):
             settings.setValue(property, value)
 
         self.settingsDialog.close()
-        print(loadSettings)
         if loadSettings:
             self.loadSettings()
             self.loadTheme()
@@ -301,6 +306,7 @@ class MainWindow(FramelessMainWindow):
         
         for project in self.projects.values():
             if project.get("canvas"):
+                project["canvas"].setRenderHint(QPainter.RenderHint.Antialiasing, self.settings["Canvas"]["Antialiasing"]["value"])
                 project["canvas"].loadObjects(project["project"], self.settings["Canvas"]["Interpolation"]["value"])
 
     def loadLanguage(self, retranslate):
@@ -329,11 +335,24 @@ class MainWindow(FramelessMainWindow):
         progressBar = QProgressBar()
         progressBar.setRange(0,0)
         text = QLabel("Downloading Update...")
-        self.statusBar().addWidget(text, 0)
-        self.statusBar().addWidget(progressBar, 1)
+        self.statusBar().addPermanentWidget(text, 0)
+        self.statusBar().addPermanentWidget(progressBar, 1)
 
-        Updater()
-        sys.exit()
+        Updater(progressBar, text)
+
+    def promptUpdate(self, ver):
+        if ver[-1] == 'u':
+            self.showDialog('info', _('An urgent update {version} was released! The app will now update.').format(version=ver))
+            self.launchUpdater()
+        else:
+            reply, dontCheck = self.showDialog("question", _('A new update has been found ({version}). Would you like to update now?').format(version=ver), "", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.Yes, "Never check for updates", False)
+
+            if dontCheck:
+                self.stagedChanges.append(["CheckUpdate", False])
+                self.saveSettings(False)
+
+            if reply == QMessageBox.StandardButton.Yes:
+                self.launchUpdater()
 
     def checkForUpdates(self):
         # Contacts GitHub server for current version and compares installed to current version
@@ -347,17 +366,7 @@ class MainWindow(FramelessMainWindow):
             return
 
         if version > currentVersion:
-            if version[-1] == 'u':
-                self.showDialog('info', _('An urgent update {version} was released! The app will now update.').format(version=version))
-                self.launchUpdater()
-            else:
-                reply, dontCheck = self.showDialog("question", _('A new update has been found ({version}). Would you like to update now?').format(version=version), "", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.Yes, "Never check for updates", False)
-
-                if reply == QMessageBox.StandardButton.Yes:
-                    self.launchUpdater()
-                elif dontCheck:
-                    self.stagedChanges.append(["CheckUpdate", False])
-                    self.saveSettings(False)
+            self.updateFound.emit(version)
 
     def setupThemes(self):
         self.themes = Theme()
@@ -366,13 +375,7 @@ class MainWindow(FramelessMainWindow):
         # Loads theme from settings table
         themeName = self.settings["General"]["Theme"]["value"]
         app = QApplication.instance()
-        # if themeName == "Light":
-        #     styles.light(app)
-        #     self.showDialog('info', 'Icons in light theme have not been implemented yet. Sorry!')
-        # elif themeName == "Dark":
-        #     styles.dark(app)
         success = self.themes.loadTheme(app, themeName)
-        print(success)
         if not success:
             self.showDialog("warning", f"An error occured while loading the theme {themeName}. Theme settings have been reset.")
             self.settings["General"]["Theme"]["value"] = "Dark"
@@ -458,6 +461,7 @@ class MainWindow(FramelessMainWindow):
 
     def setupWorkspace(self):
         def handleTabClose(index):
+            print(index)
             # Fires when tab closes
             def delProjectItem(index):
                 if self.ui.workspace.tabToolTip(index) != "":
@@ -468,7 +472,7 @@ class MainWindow(FramelessMainWindow):
             project = self.ui.workspace.tabToolTip(index)
 
             if project == "":
-                self.ui.workspace.widget(index).setParent(None)
+                self.ui.workspace.widget(index).deleteLater()
                 self.ui.workspace.removeTab(index)
                 return
 
@@ -502,7 +506,7 @@ class MainWindow(FramelessMainWindow):
                 self.selectionDebounce = False
                 self.Explorer.updateExplorer(currentProject["project"])
                 logging.info("Explorer updated") 
-                thread = threading.Thread(target=lambda: self.reloadImages(currentProject["project"].imageDirectory))
+                thread = threading.Thread(target=lambda: self.reloadImages(currentProject["project"].imageFolder))
                 thread.start()
             else:
                 self.setIconState(True)
@@ -546,7 +550,7 @@ class MainWindow(FramelessMainWindow):
         def addResource():
             currentProject = self.getCurrentProject()
             
-            if currentProject == None or not currentProject.get("imageFolder"):
+            if currentProject == None or not currentProject.get("project"):
                 return
             
             files = QFileDialog.getOpenFileNames(self, _("Add Image..."), "%userprofile%\\", "Image File (*.png *.jpeg *.jpg)")
@@ -555,30 +559,30 @@ class MainWindow(FramelessMainWindow):
                 return
             
             for file in files[0]:
-                shutil.copyfile(file, os.path.join(currentProject["imageFolder"], os.path.basename(file)))
-            self.reloadImages(currentProject["imageFolder"])
+                shutil.copyfile(file, os.path.join(currentProject["project"].imageFolder, os.path.basename(file)))
+            self.reloadImages(currentProject["project"].imageFolder)
 
         def reloadResource():
             currentProject = self.getCurrentProject()
 
-            if currentProject == None or not currentProject.get("imageFolder"):
+            if currentProject == None or not currentProject.get("project"):
                 return
             
-            self.reloadImages(currentProject["imageFolder"])
+            self.reloadImages(currentProject["project"].imageFolder)
 
         def openResourceFolder():
             currentProject = self.getCurrentProject()
 
-            if currentProject == None or not currentProject.get("imageFolder"):
+            if currentProject == None or not currentProject.get("project"):
                 return
             
             if platform.system() == "Windows":
-                path = str.replace(currentProject["imageFolder"], "/", "\\")
+                path = str.replace(currentProject["project"].imageFolder, "/", "\\")
                 os.startfile(path)
             elif platform.system() == "Darwin":
-                subprocess.Popen(["open", currentProject["imageFolder"]])
+                subprocess.Popen(["open", currentProject["project"].imageFolder])
             else:
-                subprocess.Popen(["xdg-open", currentProject["imageFolder"]])
+                subprocess.Popen(["xdg-open", currentProject["project"].imageFolder])
 
         self.statusBar().setContentsMargins(4,4,4,4)
 
@@ -610,7 +614,7 @@ class MainWindow(FramelessMainWindow):
     def setupProperties(self):
         def setProperty(args):
             currentProject = self.getCurrentProject()
-            if currentProject == None or not currentProject.get("data"):
+            if currentProject == None or not currentProject.get("project"):
                 return
             currentSelected = self.Explorer.currentItem()
             currentItem = None
@@ -622,51 +626,46 @@ class MainWindow(FramelessMainWindow):
 
             logging.info(f"Set property {args[0]}, {args[1]} for widget {currentSelected.data(0,101)}")
             # search for item by name, and if available set as currentItem
-            currentItem = currentProject["data"]["FaceProject"]["Screen"]["Widget"][currentSelected.data(0,101)]
+            currentItem =  currentProject["project"].getWidget(currentSelected.data(0,101))
 
             def updateProperty(widgetName, property, value):
-                if property == "@Value_Src" or property == "@Index_Src" or property == "@Visible_Src":
+                if property == "num_source" or property == "imagelist_source" or property == "widget_visibility_source":
                     if value == "None":
-                        currentItem[property] = 0
+                        currentItem.setProperty(property, 0)
                     else:
-                        for data in self.WatchData.modelSourceData[str(currentProject["data"]["FaceProject"]["@DeviceType"])]:
+                        for data in self.WatchData.modelSourceData[str(currentProject["project"].getDeviceType())]:
                             if data["@Name"] == value:
                                 try:
-                                    currentItem[property] = int(data["@ID"], 0)
+                                    currentItem.setProperty(property, int(data["@ID"], 0))
                                 except:
-                                    currentItem[property] = int(data["@ID"])
+                                    currentItem.setProperty(property, int(data["@ID"]))
                                 break
                         else:
                             self.showDialog("warning", "Invalid source name!")
                             return
-                elif property == "@Alignment":
+                elif property == "num_alignment":
                     alignmentList = ["Left", "Center", "Right"]
-                    currentItem[property] = str(alignmentList.index(value))
-                elif property == "@Name":
+                    currentItem.setProperty(property, str(alignmentList.index(value)))
+                elif property == "widget_name":
                     if value == widgetName:
                         return
                     elif currentProject["canvas"].getObject(value):
                         self.showDialog("info", "Another widget has this name! Please change it to something else.")
                         return
                     else:
-                        # need to do this hack, otherwise order gets messed up
-                        # i really need to stop using xmltodict, but its too engrained into the code
-                        # that it becomes too hard to replace without breaking the hell out of everything
-                        currentProject["data"]["FaceProject"]["Screen"]["Widget"][value] = currentItem
-                        del currentProject["data"]["FaceProject"]["Screen"]["Widget"][currentItem[property]]
                         currentItem[property] = value
                 elif isinstance(value, bool):
                     if value == True:
                         value = "1"
                     else:
                         value = "0"
-                    currentItem[property] = value
+                    currentItem.setProperty(property, value)
                 else:
-                    currentItem[property] = value
+                    currentItem.setProperty(property, value)
 
-                if property == "@Name":
+                if property == "widget_name":
                     self.propertiesWidget.clearOnRefresh = False
-                    self.Explorer.updateExplorer(currentProject["data"])
+                    self.Explorer.updateExplorer(currentProject["project"])
                     currentProject["canvas"].loadObjects(currentProject["project"], self.settings["Canvas"]["Interpolation"]["value"])
                     currentProject["canvas"].selectObject(value)
                 else:
@@ -680,7 +679,7 @@ class MainWindow(FramelessMainWindow):
             else:   
                 if not currentItem.get(args[0]):
                     currentItem[args[0]] = ""
-                command = CommandModifyProperty(currentItem["@Name"], args[0], currentItem[args[0]], args[1], updateProperty, f"Change property {args[0]} to {args[1]}")
+                command = CommandModifyProperty(currentItem["widget_name"], args[0], currentItem[args[0]], args[1], updateProperty, f"Change property {args[0]} to {args[1]}")
                 self.History.undoStack.push(command)
                 self.ignoreHistoryInvoke = False
             
@@ -702,14 +701,6 @@ class MainWindow(FramelessMainWindow):
         else:
             if self.propertiesWidget.clearOnRefresh:
                 self.propertiesWidget.clearProperties()
-
-    def updateObjectProperty(self, name, property, value):
-        currentProject = self.getCurrentProject()
-        for index, object in enumerate(currentProject["data"]["FaceProject"]["Screen"]["Widget"]):
-            if object["@Name"] == name:
-                object[property] = value
-                break
-        self.propertiesWidget.propertyItems[property].setText(value)
 
     def setupScaffold(self):
         with open("data/default/defaultItems.json", encoding="utf8") as raw:
@@ -739,12 +730,9 @@ class MainWindow(FramelessMainWindow):
 
         if not currentProject.get("project"):
             return
-        
-        if not currentProject["data"]["FaceProject"]["Screen"].get("Widget"):
-            currentProject["data"]["FaceProject"]["Screen"]["Widget"] = {}
 
-        for key in currentProject["data"]["FaceProject"]["Screen"]["Widget"]:
-            if "widget-" in key:
+        for widget in currentProject["project"].getAllWidgets():
+            if "widget-" in widget.getProperty("widget_name"):
                 count += 1
 
         defaultScaffold = json.loads(self.defaultSource)
@@ -752,7 +740,7 @@ class MainWindow(FramelessMainWindow):
         widgetData["@Name"] = "widget-" + str(count)
         widgetData["@X"] = int(currentProject["canvas"].scene().sceneRect().width()/2 - int(widgetData["@Width"])/2)
         widgetData["@Y"] = int(currentProject["canvas"].scene().sceneRect().height()/2 - int(widgetData["@Height"])/2)
-        self.Explorer.updateExplorer(currentProject["data"])
+        self.Explorer.updateExplorer(currentProject["project"])
         if self.ignoreHistoryInvoke:
             self.ignoreHistoryInvoke = False
         else:
@@ -760,7 +748,6 @@ class MainWindow(FramelessMainWindow):
                 if type == "undo":
                     currentProject["data"]["FaceProject"]["Screen"]["Widget"].pop(key)   
                 elif type == "redo":
-                    print(currentProject["data"]["FaceProject"]["Screen"]["Widget"])
                     currentProject["data"]["FaceProject"]["Screen"]["Widget"][key] = object
                 currentProject["canvas"].loadObjects(currentProject["project"], self.settings["Canvas"]["Interpolation"]["value"])
                 self.Explorer.updateExplorer(currentProject["data"])
@@ -788,7 +775,6 @@ class MainWindow(FramelessMainWindow):
         newData = self.FprjProject.formatToList(newData)
 
         for index, obj in enumerate(self.FprjProject.formatToList(prevData)):
-            print(obj["@Name"], currentCanvasSelected)
             if obj["@Name"] in currentCanvasSelected:
                 newData.pop(newData.index(obj))
                 if changeType == "raise" and index + 1 < len(prevData):
@@ -983,13 +969,13 @@ class MainWindow(FramelessMainWindow):
             for object in selectedObjects:
                 widget = currentProject["project"].getWidget(object.data(0))
                 
-                if int(widget["widget_pos_x"]) == round(object.pos().x()) and int(widget["widget_pos_y"]) == round(object.pos().y()):
+                if int(widget.getProperty("widget_pos_x")) == round(object.pos().x()) and int(widget.getProperty("widget_pos_y")) == round(object.pos().y()):
                     return
                 
                 prevPosObject = {
-                    "Name": widget["@Name"],
-                    "X": widget["widget_pos_x"],
-                    "Y": widget["widget_pos_y"]
+                    "Name": widget.getProperty("widget_name"),
+                    "X": widget.getProperty("widget_pos_x"),
+                    "Y": widget.getProperty("widget_pos_y")
                 }
                 currentPosObject = {
                     "Name": object.data(0),
@@ -1007,9 +993,8 @@ class MainWindow(FramelessMainWindow):
             def commandFunc(objects):
                 if isinstance(currentProject["project"], FprjProject):
                     for object in objects:
-                        widget = currentProject["project"].getWidget(object["Name"])
-                        widget["@X"] = int(object["X"])
-                        widget["@Y"] = int(object["Y"])
+                        widget.setProperty("widget_pos_x", int(object["X"]))
+                        widget.setProperty("widget_pos_y", int(object["Y"]))
                 currentProject["canvas"].loadObjects(currentProject["project"], self.settings["Canvas"]["Interpolation"]["value"])
                 currentProject["canvas"].selectObjectsFromPropertyList(objects)
 
@@ -1096,6 +1081,15 @@ class MainWindow(FramelessMainWindow):
 
         # Connect menu actions
 
+        def toggleViewOfWidget(action, widget):
+            print(widget.isVisible(), action.isChecked())
+            if widget.isVisible():
+                widget.hide()
+                action.setChecked(False)
+            else:
+                widget.show()
+                action.setChecked(True)
+
         # file
         self.ui.actionNewFile.triggered.connect(self.newProject)
         self.ui.actionOpenFile.triggered.connect(self.openProject)
@@ -1117,6 +1111,10 @@ class MainWindow(FramelessMainWindow):
         self.ui.actionPreferences.triggered.connect(self.showSettings)
 
         # view
+        self.ui.actionToggleExplorer.triggered.connect(lambda: toggleViewOfWidget(self.ui.actionToggleExplorer, self.ui.explorerWidget))
+        self.ui.actionToggleResources.triggered.connect(lambda: toggleViewOfWidget(self.ui.actionToggleResources, self.ui.resourcesWidget))
+        self.ui.actionToggleProperties.triggered.connect(lambda: toggleViewOfWidget(self.ui.actionToggleProperties, self.ui.propertiesWidget))
+        self.ui.actionToggleToolbar.triggered.connect(lambda: toggleViewOfWidget(self.ui.actionToggleToolbar, self.ui.toolBar))
         self.ui.actionZoom_In.triggered.connect(lambda: self.zoomCanvas("in"))
         self.ui.actionZoom_Out.triggered.connect(lambda: self.zoomCanvas("out"))
         self.ui.actionFull_Screen.triggered.connect(self.toggleFullscreen)
@@ -1176,29 +1174,40 @@ class MainWindow(FramelessMainWindow):
         self.newProjectDialog.buttonBox.rejected.connect(self.newProjectDialog.reject)
         self.newProjectDialog.exec()
 
-    def openProject(self, event, folder=None): 
+    def openProject(self, event, projectLocation=None): 
         # Get where to open the project from
-        if folder == None:
-            folder = QFileDialog.getExistingDirectory(self, _('Open Project...'))
+        if projectLocation == None:
+            projectLocation = QFileDialog.getExistingDirectory(self, _('Open Project...'), "%userprofile%/")
 
         # Check if file was selected
-        if folder:
-            directory = os.listdir(folder)
-            projectFile = None
-            for file in os.listdir(folder):
+        projectFile = None
+
+        if isinstance(projectLocation, list):
+            projectLocation = projectLocation[0]
+        
+        if os.path.isdir(projectLocation):
+            for file in os.listdir(projectLocation):
                 if file.endswith('.fprj'):
-                    project = FprjProject()
-                    load = project.fromExisting(os.path.join(folder, file))
-                    if load[0]:
-                        try:
-                            self.createNewWorkspace(project)    
-                        except Exception as e:
-                            self.showDialog("error", _("Failed to open project: ") + str(e), traceback.format_exc())
-                    else:
-                        self.showDialog("error", _('Cannot open project: ') + load[1], load[2])
-                    break
+                    projectFile = os.path.join(projectLocation, file)  
+                    break  
             else:
                 self.showDialog("error", "Invalid project!")
+                return
+        elif os.path.isfile(projectLocation):
+            projectFile = projectLocation
+        else:
+            # no file was selected
+            return
+
+        project = FprjProject()
+        load = project.fromExisting(os.path.join(projectLocation, projectFile))
+        if load[0]:
+            try:
+                self.createNewWorkspace(project)    
+            except Exception as e:
+                self.showDialog("error", _("Failed to open project: ") + str(e), traceback.format_exc())
+        else:
+            self.showDialog("error", _('Cannot open project: ') + load[1], load[2])
 
 
     def saveProjects(self, projectsToSave):
@@ -1255,7 +1264,6 @@ class MainWindow(FramelessMainWindow):
         image.save("file_name.png")
     
     def compileProject(self, stage):
-        print(stage)
         if not self.getCurrentProject().get("data"):
             return
 
@@ -1449,9 +1457,10 @@ if __name__ == "__main__":
         logging.info("Opening file from argument 1")
         main_window.openProject(None, sys.argv[1:])
 
+    if main_window.settings["General"]["CheckUpdate"]["value"] == True:
+        threading.Thread(target=main_window.checkForUpdates).start()
+        
     main_window.show()
     splash.finish(main_window)
-    if main_window.settings["General"]["CheckUpdate"]["value"] == True:
-        main_window.checkForUpdates()
     sys.exit(app.exec())
     
