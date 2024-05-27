@@ -118,7 +118,7 @@ class FprjProject:
             "@Digits": "num_digits",
             "@EndAngle": "arc_end_angle",
             "@Foreground_ImageName": "arc_image",
-            "@Height": "widget_height",
+            "@Height": "widget_size_height",
             "@HourHand_ImageName": "analog_hour_image",
             "@HourImage_rotate_xc": "analog_hour_anchor_x",
             "@HourImage_rotate_yc": "analog_hour_anchor_y",
@@ -243,10 +243,9 @@ class FprjProject:
     
     def getTitle(self):
         return self.data["FaceProject"]["Screen"]["@Title"]
-
-    def updateWidget(self, widget):
-        widgetData = list(filter(lambda oldWidgetData: oldWidgetData["@Name"] == widget["@Name"], self.widgets))
-        widgetData[0] = widget.data
+    
+    def getThumbnail(self):
+        return self.data["FaceProject"]["Screen"]["@Bitmap"]
 
     def setWidgetPos(self, name, posX, posY):
         widget = list(filter(lambda widget: widget["@Name"] == name, self.widgets))
@@ -257,7 +256,10 @@ class FprjProject:
             widget[0]["@Y"] = posY
         
     def setTitle(self, value):
-        self.data["FaceProject"]["Screen"] = value
+        self.data["FaceProject"]["Screen"]["@Title"] = value
+
+    def setThumbnail(self, value):
+        self.data["FaceProject"]["Screen"]["@Bitmap"] = value
 
     def toString(self, data):
         raw = xmltodict.unparse(data)
@@ -267,8 +269,6 @@ class FprjProject:
         return pretty_xml
 
     def save(self):
-        self.formatToFprj()
-
         raw = xmltodict.unparse(self.data)
         dom = xml.dom.minidom.parseString(raw)
         pretty_xml = dom.toprettyxml()
@@ -305,7 +305,6 @@ class FprjWidget:
     
     def getProperty(self, property):
         property = [k for k, v in self.project.propertyIds.items() if v == property][0]
-        print(property)
         if property == "WidgetType":
             return
 
@@ -324,9 +323,8 @@ class FprjWidget:
             return self.data[property]
 
     def setProperty(self, property, value):
-        property = [k for k, v in self.propertyIds.items() if v == property][0]
+        property = [k for k, v in self.project.propertyIds.items() if v == property][0]
         self.data[property] = value
-        self.project.updateWidget(self)
 
     
 class XiaomiProject:

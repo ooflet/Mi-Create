@@ -146,6 +146,10 @@ QSpinBox:focus#propertyField-input {
     border: 1px solid black;
 }
 
+QCheckBox#propertyField-input {
+    padding: 5px;
+}
+
 QComboBox#propertyField-input {
     border-color: transparent;
     background-color: transparent;

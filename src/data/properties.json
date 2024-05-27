@@ -36,7 +36,7 @@
                     "min": "0",
                     "max": "999"
                 },
-                "widget_height": {
+                "widget_size_height": {
                     "string": "Height",
                     "type": "int",
                     "value": "48",
@@ -76,7 +76,7 @@
             },
             "Analog Properties": {
                 "Background": {
-                    "analog_background": {
+                    "widget_background_bitmap": {
                         "string": "Image",
                         "type": "img",
                         "value": ""
@@ -205,7 +205,7 @@
                     "type": "disabled",
                     "value": "48"
                 },
-                "widget_height": {
+                "widget_size_height": {
                     "string": "Height",
                     "type": "disabled",
                     "value": "48"
@@ -366,7 +366,7 @@
                     "type": "disabled",
                     "value": "48"
                 },
-                "widget_height": {
+                "widget_size_height": {
                     "string": "Height",
                     "type": "disabled",
                     "value": "48"
@@ -436,7 +436,7 @@
                     "type": "disabled",
                     "value": "48"
                 },
-                "widget_height": {
+                "widget_size_height": {
                     "string": "Height",
                     "type": "disabled",
                     "value": "48"
@@ -520,7 +520,7 @@
                     "type": "disabled",
                     "value": ""
                 },
-                "widget_height": {
+                "widget_size_height": {
                     "string": "Height",
                     "type": "disabled",
                     "value": ""

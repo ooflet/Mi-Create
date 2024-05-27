@@ -10,24 +10,9 @@
     <file>checkbox_unchecked_disabled.svg</file>
     <file>down-arrow.png</file>
     <file>up-arrow.png</file>
-    <file>refresh-cw.png</file>
-    <file>image-plus.png</file>
-    <file>progress.png</file>
-    <file>moon.png</file>
-    <file>numbers.png</file>
-    <file>file-code-2.png</file>
-    <file>image.png</file>
-    <file>mountain-snow.png</file>
-    <file>folder-clock.png</file>
-    <file>file-clock.png</file>
-    <file>file-plus.png</file>
     <file>x_dim.png</file>
     <file>x.png</file>
     <file>MiFaceStudioFavicon.png</file>
-    <file>folder-open.png</file>
-    <file>package.png</file>
-    <file>package-open.png</file>
-    <file>plus.png</file>
     <file>checkbox_checked.svg</file>
     <file>checkbox_unchecked.svg</file>
   </qresource>
@@ -35,6 +20,5 @@
   <qresource prefix="Images">
     <file>MiCreate48x48.png</file>
     <file>mb8.png</file>
-    <file>MiCreateSplash.png</file>
   </qresource>
 </RCC>

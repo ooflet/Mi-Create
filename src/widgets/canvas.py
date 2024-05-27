@@ -19,7 +19,6 @@ from PyQt6.QtWidgets import (QApplication, QGraphicsPathItem, QGraphicsScene, QG
                             QToolButton, QGraphicsPixmapItem, QMessageBox, QRubberBand, QGraphicsBlurEffect, QGraphicsOpacityEffect)
 
 from utils.contextMenu import ContextMenu
-from utils.project import FprjProject
 
 class ObjectIcon:
     def __init__(self):
@@ -278,7 +277,7 @@ class Canvas(QGraphicsView):
 
     def selectObjectsFromPropertyList(self, items: list):
         for item in items:
-            self.widgets[item.getProperty("Name")].setSelected(True)
+            self.widgets[item["Name"]].setSelected(True)
 
     def getSelectedObjects(self):
         return self.scene().selectedItems()
@@ -335,7 +334,6 @@ class Canvas(QGraphicsView):
 
         # Split image strings from the Bitmaplist
         
-        print(bitmapList)
         firstImage = bitmapList[0]
 
         if bitmapList != []:
@@ -398,10 +396,10 @@ class Canvas(QGraphicsView):
                         int(item.getProperty("widget_pos_x")),
                         int(item.getProperty("widget_pos_y")),
                         int(item.getProperty("widget_size_width")),
-                        int(item.getProperty("widget_height"))
+                        int(item.getProperty("widget_size_height"))
                     ),
                     index,
-                    item.getProperty("analog_background"),
+                    item.getProperty("widget_background_bitmap"),
                     item.getProperty("analog_hour_image"),
                     item.getProperty("analog_minute_image"),
                     item.getProperty("analog_second_image"),
@@ -433,10 +431,10 @@ class Canvas(QGraphicsView):
                         int(item.getProperty("widget_pos_x")),
                         int(item.getProperty("widget_pos_y")),
                         int(item.getProperty("widget_size_width")),
-                        int(item.getProperty("widget_height"))
+                        int(item.getProperty("widget_size_height"))
                     ),
                     index,
-                    item.getProperty("analog_background"),
+                    item.getProperty("widget_background_bitmap"),
                     item.getProperty("arc_image"),
                     item.getProperty("arc_pos_x"),
                     item.getProperty("arc_pos_y"),
@@ -454,7 +452,7 @@ class Canvas(QGraphicsView):
                         int(item.getProperty("widget_pos_x")),
                         int(item.getProperty("widget_pos_y")),
                         int(item.getProperty("widget_size_width")),
-                        int(item.getProperty("widget_height"))
+                        int(item.getProperty("widget_size_height"))
                     ),
                     index,
                     item.getProperty("widget_bitmap"),
@@ -468,7 +466,7 @@ class Canvas(QGraphicsView):
                         int(item.getProperty("widget_pos_x")),
                         int(item.getProperty("widget_pos_y")),
                         int(item.getProperty("widget_size_width")),
-                        int(item.getProperty("widget_height"))
+                        int(item.getProperty("widget_size_height"))
                     ),
                     index,
                     item.getProperty("widget_bitmaplist"),
@@ -482,7 +480,7 @@ class Canvas(QGraphicsView):
                         int(item.getProperty("widget_pos_x")),
                         int(item.getProperty("widget_pos_y")),
                         int(item.getProperty("widget_size_width")),
-                        int(item.getProperty("widget_height"))
+                        int(item.getProperty("widget_size_height"))
                     ),
                     index,
                     item.getProperty("widget_bitmaplist"),
@@ -498,7 +496,7 @@ class Canvas(QGraphicsView):
                         int(item.getProperty("widget_pos_x")),
                         int(item.getProperty("widget_pos_y")),
                         int(item.getProperty("widget_size_width")),
-                        int(item.getProperty("widget_height"))
+                        int(item.getProperty("widget_size_height"))
                     ),
                     index,
                     item.getProperty("analog_background"),
@@ -522,14 +520,19 @@ class Canvas(QGraphicsView):
             QMessageBox().critical(None, "Error", f"Unable to create object {item.getProperty('widget_name')}: {traceback.format_exc()}")
             return False, str(e)
 
-    def loadObjects(self, project, interpolation):
+    def loadObjects(self, project, interpolation=None):
         self.frame = DeviceFrame(self.deviceSize)
+        
+        if interpolation == None:
+            interpolation = self.interpolation
+        else:
+            self.interpolation = interpolation
+
         #self.deviceRep = DeviceRepresentation(project.getDeviceType(), interpolation)
         if project.widgets != None:
             self.scene().clear()
             self.widgets.clear()
             #self.scene().addItem(self.deviceRep)
-            print("frame")
             self.scene().addItem(self.frame)
  
             self.imageFolder = project.imageFolder
@@ -546,17 +549,16 @@ class Canvas(QGraphicsView):
                 return False, "Widgets not in list!"
             
         else:
-            print("frame")
             self.scene().addItem(self.frame)
             return True, "Success"
         
-    def reloadObject(self, objectName, objectData, interpolation):
+    def reloadObject(self, objectName, widget):
         object = self.widgets[objectName]
         objectZValue = object.zValue()
 
         if object != None:
             object.delete()
-            result, reason = self.createObject(objectZValue, objectData, interpolation)
+            result, reason = self.createWidgetFromData(objectZValue, widget, self.interpolation)
             if not result:
                 return False, reason 
             else:

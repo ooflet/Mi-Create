@@ -3,7 +3,7 @@
         "Theme": {
             "string": "Theme",
             "type": "list",
-            "value": "Dark",
+            "value": "Default Dark",
             "options": []
         },
         "Language": {
@@ -34,11 +34,6 @@
             "type": "bool",
             "value": true,
             "changeState": ["ClipDeviceShape", "disabled", false]
-        },
-        "LegacyOutlines": {
-            "string": "Performance Outlines",
-            "type": "bool",
-            "value": false
         },
         "Antialiasing": {
             "string": "Antialiasing",

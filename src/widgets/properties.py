@@ -56,6 +56,7 @@ class PropertiesWidget(QWidget):
         super().__init__()
 
         self.clearOnRefresh = True
+        self.ignorePropertyChange = False
 
         self.treeWidgetItems = []
         self.propertyItems = {}
@@ -100,7 +101,10 @@ class PropertiesWidget(QWidget):
         _ = translation.gettext
     
     def sendPropertyChangedSignal(self, property, value):
-        self.propertyChanged.emit(property, value)
+        if not self.ignorePropertyChange:
+            self.propertyChanged.emit(property, value)
+        else:
+            self.ignorePropertyChange = False
 
     def addProperty(self, srcProperty, name, valueWidget, parent=None, inputSinker=None) -> QTreeWidgetItem:
         if parent != None:
@@ -261,7 +265,7 @@ class PropertiesWidget(QWidget):
         inputSinker.setStyleSheet("background: none; border: none;")
         inputSinker.clicked.connect(onClick)
         checkBox = QCheckBox(inputSinker)
-        checkBox.setStyleSheet("padding: 6px")
+        checkBox.setObjectName("propertyField-input")
         if checked == None or checked == "":
             checked = False
         checkBox.setChecked(checked)

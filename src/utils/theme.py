@@ -16,6 +16,7 @@ class Theme:
     def __init__(self):
         self.themes = {}
         self.themeNames = []
+        self.currentWelcomePage = ""
         
         config = configparser.ConfigParser()
         logging.debug("Initializing Themes")
@@ -34,43 +35,53 @@ class Theme:
                         "stylesheet": os.path.join(themeFolder, config.get('theme', 'stylesheet')),
                         "iconFolder": os.path.join(themeFolder, config.get('theme', 'iconFolder'))
                     }
-                    for scheme in schemes:
-                        if config.get('config', 'themeName') == "Default":
-                            self.themeNames.append(scheme)
-                        else:
+                    if schemes.get("Base"): # no different color schemes for theme
+                        self.themeNames.append(config.get('config', 'themeName'))
+                    else:
+                        for scheme in schemes:
                             self.themeNames.append(f"{config.get('config', 'themeName')} {scheme}")
+                                
 
     def loadTheme(self, app, themeName):
         themeName = themeName.split(" ")
 
-        print(themeName)
-        if len(themeName) < 2:
-            if not self.themes.get("Default"):
-                raise NameError("No default theme found!")
-            elif not self.themes["Default"]["colorSchemes"].get(themeName[0]):
-                return False
-            theme = self.themes["Default"]
-            scheme = themeName[0]
-        else:
-            if not self.themes.get(themeName[0]) or not self.themes[themeName[0]]["colorSchemes"].get(themeName[1]):
-                return False
-            theme = self.themes[themeName[0]]
-            scheme = themeName[1]
+        if not self.themes.get(themeName[0]):
+            return False
+        theme = self.themes[themeName[0]]
 
         palette = QPalette()
 
-        for colorGroup, colors in theme["colorSchemes"][scheme].items():
-            for colorRole, color in colors.items():
-                if colorGroup == "Disabled":
-                    palette.setColor(QPalette.ColorGroup.Disabled, getattr(QPalette.ColorRole, colorRole), QColor(color[0], color[1], color[2]))
-                else:
-                    print(colorRole, color)
-                    palette.setColor(getattr(QPalette.ColorRole, colorRole), QColor(color[0], color[1], color[2]))
+        if len(themeName) < 2:
+            scheme = None
+            for colorGroup, colors in theme["colorSchemes"].items():
+                for colorRole, color in colors.items():
+                    if colorGroup == "Disabled":
+                        palette.setColor(QPalette.ColorGroup.Disabled, getattr(QPalette.ColorRole, colorRole), QColor(color[0], color[1], color[2]))
+                    else:
+                        print(colorRole, color)
+                        palette.setColor(getattr(QPalette.ColorRole, colorRole), QColor(color[0], color[1], color[2]))
+        else:
+            scheme = themeName[1]
+            for colorGroup, colors in theme["colorSchemes"][scheme].items():
+                for colorRole, color in colors.items():
+                    if colorGroup == "Disabled":
+                        palette.setColor(QPalette.ColorGroup.Disabled, getattr(QPalette.ColorRole, colorRole), QColor(color[0], color[1], color[2]))
+                    else:
+                        print(colorRole, color)
+                        palette.setColor(getattr(QPalette.ColorRole, colorRole), QColor(color[0], color[1], color[2]))
         
         app.setPalette(palette)
 
+        palette = QPalette()
+
         QIcon().setThemeSearchPaths([theme["iconFolder"]])
-        QIcon().setThemeName(scheme)
+
+        if scheme:
+            print(scheme)
+            QIcon().setThemeName(scheme)
+        else:
+            print("theme"+themeName[0])
+            QIcon().setThemeName(themeName[0])
                 
         if theme["baseStyle"] != "none":
             print(theme["baseStyle"])

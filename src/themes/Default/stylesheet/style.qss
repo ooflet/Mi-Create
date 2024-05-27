@@ -167,6 +167,14 @@ QComboBox {
     border-radius: 4px;
 }
 
+QComboBox::drop-down {
+    width: 20px;
+}
+
+QComboBox:focus {
+    border-color: palette(highlight);
+}
+
 QComboBox::item {
     selection-background-color: palette(alternate-base);
 }
@@ -183,6 +191,10 @@ QToolButton#inputField-button {
     padding: 4px;
     background-color: transparent;
     border: 1px solid palette(light);
+}
+
+QToolButton:focus#inputField-button {
+    border-color: palette(highlight);
 }
 
 QToolButton#canvasDecoration-button {
@@ -522,6 +534,10 @@ QSpinBox::down-arrow#propertyField-input {
 QSpinBox:focus#propertyField-input {
     background-color: palette(dark);
     border: 1px solid black;
+}
+
+QCheckBox#propertyField-input {
+    padding: 6px;
 }
 
 QComboBox#propertyField-input {
