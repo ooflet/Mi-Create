@@ -285,7 +285,6 @@ class PropertiesWidget(QWidget):
     def addProperties(self, properties, project=None, widgetName=None, resourceList=None, parent=None, device=None):
         if project != None:
             widget = project.getWidget(widgetName)
-            pprint(widget)
             
         for key, property in properties.items():
             if not property.get("string"):
@@ -300,8 +299,6 @@ class PropertiesWidget(QWidget):
                     propertyValue = widget.getProperty(key)
                 else:
                     propertyValue = property["value"]
-                
-                print(key, propertyValue)
 
                 inputWidget = None
                 
@@ -319,14 +316,12 @@ class PropertiesWidget(QWidget):
                     self.imageCategories = []
 
                     def imagesChanged(stringIndex, image, index):
-                        imageString = f"({stringIndex}):{image}"
-                        print(len(propertyValue), index)
+                        imageString = [stringIndex, image]
                         if len(propertyValue) - 1 >= index:
                             propertyValue[index] = imageString
                         else:
                             propertyValue.insert(index, imageString)
-                        completeString = '|'.join(propertyValue)
-                        self.sendPropertyChangedSignal(key, completeString)
+                        self.sendPropertyChangedSignal(key, propertyValue)
 
                     def createImageCategories(imageList, imageCount):
                         for index in range(0, imageCount):
@@ -338,9 +333,7 @@ class PropertiesWidget(QWidget):
                             self.imageCategories.append([imageCategory, imageInput, indexInput])
 
                             if len(imageList) > index:
-                                print(imageList)
                                 image = imageList[index]
-                                print(image)
                                 if image[0] != "" and len(image) > 1:
                                     indexInput.setValue(int(image[0])) 
                                     imageInput.setCurrentText(image[1])             
@@ -367,8 +360,6 @@ class PropertiesWidget(QWidget):
                     imageAmountInput = self.createSpinBox(len(propertyValue), False, True, key, 0, 100)
                     imageAmountInput.textChanged.connect(lambda value=imageAmountInput.value(): updateImageAmount(value))
                     self.addProperty("", "Image Count", imageAmountInput, parent)
-
-                    print(propertyValue)
 
                     success, message = createImageCategories(propertyValue, len(propertyValue))
 
@@ -422,7 +413,7 @@ class PropertiesWidget(QWidget):
                             inputWidget = self.createComboBox(self.sourceList[str(device)], False, key, True)
                             break   
                     else:
-                        QMessageBox.critical(None, "Properties", f"Data source not found.")
+                        QMessageBox.warning(None, "Properties", f"Data source not found.")
                         inputWidget = self.createComboBox(self.sourceList[str(device)], False, key, True)
                 if not ignorePropertyCreation:
                     if property.get("visibleOn") != None:

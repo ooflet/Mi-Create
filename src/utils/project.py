@@ -153,6 +153,101 @@ class FprjProject:
             "WidgetType": "WidgetType"
         }
 
+        self.defaultItems = {
+            "widget_analog": {
+                "@Shape":"27",
+                "@Name":"",
+                "@X":"",
+                "@Y":"",
+                "@Width":"100",
+                "@Height":"100",
+                "@Alpha":"255",
+                "@Visible_Src":"0",
+                "@HourHandCorrection_En":"0",
+                "@MinuteHandCorrection_En":"0",
+                "@Background_ImageName":"",
+                "@BgImage_rotate_xc":"0", 
+                "@BgImage_rotate_yc":"0",
+                "@HourHand_ImageName":"",
+                "@HourImage_rotate_xc":"0",
+                "@HourImage_rotate_yc":"0",
+                "@MinuteHand_Image":"",
+                "@MinuteImage_rotate_xc":"0",
+                "@MinuteImage_rotate_yc":"0",
+                "@SecondHand_Image":"",
+                "@SecondImage_rotate_xc":"0",
+                "@SecondImage_rotate_yc":"0"
+            },
+            "widget": {
+                "@Shape":"30",
+                "@Name":"",
+                "@Bitmap":"",
+                "@X":"",
+                "@Y":"",
+                "@Width":"48",
+                "@Height":"48",
+                "@Alpha":"255",
+                "@Visible_Src":"0"
+            },
+            "widget_imagelist": {
+                "@Shape":"31",
+                "@Name":"",
+                "@BitmapList":"",
+                "@X":"",
+                "@Y":"",
+                "@Width":"48",
+                "@Height":"48",
+                "@Alpha":"255",
+                "@Alignment":"0",
+                "@DefaultIndex":"0",
+                "@Value_Src":"0",
+                "@Spacing":"0",
+                "@Blanking":"0",
+                "@Visible_Src":"0"
+            },
+            "widget_num": {
+                "@Shape":"32",
+                "@Name":"",
+                "@BitmapList":"",
+                "@X":"",
+                "@Y":"",
+                "@Width":"48",
+                "@Height":"48",
+                "@Alpha":"255",
+                "@Visible_Src":"0",
+                "@Digits":"1",
+                "@Alignment":"0",
+                "@Value_Src":"0",
+                "@Spacing":"0",
+                "@Blanking":"0"
+            },
+            "widget_arc": {
+                "@Shape":"42",
+                "@Name":"",
+                "@X":"0",
+                "@Y":"0",
+                "@Width":"200",
+                "@Height":"200",
+                "@Alpha":"255",
+                "@Visible_Src":"0",
+                "@Rotate_xc":"100",
+                "@Rotate_yc":"100",
+                "@Radius":"75",
+                "@Line_Width":"30",
+                "@Butt_cap_ending_style_En":"1",
+                "@StartAngle":"-120",
+                "@EndAngle":"120",
+                "@Range_Min":"0",
+                "@Range_Max":"100",
+                "@Range_MinStep":"0",
+                "@Range_Step":"0",
+                "@Background_ImageName":"",
+                "@Foreground_ImageName":"",
+                "@Range_Max_Src":"0",
+                "@Range_Val_Src":"0"
+            }
+        }
+
         self.watchFileBlank = {
             "FaceProject": {
                 "@DeviceType": "",
@@ -195,7 +290,6 @@ class FprjProject:
             with open(path, "r", encoding="utf8") as project:
                 xmlsource = project.read()
                 parse = xmltodict.parse(xmlsource)
-                print(parse)
                 if parse.get("FaceProject"):
                     imagesDir = os.path.join(projectDir, "images")
                     if not parse["FaceProject"]["Screen"].get("Widget"):
@@ -233,13 +327,20 @@ class FprjProject:
         else:
             return FprjWidget(self, widget[0])
         
-    def createWidget(self, data):
-        self.widgets
+    def createWidget(self, id, name, posX, posY):
+        widget = self.defaultItems[id].copy()
+        widget["@Name"] = name
+        widget["@X"] = posX
+        widget["@Y"] = posY
+        self.widgets.append(widget)
         
-    def deleteWidget(self, name):
+    def deleteWidget(self, widget):
         for index, item in enumerate(self.widgets):
-            if item["@Name"] == name:
+            if item["@Name"] == widget.getProperty("widget_name"):
                 self.widgets.pop(index) 
+
+    def restoreWidget(self, widget, index):
+        self.widgets.insert(index, widget.data)
     
     def getTitle(self):
         return self.data["FaceProject"]["Screen"]["@Title"]
@@ -261,8 +362,8 @@ class FprjProject:
     def setThumbnail(self, value):
         self.data["FaceProject"]["Screen"]["@Bitmap"] = value
 
-    def toString(self, data):
-        raw = xmltodict.unparse(data)
+    def toString(self):
+        raw = xmltodict.unparse(self.data)
         dom = xml.dom.minidom.parseString(raw)
         pretty_xml = dom.toprettyxml()
 
@@ -309,7 +410,7 @@ class FprjWidget:
             return
 
         if property == "@Shape":
-            return self.project.widgetIds[self.data[property]]
+            return self.project.widgetIds.get(self.data[property])
         elif property == "@BitmapList":
             bitmapString = self.data[property]
             bitmapList = bitmapString.split("|")
@@ -324,6 +425,12 @@ class FprjWidget:
 
     def setProperty(self, property, value):
         property = [k for k, v in self.project.propertyIds.items() if v == property][0]
+        if property == "@BitmapList":
+            for index, item in enumerate(value):
+                if isinstance(item, list): # contains index info
+                    item[0] = f"({item[0]})" # add brackets
+                    value[index] = ":".join(item)
+            value = "|".join(value)
         self.data[property] = value
 
     

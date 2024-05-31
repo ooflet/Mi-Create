@@ -310,6 +310,9 @@ class Canvas(QGraphicsView):
         widget.addMinuteHand(minImg, itemAnchors["minute"]["x"], itemAnchors["minute"]["y"], interpolationStyle)
         widget.addSecondHand(secImg, itemAnchors["second"]["x"], itemAnchors["second"]["y"], interpolationStyle)
         
+        if bgImg.isNull() and hrImg.isNull() and minImg.isNull() and secImg.isNull():
+            widget.color = QColor(255, 0, 0, 100)
+
         return widget
 
     def createImage(self, name, rect, zValue, image, interpolationStyle):
@@ -387,6 +390,9 @@ class Canvas(QGraphicsView):
             interpolation = True
         else:
             interpolation = False
+
+        if item.getProperty("widget_type") == None:
+            return False, f" Widget '{item.getProperty('widget_name')}' has unsupported widget type"
 
         try:
             if item.getProperty("widget_type") == "widget_analog":
@@ -517,8 +523,7 @@ class Canvas(QGraphicsView):
             self.scene().addItem(widget)
             return True, "Success"
         except Exception as e:
-            QMessageBox().critical(None, "Error", f"Unable to create object {item.getProperty('widget_name')}: {traceback.format_exc()}")
-            return False, str(e)
+            return False, str(f" Unable to create object {item.getProperty('widget_name')}:\n {traceback.format_exc()}")
 
     def loadObjects(self, project, interpolation=None):
         self.frame = DeviceFrame(self.deviceSize)
@@ -682,7 +687,6 @@ class ImageWidget(BaseWidget):
 
     def representNoImage(self):
         self.color = QColor(255, 0, 0, 100)
-        self.setRect(0,0,48,48)
 
 class AnalogWidget(BaseWidget):
     # Widget for handling AnalogDisplays
@@ -702,15 +706,11 @@ class AnalogWidget(BaseWidget):
     def addSecondHand(self, secHandImage, secHandX, secHandY, antialiasing):
         self.secHand = QGraphicsPixmapItem(secHandImage, self)
         self.secHand.setOffset(-int(secHandX), -int(secHandY))
-        if secHandImage.isNull():
-            self.color = QColor(255, 0, 0, 100)
         self.secHand.setPos(self.rect().width()/2, self.rect().height()/2)
         if antialiasing:
             self.secHand.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
 
     def addMinuteHand(self, minHandImage, minHandX, minHandY, antialiasing):
-        if minHandImage.isNull():
-            self.color = QColor(255, 0, 0, 100)
         self.minHand = QGraphicsPixmapItem(minHandImage, self)
         self.minHand.setOffset(-int(minHandX), -int(minHandY))
         self.minHand.setRotation(60)
@@ -719,8 +719,6 @@ class AnalogWidget(BaseWidget):
             self.minHand.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
 
     def addHourHand(self, hourHandImage, hrHandX, hrHandY, antialiasing):
-        if hourHandImage.isNull():
-            self.color = QColor(255, 0, 0, 100)
         self.hrHand = QGraphicsPixmapItem(hourHandImage, self)
         self.hrHand.setOffset(-int(hrHandX), -int(hrHandY))
         self.hrHand.setRotation(-60)

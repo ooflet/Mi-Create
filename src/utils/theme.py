@@ -58,7 +58,6 @@ class Theme:
                     if colorGroup == "Disabled":
                         palette.setColor(QPalette.ColorGroup.Disabled, getattr(QPalette.ColorRole, colorRole), QColor(color[0], color[1], color[2]))
                     else:
-                        print(colorRole, color)
                         palette.setColor(getattr(QPalette.ColorRole, colorRole), QColor(color[0], color[1], color[2]))
         else:
             scheme = themeName[1]
@@ -67,7 +66,6 @@ class Theme:
                     if colorGroup == "Disabled":
                         palette.setColor(QPalette.ColorGroup.Disabled, getattr(QPalette.ColorRole, colorRole), QColor(color[0], color[1], color[2]))
                     else:
-                        print(colorRole, color)
                         palette.setColor(getattr(QPalette.ColorRole, colorRole), QColor(color[0], color[1], color[2]))
         
         app.setPalette(palette)
@@ -77,14 +75,11 @@ class Theme:
         QIcon().setThemeSearchPaths([theme["iconFolder"]])
 
         if scheme:
-            print(scheme)
             QIcon().setThemeName(scheme)
         else:
-            print("theme"+themeName[0])
             QIcon().setThemeName(themeName[0])
                 
         if theme["baseStyle"] != "none":
-            print(theme["baseStyle"])
             app.setStyle(theme["baseStyle"])
 
         with open(theme["stylesheet"]) as stylesheet:

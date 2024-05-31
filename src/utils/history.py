@@ -23,6 +23,18 @@ class CommandAddWidget(QUndoCommand):
     def undo(self):
         self.commandFunc("undo", self.widget)
 
+class CommandDeleteWidget(QUndoCommand):
+    def __init__(self, widget, commandFunc, description):
+        super(CommandDeleteWidget, self).__init__(description)
+        self.widget = widget
+        self.commandFunc = commandFunc
+
+    def redo(self):
+        self.commandFunc("redo", self.widget)
+
+    def undo(self):
+        self.commandFunc("undo", self.widget)
+
 class CommandModifyProjectData(QUndoCommand):
     def __init__(self, prevData, newData, commandFunc, description):
         logging.debug(f"prevdata {prevData}, newdata {newData}")

@@ -3,9 +3,9 @@ import sys
 
 from PyQt6.QtCore import Qt
 from PyQt6.QtWebEngineWidgets import QWebEngineView
-from qframelesswindow import AcrylicWindow, FramelessWindow
-from qframelesswindow import AcrylicWindow
 
+sys.path.append("..")
+from window import AcrylicWindow, FramelessWindow
 
 class FramelessWebEngineView(QWebEngineView):
     """ Frameless web engine view """

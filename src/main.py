@@ -23,7 +23,9 @@ from PyQt6.QtWidgets import (QMainWindow, QDialog, QInputDialog, QMessageBox, QA
                                QSpacerItem, QSizePolicy, QAbstractItemView, QUndoView, QCheckBox, QHBoxLayout)
 from PyQt6.QtGui import QIcon, QPixmap, QDesktopServices, QDrag, QImage, QPainter
 from PyQt6.QtCore import Qt, QSettings, QSize, QUrl, pyqtSignal
+from PyQt6.QtWebEngineWidgets import QWebEngineView
 from window import FramelessMainWindow, FramelessDialog
+from window.webengine import FramelessWebEngineView
 
 from pprint import pprint, pformat
 import xml.dom.minidom
@@ -46,7 +48,7 @@ from utils.project import WatchData, FprjProject, XiaomiProject
 from utils.dialog import MultiFieldDialog
 from utils.theme import Theme
 from utils.updater import Updater
-from utils.history import History, CommandAddWidget, CommandModifyProperty, CommandModifyPosition, CommandModifyProjectData
+from utils.history import History, CommandAddWidget, CommandDeleteWidget, CommandModifyProperty, CommandModifyPosition, CommandModifyProjectData
 from utils.widgetgallery import WidgetGallery
 from widgets.canvas import Canvas, ObjectIcon
 from widgets.explorer import Explorer
@@ -62,7 +64,7 @@ from dialog.compileDialog_ui import Ui_Dialog as Ui_CompileDialog
 _ = gettext.gettext
 
 programVersion = 'v0.4'
-compilerVersion = 'm0tral_v4.13'
+compilerVersion = 'm0tral-v4.13'
 
 class MainWindow(FramelessMainWindow):
     updateFound = pyqtSignal(str)
@@ -174,12 +176,12 @@ class MainWindow(FramelessMainWindow):
         self.ignoreHistoryInvoke = False
 
         # Undo History Dialog
-        # self.undoLayout = QVBoxLayout()
-        # self.undoDialog = QDialog(self)
-        # self.undoView = QUndoView(self.History.undoStack)
-        # self.undoLayout.addWidget(self.undoView)
-        # self.undoDialog.setLayout(self.undoLayout)
-        # self.undoDialog.show()
+        self.undoLayout = QVBoxLayout()
+        self.undoDialog = QDialog(self)
+        self.undoView = QUndoView(self.History.undoStack)
+        self.undoLayout.addWidget(self.undoView)
+        self.undoDialog.setLayout(self.undoLayout)
+        self.undoDialog.show()
  
         # Setup Project 
         self.project = None 
@@ -366,6 +368,13 @@ class MainWindow(FramelessMainWindow):
         # Loads theme from settings table
         themeName = self.settings["General"]["Theme"]["value"]
         app = QApplication.instance()
+
+        if themeName == "Dark":
+            themeName = "Default Dark"
+            self.settings["General"]["Theme"]["value"] = "Default Dark"
+            self.stagedChanges.append(["Theme", "Default Dark"])
+            self.saveSettings(False, False)
+
         success = self.themes.loadTheme(app, themeName)
         if not success:
             self.settings["General"]["Theme"]["value"] = "Default Dark"
@@ -477,7 +486,6 @@ class MainWindow(FramelessMainWindow):
                     return
 
             delProjectItem(index)
-            self.ui.workspace.widget(index).setParent(None)
             self.ui.workspace.removeTab(index)
             self.fileChanged = False
 
@@ -645,7 +653,20 @@ class MainWindow(FramelessMainWindow):
                         self.showDialog("info", "Another widget has this name! Please change it to something else.")
                         return
                     else:
-                        currentItem[property] = value
+                        currentItem.setProperty(property, value)
+
+                elif property == "widget_bitmap":
+                    pixmap = QPixmap()
+                    pixmap.load(os.path.join(currentProject["project"].imageFolder, value))
+                    
+                    # set widget size to image size
+                    currentItem.setProperty("widget_size_width", pixmap.width())
+                    self.propertiesWidget.propertyItems["widget_size_width"].setText(str(pixmap.width()))
+                    currentItem.setProperty("widget_size_height", pixmap.height())
+                    self.propertiesWidget.propertyItems["widget_size_height"].setText(str(pixmap.width()))
+                    
+                    currentItem.setProperty(property, value)
+
                 elif isinstance(value, bool):
                     if value == True:
                         value = "1"
@@ -665,8 +686,7 @@ class MainWindow(FramelessMainWindow):
                     currentProject["canvas"].reloadObject(widgetName, currentItem)
                     currentProject["canvas"].selectObject(widgetName)
 
-                self.propertiesWidget.ignorePropertyChange = True
-                self.propertiesWidget
+                #self.propertiesWidget.ignorePropertyChange = True
 
             if self.ignoreHistoryInvoke:
                 self.ignoreHistoryInvoke = False
@@ -725,23 +745,30 @@ class MainWindow(FramelessMainWindow):
 
         if not currentProject.get("project"):
             return
+        
+        count = 0
+        for widget in currentProject["project"].getAllWidgets():
+            if "widget-" in widget.getProperty("widget_name"):
+                count += 1
 
-        widget = currentProject["project"].createWidget(id, currentProject["canvas"])
-
+        name = "widget-" + str(count)
+        
         if self.ignoreHistoryInvoke:
             self.ignoreHistoryInvoke = False
         else:
-            def commandFunc(type, widget):
+            def commandFunc(type, name):
                 if type == "undo":
-                    currentProject["project"].deleteWidget(widget.getProperty("widget_name"))   
+                    currentProject["project"].deleteWidget(name)   
                 elif type == "redo":
-                    currentProject["project"].addWidget(widget)
+                    currentProject["project"].createWidget(id, name, int(currentProject["canvas"].scene().sceneRect().width()/2 - 24), int(currentProject["canvas"].scene().sceneRect().height()/2 - 24))
+                print(self.getCurrentProject()["project"].data)
                 currentProject["canvas"].loadObjects(currentProject["project"], self.settings["Canvas"]["Interpolation"]["value"])
                 self.Explorer.updateExplorer(currentProject["project"])
 
-            command = CommandAddWidget(widget, commandFunc, f"Add object {widget.getProperty('widget_name')}")
+            print(name)
+            command = CommandAddWidget(name, commandFunc, f"Add object {widget.getProperty('widget_name')}")
             self.History.undoStack.push(command)
-        currentProject["canvas"].selectObject(widget.getProperty("widget_name"))
+        currentProject["canvas"].selectObject(name)
 
     def changeSelectedWatchfaceWidgetLayer(self, changeType):
         currentProject = self.getCurrentProject()
@@ -786,24 +813,34 @@ class MainWindow(FramelessMainWindow):
 
     def deleteSelectedWatchfaceWidgets(self):
         currentProject = self.getCurrentProject()
-        if not currentProject.get("canvas"):
+        itemList = []
+        if not currentProject.get("project"):
             return
 
-        prevData = currentProject["data"]["FaceProject"]["Screen"]["Widget"]
-        newData = prevData.copy()
-
         for item in currentProject["canvas"].getSelectedObjects():
-            newData.pop(item.data(0))
+            itemList.append(item)
 
         if self.ignoreHistoryInvoke:
             self.ignoreHistoryInvoke = False
         else:
-            def commandFunc(data):
-                currentProject["data"]["FaceProject"]["Screen"]["Widget"] = data
-                currentProject["canvas"].loadObjects(currentProject["project"], self.settings["Canvas"]["Interpolation"]["value"])
-                self.Explorer.updateExplorer(currentProject["data"])
+            def commandFunc(type, widgetList):
+                if type == "undo":
+                    for widget, index in widgetList:
+                        currentProject["project"].restoreWidget(widget, index)
 
-            command = CommandModifyProjectData(prevData, newData, commandFunc, f"Delete objects through ModifyProjectData command")
+                elif type == "redo":
+                    for widget in widgetList:
+                        currentProject["project"].deleteWidget(widget[0])
+
+                currentProject["canvas"].loadObjects(currentProject["project"], self.settings["Canvas"]["Interpolation"]["value"])
+                self.Explorer.updateExplorer(currentProject["project"])
+
+            widgetList = []
+            for item in itemList:
+                print(item.data)
+                widgetList.append([currentProject["project"].getWidget(item.data(0)), int(item.zValue())])
+
+            command = CommandDeleteWidget(widgetList, commandFunc, f"Delete objects through ModifyProjectData command")
             self.History.undoStack.push(command)
 
     def cutSelectedWatchfaceWidgets(self):
@@ -1282,16 +1319,11 @@ class MainWindow(FramelessMainWindow):
                     # append to output without a redundant newline
                     self.compileUi.textEdit.setText(self.compileUi.textEdit.toPlainText()+text)
 
-                def error():
-                    append(f"Internal error occured: {process.errorString()}")
-                    self.compileUi.buttonBox.setDisabled(False)
-
                 formattedDir = compileDirectory.replace("\\", "/")
                 append(f"Please read https://ooflet.github.io/docs/quickstart/testing to see how you can test your project\n\n")
                 process = currentProject["project"].compile(currentProject["project"].dataPath, compileDirectory, "compiler/compile.exe")
                 process.readyReadStandardOutput.connect(lambda: append(bytearray(process.readAll()).decode("utf-8")))
                 process.finished.connect(lambda: self.compileUi.buttonBox.setDisabled(False))
-                process.errorOccurred.connect(error)
                 
                 self.currentCompileState = 1
 

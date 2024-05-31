@@ -27,9 +27,7 @@ Executing from source however will not create log files, it will output logs to 
 
 I do not mind the program being redistributed, however please link the Github repository somewhere whether it be the post or the description.
 
-Compiling for different programs must be done using Nuitka, there are some specific compiled checks special for Nutika in the program. Plus, Nutika gives an added performance benefit.
-
-If you want to redistrubute the program please do under your own risk. Any issues that arise from the redistribution of the program go towards the maintainer.
+Compiling for different platforms must be done using Nuitka, there are some specific compiled checks special for Nutika in the program. Plus, Nutika gives an added performance benefit.
 
 There is an automated Github Actions script made for compiling this program, however there are some odd nuances from compilation through the script. Once the artifacts are ironed out, I will add the build script over into this repo.
 
