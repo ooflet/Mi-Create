@@ -5,6 +5,8 @@ Compatible with all Xiaomi wearables made ~2021 and above (Devices manufactured 
 
 ![alt text](images/window.png)
 
+## There are known issues with the FramelessMainWindow module on Linux. In the meantime, a branch with the FramelessMainWindow module has been created at https://github.com/ooflet/Mi-Create/tree/linux
+
 ### Features:
 - Intuitive and elegant user interface
 - Modern control methods
