@@ -1,0 +1,54 @@
+{
+    "default": {
+        "Undo": {
+            "inherit": "actionUndo"
+        },
+        "Redo": {
+            "inherit": "actionRedo"
+        },
+        "sep1": {
+            "specialType": "seperator"
+        },
+        "Paste": {
+            "inherit": "actionPaste"
+        },
+        "sep2": {
+            "specialType": "seperator"
+        },
+        "Zoom": {
+            "inheritSubmenu": "menuZoom"
+        }
+    },
+    "shape": {
+        "Undo": {
+            "inherit": "actionUndo"
+        },
+        "Redo": {
+            "inherit": "actionRedo"
+        },
+        "sep1": {
+            "specialType": "seperator"
+        },
+        "Cut": {
+            "inherit": "actionCut"
+        },
+        "Copy": {
+            "inherit": "actionCopy"
+        },
+        "Paste": {
+            "inherit": "actionPaste"
+        },
+        "sep2": {
+            "specialType": "seperator"
+        },
+        "Layers": {
+            "inheritSubmenu": "menuLayers"
+        },
+        "sep3": {
+            "specialType": "seperator"
+        },
+        "Delete": {
+            "inherit": "actionDelete"
+        }
+    }
+}

@@ -1,4 +1,4 @@
-# Canvas for Mi Create
+# Canvas
 # tostr 2023
 
 # Responsible for rendering parsed EasyFace XML projects via QGraphicsView library.
@@ -11,12 +11,12 @@ import logging
 from tracemalloc import start
 
 sys.path.append("..")
-from utils.project import watchData
+from utils.project import WatchData
 
 from PyQt6.QtCore import pyqtSignal, QPointF, QSize, QRect, QRectF, QLineF, Qt
 from PyQt6.QtGui import QPainter, QPainterPath, QPen, QColor, QPixmap, QIcon, QBrush
 from PyQt6.QtWidgets import (QApplication, QGraphicsPathItem, QGraphicsScene, QGraphicsSceneMouseEvent, QGraphicsView, QGraphicsItem, QGraphicsRectItem, 
-                            QToolButton, QGraphicsPixmapItem, QMessageBox, QRubberBand)
+                            QToolButton, QGraphicsPixmapItem, QMessageBox, QRubberBand, QGraphicsBlurEffect, QGraphicsOpacityEffect)
 
 from utils.contextMenu import ContextMenu
 
@@ -24,12 +24,23 @@ class ObjectIcon:
     def __init__(self):
         super().__init__()
         self.icon = {
-            "27":"widget-analogdisplay",
-            "30":"widget-image",
-            "31":"widget-imagelist",
-            "32":"widget-digitalnumber",
-            "42":"widget-arcprogress"
+            "widget_analog":"widget-analogdisplay",
+            "widget":"widget-image",
+            "widget_imagelist":"widget-imagelist",
+            "widget_num":"widget-digitalnumber",
+            "widget_arc":"widget-arcprogress"
         }
+
+class DeviceRepresentation(QGraphicsPixmapItem):
+    def __init__(self, id, interpolation):
+        super().__init__()
+        self.deviceData = {
+            "9": [":/Images/mb8.png", -325, -180]
+        }
+        self.setPixmap(QPixmap(self.deviceData[id][0]))
+        self.setPos(self.deviceData[id][1], self.deviceData[id][2])
+        if interpolation:
+            self.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
 
 class DeviceOutline(QGraphicsPathItem):
     # Creates the grey outline showing how rounded the screen is
@@ -160,7 +171,7 @@ class Canvas(QGraphicsView):
 
         self.zoomValue = 0
 
-        self.deviceSize = watchData().modelSize[str(device)]
+        self.deviceSize = WatchData().modelSize[str(device)]
 
         self.graphicsScene = Scene()
         self.graphicsScene.setSceneRect(0,0,self.deviceSize[0],self.deviceSize[1])
@@ -177,6 +188,7 @@ class Canvas(QGraphicsView):
 
     def drawDecorations(self):
         insertButton = QToolButton(self)
+        insertButton.setObjectName("canvasDecoration-button")
         insertButton.setGeometry(20, 20, 40, 25)
         insertButton.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
         insertButton.setMenu(self.mainWindowUI.menuInsert)
@@ -247,6 +259,7 @@ class Canvas(QGraphicsView):
             scroll_value = self.verticalScrollBar().value() - scroll_delta
             self.verticalScrollBar().setValue(scroll_value)
             
+            
 
     def handleObjectSelectionChange(self):
         selected_object = self.getSelectedObject()
@@ -276,7 +289,7 @@ class Canvas(QGraphicsView):
         # Create widget
         widget = AnalogWidget(int(pos.x()), int(pos.y()), int(pos.width()), int(pos.height()), self.frame, self, QColor(255,255,255,0), name)
         widget.setZValue(zValue)
-        widget.setData(1, "27") # Item ID (Used for legacy fprj format)
+        widget.setData(1, "widget_analog") # Item ID
 
         # Add images
 
@@ -297,13 +310,16 @@ class Canvas(QGraphicsView):
         widget.addMinuteHand(minImg, itemAnchors["minute"]["x"], itemAnchors["minute"]["y"], interpolationStyle)
         widget.addSecondHand(secImg, itemAnchors["second"]["x"], itemAnchors["second"]["y"], interpolationStyle)
         
+        if bgImg.isNull() and hrImg.isNull() and minImg.isNull() and secImg.isNull():
+            widget.color = QColor(255, 0, 0, 100)
+
         return widget
 
     def createImage(self, name, rect, zValue, image, interpolationStyle):
         # Create widget
         widget = ImageWidget(int(rect.x()), int(rect.y()), int(rect.width()), int(rect.height()), self.frame, self, QColor(255,255,255,0), name)
         widget.setZValue(zValue)
-        widget.setData(1, "30") # Item ID (Used for legacy fprj format)
+        widget.setData(1, "widget") # Item ID
 
         # Add image
         pixmap = QPixmap()
@@ -317,13 +333,13 @@ class Canvas(QGraphicsView):
         # Create widget
         widget = ImageWidget(int(rect.x()), int(rect.y()), int(rect.width()), int(rect.height()), self.frame, self, QColor(255,255,255,0), name)
         widget.setZValue(zValue)
-        widget.setData(1, "31") # Item ID (Used for legacy fprj format)
+        widget.setData(1, "widget_imagelist") # Item ID 
 
         # Split image strings from the Bitmaplist
-        imageList = bitmapList.split("|")
-        firstImage = imageList[0].split(":")
+        
+        firstImage = bitmapList[0]
 
-        if bitmapList != "":
+        if bitmapList != []:
             # Get Image
             if len(firstImage) >= 2:
                 image = QPixmap()
@@ -337,16 +353,15 @@ class Canvas(QGraphicsView):
         return widget
 
     def createDigitalNumber(self, name, rect, zValue, numList, digits, spacing, interpolationStyle):
-        imageList = numList.split("|")
         widget = ImageWidget(rect.x(), rect.y(), rect.width(), rect.height(), self.frame, self, QColor(255,255,255,0), name)
         widget.setZValue(zValue)
-        widget.setData(1, "31") # Item ID (Used for legacy fprj format)
+        widget.setData(1, "widget_imagelist") # Item ID
 
         for x in range(int(digits)):
             # Get QPixmap from file string
-            if len(imageList) == 11:
+            if len(numList) == 11:
                 image = QPixmap()
-                image.load(os.path.join(self.imageFolder, imageList[x]))
+                image.load(os.path.join(self.imageFolder, numList[x]))
 
                 widget.addImage(image, (image.size().width() * x) + (int(spacing) * x), 0, int(spacing), interpolationStyle)
             else:
@@ -364,11 +379,11 @@ class Canvas(QGraphicsView):
         # the amount of arguments is horrific, but im too lazy to fix it
         widget = ProgressWidget(rect.x(), rect.y(), rect.width(), rect.height(), self.frame, self, QColor(255,255,255,0), name, arcX, arcY, radius, lineWidth, startAngle, endAngle, bgImage, fgImage, interpolationStyle)
         widget.setZValue(zValue)
-        widget.setData(1, "42")
+        widget.setData(1, "widget_arc")
 
         return widget
 
-    def createObject(self, index, item, interpolation):
+    def createWidgetFromData(self, index, item, interpolation):
         widget = None
 
         if interpolation == "Bilinear":
@@ -376,167 +391,179 @@ class Canvas(QGraphicsView):
         else:
             interpolation = False
 
+        if item.getProperty("widget_type") == None:
+            return False, f" Widget '{item.getProperty('widget_name')}' has unsupported widget type"
+
         try:
-            if item["@Shape"] == "27":
+            if item.getProperty("widget_type") == "widget_analog":
                 widget = self.createAnalogDisplay(
-                    item["@Name"], 
+                    item.getProperty("widget_name"),
                     QRect(
-                        int(item["@X"]), 
-                        int(item["@Y"]), 
-                        int(item["@Width"]), 
-                        int(item["@Height"])               
+                        int(item.getProperty("widget_pos_x")),
+                        int(item.getProperty("widget_pos_y")),
+                        int(item.getProperty("widget_size_width")),
+                        int(item.getProperty("widget_size_height"))
                     ),
                     index,
-                    item["@Background_ImageName"],
-                    item["@HourHand_ImageName"],
-                    item["@MinuteHand_Image"],
-                    item["@SecondHand_Image"], 
+                    item.getProperty("widget_background_bitmap"),
+                    item.getProperty("analog_hour_image"),
+                    item.getProperty("analog_minute_image"),
+                    item.getProperty("analog_second_image"),
                     {
                         "background": {
-                            "x": item["@BgImage_rotate_xc"],
-                            "y": item["@BgImage_rotate_yc"],
-                        },  
+                            "x": item.getProperty("analog_bg_anchor_x"),
+                            "y": item.getProperty("analog_bg_anchor_y"),
+                        },
                         "hour": {
-                            "x": item["@HourImage_rotate_xc"],
-                            "y": item["@HourImage_rotate_yc"],
-                        },  
+                            "x": item.getProperty("analog_hour_anchor_x"),
+                            "y": item.getProperty("analog_hour_anchor_y"),
+                        },
                         "minute": {
-                            "x": item["@MinuteImage_rotate_xc"],
-                            "y": item["@MinuteImage_rotate_yc"],
-                        },  
+                            "x": item.getProperty("analog_minute_anchor_x"),
+                            "y": item.getProperty("analog_minute_anchor_y"),
+                        },
                         "second": {
-                            "x": item["@SecondImage_rotate_xc"],
-                            "y": item["@SecondImage_rotate_yc"],
-                        },  
+                            "x": item.getProperty("analog_second_anchor_x"),
+                            "y": item.getProperty("analog_second_anchor_y"),
+                        },
                     },
                     interpolation
                 )
 
-            elif item["@Shape"] == "29":
+            elif item.getProperty("widget_type") == "widget_arc":
                 widget = self.createProgressArc(
-                    item["@Name"], 
+                    item.getProperty("widget_name"),
                     QRect(
-                        int(item["@X"]), 
-                        int(item["@Y"]), 
-                        int(item["@Width"]), 
-                        int(item["@Height"])               
+                        int(item.getProperty("widget_pos_x")),
+                        int(item.getProperty("widget_pos_y")),
+                        int(item.getProperty("widget_size_width")),
+                        int(item.getProperty("widget_size_height"))
                     ),
                     index,
-                    item["@Background_ImageName"],
-                    item["@Foreground_ImageName"],
-                    item["@Rotate_xc"], 
-                    item["@Rotate_yc"], 
-                    item["@Radius"], 
-                    item["@Line_Width"], 
-                    item["@StartAngle"], 
-                    item["@EndAngle"], 
+                    item.getProperty("widget_background_bitmap"),
+                    item.getProperty("arc_image"),
+                    item.getProperty("arc_pos_x"),
+                    item.getProperty("arc_pos_y"),
+                    item.getProperty("arc_radius"),
+                    item.getProperty("arc_thickness"),
+                    item.getProperty("arc_start_angle"),
+                    item.getProperty("arc_end_angle"),
                     interpolation
                 )
 
-            elif item["@Shape"] == "30":    
+            elif item.getProperty("widget_type") == "widget":
                 widget = self.createImage(
-                    item["@Name"], 
+                    item.getProperty("widget_name"),
                     QRect(
-                        int(item["@X"]), 
-                        int(item["@Y"]), 
-                        int(item["@Width"]), 
-                        int(item["@Height"])               
+                        int(item.getProperty("widget_pos_x")),
+                        int(item.getProperty("widget_pos_y")),
+                        int(item.getProperty("widget_size_width")),
+                        int(item.getProperty("widget_size_height"))
                     ),
                     index,
-                    item["@Bitmap"],
+                    item.getProperty("widget_bitmap"),
                     interpolation
                 )
-                
-            elif item["@Shape"] == "31":
+
+            elif item.getProperty("widget_type") == "widget_imagelist":
                 widget = self.createImageList(
-                    item["@Name"], 
+                    item.getProperty("widget_name"),
                     QRect(
-                        int(item["@X"]), 
-                        int(item["@Y"]), 
-                        int(item["@Width"]), 
-                        int(item["@Height"])               
+                        int(item.getProperty("widget_pos_x")),
+                        int(item.getProperty("widget_pos_y")),
+                        int(item.getProperty("widget_size_width")),
+                        int(item.getProperty("widget_size_height"))
                     ),
                     index,
-                    item["@BitmapList"],
+                    item.getProperty("widget_bitmaplist"),
                     interpolation
                 )
 
-            elif item["@Shape"] == "32":
+            elif item.getProperty("widget_type") == "widget_num":
                 widget = self.createDigitalNumber(
-                    item["@Name"], 
+                    item.getProperty("widget_name"),
                     QRect(
-                        int(item["@X"]), 
-                        int(item["@Y"]), 
-                        int(item["@Width"]), 
-                        int(item["@Height"])               
+                        int(item.getProperty("widget_pos_x")),
+                        int(item.getProperty("widget_pos_y")),
+                        int(item.getProperty("widget_size_width")),
+                        int(item.getProperty("widget_size_height"))
                     ),
                     index,
-                    item["@BitmapList"],
-                    item["@Digits"],
-                    item["@Spacing"],
+                    item.getProperty("widget_bitmaplist"),
+                    item.getProperty("num_digits"),
+                    item.getProperty("num_spacing"),
                     interpolation
                 )
 
-            elif item["@Shape"] == "42":
+            elif item.getProperty("widget_type") == "widget_arc":
                 widget = self.createProgressArc(
-                    item["@Name"], 
+                    item.getProperty("widget_name"),
                     QRect(
-                        int(item["@X"]), 
-                        int(item["@Y"]), 
-                        int(item["@Width"]), 
-                        int(item["@Height"])               
+                        int(item.getProperty("widget_pos_x")),
+                        int(item.getProperty("widget_pos_y")),
+                        int(item.getProperty("widget_size_width")),
+                        int(item.getProperty("widget_size_height"))
                     ),
                     index,
-                    item["@Background_ImageName"],
-                    item["@Foreground_ImageName"],
-                    item["@Rotate_xc"], 
-                    item["@Rotate_yc"], 
-                    item["@Radius"], 
-                    item["@Line_Width"], 
-                    item["@StartAngle"], 
-                    item["@EndAngle"], 
+                    item.getProperty("analog_background"),
+                    item.getProperty("arc_image"),
+                    item.getProperty("arc_pos_x"),
+                    item.getProperty("arc_pos_y"),
+                    item.getProperty("arc_radius"),
+                    item.getProperty("arc_thickness"),
+                    item.getProperty("arc_start_angle"),
+                    item.getProperty("arc_end_angle"),
                     interpolation
                 )
 
             else:
-                return False, f"Widget {item['@Shape']} not implemented in canvas, please report as issue."
-            
-            self.widgets[item["@Name"]] = widget
+                return False, f"Widget {item.getProperty('widget_type')} not implemented in canvas, please report as issue."
+
+            self.widgets[item.getProperty("widget_name")] = widget
             self.scene().addItem(widget)
             return True, "Success"
         except Exception as e:
-            QMessageBox().critical(None, "Error", f"Unable to create object {item['@Name']}: {traceback.format_exc()}")
-            return False, str(e)
+            return False, str(f" Unable to create object {item.getProperty('widget_name')}:\n {traceback.format_exc()}")
 
-    def loadObjects(self, data, imageFolder, interpolation):
+    def loadObjects(self, project, interpolation=None):
         self.frame = DeviceFrame(self.deviceSize)
-        if data["FaceProject"]["Screen"].get("Widget") != None:
+        
+        if interpolation == None:
+            interpolation = self.interpolation
+        else:
+            self.interpolation = interpolation
+
+        #self.deviceRep = DeviceRepresentation(project.getDeviceType(), interpolation)
+        if project.widgets != None:
             self.scene().clear()
             self.widgets.clear()
+            #self.scene().addItem(self.deviceRep)
             self.scene().addItem(self.frame)
  
-            self.imageFolder = imageFolder
+            self.imageFolder = project.imageFolder
 
-            widgets = data["FaceProject"]["Screen"]["Widget"]
-            if type(widgets) == dict:
-                for index, key in enumerate(widgets):     
-                    result, reason = self.createObject(index, widgets[key], interpolation)
+            widgets = project.getAllWidgets()
+            if type(widgets) == list:
+                for index, widget in enumerate(widgets):    
+                    result, reason = self.createWidgetFromData(index, widget, interpolation)
                     if not result:
                         return False, reason
                 self.scene().updatePosMap()
                 return True, "Success"
+            else:
+                return False, "Widgets not in list!"
             
         else:
             self.scene().addItem(self.frame)
             return True, "Success"
         
-    def reloadObject(self, objectName, objectData, interpolation):
+    def reloadObject(self, objectName, widget):
         object = self.widgets[objectName]
         objectZValue = object.zValue()
 
         if object != None:
             object.delete()
-            result, reason = self.createObject(objectZValue, objectData, interpolation)
+            result, reason = self.createWidgetFromData(objectZValue, widget, self.interpolation)
             if not result:
                 return False, reason 
             else:
@@ -660,7 +687,6 @@ class ImageWidget(BaseWidget):
 
     def representNoImage(self):
         self.color = QColor(255, 0, 0, 100)
-        self.setRect(0,0,48,48)
 
 class AnalogWidget(BaseWidget):
     # Widget for handling AnalogDisplays
@@ -680,15 +706,11 @@ class AnalogWidget(BaseWidget):
     def addSecondHand(self, secHandImage, secHandX, secHandY, antialiasing):
         self.secHand = QGraphicsPixmapItem(secHandImage, self)
         self.secHand.setOffset(-int(secHandX), -int(secHandY))
-        if secHandImage.isNull():
-            self.color = QColor(255, 0, 0, 100)
         self.secHand.setPos(self.rect().width()/2, self.rect().height()/2)
         if antialiasing:
             self.secHand.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
 
     def addMinuteHand(self, minHandImage, minHandX, minHandY, antialiasing):
-        if minHandImage.isNull():
-            self.color = QColor(255, 0, 0, 100)
         self.minHand = QGraphicsPixmapItem(minHandImage, self)
         self.minHand.setOffset(-int(minHandX), -int(minHandY))
         self.minHand.setRotation(60)
@@ -697,8 +719,6 @@ class AnalogWidget(BaseWidget):
             self.minHand.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
 
     def addHourHand(self, hourHandImage, hrHandX, hrHandY, antialiasing):
-        if hourHandImage.isNull():
-            self.color = QColor(255, 0, 0, 100)
         self.hrHand = QGraphicsPixmapItem(hourHandImage, self)
         self.hrHand.setOffset(-int(hrHandX), -int(hrHandY))
         self.hrHand.setRotation(-60)

@@ -1,21 +1,31 @@
-# Project Manager for Mi Create
+# Watchface Projects
 # tostr 2024
 
-# Responsible for saving and loading project formats
-# ProjectV1 uses the old EasyFace fprj format
-# ProjectV2 uses the official Xiaomi watchface format
+# XiaomiProject uses the official Xiaomi watchface format.
+# FprjProject uses m0tral's XML format for use with m0tral's compiler.
+# GMFProject uses GiveMeFive's JSON based format for use with GMF's compiler
+
+# All project manipulation is done through functions
+# There are designated IDs for each property.
+
+# Processes like compilation are handled by Qt's QProcess class because it is discreet and robust. 
+# If you are planning to port the code over to your own project, make sure you either:
+# - install PyQt/PySide libraries if you are fine with the extra bloat
+# - port to Python's subprocess
+
+# TODO
+# Implement plugin system so that formats are installed as seperate plugins
 
 import os
-import subprocess
 import traceback
 import logging
-import base64
 import json
 import xmltodict
 import xml
 import xml.dom.minidom as minidom
-from lxml import etree
 
+from pathlib import Path
+from pprint import pprint
 from copy import deepcopy
 from PyQt6.QtCore import QProcess
 
@@ -35,17 +45,7 @@ class WatchData:
             "27":"AnalogDisplay",
             "30":"Image",
             "31":"ImageList",
-            "32":"DigitalNumbers"
-        }
-        self.watchFileTemplate = {
-            "FaceProject": {
-                "@DeviceType": "",
-                "Screen": {
-                    "@Title": "",
-                    "@Bitmap": "",
-                    "Widget": ""
-                }
-            }
+            "32":"DigitalNumber"
         }
         dataPath = os.path.join(os.getcwd(), "data", "DeviceInfo.db")
 
@@ -62,14 +62,206 @@ class WatchData:
 
     def getWatchModel(self, id):
         return self.watchID[id]
-
-class ProjectV1:  
+    
+class ProjectTools:
     def __init__(self):
         pass
 
-    def create(self, path, device, name):
+class FprjProject:  
+    def __init__(self):
+        self.data = None
+        self.widgets = None
+
+        self.name = None
+        self.directory = None
+        self.dataPath = None
+        self.imageFolder = None
+
+        self.deviceIds = {
+            "0": "xiaomi_color",
+            "1": "xiaomi_color_sport",
+            "3": "xiaomi_color_2/s1/s2",
+            "4": "xiaomi_watch_s1_pro",
+            "5": "redmi/poco_watch",
+            "6": "xiaomi_band_7_pro",
+            "7": "redmi_watch_3",
+            "8": "redmi_band_pro",
+            "9": "xiaomi_band_8",
+            "10": "redmi_watch_2_lite",
+            "11": "xiaomi_band_8_pro",
+            "12": "redmi_watch_3_active",
+            "12": "redmi_watch_3_active",
+            "362": "xiaomi_watch_s3",
+            "365": "redmi_watch_4",
+            "366": "xiaomi_band_9",
+        }
+
+        self.widgetIds = {
+            "27": "widget_analog",
+            "29": "widget_arc",
+            "30": "widget",
+            "31": "widget_imagelist",
+            "32": "widget_num",
+            "42": "widget_arc" # progress arc plus, prefer using this
+        }
+
+        self.propertyIds = {
+            "@Alignment": "num_alignment",
+            "@Alpha": "widget_alpha",
+            "@Background_ImageName": "widget_background_bitmap",
+            "@BgImage_rotate_xc": "analog_bg_anchor_x",
+            "@BgImage_rotate_yc": "analog_bg_anchor_y",
+            "@Bitmap": "widget_bitmap",
+            "@BitmapList": "widget_bitmaplist",
+            "@Blanking": "num_hide_zeros",
+            "@DefaultIndex": "imagelist_default_index",
+            "@Digits": "num_digits",
+            "@EndAngle": "arc_end_angle",
+            "@Foreground_ImageName": "arc_image",
+            "@Height": "widget_size_height",
+            "@HourHand_ImageName": "analog_hour_image",
+            "@HourImage_rotate_xc": "analog_hour_anchor_x",
+            "@HourImage_rotate_yc": "analog_hour_anchor_y",
+            "@HourHandCorrection_En": "analog_hour_smooth_motion",
+            "@Index_Src": "imagelist_source",
+            "@Line_Width": "arc_thickness",
+            "@MinuteHand_Image": "analog_minute_image",
+            "@MinuteImage_rotate_xc": "analog_minute_anchor_x",
+            "@MinuteImage_rotate_yc": "analog_minute_anchor_y",
+            "@MinuteHandCorrection_En": "analog_minute_smooth_motion",
+            "@Name": "widget_name",
+            "@Radius": "arc_radius",
+            "@Range_Max": "arc_max_value",
+            "@Range_Max_Src": "arc_max_value_source",
+            "@Range_Min": "arc_min_value",
+            "@Range_MinStep": "arc_min_step_value",
+            "@Range_Step": "arc_step_value",
+            "@Range_Val_Src": "arc_source",
+            "@Rotate_xc": "arc_pos_x",
+            "@Rotate_yc": "arc_pos_y",
+            "@SecondHand_Image": "analog_second_image",
+            "@SecondImage_rotate_xc": "analog_second_anchor_x",
+            "@SecondImage_rotate_yc": "analog_second_anchor_y",
+            "@Shape": "widget_type",
+            "@Spacing": "num_spacing",
+            "@StartAngle": "arc_start_angle",
+            "@Value_Src": "num_source",
+            "@Visible_Src": "widget_visiblity_source",
+            "@Width": "widget_size_width",
+            "@X": "widget_pos_x",
+            "@Y": "widget_pos_y",
+            "WidgetType": "WidgetType"
+        }
+
+        self.defaultItems = {
+            "widget_analog": {
+                "@Shape":"27",
+                "@Name":"",
+                "@X":"",
+                "@Y":"",
+                "@Width":"100",
+                "@Height":"100",
+                "@Alpha":"255",
+                "@Visible_Src":"0",
+                "@HourHandCorrection_En":"0",
+                "@MinuteHandCorrection_En":"0",
+                "@Background_ImageName":"",
+                "@BgImage_rotate_xc":"0", 
+                "@BgImage_rotate_yc":"0",
+                "@HourHand_ImageName":"",
+                "@HourImage_rotate_xc":"0",
+                "@HourImage_rotate_yc":"0",
+                "@MinuteHand_Image":"",
+                "@MinuteImage_rotate_xc":"0",
+                "@MinuteImage_rotate_yc":"0",
+                "@SecondHand_Image":"",
+                "@SecondImage_rotate_xc":"0",
+                "@SecondImage_rotate_yc":"0"
+            },
+            "widget": {
+                "@Shape":"30",
+                "@Name":"",
+                "@Bitmap":"",
+                "@X":"",
+                "@Y":"",
+                "@Width":"48",
+                "@Height":"48",
+                "@Alpha":"255",
+                "@Visible_Src":"0"
+            },
+            "widget_imagelist": {
+                "@Shape":"31",
+                "@Name":"",
+                "@BitmapList":"",
+                "@X":"",
+                "@Y":"",
+                "@Width":"48",
+                "@Height":"48",
+                "@Alpha":"255",
+                "@Alignment":"0",
+                "@DefaultIndex":"0",
+                "@Value_Src":"0",
+                "@Spacing":"0",
+                "@Blanking":"0",
+                "@Visible_Src":"0"
+            },
+            "widget_num": {
+                "@Shape":"32",
+                "@Name":"",
+                "@BitmapList":"",
+                "@X":"",
+                "@Y":"",
+                "@Width":"48",
+                "@Height":"48",
+                "@Alpha":"255",
+                "@Visible_Src":"0",
+                "@Digits":"1",
+                "@Alignment":"0",
+                "@Value_Src":"0",
+                "@Spacing":"0",
+                "@Blanking":"0"
+            },
+            "widget_arc": {
+                "@Shape":"42",
+                "@Name":"",
+                "@X":"0",
+                "@Y":"0",
+                "@Width":"200",
+                "@Height":"200",
+                "@Alpha":"255",
+                "@Visible_Src":"0",
+                "@Rotate_xc":"100",
+                "@Rotate_yc":"100",
+                "@Radius":"75",
+                "@Line_Width":"30",
+                "@Butt_cap_ending_style_En":"1",
+                "@StartAngle":"-120",
+                "@EndAngle":"120",
+                "@Range_Min":"0",
+                "@Range_Max":"100",
+                "@Range_MinStep":"0",
+                "@Range_Step":"0",
+                "@Background_ImageName":"",
+                "@Foreground_ImageName":"",
+                "@Range_Max_Src":"0",
+                "@Range_Val_Src":"0"
+            }
+        }
+
+        self.watchFileBlank = {
+            "FaceProject": {
+                "@DeviceType": "",
+                "Screen": {
+                    "@Title": "",
+                    "@Bitmap": "",
+                    "Widget": ""
+                }
+            }
+        }
+
+    def fromBlank(self, path, device, name):
         try:
-            template = WatchData().watchFileTemplate
+            template = self.watchFileBlank
             template["FaceProject"]["@DeviceType"] = str(device)
             folder = os.path.join(path, name)
             os.makedirs(os.path.join(folder, "images"))
@@ -79,74 +271,111 @@ class ProjectV1:
                 dom = minidom.parseString(rawXml)
                 prettyXml = dom.toprettyxml()
                 fprj.write(prettyXml)
+
+            self.data = template
+            self.widgets = template["FaceProject"]["Screen"].get("Widget")
+
+            self.name = os.path.basename(path)
+            self.directory = os.path.dirname(path)
+            self.dataPath = os.path.join(folder, f"{name}.fprj")
+            self.imageFolder = os.path.join(folder, "images")
+
             return True, os.path.join(folder, f"{name}.fprj")
         except Exception as e:
             return False, str(e), traceback.format_exc()
         
-    def formatToKeys(self, widgetList):
-        # Format list to dict for fast access
-        # Uses the @Name property for the key
-        widgetDict = {}
-        if widgetList == None:
-            return widgetDict
-        for widget in widgetList:
-            if widgetDict.get(widget["@Name"]):
-                return False, "Duplicate widget name!", f"Cannot format {widget['@Name']} because there already is another widget named the same"
-            widgetDict[widget["@Name"]] = widget
-        return widgetDict
-    
-    def formatToList(self, widgets):
-        # Format dict to list
-        widgetList = []
-        for widget in widgets:
-            widgetList.append(widgets[widget])
-        return widgetList
-
-    def load(self, path):
-        xml_path = os.path.join(path)
-
+    def fromExisting(self, path):
+        projectDir = os.path.dirname(path)
         try:
-            with open(xml_path, 'r', encoding="utf8") as project:
+            with open(path, "r", encoding="utf8") as project:
                 xmlsource = project.read()
                 parse = xmltodict.parse(xmlsource)
-                print(parse)
                 if parse.get("FaceProject"):
-                    imagesDir = os.path.join(os.path.dirname(path), "images")
+                    imagesDir = os.path.join(projectDir, "images")
                     if not parse["FaceProject"]["Screen"].get("Widget"):
                         parse["FaceProject"]["Screen"]["Widget"] = []
                     if type(parse["FaceProject"]["Screen"]["Widget"]) == dict:
                         parse["FaceProject"]["Screen"]["Widget"] = [parse["FaceProject"]["Screen"]["Widget"]]
 
-                    parse["FaceProject"]["Screen"]["Widget"] = self.formatToKeys(parse["FaceProject"]["Screen"]["Widget"])
+                    self.data = parse
+                    self.widgets = parse["FaceProject"]["Screen"].get("Widget")
+                    
+                    self.name = os.path.basename(path)
+                    self.directory = projectDir
+                    self.dataPath = path
+                    self.imageFolder = imagesDir
 
-                    print(parse["FaceProject"]["Screen"]["Widget"], parse)
-
-                    return True, parse, imagesDir
+                    return True, "Success"
                 else:
-                    return False, "Not a FaceProject!", ""
+                    return False, "Invalid/corrupted fprj project!", ""
         except Exception as e:
             return False, str(e), traceback.format_exc()
+        
+    def getDeviceType(self):
+        return self.data["FaceProject"]["@DeviceType"]
+        
+    def getAllWidgets(self, type=None, theme=None): # type and theme are for theme support someday over the rainbow
+        widgetList = []
+        for widget in self.widgets:
+            widgetList.append(FprjWidget(self, widget))
+        return widgetList
 
-    def unparse(self, data):
-        raw = xmltodict.unparse(data)
+    def getWidget(self, name):
+        widget = list(filter(lambda widget: widget["@Name"] == name, self.widgets))
+        if len(widget) == 0:
+            return None
+        else:
+            return FprjWidget(self, widget[0])
+        
+    def createWidget(self, id, name, posX, posY):
+        widget = self.defaultItems[id].copy()
+        widget["@Name"] = name
+        widget["@X"] = posX
+        widget["@Y"] = posY
+        self.widgets.append(widget)
+        
+    def deleteWidget(self, widget):
+        for index, item in enumerate(self.widgets):
+            if item["@Name"] == widget.getProperty("widget_name"):
+                self.widgets.pop(index) 
+
+    def restoreWidget(self, widget, index):
+        self.widgets.insert(index, widget.data)
+    
+    def getTitle(self):
+        return self.data["FaceProject"]["Screen"]["@Title"]
+    
+    def getThumbnail(self):
+        return self.data["FaceProject"]["Screen"]["@Bitmap"]
+
+    def setWidgetPos(self, name, posX, posY):
+        widget = list(filter(lambda widget: widget["@Name"] == name, self.widgets))
+        if len(widget) == 0:
+            return "Widget does not exist!"
+        else:
+            widget[0]["@X"] = posX
+            widget[0]["@Y"] = posY
+        
+    def setTitle(self, value):
+        self.data["FaceProject"]["Screen"]["@Title"] = value
+
+    def setThumbnail(self, value):
+        self.data["FaceProject"]["Screen"]["@Bitmap"] = value
+
+    def toString(self):
+        raw = xmltodict.unparse(self.data)
         dom = xml.dom.minidom.parseString(raw)
         pretty_xml = dom.toprettyxml()
 
         return pretty_xml
 
-    def save(self, path, data: dict):
-        
-        rawdata = deepcopy(data)
-        print(rawdata)
-        rawdata["FaceProject"]["Screen"]["Widget"] = self.formatToList(rawdata["FaceProject"]["Screen"]["Widget"])
-        print(rawdata)
-
-        raw = xmltodict.unparse(rawdata)
+    def save(self):
+        raw = xmltodict.unparse(self.data)
         dom = xml.dom.minidom.parseString(raw)
         pretty_xml = dom.toprettyxml()
 
         try:
-            with open(path, "w", encoding="utf8") as file:
+            with open(self.dataPath, "w", encoding="utf8") as file:
                 file.write(pretty_xml)
             return True, "success"
             
@@ -170,19 +399,51 @@ class ProjectV1:
         process.start()
         return process
     
-# ProjectV2 uses proper OOP instead of half assed static functions
-class ProjectV2:
-    def __init__(self, folder):
+class FprjWidget:
+    def __init__(self, project, data):
+        self.project = project
+        self.data = data
+    
+    def getProperty(self, property):
+        property = [k for k, v in self.project.propertyIds.items() if v == property][0]
+        if property == "WidgetType":
+            return
+
+        if property == "@Shape":
+            return self.project.widgetIds.get(self.data[property])
+        elif property == "@BitmapList":
+            bitmapString = self.data[property]
+            bitmapList = bitmapString.split("|")
+            for index, item in enumerate(bitmapList):
+                split = item.split(":")
+                if len(split) > 1:
+                    split[0] = split[0].strip("()")
+                    bitmapList[index] = split
+            return bitmapList
+        else:
+            return self.data[property]
+
+    def setProperty(self, property, value):
+        property = [k for k, v in self.project.propertyIds.items() if v == property][0]
+        if property == "@BitmapList":
+            for index, item in enumerate(value):
+                if isinstance(item, list): # contains index info
+                    item[0] = f"({item[0]})" # add brackets
+                    value[index] = ":".join(item)
+            value = "|".join(value)
+        self.data[property] = value
+
+    
+class XiaomiProject:
+    def __init__(self):
         # TODO
         # Get manifest.xml parsed properly and resources
-        # Use lxml instead of xmltodict
 
         # NOTE
         # There are 2 important files
         # - description.xml located at top level
         # - manifest.xml located at /resources
-        # description.xml contains, well, descriptions about the watchface
-        # manifest.xml contains a list of resources and widgets in the watchface
+
         self.descriptionBlank = """
         <?xml version="1.0" encoding="utf-8"?>
         <watch>
@@ -209,7 +470,7 @@ class ProjectV2:
         <Watchface width="" height="" editable="false" id="" _recolorEnable="" recolorTable="" compressMethod="" name="">
             <Resources>
             </Resources>
-            <Theme type="normal" name="theme1" bg="" isPhotoAlbumWatchface="false" preview="">
+            <Theme type="normal" name="default" bg="" isPhotoAlbumWatchface="false" preview="">
             </Theme>
         </Watchface>
         """
@@ -237,18 +498,26 @@ class ProjectV2:
         logging.info("Parsing description.xml & manifest.xml")
 
         # xml source files
-        description = etree.parse(joinPath(folder, "description.xml"))
-        manifest = etree.parse(joinPath(self.resourceFolder, "manifest.xml"))
+        with open(joinPath(folder, "description.xml"), "r", encoding="utf8") as descFile:
+            self.description = xmltodict.parse(descFile.read())
 
-        # process manifest elements
-        self.description = description.getroot()
-        self.manifest = manifest.getroot()
+        with open(joinPath(self.resourceFolder, "manifest.xml"), "r", encoding="utf8") as manifestFile:
+            self.manifest = xmltodict.parse(manifestFile.read())["Watchface"]
+
+    def getResource(self, name):
+        return 
         
-    def getAllWidgets(self):
-        pass
+    def getAllWidgets(self, type, theme):
+        pprint(self.manifest)
+        return self.manifest["Theme"]
 
-    def getWidget(self, name):
-        pass
+    def getWidget(self, theme, name):
+        widgets = self.manifest["Theme"]["Layout"]
+        return [ widgets for widget in widgets if widget.get(name) == theme ]
 
     def save(self, folder):
+        pass
+
+class GMFProject:
+    def __init__(self):
         pass

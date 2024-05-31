@@ -2,6 +2,7 @@
 # tostr 2024
 
 import sys
+import json
 
 from PyQt6.QtWidgets import QMenu
 from PyQt6.QtGui import QIcon
@@ -15,56 +16,11 @@ from translate import QCoreApplication
 #
 # The context menu system uses the same data structure as the properties system
 #
-# Something neat with the system is that you can inherit existing actions/menus from the
-# main application. If, for example, you made an action in the window.ui file to copy an
-# object, you do not have to create an entirely new action if you want to add a copy
-# action to a context menu, simply add an action with the inherit property with the name
-# of the action. Same also applies for submenus.
+# Context menu items allow for "inheritance" from the main window, basically
+# reusing already created menu items
 
-contextMenus = {
-    "default" : {
-        "Undo" : {
-            "inherit" : "actionUndo"
-        },
-        "Redo" : {
-            "inherit" : "actionRedo"
-        },
-        "sep1" : {},
-        "Paste" : {
-            "inherit" : "actionPaste"
-        },
-        "sep2" : {},
-        "Zoom" : {
-            "inheritSubmenu" : "menuZoom"
-        }
-    },
-    "shape" : {
-        "Undo" : {
-            "inherit" : "actionUndo"
-        },
-        "Redo" : {
-            "inherit" : "actionRedo"
-        },
-        "sep1" : {},
-        "Cut" : {
-            "inherit" : "actionCut"
-        },
-        "Copy" : {
-            "inherit" : "actionCopy"
-        },
-        "Paste" : {
-            "inherit" : "actionPaste"
-        },
-        "sep2" : {},
-        "Layers" : {
-            "inheritSubmenu" : "menuLayers"
-        },
-        "sep3" : {},
-        "Delete" : {
-            "inherit" : "actionDelete"
-        }
-    }
-}
+with open("data/contextMenus.json") as file:
+    contextMenus = json.load(file)
 
 class ContextMenu(QMenu):
     def __init__(self, type, pos, ui):
@@ -78,8 +34,9 @@ class ContextMenu(QMenu):
                     menu.addAction(getattr(ui, properties["inherit"]))
                 elif properties.get("inheritSubmenu"):
                     menu.addMenu(getattr(ui, properties["inheritSubmenu"]))
-                elif "sep" in actionName:
-                    menu.addSeparator()
+                elif properties.get("specialType"):
+                    if properties.get("specialType") == "seperator":
+                        menu.addSeparator()
                 else:
                     action = menu.addAction(actionName)
                     if properties.get("icon"):

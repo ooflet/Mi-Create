@@ -72,8 +72,8 @@ class MultiFieldDialog(QDialog):
         field.setFixedWidth(175)
         field.setPlaceholderText(placeholderText)
         folderButton = QToolButton(self)
+        folderButton.setObjectName("inputField-button")
         folderButton.setText("")
-        folderButton.setFixedSize(22, 22)
         foldericon = QIcon().fromTheme("document-open")
         folderButton.setIcon(foldericon)
         folderButton.clicked.connect(openFolderDialog)
@@ -82,7 +82,7 @@ class MultiFieldDialog(QDialog):
             self.mandatoryFields.append(field)
 
         horizontalLayout = QHBoxLayout()
-        horizontalLayout.setSpacing(0)
+        horizontalLayout.setSpacing(4)
         horizontalLayout.addWidget(field)
         horizontalLayout.addWidget(folderButton)
         horizontalLayout.addStretch()
@@ -149,8 +149,6 @@ class MultiFieldDialog(QDialog):
 
         for item in self.mandatoryFields:
             item.textChanged.connect(update)
-
-        buttonBox.accepted.connect(self.accept)
 
         update()
 
