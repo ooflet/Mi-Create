@@ -23,14 +23,11 @@ from PyQt6.QtWidgets import (QMainWindow, QDialog, QInputDialog, QMessageBox, QA
                                QSpacerItem, QSizePolicy, QAbstractItemView, QUndoView, QCheckBox, QHBoxLayout)
 from PyQt6.QtGui import QIcon, QPixmap, QDesktopServices, QDrag, QImage, QPainter
 from PyQt6.QtCore import Qt, QSettings, QSize, QUrl, pyqtSignal
-from PyQt6.QtWebEngineWidgets import QWebEngineView
 from window import FramelessMainWindow, FramelessDialog
-from window.webengine import FramelessWebEngineView
 
 from pprint import pprint, pformat
 import xml.dom.minidom
 import configparser
-import xmltodict
 import threading
 import logging
 
@@ -693,7 +690,7 @@ class MainWindow(FramelessMainWindow):
                 updateProperty(currentSelected.data(0,101), args[0], args[1])
             else:   
                 if not currentItem.getProperty(args[0]):
-                    currentItem.setProperty[args[0]] = ""
+                    currentItem.setProperty(args[0])
                 command = CommandModifyProperty(currentItem.getProperty("widget_name"), args[0], currentItem.getProperty(args[0]), args[1], updateProperty, f"Change property {args[0]} to {args[1]}")
                 self.History.undoStack.push(command)
                 self.ignoreHistoryInvoke = False
