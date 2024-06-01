@@ -141,7 +141,7 @@ class PropertiesWidget(QWidget):
 
         lineEdit = QLineEdit(self)
         lineEdit.setObjectName("propertyField-input")
-        lineEdit.setText(text)
+        lineEdit.setText(str(text))
         lineEdit.setDisabled(disabled)
         lineEdit.editingFinished.connect(onDeselect)
         return lineEdit

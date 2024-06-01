@@ -520,7 +520,6 @@ class Canvas(QGraphicsView):
                 return False, f"Widget {item.getProperty('widget_type')} not implemented in canvas, please report as issue."
 
             self.widgets[item.getProperty("widget_name")] = widget
-            self.scene().addItem(widget)
             return True, "Success"
         except Exception as e:
             return False, str(f" Unable to create object {item.getProperty('widget_name')}:\n {traceback.format_exc()}")

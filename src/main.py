@@ -688,9 +688,7 @@ class MainWindow(FramelessMainWindow):
             if self.ignoreHistoryInvoke:
                 self.ignoreHistoryInvoke = False
                 updateProperty(currentSelected.data(0,101), args[0], args[1])
-            else:   
-                if not currentItem.getProperty(args[0]):
-                    currentItem.setProperty(args[0])
+            else:
                 command = CommandModifyProperty(currentItem.getProperty("widget_name"), args[0], currentItem.getProperty(args[0]), args[1], updateProperty, f"Change property {args[0]} to {args[1]}")
                 self.History.undoStack.push(command)
                 self.ignoreHistoryInvoke = False
@@ -755,7 +753,7 @@ class MainWindow(FramelessMainWindow):
         else:
             def commandFunc(type, name):
                 if type == "undo":
-                    currentProject["project"].deleteWidget(name)   
+                    currentProject["project"].deleteWidget(currentProject["project"].getWidget(name))   
                 elif type == "redo":
                     currentProject["project"].createWidget(id, name, int(currentProject["canvas"].scene().sceneRect().width()/2 - 24), int(currentProject["canvas"].scene().sceneRect().height()/2 - 24))
                 print(self.getCurrentProject()["project"].data)
