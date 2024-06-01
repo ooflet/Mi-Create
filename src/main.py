@@ -763,7 +763,7 @@ class MainWindow(FramelessMainWindow):
                 self.Explorer.updateExplorer(currentProject["project"])
 
             print(name)
-            command = CommandAddWidget(name, commandFunc, f"Add object {widget.getProperty('widget_name')}")
+            command = CommandAddWidget(name, commandFunc, f"Add object {name}")
             self.History.undoStack.push(command)
         currentProject["canvas"].selectObject(name)
 
