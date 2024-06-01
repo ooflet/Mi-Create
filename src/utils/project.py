@@ -417,7 +417,7 @@ class FprjWidget:
             return
 
         if property == "@Shape":
-            return self.project.widgetIds.get(self.data[property])
+            return self.project.widgetIds.get(self.data.get(property))
         elif property == "@BitmapList":
             bitmapString = self.data[property]
             bitmapList = bitmapString.split("|")
@@ -428,7 +428,7 @@ class FprjWidget:
                     bitmapList[index] = split
             return bitmapList
         else:
-            return self.data[property]
+            return self.data.get(property)
 
     def setProperty(self, property, value):
         property = [k for k, v in self.project.propertyIds.items() if v == property][0]

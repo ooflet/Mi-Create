@@ -1,3 +1,4 @@
+<br />
 <h2 align="center"> Mi Create </h2>
 <p align="center"> Unofficial watchface and application creator for Xiaomi Wearables. Compatible with all Xiaomi wearables made ~2021 and above </p>
 
@@ -11,10 +12,10 @@
 ## There are known issues with the FramelessMainWindow module on Linux. In the meantime, a branch with the FramelessMainWindow module disabled has been created at https://github.com/ooflet/Mi-Create/tree/linux
 
 ### Features:
-- Intuitive and elegant user interface
-- Modern control methods
-- Powerful integrated text editor
-- Language support
+- Shockingly simple user interface
+- Easy to learn (especially for EasyFace users)
+- Native, no bloated and slow Electron/web-based BS!
+- Multilingual
 
 ### Installation:
 Download the latest installer from the [releases](https://github.com/ooflet/Mi-Create/releases) tab.

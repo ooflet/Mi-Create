@@ -157,7 +157,7 @@ class MainWindow(FramelessMainWindow):
         rawSettings = QSettings("Mi Create", "Settings") 
         if "Language" not in rawSettings.allKeys():
             logging.info("No language selected")
-            item, accepted = QInputDialog().getItem(self, "Mi Create", "Select Language", self.languageNames, 0)
+            item, accepted = QInputDialog().getItem(None, "Mi Create", "Select Language", self.languageNames, 0)
 
             if item in self.languageNames:
                 if accepted:
