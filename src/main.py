@@ -25,6 +25,7 @@ from PyQt6.QtGui import QIcon, QPixmap, QDesktopServices, QDrag, QImage, QPainte
 from PyQt6.QtCore import Qt, QSettings, QSize, QUrl, pyqtSignal
 from window import FramelessMainWindow, FramelessDialog
 
+from copy import deepcopy
 from pprint import pprint, pformat
 import xml.dom.minidom
 import configparser
@@ -45,7 +46,7 @@ from utils.project import WatchData, FprjProject, XiaomiProject
 from utils.dialog import MultiFieldDialog
 from utils.theme import Theme
 from utils.updater import Updater
-from utils.history import History, CommandAddWidget, CommandDeleteWidget, CommandModifyProperty, CommandModifyPosition, CommandModifyProjectData
+from utils.history import History, CommandAddWidget, CommandDeleteWidget, CommandModifyWidgetLayer, CommandModifyProperty, CommandModifyPosition, CommandModifyProjectData
 from utils.widgetgallery import WidgetGallery
 from widgets.canvas import Canvas, ObjectIcon
 from widgets.explorer import Explorer
@@ -773,37 +774,33 @@ class MainWindow(FramelessMainWindow):
             return
 
         for item in currentProject["canvas"].getSelectedObjects():
-            currentCanvasSelected.append(item.data(0))
+            currentCanvasSelected.insert(int(item.zValue()), [currentProject["project"].getWidget(item.data(0)), int(item.zValue())])
 
         if currentCanvasSelected == []:
             return
 
-        prevData = currentProject["data"]["FaceProject"]["Screen"]["Widget"]
-        newData = prevData.copy()
+        print(currentCanvasSelected)
 
-        newData = self.FprjProject.formatToList(newData)
+        def commandFunc(type, layerChange, widgets):
+            if type == "undo":
+                for widget in widgets:
+                    currentProject["project"].setWidgetLayer(widget[0], widget[1])
+            elif type == "redo":
+                for widget in widgets:
+                    if layerChange == "raise":
+                        currentProject["project"].setWidgetLayer(widget[0], widget[1] + 1)
+                    elif layerChange == "lower" and widget[1] - 1 >= 0:
+                        currentProject["project"].setWidgetLayer(widget[0], widget[1] - 1)
+                    elif layerChange == "top":
+                        currentProject["project"].setWidgetLayer(widget[0], "top")
+                    elif layerChange == "bottom":
+                        currentProject["project"].setWidgetLayer(widget[0], 0)
 
-        for index, obj in enumerate(self.FprjProject.formatToList(prevData)):
-            if obj["@Name"] in currentCanvasSelected:
-                newData.pop(newData.index(obj))
-                if changeType == "raise" and index + 1 < len(prevData):
-                    newData.insert(index + 1, obj)
-                elif changeType == "lower" and index - 1 >= 0:
-                    newData.insert(index - 1, obj)
-                elif changeType == "top":
-                    newData.append(obj)
-                elif changeType == "bottom":
-                    newData.insert(0, obj)
 
-        newData = self.FprjProject.formatToKeys(newData)
-
-        def commandFunc(data):
-            projectWidgets = currentProject["data"]["FaceProject"]["Screen"]["Widget"]
-            currentProject["data"]["FaceProject"]["Screen"]["Widget"] = data
             currentProject["canvas"].loadObjects(currentProject["project"], self.settings["Canvas"]["Interpolation"]["value"])
-            self.Explorer.updateExplorer(currentProject["data"])
+            self.Explorer.updateExplorer(currentProject["project"])
 
-        command = CommandModifyProjectData(prevData, newData, commandFunc, f"Change object/s order through ModifyProjectData command")
+        command = CommandModifyWidgetLayer(currentCanvasSelected, changeType, commandFunc, f"Change object/s order through ModifyProjectData command")
         self.History.undoStack.push(command)
 
     def deleteSelectedWatchfaceWidgets(self):

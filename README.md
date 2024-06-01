@@ -1,9 +1,12 @@
-# ![MiCreate48x48](https://raw.githubusercontent.com/ooflet/Mi-Create/main/src/resources/MiCreate48x48.png)
-### Mi Create
-Unofficial watchface and application creator for Xiaomi Wearables.
-Compatible with all Xiaomi wearables made ~2021 and above (Devices manufactured by 70mai & Longcheer)
+<h2 align="center"> Mi Create </h2>
+<p align="center"> Unofficial watchface and application creator for Xiaomi Wearables. Compatible with all Xiaomi wearables made ~2021 and above </p>
 
-![alt text](images/window.png)
+<p align="center">
+    <img src="images/linux.png" alt="linux">
+    <img src="images/windows.png" alt="linux">
+</p>
+
+![window](images/window.png)
 
 ## There are known issues with the FramelessMainWindow module on Linux. In the meantime, a branch with the FramelessMainWindow module disabled has been created at https://github.com/ooflet/Mi-Create/tree/linux
 

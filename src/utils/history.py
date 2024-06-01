@@ -35,6 +35,19 @@ class CommandDeleteWidget(QUndoCommand):
     def undo(self):
         self.commandFunc("undo", self.widget)
 
+class CommandModifyWidgetLayer(QUndoCommand):
+    def __init__(self, widgetList, changeType, commandFunc, description):
+        super(CommandModifyWidgetLayer, self).__init__(description)
+        self.widgetList = widgetList
+        self.changeType = changeType
+        self.commandFunc = commandFunc
+
+    def redo(self):
+        self.commandFunc("redo", self.changeType, self.widgetList)
+
+    def undo(self):
+        self.commandFunc("undo", self.changeType, self.widgetList)
+
 class CommandModifyProjectData(QUndoCommand):
     def __init__(self, prevData, newData, commandFunc, description):
         logging.debug(f"prevdata {prevData}, newdata {newData}")

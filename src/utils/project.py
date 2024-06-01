@@ -341,6 +341,13 @@ class FprjProject:
 
     def restoreWidget(self, widget, index):
         self.widgets.insert(index, widget.data)
+
+    def setWidgetLayer(self, widget, layerIndex):        
+        self.widgets.pop(self.widgets.index(widget.data))
+        if layerIndex == "top":
+            self.widgets.append(widget.data)
+        else:
+            self.widgets.insert(layerIndex, widget.data)
     
     def getTitle(self):
         return self.data["FaceProject"]["Screen"]["@Title"]
