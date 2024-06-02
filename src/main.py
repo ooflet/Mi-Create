@@ -25,7 +25,6 @@ from PyQt6.QtGui import QIcon, QPixmap, QDesktopServices, QDrag, QImage, QPainte
 from PyQt6.QtCore import Qt, QSettings, QSize, QUrl, pyqtSignal
 from window import FramelessMainWindow, FramelessDialog
 
-from copy import deepcopy
 from pprint import pprint, pformat
 import xml.dom.minidom
 import configparser
@@ -58,6 +57,7 @@ import resources.icons_rc # resource import required because it sets up the icon
 
 from window_ui import Ui_MainWindow
 from dialog.compileDialog_ui import Ui_Dialog as Ui_CompileDialog
+from dialog.welcome_ui import Ui_Dialog as Ui_WelcomeDialog
 
 _ = gettext.gettext
 
@@ -76,11 +76,7 @@ class MainWindow(FramelessMainWindow):
         self.selectionDebounce = False
 
         # Setup projects (tabs) 
-        self.projects = {
-            "Welcome": {
-                "hasFileChanged": False
-            }
-        } 
+        self.projects = {} 
 
         # Setup Main Window 
         logging.info("Initializing MainWindow")
@@ -136,7 +132,7 @@ class MainWindow(FramelessMainWindow):
         self.setupProperties()
 
         logging.info("Initializing Settings")
-        self.settingsDialog = QDialog(self) 
+        self.settingsDialog = QDialog() 
         self.settingsDialog.setFixedSize(500, 300)
         self.settingsDialog.setWindowTitle("Settings")
         self.settingsLayout = QVBoxLayout()
@@ -157,14 +153,12 @@ class MainWindow(FramelessMainWindow):
         rawSettings = QSettings("Mi Create", "Settings") 
         if "Language" not in rawSettings.allKeys():
             logging.info("No language selected")
-            item, accepted = QInputDialog().getItem(None, "Mi Create", "Select Language", self.languageNames, 0)
+            item, accepted = QInputDialog().getItem(None, "Mi Create", "Select Language", self.languageNames, 0, False)
 
             if item in self.languageNames:
                 if accepted:
                     self.stagedChanges.append(["Language", item])
                     self.saveSettings(False)
-            else:
-                self.showDialog("warning", "Selected language is not available")
                 
         self.settingsWidget.loadProperties(self.settings)
         self.settingsWidget.propertyChanged.connect(lambda property, value: self.stagedChanges.append([property, value]))
@@ -174,12 +168,12 @@ class MainWindow(FramelessMainWindow):
         self.ignoreHistoryInvoke = False
 
         # Undo History Dialog
-        self.undoLayout = QVBoxLayout()
-        self.undoDialog = QDialog(self)
-        self.undoView = QUndoView(self.History.undoStack)
-        self.undoLayout.addWidget(self.undoView)
-        self.undoDialog.setLayout(self.undoLayout)
-        self.undoDialog.show()
+        # self.undoLayout = QVBoxLayout()
+        # self.undoDialog = QDialog(self)
+        # self.undoView = QUndoView(self.History.undoStack)
+        # self.undoLayout.addWidget(self.undoView)
+        # self.undoDialog.setLayout(self.undoLayout)
+        # self.undoDialog.show()
  
         # Setup Project 
         self.project = None 
@@ -187,7 +181,6 @@ class MainWindow(FramelessMainWindow):
 
         logging.info("Initializing Misc")
         self.loadWindowState()
-        self.createWelcomePage()
         self.updateFound.connect(self.promptUpdate)
         logging.info("Launch!!")
         self.statusBar().showMessage("Ready", 3000) 
@@ -221,17 +214,59 @@ class MainWindow(FramelessMainWindow):
         else:
             quitWindow()
 
-    # def showEvent(self, event):
-    #     self.ui.actionToggleExplorer.setChecked(self.ui.explorerWidget.isVisible())
-    #     self.ui.actionToggleResources.setChecked(self.ui.resourcesWidget.isVisible())
-    #     self.ui.actionToggleProperties.setChecked(self.ui.propertiesWidget.isVisible())
-    #     self.ui.actionToggleToolbar.setChecked(self.ui.toolBar.isVisible())
+    def showEvent(self, event):
+        self.ui.actionToggleExplorer.setChecked(self.ui.explorerWidget.isVisible())
+        self.ui.actionToggleResources.setChecked(self.ui.resourcesWidget.isVisible())
+        self.ui.actionToggleProperties.setChecked(self.ui.propertiesWidget.isVisible())
+        self.ui.actionToggleToolbar.setChecked(self.ui.toolBar.isVisible())
 
     def toggleFullscreen(self):
         if self.isFullScreen():
             self.showNormal()
         else:
             self.showFullScreen()
+
+    def showWelcome(self):
+        settings = QSettings("Mi Create", "Workspace")
+
+        self.welcomeUi.ProjectList.clear()
+
+        if settings.value("recentProjects") != None:
+            projectList = settings.value("recentProjects")
+            projectList.reverse()
+            for name, location in projectList:
+                if os.path.isfile(location):
+                    listWidget = QWidget()
+                    textLayout = QVBoxLayout()
+                    widgetLayout = QHBoxLayout()
+                    projectName = QLabel()
+                    projectLocation = QLabel()
+                    projectIcon = QLabel()
+                    icon = QIcon().fromTheme("project-icon")
+
+                    projectName.setText(name)
+                    projectLocation.setText(location)
+                    projectLocation.setStyleSheet("color: palette(midlight)")
+                    projectIcon.setPixmap(QPixmap(icon.pixmap(QSize(32, 32))))
+
+                    textLayout.setSpacing(0)
+                    textLayout.addWidget(projectName)
+                    textLayout.addWidget(projectLocation)
+
+                    widgetLayout.setSpacing(8)
+                    widgetLayout.addWidget(projectIcon, 0)
+                    widgetLayout.addLayout(textLayout, 1)
+
+                    listWidget.setLayout(widgetLayout)
+
+                    # item
+                    listItem = QListWidgetItem(self.welcomeUi.ProjectList)
+                    listItem.setToolTip(location)
+                    listItem.setSizeHint(listWidget.sizeHint())
+                    self.welcomeUi.ProjectList.addItem(listItem)
+                    self.welcomeUi.ProjectList.setItemWidget(listItem, listWidget)
+
+        self.welcomeDialog.exec()
 
     def getCurrentProject(self) -> dict:
         # tab paths are stored in the tabToolTip string
@@ -329,21 +364,17 @@ class MainWindow(FramelessMainWindow):
         self.statusBar().addPermanentWidget(text, 0)
         self.statusBar().addPermanentWidget(progressBar, 1)
 
-        Updater(progressBar, text)
+        Updater(self.statusBar(), progressBar, text)
 
     def promptUpdate(self, ver):
-        if ver[-1] == 'u':
-            self.showDialog('info', _('An urgent update {version} was released! The app will now update.').format(version=ver))
+        reply, dontCheck = self.showDialog("question", _('A new update has been found ({version}). Would you like to update now?').format(version=ver), "", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.Yes, "Never check for updates", False)
+
+        if dontCheck:
+            self.stagedChanges.append(["CheckUpdate", False])
+            self.saveSettings(False)
+
+        if reply == QMessageBox.StandardButton.Yes:
             self.launchUpdater()
-        else:
-            reply, dontCheck = self.showDialog("question", _('A new update has been found ({version}). Would you like to update now?').format(version=ver), "", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.Yes, "Never check for updates", False)
-
-            if dontCheck:
-                self.stagedChanges.append(["CheckUpdate", False])
-                self.saveSettings(False)
-
-            if reply == QMessageBox.StandardButton.Yes:
-                self.launchUpdater()
 
     def checkForUpdates(self):
         # Contacts GitHub server for current version and compares installed to current version
@@ -381,37 +412,6 @@ class MainWindow(FramelessMainWindow):
             self.loadTheme()
             self.showDialog("warning", f"An error occured while loading the theme {themeName}. Theme settings have been reset.")
 
-    def createWelcomePage(self):
-        Welcome = QWidget()
-        Welcome.setObjectName("Welcome")
-        gridLayout_3 = QGridLayout(Welcome)
-        gridLayout_3.setContentsMargins(32, -1, -1, -1)
-        gridLayout_3.setObjectName("gridLayout_3")
-        OpenProject = QLabel(parent=Welcome)
-        OpenProject.setObjectName("OpenProject")
-        gridLayout_3.addWidget(OpenProject, 3, 0, 1, 1)
-        spacerItem = QSpacerItem(20, 176, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
-        gridLayout_3.addItem(spacerItem, 4, 0, 1, 1)
-        WelcomeText = QLabel(parent=Welcome)
-        WelcomeText.setStyleSheet("QLabel { font-size: 18pt;}")
-        WelcomeText.setObjectName("WelcomeText")
-        gridLayout_3.addWidget(WelcomeText, 1, 0, 1, 1)
-        NewProject = QLabel(parent=Welcome)
-        NewProject.setObjectName("NewProject")
-        gridLayout_3.addWidget(NewProject, 2, 0, 1, 1)
-        spacerItem1 = QSpacerItem(20, 177, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
-        gridLayout_3.addItem(spacerItem1, 0, 0, 1, 1)
-        icon1 = QIcon()
-        icon1.addPixmap(QPixmap(":/Dark/MiFaceStudioFavicon.png"), QIcon.Mode.Normal, QIcon.State.Off)
-
-        OpenProject.setText(QCoreApplication.translate("MainWindow", "<html><head/><body><p><img src=\":/Dark/folder-open.png\"/> <a href=\"\\&quot;\\&quot;\"><span style=\" text-decoration: underline; color:#55aaff;\">Open Project...</span></a></p></body></html>"))
-        WelcomeText.setText(QCoreApplication.translate("MainWindow", "Welcome"))
-        NewProject.setText(QCoreApplication.translate("MainWindow", "<html><head/><body><p><img src=\":/Dark/file-plus.png\"/> <a href=\"\\&quot;\\&quot;\"><span style=\" text-decoration: underline; color:#55aaff;\">New Project...</span></a></p></body></html>"))
-
-        NewProject.linkActivated.connect(lambda: self.ui.actionNewFile.trigger())
-        OpenProject.linkActivated.connect(lambda: self.ui.actionOpenFile.trigger())
-
-        self.ui.workspace.addTab(Welcome, icon1, QCoreApplication.translate("MainWindow", "Welcome"))
 
     def reloadImages(self, imageFolder):
         if imageFolder == None:
@@ -486,6 +486,9 @@ class MainWindow(FramelessMainWindow):
             delProjectItem(index)
             self.ui.workspace.removeTab(index)
             self.fileChanged = False
+
+            if self.ui.workspace.count() == 0:
+                self.showWelcome()
 
         def handleTabChange(index):
             # Fires when tab changes
@@ -714,7 +717,7 @@ class MainWindow(FramelessMainWindow):
                 self.propertiesWidget.clearProperties()
 
     def setupDialogs(self):
-        self.newProjectDialog = MultiFieldDialog(self, _("New Project..."), "New Project...")
+        self.newProjectDialog = MultiFieldDialog(None, _("New Project..."), "New Project...")
         self.newProjectDialog.deviceSelection = self.newProjectDialog.addDropdown("Select device", self.WatchData.models)
         self.newProjectDialog.projectName = self.newProjectDialog.addTextField("Project name", "", "", True)
         self.newProjectDialog.projectLocation = self.newProjectDialog.addFolderField("Project location", "", "", True)
@@ -725,6 +728,28 @@ class MainWindow(FramelessMainWindow):
         self.compileUi.setupUi(self.compileDialog) 
         self.compileUi.buttonBox.accepted.connect(lambda: self.compileProject(1))
         self.compileUi.buttonBox.rejected.connect(self.compileDialog.close)
+
+        self.welcomeDialog = QDialog() 
+        self.welcomeUi = Ui_WelcomeDialog() 
+        self.welcomeUi.setupUi(self.welcomeDialog) 
+        self.welcomeUi.ApplicationVersion.setText(f"{programVersion} | compiler {compilerVersion}")
+        self.welcomeUi.NewProject.pressed.connect(self.newProject)
+        self.welcomeUi.OpenProject.pressed.connect(lambda: self.openProject(None))
+        self.welcomeUi.settings.clicked.connect(self.showSettings)
+
+        def welcomeClose(event):
+            if not self.isVisible():
+                event.accept()
+                sys.exit()
+
+        def projectListOpen():
+            if len(self.welcomeUi.ProjectList.selectedItems()) == 1:
+                listItem = self.welcomeUi.ProjectList.selectedItems()[0]
+                print(listItem.toolTip())
+                self.openProject(None, listItem.toolTip())
+
+        self.welcomeUi.ProjectList.itemClicked.connect(projectListOpen)
+        self.welcomeDialog.closeEvent = welcomeClose
 
         #self.compileDialog = MultiFieldDialog(self, _("Compile Project..."), "Compile Project...")
 
@@ -764,7 +789,7 @@ class MainWindow(FramelessMainWindow):
             print(name)
             command = CommandAddWidget(name, commandFunc, f"Add object {name}")
             self.History.undoStack.push(command)
-        currentProject["canvas"].selectObject(name)
+        #currentProject["canvas"].selectObject(name)
 
     def changeSelectedWatchfaceWidgetLayer(self, changeType):
         currentProject = self.getCurrentProject()
@@ -848,7 +873,7 @@ class MainWindow(FramelessMainWindow):
         self.clipboard = []
 
         for object in selectedObjects:
-            self.clipboard.append(currentProject["data"]["FaceProject"]["Screen"]["Widget"][object.data(0)])
+            self.clipboard.append(currentProject["project"].getWidget(object.data(0)))
 
     def pasteWatchfaceWidgets(self):
         currentProject = self.getCurrentProject()
@@ -1031,7 +1056,7 @@ class MainWindow(FramelessMainWindow):
         canvas.onObjectPosChange.connect(posChange)
 
         # Add Icons
-        icon = QIcon(":/Dark/folder-clock.png")
+        icon = QIcon().fromTheme("project-icon")
 
         success = True
 
@@ -1060,6 +1085,17 @@ class MainWindow(FramelessMainWindow):
             self.ui.workspace.setTabToolTip(index, project.directory)
             self.ui.workspace.setCurrentIndex(index)
             canvas.setFrameShape(QFrame.Shape.NoFrame)
+
+            if self.ui.workspace.count() == 1: # new tab from empty workspace does not refresh
+                self.show()
+                self.welcomeDialog.close()
+                self.setIconState(False)
+                self.selectionDebounce = False
+                self.Explorer.updateExplorer(project)
+                logging.info("Explorer updated") 
+                thread = threading.Thread(target=lambda: self.reloadImages(project.imageFolder))
+                thread.start()
+
         else:
             self.showDialog("error", "Cannot render project!" + success[1], success[1])
 
@@ -1177,6 +1213,18 @@ class MainWindow(FramelessMainWindow):
                     if create[0]:
                         try:
                             self.createNewWorkspace(newProject)    
+                            settings = QSettings("Mi Create", "Workspace")
+                            recentProjectList = settings.value("recentProjects")
+
+                            if recentProjectList == None:
+                                recentProjectList = []
+                            
+                            if [os.path.basename(newProject.dataPath), newProject.dataPath] in recentProjectList:
+                                recentProjectList.pop(recentProjectList.index([os.path.basename(newProject.dataPath), newProject.dataPath]))
+
+                            recentProjectList.append([os.path.basename(newProject.dataPath), newProject.dataPath])
+                            
+                            settings.setValue("recentProjects", recentProjectList)
                         except Exception as e:
                             self.showDialog("error", _("Failed to createNewWorkspace: ") + e, traceback.format_exc())
                     else:
@@ -1184,17 +1232,18 @@ class MainWindow(FramelessMainWindow):
 
         self.newProjectDialog.buttonBox.accepted.connect(accepted)
         self.newProjectDialog.buttonBox.rejected.connect(self.newProjectDialog.reject)
+
         self.newProjectDialog.exec()
 
-    def openProject(self, event, projectLocation=None): 
+    def openProject(self, event, projectLocation=None):
         # Get where to open the project from
         if projectLocation == None:
             projectLocation = QFileDialog.getOpenFileName(self, _('Open Project...'), "%userprofile%/")
 
-        projectLocation = projectLocation[0]
-        
+        if not isinstance(projectLocation, str):
+            projectLocation = projectLocation[0].replace("\\", "/")
+
         if os.path.isfile(projectLocation):
-            print(os.path.splitext(projectLocation))
             if os.path.splitext(projectLocation)[1] == '.fprj':
                 project = FprjProject()
             else:
@@ -1202,12 +1251,24 @@ class MainWindow(FramelessMainWindow):
                 return
         else:
             # no file was selected
-            return
+            return False
 
         load = project.fromExisting(projectLocation)
         if load[0]:
             try:
                 self.createNewWorkspace(project)    
+                settings = QSettings("Mi Create", "Workspace")
+                recentProjectList = settings.value("recentProjects")
+
+                if recentProjectList == None:
+                    recentProjectList = []
+                
+                if [os.path.basename(projectLocation), projectLocation] in recentProjectList:
+                    recentProjectList.pop(recentProjectList.index([os.path.basename(projectLocation), projectLocation]))
+
+                recentProjectList.append([os.path.basename(projectLocation), projectLocation])
+                
+                settings.setValue("recentProjects", recentProjectList)
             except Exception as e:
                 self.showDialog("error", _("Failed to open project: ") + str(e), traceback.format_exc())
         else:
@@ -1438,7 +1499,6 @@ if __name__ == "__main__":
         QSettings("Mi Create", "Settings").clear()
         QSettings("Mi Create", "Workspace").clear()
         QMessageBox.information(None, 'Mi Create', "Settings reset.", QMessageBox.StandardButton.Ok)
-        time.sleep(1)
 
     try:
         app.setAttribute(Qt.ApplicationAttribute.AA_DontCreateNativeWidgetSiblings)
@@ -1449,14 +1509,17 @@ if __name__ == "__main__":
         QMessageBox.critical(None, 'Error', error_message, QMessageBox.StandardButton.Ok)
         sys.exit(1)
 
-    if sys.argv[1:] != []:
-        logging.info("Opening file from argument 1")
-        main_window.openProject(None, sys.argv[1:])
-
     if main_window.settings["General"]["CheckUpdate"]["value"] == True:
         threading.Thread(target=main_window.checkForUpdates).start()
         
-    main_window.show()
     splash.finish(main_window)
+
+    if sys.argv[1:] != []:
+        logging.info("Opening file from argument 1")
+        result = main_window.openProject(None, sys.argv[1:])
+        if result == False:
+            main_window.showWelcome()
+    else:
+        main_window.showWelcome()
+
     sys.exit(app.exec())
-    

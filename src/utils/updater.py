@@ -17,10 +17,11 @@ QObject()
 
 class Updater(QObject):
     updateProgress = pyqtSignal(int)
-    def __init__(self, progressBar, text):
+    def __init__(self, statusBar, progressBar, text):
         super().__init__()
         self.installComplete = False
 
+        self.statusBar = statusBar
         self.progressBar = progressBar
         self.text = text
 
@@ -68,3 +69,4 @@ class Updater(QObject):
         self.installComplete = True
         self.progressBar.deleteLater()
         self.text.deleteLater()
+        self.statusBar.showMessage("Update complete! Please reopen the app to launch the new version.", 1000) 

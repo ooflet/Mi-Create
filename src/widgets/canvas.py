@@ -365,7 +365,7 @@ class Canvas(QGraphicsView):
 
                 widget.addImage(image, (image.size().width() * x) + (int(spacing) * x), 0, int(spacing), interpolationStyle)
             else:
-                self.representNoImage()
+                widget.representNoImage()
                 
         return widget
 
@@ -385,6 +385,8 @@ class Canvas(QGraphicsView):
 
     def createWidgetFromData(self, index, item, interpolation):
         widget = None
+
+        print(index, item.data)
 
         if interpolation == "Bilinear":
             interpolation = True

@@ -7,7 +7,7 @@
 
 
 from PyQt6 import QtCore, QtGui, QtWidgets
-from translate import QCoreApplication
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -41,7 +41,7 @@ class Ui_MainWindow(object):
         self.workspace.setDocumentMode(False)
         self.workspace.setTabsClosable(True)
         self.workspace.setMovable(True)
-        self.workspace.setTabBarAutoHide(True)
+        self.workspace.setTabBarAutoHide(False)
         self.workspace.setObjectName("workspace")
         self.gridLayout_2.addWidget(self.workspace, 0, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
@@ -309,7 +309,6 @@ class Ui_MainWindow(object):
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionSave)
         self.menuFile.addSeparator()
-        self.menuFile.addAction(self.actionExit)
         self.menuZoom.addAction(self.actionZoom_In)
         self.menuZoom.addAction(self.actionZoom_Out)
         self.menuView.addAction(self.actionToggleExplorer)
@@ -350,8 +349,9 @@ class Ui_MainWindow(object):
         self.menuAbout.addAction(self.actionAbout_MiFaceStudio)
         self.menuAbout.addAction(self.actionAbout_Qt)
         self.menuLogo.addAction(self.actionDocumentation)
-        self.menuLogo.addSeparator()
         self.menuLogo.addAction(self.menuAbout.menuAction())
+        self.menuLogo.addSeparator()
+        self.menuLogo.addAction(self.actionExit)
         self.menubar.addAction(self.menuLogo.menuAction())
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuEdit.menuAction())
@@ -379,7 +379,7 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
-        _translate = QCoreApplication.translate
+        _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Mi Create"))
         self.menuFile.setTitle(_translate("MainWindow", "File"))
         self.menuView.setTitle(_translate("MainWindow", "View"))

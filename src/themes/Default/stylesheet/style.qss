@@ -440,6 +440,10 @@ QListView::item:hover:!selected {
     background-color: palette(alternate-base);
 }
 
+QListWidget#ProjectList {
+    background-color: palette(base)
+}
+
 QGraphicsView {
     background-color: palette(base)
 }

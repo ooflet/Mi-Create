@@ -254,7 +254,7 @@ class FprjProject:
                 "Screen": {
                     "@Title": "",
                     "@Bitmap": "",
-                    "Widget": ""
+                    "Widget": []
                 }
             }
         }
@@ -332,6 +332,7 @@ class FprjProject:
         widget["@Name"] = name
         widget["@X"] = posX
         widget["@Y"] = posY
+        print(self.widgets)
         self.widgets.append(widget)
         
     def deleteWidget(self, widget):
