@@ -254,6 +254,7 @@ class MainWindow(FramelessMainWindow):
                     textLayout.addWidget(projectLocation)
 
                     widgetLayout.setSpacing(8)
+                    widgetLayout.setContentsMargins(12, 8, 12, 8)
                     widgetLayout.addWidget(projectIcon, 0)
                     widgetLayout.addLayout(textLayout, 1)
 
@@ -1218,11 +1219,14 @@ class MainWindow(FramelessMainWindow):
 
                             if recentProjectList == None:
                                 recentProjectList = []
-                            
-                            if [os.path.basename(newProject.dataPath), newProject.dataPath] in recentProjectList:
-                                recentProjectList.pop(recentProjectList.index([os.path.basename(newProject.dataPath), newProject.dataPath]))
 
-                            recentProjectList.append([os.path.basename(newProject.dataPath), newProject.dataPath])
+                            path = os.path.normpath(newProject.dataPath)
+                            print(path)
+                            
+                            if [os.path.basename(path), path] in recentProjectList:
+                                recentProjectList.pop(recentProjectList.index([os.path.basename(path), path]))
+
+                            recentProjectList.append([os.path.basename(newProject.dataPath), os.path.normpath(newProject.dataPath)])
                             
                             settings.setValue("recentProjects", recentProjectList)
                         except Exception as e:
@@ -1263,10 +1267,13 @@ class MainWindow(FramelessMainWindow):
                 if recentProjectList == None:
                     recentProjectList = []
                 
-                if [os.path.basename(projectLocation), projectLocation] in recentProjectList:
-                    recentProjectList.pop(recentProjectList.index([os.path.basename(projectLocation), projectLocation]))
+                path = os.path.normpath(projectLocation)
+                print(path)
+                
+                if [os.path.basename(path), path] in recentProjectList:
+                    recentProjectList.pop(recentProjectList.index([os.path.basename(path), path]))
 
-                recentProjectList.append([os.path.basename(projectLocation), projectLocation])
+                recentProjectList.append([os.path.basename(path), path])
                 
                 settings.setValue("recentProjects", recentProjectList)
             except Exception as e:
@@ -1503,6 +1510,15 @@ if __name__ == "__main__":
     try:
         app.setAttribute(Qt.ApplicationAttribute.AA_DontCreateNativeWidgetSiblings)
         main_window = MainWindow()
+        splash.finish(main_window)
+
+        if sys.argv[1:] != []:
+            logging.info("Opening file from argument 1")
+            result = main_window.openProject(None, sys.argv[1:])
+            if result == False:
+                main_window.showWelcome()
+        else:
+            main_window.showWelcome()
     except Exception as e:
         error_message = "Critical error during initialization: "+traceback.format_exc()
         logging.error(error_message)
@@ -1511,15 +1527,5 @@ if __name__ == "__main__":
 
     if main_window.settings["General"]["CheckUpdate"]["value"] == True:
         threading.Thread(target=main_window.checkForUpdates).start()
-        
-    splash.finish(main_window)
-
-    if sys.argv[1:] != []:
-        logging.info("Opening file from argument 1")
-        result = main_window.openProject(None, sys.argv[1:])
-        if result == False:
-            main_window.showWelcome()
-    else:
-        main_window.showWelcome()
 
     sys.exit(app.exec())

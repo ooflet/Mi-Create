@@ -33,8 +33,7 @@ class Explorer(QTreeWidget):
             object.setData(0, 101, item.getProperty("widget_name"))
             self.items[item.getProperty("widget_name")] = object
         
-        icon = QIcon()
-        icon.addFile(u":/Dark/watch.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        icon = QIcon().fromTheme("device-watch")
         name = None
         if project.getTitle() == "":
             name = "Watchface"

@@ -32,7 +32,7 @@ class Ui_Dialog(object):
         self.SideBar.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
         self.SideBar.setObjectName("SideBar")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.SideBar)
-        self.verticalLayout.setContentsMargins(18, 18, 18, 18)
+        self.verticalLayout.setContentsMargins(9, 9, 9, 9)
         self.verticalLayout.setObjectName("verticalLayout")
         spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Expanding)
         self.verticalLayout.addItem(spacerItem)

@@ -1,3 +1,10 @@
+/* 
+
+    Mi Create Default stylesheet
+    ooflet 2024
+
+ */
+
 QWidget#windowTitleBar {
     background-color: palette(base);
 }

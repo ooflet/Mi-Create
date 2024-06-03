@@ -61,16 +61,16 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <property name="leftMargin">
-       <number>18</number>
+       <number>9</number>
       </property>
       <property name="topMargin">
-       <number>18</number>
+       <number>9</number>
       </property>
       <property name="rightMargin">
-       <number>18</number>
+       <number>9</number>
       </property>
       <property name="bottomMargin">
-       <number>18</number>
+       <number>9</number>
       </property>
       <item>
        <spacer name="verticalSpacer">

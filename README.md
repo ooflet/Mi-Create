@@ -9,13 +9,17 @@
 
 ![window](images/window.png)
 
-## There are known issues with the FramelessMainWindow module on Linux. In the meantime, a branch with the FramelessMainWindow module disabled has been created at https://github.com/ooflet/Mi-Create/tree/linux
+### There are known issues with the FramelessMainWindow module on Linux. In the meantime, a branch with the FramelessMainWindow module disabled has been created at https://github.com/ooflet/Mi-Create/tree/linux
+
+---
 
 ### Features:
 - Shockingly simple user interface
 - Easy to learn (especially for EasyFace users)
 - Native, no bloated and slow Electron/web-based BS!
 - Multilingual
+
+---
 
 ### Installation:
 
@@ -24,6 +28,8 @@ Download the latest installer from the [releases](https://github.com/ooflet/Mi-C
 
 ### Linux
 For now, there are no prebuilt binaries for Linux, however I do plan to distribute on Linux once a fully stable and feature-rich release is out. If there are any Linux app maintainers who have experience in distributing applications, I would highly appreciate your help.
+
+---
 
 ### Running source code
 If you want to run from source:
@@ -34,14 +40,20 @@ If you want to run from source:
 
 Executing from source however will not create log files, it will output logs to console.
 
+---
+
 ### Redistribution
 
 I do not mind the program being redistributed, however please link the Github repository somewhere whether it be the post or the description.
 
 Compiling for different platforms must be done using Nuitka, there are some specific compiled checks special for Nutika in the program. Plus, Nutika gives an added performance benefit.
 
+---
+
 ### Help
 If you are looking for a tutorial on Mi Create, please view the documentation at https://ooflet.github.io/docs. If you have any further questions that are not covered by the documentation, feel free to ask on the [discussions](https://github.com/ooflet/Mi-Create/discussions) tab. Otherwise, if there is a bug or issue with Mi Create, submit an [issue](https://github.com/ooflet/Mi-Create/issues) report.
+
+---
 
 ### Licensing:
 Mi Create is licensed under the GPL-3 licence. [View what you can and can't do](https://gist.github.com/kn9ts/cbe95340d29fc1aaeaa5dd5c059d2e60)   
