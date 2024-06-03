@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "POT-Creation-Date: 2024-01-05 14:27+1100\n"
-"PO-Revision-Date: 2024-03-12 20:59+1100\n"
+"PO-Revision-Date: 2024-06-03 18:58+1000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ru\n"
@@ -147,11 +147,20 @@ msgstr "О сайте"
 msgid "View"
 msgstr "Посмотреть"
 
-msgid "Toolbars"
-msgstr "Панели инструментов"
+msgid "Toolbar"
+msgstr "Панель инструментов"
 
-msgid "Tools"
-msgstr "Инструменты"
+msgid "Zoom"
+msgstr "Увеличить"
+
+msgid "Zoom In"
+msgstr "Приблизить"
+
+msgid "Zoom Out"
+msgstr "Уменьшить"
+
+msgid "Full Screen"
+msgstr "Полноэкранный"
 
 msgid "Create"
 msgstr "Создать"
@@ -161,15 +170,6 @@ msgstr "Проект"
 
 msgid "Properties"
 msgstr "Свойства"
-
-msgid "File Toolbar"
-msgstr "Панель инструментов файла"
-
-msgid "toolBar_2"
-msgstr ""
-
-msgid "toolBar"
-msgstr ""
 
 msgid "New Project..."
 msgstr "Новый проект..."
@@ -219,6 +219,9 @@ msgstr "Поиск:"
 msgid "Resources"
 msgstr "Ресурсы"
 
+msgid "Add Image..."
+msgstr "Добавить изображение..."
+
 msgid "Layers"
 msgstr "Слои"
 
@@ -236,3 +239,15 @@ msgstr "Отправьте его назад"
 
 msgid "Delete"
 msgstr "Удалить"
+
+msgid "New Project"
+msgstr "Новый проект"
+
+msgid "Open Project"
+msgstr "Открыть проект"
+
+#~ msgid "Tools"
+#~ msgstr "Инструменты"
+
+#~ msgid "File Toolbar"
+#~ msgstr "Панель инструментов файла"

@@ -7,7 +7,9 @@
 
 
 from PyQt6 import QtCore, QtGui, QtWidgets
-
+import sys
+sys.path.append("..")
+from translate import QCoreApplication
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
@@ -98,10 +100,9 @@ class Ui_Dialog(object):
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
     def retranslateUi(self, Dialog):
-        _translate = QtCore.QCoreApplication.translate
+        _translate = QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "Welcome"))
         self.ApplicationName.setText(_translate("Dialog", "Mi Create"))
-        self.ApplicationVersion.setText(_translate("Dialog", "Version"))
         self.NewProject.setText(_translate("Dialog", "New Project"))
         self.OpenProject.setText(_translate("Dialog", "Open Project"))
         self.settings.setText(_translate("Dialog", "Settings"))

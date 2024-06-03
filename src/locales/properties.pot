@@ -13,6 +13,29 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
 
+msgid "Theme"
+msgstr ""
+
+msgid "Language"
+msgstr ""
+
+msgid "Check for Updates"
+msgstr ""
+
+msgid "Snap to Guides"
+msgstr ""
+
+msgid "Clip to Device Shape"
+msgstr ""
+
+msgid "Show Device Outline"
+msgstr ""
+
+msgid "Antialiasing"
+msgstr ""
+
+msgid "Image Interpolation"
+msgstr ""
 
 msgid "General"
 msgstr ""
@@ -54,6 +77,9 @@ msgid "Background"
 msgstr ""
 
 msgid "Image"
+msgstr ""
+
+msgid "Alignment"
 msgstr ""
 
 msgid "Anchor Point"

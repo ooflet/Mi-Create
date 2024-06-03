@@ -5,120 +5,147 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "POT-Creation-Date: 2024-01-02 11:05+1100\n"
-"PO-Revision-Date: 2024-01-05 17:30+1100\n"
+"PO-Revision-Date: 2024-06-03 18:52+1000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"Language: en\n"
+"Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
 "X-Generator: Poedit 3.4\n"
 
+msgid "Theme"
+msgstr "Тема"
+
+msgid "Language"
+msgstr "Язык"
+
+msgid "Check for Updates"
+msgstr "Проверьте наличие обновлений"
+
+msgid "Snap to Guides"
+msgstr "Привязка к направляющим"
+
+msgid "Clip to Device Shape"
+msgstr "Обрезать по форме экрана"
+
+msgid "Show Device Outline"
+msgstr "Показать контур экрана"
+
+msgid "Antialiasing"
+msgstr "Сглаживание"
+
+msgid "Image Interpolation"
+msgstr "Интерполяция изображения"
+
 msgid "General"
-msgstr ""
+msgstr "Общий"
 
 msgid "Widget Type"
-msgstr ""
+msgstr "Тип виджета"
 
 msgid "Name"
-msgstr ""
+msgstr "Имя"
 
 msgid "Position"
-msgstr ""
+msgstr "Позиция"
 
 msgid "Width"
-msgstr ""
+msgstr "Ширина"
 
 msgid "Height"
-msgstr ""
+msgstr "Высота"
 
 msgid "Appearance"
-msgstr ""
+msgstr "Появление"
 
 msgid "Opacity"
-msgstr ""
+msgstr "Непрозрачность"
 
 msgid "Visibility Trigger"
-msgstr ""
+msgstr "Триггер видимости"
 
 msgid "Hour Hand Smooth"
-msgstr ""
+msgstr "Гладкая часовая стрелка"
 
 msgid "Minute Hand Smooth"
-msgstr ""
+msgstr "Гладкая минутная стрелка"
 
 msgid "Analog Properties"
-msgstr ""
+msgstr "Аналоговый"
 
 msgid "Background"
-msgstr ""
+msgstr "Фон"
 
 msgid "Image"
-msgstr ""
+msgstr "Изображение"
+
+msgid "Alignment"
+msgstr "Выравнивание"
 
 msgid "Anchor Point"
-msgstr ""
+msgstr "Точка привязки"
 
 msgid "Hour Hand"
-msgstr ""
+msgstr "Часовая стрелка"
 
 msgid "Minute Hand"
-msgstr ""
+msgstr "Минутная стрелка"
 
 msgid "Second Hand"
-msgstr ""
+msgstr "Секундная стрелка"
 
 msgid "Progress Bar"
-msgstr ""
+msgstr "Индикатор"
 
 msgid "Radius"
-msgstr ""
+msgstr "Радиус"
 
 msgid "Thickness"
-msgstr ""
+msgstr "Толщина"
 
 msgid "Start Angle"
-msgstr ""
+msgstr "Начальный угол"
 
 msgid "End Angle"
-msgstr ""
+msgstr "Конечный угол"
 
 msgid "Range"
-msgstr ""
+msgstr "Диапазон"
 
 msgid "Minimum Value"
-msgstr ""
+msgstr "Минимальное значение"
 
 msgid "Maximum Value"
-msgstr ""
+msgstr "Максимальное значение"
 
 msgid "Minimum Step Value"
-msgstr ""
+msgstr "Минимальный шаг"
 
 msgid "Step Value"
-msgstr ""
+msgstr "Значение шага"
 
 msgid "Data"
-msgstr ""
+msgstr "Данные"
 
 msgid "Data Source"
-msgstr ""
+msgstr "Источник данных"
 
 msgid "Max Value Source"
-msgstr ""
+msgstr "Источник максимального значения"
 
 msgid "Images"
-msgstr ""
+msgstr "Изображений"
 
 msgid "Default Index"
-msgstr ""
+msgstr "Индекс по умолчанию"
 
 msgid "Digits"
-msgstr ""
+msgstr "Цифры"
 
 msgid "Spacing"
-msgstr ""
+msgstr "Расстояние"
 
 msgid "Blanking"
-msgstr ""
+msgstr "Пусто на нуле"

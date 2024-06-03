@@ -141,10 +141,19 @@ msgstr ""
 msgid "View"
 msgstr ""
 
-msgid "Toolbars"
+msgid "Toolbar"
 msgstr ""
 
-msgid "Tools"
+msgid "Zoom"
+msgstr ""
+
+msgid "Zoom In"
+msgstr ""
+
+msgid "Zoom Out"
+msgstr ""
+
+msgid "Full Screen"
 msgstr ""
 
 msgid "Create"
@@ -154,15 +163,6 @@ msgid "Project"
 msgstr ""
 
 msgid "Properties"
-msgstr ""
-
-msgid "File Toolbar"
-msgstr ""
-
-msgid "toolBar_2"
-msgstr ""
-
-msgid "toolBar"
 msgstr ""
 
 msgid "New Project..."
@@ -235,4 +235,10 @@ msgid "Delete"
 msgstr ""
 
 msgid "Layers"
+msgstr ""
+
+msgid "New Project"
+msgstr ""
+
+msgid "Open Project"
 msgstr ""

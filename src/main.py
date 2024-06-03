@@ -219,6 +219,8 @@ class MainWindow(FramelessMainWindow):
         self.ui.actionToggleResources.setChecked(self.ui.resourcesWidget.isVisible())
         self.ui.actionToggleProperties.setChecked(self.ui.propertiesWidget.isVisible())
         self.ui.actionToggleToolbar.setChecked(self.ui.toolBar.isVisible())
+        if self.settings["General"]["CheckUpdate"]["value"] == True:
+            threading.Thread(target=self.checkForUpdates).start()
 
     def toggleFullscreen(self):
         if self.isFullScreen():
@@ -353,6 +355,7 @@ class MainWindow(FramelessMainWindow):
             QCoreApplication.loadLanguage(os.path.basename(selectedLanguage["directory"]))
             self.propertiesWidget.loadLanguage(os.path.basename(selectedLanguage["directory"]))
             self.ui.retranslateUi(self) # function on each precompiled window/dialog
+            self.welcomeUi.retranslateUi(self.welcomeDialog)
             self.compileUi.retranslateUi(self.compileDialog)
             # retranslate relies on the translate.py module
             # the translate module reimplements CoreApplication's translate function to rely on gettext instead
@@ -718,12 +721,6 @@ class MainWindow(FramelessMainWindow):
                 self.propertiesWidget.clearProperties()
 
     def setupDialogs(self):
-        self.newProjectDialog = MultiFieldDialog(None, _("New Project..."), "New Project...")
-        self.newProjectDialog.deviceSelection = self.newProjectDialog.addDropdown("Select device", self.WatchData.models)
-        self.newProjectDialog.projectName = self.newProjectDialog.addTextField("Project name", "", "", True)
-        self.newProjectDialog.projectLocation = self.newProjectDialog.addFolderField("Project location", "", "", True)
-        self.newProjectDialog.buttonBox = self.newProjectDialog.addButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
-
         self.compileDialog = QDialog(self) 
         self.compileUi = Ui_CompileDialog() 
         self.compileUi.setupUi(self.compileDialog) 
@@ -1234,6 +1231,12 @@ class MainWindow(FramelessMainWindow):
                     else:
                         self.showDialog("error", _("Failed to create a new project: ") + newProject[1], newProject[2])
 
+        self.newProjectDialog = MultiFieldDialog(None, _("New Project..."), _("New Project..."))
+        self.newProjectDialog.deviceSelection = self.newProjectDialog.addDropdown(_("Select device"), self.WatchData.models)
+        self.newProjectDialog.projectName = self.newProjectDialog.addTextField(_("Project name"), "", "", True)
+        self.newProjectDialog.projectLocation = self.newProjectDialog.addFolderField(_("Project location"), "", "", True)
+        self.newProjectDialog.buttonBox = self.newProjectDialog.addButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+
         self.newProjectDialog.buttonBox.accepted.connect(accepted)
         self.newProjectDialog.buttonBox.rejected.connect(self.newProjectDialog.reject)
 
@@ -1524,8 +1527,5 @@ if __name__ == "__main__":
         logging.error(error_message)
         QMessageBox.critical(None, 'Error', error_message, QMessageBox.StandardButton.Ok)
         sys.exit(1)
-
-    if main_window.settings["General"]["CheckUpdate"]["value"] == True:
-        threading.Thread(target=main_window.checkForUpdates).start()
 
     sys.exit(app.exec())
