@@ -48,7 +48,7 @@ class FramelessDialog(QDialog, FramelessWindow):
         self.windowEffect.disableMaximizeButton(self.winId())
 
 
-class FramelessMainWindow(QMainWindow, FramelessWindow):
+class QMainWindow(QMainWindow, FramelessWindow):
     """ Frameless main window """
 
     def __init__(self, parent=None):

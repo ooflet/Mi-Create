@@ -17,13 +17,18 @@ import gettext
 os.chdir(os.path.dirname(os.path.realpath(__file__))) # switch working directory to program location
                                                       # so that data files can be found
 
-from PyQt6.QtWidgets import (QMainWindow, QDialog, QInputDialog, QMessageBox, QApplication, QProgressBar, 
+from PyQt6.QtWidgets import (QDialog, QInputDialog, QMessageBox, QApplication, QProgressBar, 
                                QDialogButtonBox, QTreeWidgetItem, QFileDialog, QWidget, QVBoxLayout, 
                                QFrame, QColorDialog, QFontDialog, QSplashScreen, QGridLayout, QLabel, QListWidgetItem,
                                QSpacerItem, QSizePolicy, QAbstractItemView, QUndoView, QCheckBox, QHBoxLayout)
 from PyQt6.QtGui import QIcon, QPixmap, QDesktopServices, QDrag, QImage, QPainter
 from PyQt6.QtCore import Qt, QSettings, QSize, QUrl, pyqtSignal
-from window import FramelessMainWindow, FramelessDialog
+from window import FramelessDialog
+
+if sys.platform == "win32": # use frameless window on windows
+    from window import QMainWindow
+else:
+    from PyQt6.QtWidgets import QMainWindow
 
 from pprint import pprint, pformat
 import xml.dom.minidom
@@ -41,7 +46,7 @@ import json
 import traceback
 
 from translate import QCoreApplication
-from utils.project import WatchData, FprjProject, XiaomiProject
+from utils.project import WatchData, XiaomiProject, FprjProject, GMFProject
 from utils.dialog import MultiFieldDialog
 from utils.theme import Theme
 from utils.updater import Updater
@@ -64,7 +69,7 @@ _ = gettext.gettext
 programVersion = 'v0.4'
 compilerVersion = 'm0tral-v4.13'
 
-class MainWindow(FramelessMainWindow):
+class MainWindow(QMainWindow):
     updateFound = pyqtSignal(str)
     def __init__(self):
         super().__init__()
@@ -82,9 +87,11 @@ class MainWindow(FramelessMainWindow):
         logging.info("Initializing MainWindow")
         self.ui = Ui_MainWindow() 
         self.ui.setupUi(self) 
-        self.titleBar.layout().insertWidget(0, self.ui.menubar, 0, Qt.AlignmentFlag.AlignLeft)
-        self.titleBar.layout().insertStretch(1, 1)
-        self.setMenuWidget(self.titleBar)
+
+        if sys.platform == "win32": # init frameless window
+            self.titleBar.layout().insertWidget(0, self.ui.menubar, 0, Qt.AlignmentFlag.AlignLeft)
+            self.titleBar.layout().insertStretch(1, 1)
+            self.setMenuWidget(self.titleBar)
 
         # Setup WatchData 
         logging.info("Initializing WatchData")
@@ -460,7 +467,6 @@ class MainWindow(FramelessMainWindow):
         # compile
         self.ui.actionBuild.setDisabled(disabled)
         self.ui.actionUnpack.setDisabled(disabled)
-
 
     def setupWorkspace(self):
         def handleTabClose(index):
@@ -1271,12 +1277,13 @@ class MainWindow(FramelessMainWindow):
                     recentProjectList = []
                 
                 path = os.path.normpath(projectLocation)
+                projectListing = [os.path.basename(path), path]
                 print(path)
                 
-                if [os.path.basename(path), path] in recentProjectList:
-                    recentProjectList.pop(recentProjectList.index([os.path.basename(path), path]))
+                if projectListing in recentProjectList:
+                    recentProjectList.pop(recentProjectList.index(projectListing))
 
-                recentProjectList.append([os.path.basename(path), path])
+                recentProjectList.append(projectListing)
                 
                 settings.setValue("recentProjects", recentProjectList)
             except Exception as e:
