@@ -9,8 +9,6 @@
 
 ![window](images/window.png)
 
-### There are known issues with the FramelessMainWindow module on Linux. In the meantime, a branch with the FramelessMainWindow module disabled has been created at https://github.com/ooflet/Mi-Create/tree/linux
-
 ---
 
 ### Features:
