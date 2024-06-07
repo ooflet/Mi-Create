@@ -27,6 +27,7 @@ class Explorer(QTreeWidget):
                 return
             object = QTreeWidgetItem(root)
             object.setText(0, item.getProperty("widget_name"))
+            object.setSizeHint(0, QSize(18, 18))
             object.setIcon(0, QIcon.fromTheme(self.objectIcon.icon[item.getProperty("widget_type")]))
             object.setFlags(object.flags() | Qt.ItemFlag.ItemIsEditable)
             object.setData(0, 100, item.getProperty("widget_type"))

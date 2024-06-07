@@ -23,6 +23,7 @@ from PyQt6.QtWidgets import (QDialog, QInputDialog, QMessageBox, QApplication, Q
                                QSpacerItem, QSizePolicy, QAbstractItemView, QUndoView, QCheckBox, QHBoxLayout)
 from PyQt6.QtGui import QIcon, QPixmap, QDesktopServices, QDrag, QImage, QPainter
 from PyQt6.QtCore import Qt, QSettings, QSize, QUrl, pyqtSignal
+from PyQt6.QtQuickWidgets import QQuickWidget
 from window import FramelessDialog
 
 if sys.platform == "win32": # use frameless window on windows
@@ -155,7 +156,6 @@ class MainWindow(QMainWindow):
         self.setupThemes()
         self.loadSettings() 
         self.loadTheme()
-        self.loadLanguage(True)
 
         rawSettings = QSettings("Mi Create", "Settings") 
         if "Language" not in rawSettings.allKeys():
@@ -170,6 +170,8 @@ class MainWindow(QMainWindow):
         self.settingsWidget.loadProperties(self.settings)
         self.settingsWidget.propertyChanged.connect(lambda property, value: self.stagedChanges.append([property, value]))
 
+        self.loadLanguage(True)
+        
         # Setup History System
         self.History = History()
         self.ignoreHistoryInvoke = False
@@ -276,7 +278,8 @@ class MainWindow(QMainWindow):
                     self.welcomeUi.ProjectList.addItem(listItem)
                     self.welcomeUi.ProjectList.setItemWidget(listItem, listWidget)
 
-        self.welcomeDialog.exec()
+        self.welcomeDialog.show()
+        return(self.welcomeDialog)
 
     def getCurrentProject(self) -> dict:
         # tab paths are stored in the tabToolTip string
@@ -498,6 +501,7 @@ class MainWindow(QMainWindow):
             self.fileChanged = False
 
             if self.ui.workspace.count() == 0:
+                self.setIconState(True)
                 self.showWelcome()
 
         def handleTabChange(index):
@@ -736,6 +740,12 @@ class MainWindow(QMainWindow):
         self.welcomeDialog = QDialog() 
         self.welcomeUi = Ui_WelcomeDialog() 
         self.welcomeUi.setupUi(self.welcomeDialog) 
+        
+        # self.welcomeUi.ProjectList.hide()
+        # projectList = QQuickWidget()
+        # projectList.setSource(QUrl("test.qml", QUrl.ParsingMode.TolerantMode))
+        # self.welcomeUi.verticalLayout_2.addWidget(projectList)
+
         self.welcomeUi.ApplicationVersion.setText(f"{programVersion} | compiler {compilerVersion}")
         self.welcomeUi.NewProject.pressed.connect(self.newProject)
         self.welcomeUi.OpenProject.pressed.connect(lambda: self.openProject(None))
@@ -1433,18 +1443,19 @@ class MainWindow(QMainWindow):
 
     def showAboutWindow(self):
         dialog = FramelessDialog(self)
-        dialog.setFixedSize(350, 185)
-        dialog.setContentsMargins(20, 30, 5, 5)
+        dialog.setFixedSize(250, 300)
+        dialog.setContentsMargins(5, 60, 5, 5)
         aboutIcon = QLabel()
         aboutIcon.setPixmap(QPixmap(":/Images/MiCreate48x48.png"))
+        aboutIcon.setAlignment(Qt.AlignmentFlag.AlignCenter)
         aboutText = QLabel()
+        aboutText.setAlignment(Qt.AlignmentFlag.AlignCenter)
         aboutText.setText(
             f'''
             <html>
             <head/>
             <body>
                 <p>Mi Create {programVersion}<br/><a href="https://github.com/ooflet/Mi-Create/"><span style=" text-decoration: underline; color:#55aaff;">https://github.com/ooflet/Mi-Create/</span></a></p>
-                <p>Watchface Compiler: {compilerVersion}</p>
                 <p>ooflet 2024</p>
             </body>
             </html>
@@ -1453,15 +1464,13 @@ class MainWindow(QMainWindow):
         buttonBox = QDialogButtonBox()
         buttonBox.setStandardButtons(QDialogButtonBox.StandardButton.Ok)
         buttonBox.accepted.connect(dialog.close)
-        textLayout = QHBoxLayout()
-        textLayout.setSpacing(20)
-        textLayout.addWidget(aboutIcon)
-        textLayout.addWidget(aboutText)
-        textLayout.addStretch()
-        textLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
         dialogLayout = QVBoxLayout()
+        dialogLayout.setSpacing(20)
+        dialogLayout.addStretch()
+        dialogLayout.addWidget(aboutIcon)
+        dialogLayout.addWidget(aboutText)
+        dialogLayout.addStretch()
         dialogLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        dialogLayout.addLayout(textLayout)
         dialogLayout.addStretch()
         dialogLayout.addWidget(buttonBox)
         dialog.setLayout(dialogLayout)
@@ -1508,10 +1517,6 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
 
-    pixmap = QPixmap("themes/splash.png")
-    splash = QSplashScreen(pixmap)
-    splash.show()
-
     if sys.argv[1:] == ["--ResetSettings"]:
         QSettings("Mi Create", "Settings").clear()
         QSettings("Mi Create", "Workspace").clear()
@@ -1520,15 +1525,14 @@ if __name__ == "__main__":
     try:
         app.setAttribute(Qt.ApplicationAttribute.AA_DontCreateNativeWidgetSiblings)
         main_window = MainWindow()
-        splash.finish(main_window)
 
         if sys.argv[1:] != []:
             logging.info("Opening file from argument 1")
             result = main_window.openProject(None, sys.argv[1:])
             if result == False:
-                main_window.showWelcome()
+                welcomeDialog = main_window.showWelcome()
         else:
-            main_window.showWelcome()
+            welcomeDialog = main_window.showWelcome()
     except Exception as e:
         error_message = "Critical error during initialization: "+traceback.format_exc()
         logging.error(error_message)

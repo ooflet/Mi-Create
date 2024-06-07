@@ -192,7 +192,7 @@ class Canvas(QGraphicsView):
         insertButton.setGeometry(20, 20, 40, 25)
         insertButton.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
         insertButton.setMenu(self.mainWindowUI.menuInsert)
-        insertButton.setIcon(QIcon(":Dark/plus.png"))
+        insertButton.setIcon(QIcon().fromTheme("insert-object"))
         insertButton.setIconSize(QSize(18, 18))
         insertButton.setToolTip("Create Widget")
         insertButton.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)

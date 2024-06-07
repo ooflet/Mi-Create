@@ -78,6 +78,7 @@ class Ui_Dialog(object):
         self.settings = QtWidgets.QToolButton(parent=self.SideBar)
         icon = QtGui.QIcon.fromTheme("preferences-desktop")
         self.settings.setIcon(icon)
+        self.settings.setIconSize(QtCore.QSize(18, 18))
         self.settings.setObjectName("settings")
         self.verticalLayout.addWidget(self.settings)
         self.horizontalLayout.addWidget(self.SideBar)

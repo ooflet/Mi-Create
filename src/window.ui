@@ -272,7 +272,7 @@
   <widget class="QDockWidget" name="resourcesWidget">
    <property name="minimumSize">
     <size>
-     <width>200</width>
+     <width>204</width>
      <height>262</height>
     </size>
    </property>
@@ -296,7 +296,10 @@
      <property name="bottomMargin">
       <number>2</number>
      </property>
-     <property name="spacing">
+     <property name="horizontalSpacing">
+      <number>0</number>
+     </property>
+     <property name="verticalSpacing">
       <number>2</number>
      </property>
      <item row="2" column="4">
@@ -305,13 +308,12 @@
         <string>Reload</string>
        </property>
        <property name="icon">
-        <iconset>
-         <normaloff>:/Dark/refresh-cw.png</normaloff>:/Dark/refresh-cw.png</iconset>
+        <iconset theme="view-refresh"/>
        </property>
        <property name="iconSize">
         <size>
-         <width>16</width>
-         <height>16</height>
+         <width>18</width>
+         <height>18</height>
         </size>
        </property>
       </widget>
@@ -319,15 +321,15 @@
      <item row="2" column="6">
       <widget class="QToolButton" name="openResourceFolder">
        <property name="text">
-        <string>...</string>
+        <string>openFolder</string>
        </property>
        <property name="icon">
-        <iconset theme="document-open"/>
+        <iconset theme="folder"/>
        </property>
        <property name="iconSize">
         <size>
-         <width>16</width>
-         <height>16</height>
+         <width>18</width>
+         <height>18</height>
         </size>
        </property>
       </widget>
@@ -400,13 +402,12 @@
         <string>addImage</string>
        </property>
        <property name="icon">
-        <iconset>
-         <normaloff>:/Dark/image-plus.png</normaloff>:/Dark/image-plus.png</iconset>
+        <iconset theme="insert-image"/>
        </property>
        <property name="iconSize">
         <size>
-         <width>16</width>
-         <height>16</height>
+         <width>18</width>
+         <height>18</height>
         </size>
        </property>
       </widget>
@@ -423,8 +424,8 @@
    </property>
    <property name="iconSize">
     <size>
-     <width>16</width>
-     <height>16</height>
+     <width>18</width>
+     <height>18</height>
     </size>
    </property>
    <property name="floatable">

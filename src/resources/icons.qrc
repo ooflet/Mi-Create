@@ -18,6 +18,7 @@
   </qresource>
   <qresource prefix="Light"/>
   <qresource prefix="Images">
+    <file>MiCreate.png</file>
     <file>MiCreate48x48.png</file>
     <file>mb8.png</file>
   </qresource>

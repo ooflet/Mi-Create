@@ -275,7 +275,7 @@ class FprjProject:
             self.data = template
             self.widgets = template["FaceProject"]["Screen"].get("Widget")
 
-            self.name = os.path.basename(path)
+            self.name = f"{name}.fprj"
             self.directory = os.path.dirname(path)
             self.dataPath = os.path.join(folder, f"{name}.fprj")
             self.imageFolder = os.path.join(folder, "images")
