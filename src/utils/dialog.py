@@ -16,10 +16,12 @@ from translate import QCoreApplication
 
 class CoreDialog(QDialog):
     # Core dialog contains welcome screen, new project screen and compile project screen
+    reloadSettings = pyqtSignal()
+    saveSettings = pyqtSignal()
     def __init__(self, parent, settingsWidget, versionString, deviceList):
         super().__init__(parent)
 
-        self.setWindowTitle(QCoreApplication.translate("Dialog", "Welcome"))
+        self.setWindowTitle(QCoreApplication.translate("", "Welcome"))
         self.setWindowIcon(QIcon(":Images/MiCreate48x48.png"))      
 
         self.resize(750, 500)
@@ -54,9 +56,9 @@ class CoreDialog(QDialog):
         self.welcomeSidebarSettings.setText(QCoreApplication.translate("", "Settings"))
         self.watchfaceCategory.setText(QCoreApplication.translate("", "Watchface"))
         self.settingsSidebarTitle.setText(QCoreApplication.translate("", "Settings"))
-        self.newProjectWatchfacePageDeviceTitle.setText(QCoreApplication.translate("Dialog", "Select device"))
-        self.newProjectWatchfacePageProjectTitle.setText(QCoreApplication.translate("Dialog", "Project Name"))
-        self.newProjectWatchfacePageDirectoryTitle.setText(QCoreApplication.translate("Dialog", "Project Location"))
+        self.newProjectWatchfacePageDeviceTitle.setText(QCoreApplication.translate("", "Select device"))
+        self.newProjectWatchfacePageProjectTitle.setText(QCoreApplication.translate("", "Project Name"))
+        self.newProjectWatchfacePageDirectoryTitle.setText(QCoreApplication.translate("", "Project Location"))
 
     def setupWelcomePage(self, versionString):
         # sidebar
@@ -148,6 +150,13 @@ class CoreDialog(QDialog):
 
         # contents
 
+        def update():
+            # update and check if all fields are filled
+            if self.newProjectWatchfacePageProjectField.text() != "" and self.newProjectWatchfacePageDirectoryField.text() != "":
+                self.newProjectWatchfacePageButtonBox.setEnabled(True)
+            else:
+                self.newProjectWatchfacePageButtonBox.setEnabled(False)
+
         def openFolderDialog():
             location = QFileDialog.getExistingDirectory(self)
             self.newProjectWatchfacePageDirectoryField.setText(str(location))
@@ -181,6 +190,7 @@ class CoreDialog(QDialog):
         self.newProjectWatchfacePageProjectTitle = QLabel(self)
         self.newProjectWatchfacePageProjectField = QLineEdit(self)
         self.newProjectWatchfacePageProjectField.setFixedWidth(175)
+        self.newProjectWatchfacePageProjectField.textChanged.connect(update)
 
         self.newProjectWatchfacePageProjectLayout.addWidget(self.newProjectWatchfacePageProjectTitle)
         self.newProjectWatchfacePageProjectLayout.addWidget(self.newProjectWatchfacePageProjectField)
@@ -191,6 +201,7 @@ class CoreDialog(QDialog):
 
         self.newProjectWatchfacePageDirectoryTitle = QLabel(self)
         self.newProjectWatchfacePageDirectoryField = QLineEdit(self.newProjectWatchfacePage)
+        self.newProjectWatchfacePageDirectoryField.textChanged.connect(update)
         self.newProjectWatchfacePageDirectoryFolderButton = QToolButton(self)
         self.newProjectWatchfacePageDirectoryFolderButton.setObjectName("inputField-button")
         self.newProjectWatchfacePageDirectoryFolderButton.setText("")
@@ -201,8 +212,7 @@ class CoreDialog(QDialog):
         self.newProjectWatchfacePageDirectoryLayout.addWidget(self.newProjectWatchfacePageDirectoryField)
         self.newProjectWatchfacePageDirectoryLayout.addWidget(self.newProjectWatchfacePageDirectoryFolderButton)
 
-        self.newProjectWatchfacePageButtonBox = QDialogButtonBox()
-        self.newProjectWatchfacePageButtonBox.setStandardButtons(QDialogButtonBox.StandardButton.Ok)
+        self.newProjectWatchfacePageButtonBox = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok)
 
         # layout
         
@@ -221,6 +231,8 @@ class CoreDialog(QDialog):
         
         self.sidebar.addWidget(self.newProjectSidebar)
         self.contentPanel.addWidget(self.newProjectPage)
+
+        update()
 
     def setupSettingsPage(self, settingsWidget):
         self.settingsSidebar = QFrame()
@@ -247,10 +259,12 @@ class CoreDialog(QDialog):
         self.contentPanel.addWidget(self.settingsPage)
 
     def showWelcomePage(self):
+        self.setWindowTitle(QCoreApplication.translate("", "Welcome"))
         self.sidebar.setCurrentWidget(self.welcomeSidebar)
         self.contentPanel.setCurrentWidget(self.welcomePage)
 
     def showNewProjectPage(self, prevPageFunc=None):
+        self.setWindowTitle(QCoreApplication.translate("", "New Project"))
         self.sidebar.setCurrentWidget(self.newProjectSidebar)
         self.contentPanel.setCurrentWidget(self.newProjectPage)
         self.newProjectSidebarList.setCurrentRow(0)
@@ -262,6 +276,8 @@ class CoreDialog(QDialog):
             self.newProjectSidebarBack.setVisible(False)
 
     def showSettingsPage(self, prevPageFunc=None):
+        self.setWindowTitle(QCoreApplication.translate("", "Settings"))
+        self.reloadSettings.emit()
         self.sidebar.setCurrentWidget(self.settingsSidebar)
         self.contentPanel.setCurrentWidget(self.settingsPage)
 

@@ -138,18 +138,7 @@ class MainWindow(QMainWindow):
         self.setupProperties()
 
         logging.info("Initializing Settings")
-        self.settingsDialog = QDialog()
-        self.settingsDialog.setFixedSize(500, 300)
-        self.settingsDialog.setWindowTitle("Settings")
-        self.settingsLayout = QVBoxLayout()
         self.settingsWidget = PropertiesWidget(self)
-        self.settingsButtonBox = QDialogButtonBox()
-        self.settingsButtonBox.setStandardButtons(QDialogButtonBox.StandardButton.Save | QDialogButtonBox.StandardButton.Cancel)
-        self.settingsButtonBox.accepted.connect(lambda: self.saveSettings(True))
-        self.settingsButtonBox.rejected.connect(close)
-        self.settingsLayout.addWidget(self.settingsWidget)
-        self.settingsLayout.addWidget(self.settingsButtonBox)
-        self.settingsDialog.setLayout(self.settingsLayout)
 
         self.setupThemes()
         self.loadSettings()
@@ -165,7 +154,7 @@ class MainWindow(QMainWindow):
                     self.stagedChanges.append(["Language", item])
                     self.saveSettings(False)
 
-        self.settingsWidget.propertyChanged.connect(lambda property, value: self.stagedChanges.append([property, value]))
+        self.settingsWidget.propertyChanged.connect(lambda property, value: self.setSetting(property, value))
 
         logging.info("Initializing Dialogs")
         self.setupDialogs()
@@ -303,12 +292,24 @@ class MainWindow(QMainWindow):
         self.restoreGeometry(settings.value("geometry"))
         self.restoreState(settings.value("state"))
 
+    def setSetting(self, setting, value, loadSettings=True):
+        settings = QSettings("Mi Create", "Settings")
+        settings.setValue(setting, value)
+
+        if loadSettings:
+            self.loadSettings()
+            if setting == "Theme":
+                self.loadTheme()
+            if setting == "Language":
+                self.loadLanguage(True)
+                
+        self.settingsWidget.loadProperties(self.settings)
+
     def saveSettings(self, retranslate, loadSettings=True):
         settings = QSettings("Mi Create", "Settings")
         for property, value in self.stagedChanges:
             settings.setValue(property, value)
 
-        self.settingsDialog.close()
         if loadSettings:
             self.loadSettings()
             self.loadTheme()
@@ -739,6 +740,13 @@ class MainWindow(QMainWindow):
 
         self.coreDialog = CoreDialog(None, self.settingsWidget, f"{programVersion} | compiler {compilerVersion}", self.WatchData.models)
         self.coreDialog.welcomeSidebarOpenProject.clicked.connect(self.openProject)
+        self.coreDialog.reloadSettings.connect(lambda: self.settingsWidget.loadProperties(self.settings))
+
+        deviceField = self.coreDialog.newProjectWatchfacePageDeviceField
+        nameField = self.coreDialog.newProjectWatchfacePageProjectField
+        locationField = self.coreDialog.newProjectWatchfacePageDirectoryField
+
+        self.coreDialog.newProjectWatchfacePageButtonBox.accepted.connect(lambda: self.newProject(locationField.text(), nameField.text(), deviceField.currentText()))
 
         def projectListOpen():
             if len(self.coreDialog.welcomePage.selectedItems()) == 1:
@@ -1082,7 +1090,6 @@ class MainWindow(QMainWindow):
             canvas.setFrameShape(QFrame.Shape.NoFrame)
 
             if self.ui.workspace.count() == 1: # new tab from empty workspace does not refresh
-                self.show()
                 self.coreDialog.close()
                 self.setIconState(False)
                 self.selectionDebounce = False
@@ -1090,6 +1097,7 @@ class MainWindow(QMainWindow):
                 logging.info("Explorer updated")
                 thread = threading.Thread(target=lambda: self.reloadImages(project.imageFolder))
                 thread.start()
+                self.show()
 
         else:
             self.showDialog("error", "Cannot render project!" + success[1], success[1])
@@ -1138,7 +1146,7 @@ class MainWindow(QMainWindow):
                 action.setChecked(True)
 
         # file
-        self.ui.actionNewFile.triggered.connect(self.newProject)
+        self.ui.actionNewFile.triggered.connect(self.showNewProjectDialog)
         self.ui.actionOpenFile.triggered.connect(self.openProject)
         self.ui.actionSave.triggered.connect(lambda: self.saveProjects("current"))
         self.ui.actionExit.triggered.connect(self.close)
@@ -1184,55 +1192,47 @@ class MainWindow(QMainWindow):
             settings.setValue("state", None)
             os.execl(sys.executable, os.path.abspath(__file__), *sys.argv)
 
-    def newProject(self):
-        def accepted():
-            # Get file location from dialog
-            file = self.newProjectDialog.projectLocation.text()
-            projectName = self.newProjectDialog.projectName.text()
-            watchModel = self.newProjectDialog.deviceSelection.currentText()
-
-            # Check if file was selected
-            if file:
-                accepted = True
-                if file[0] != "C" and file[0] != "/":
-                    reply = self.showDialog("question",  _("Are you sure you want to create your project in the directory of this program?"), "", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.Yes)
-                    if reply == QMessageBox.StandardButton.Yes:
-                        accepted = True
-                    else:
-                        accepted = False
-
-                if accepted:
-                    self.newProjectDialog.accept()
-                    newProject = FprjProject()
-                    create = newProject.fromBlank(file, self.WatchData.modelID[str(watchModel)], projectName)
-                    if create[0]:
-                        try:
-                            self.createNewWorkspace(newProject)
-                            settings = QSettings("Mi Create", "Workspace")
-                            recentProjectList = settings.value("recentProjects")
-
-                            if recentProjectList == None:
-                                recentProjectList = []
-
-                            path = os.path.normpath(newProject.dataPath)
-                            print(path)
-
-                            if [os.path.basename(path), path] in recentProjectList:
-                                recentProjectList.pop(recentProjectList.index([os.path.basename(path), path]))
-
-                            recentProjectList.append([os.path.basename(newProject.dataPath), os.path.normpath(newProject.dataPath)])
-
-                            settings.setValue("recentProjects", recentProjectList)
-                        except Exception as e:
-                            self.showDialog("error", _("Failed to createNewWorkspace: ") + e, traceback.format_exc())
-                    else:
-                        self.showDialog("error", _("Failed to create a new project: ") + newProject[1], newProject[2])
-
+    def showNewProjectDialog(self):
         self.coreDialog.showNewProjectPage()
         self.coreDialog.exec()
 
-        # self.newProjectDialog.buttonBox.accepted.connect(accepted)
-        # self.newProjectDialog.buttonBox.rejected.connect(self.newProjectDialog.reject)
+    def newProject(self, file, projectName, watchModel):
+        # Check if file was selected
+        if file:
+            accepted = True
+            if file[0] != "C" and file[0] != "/":
+                reply = self.showDialog("question",  _("Are you sure you want to create your project in the directory of this program?"), "", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.Yes)
+                if reply == QMessageBox.StandardButton.Yes:
+                    accepted = True
+                else:
+                    accepted = False
+
+            if accepted:
+                self.coreDialog.close()
+                newProject = FprjProject()
+                create = newProject.fromBlank(file, self.WatchData.modelID[str(watchModel)], projectName)
+                if create[0]:
+                    try:
+                        self.createNewWorkspace(newProject)
+                        settings = QSettings("Mi Create", "Workspace")
+                        recentProjectList = settings.value("recentProjects")
+
+                        if recentProjectList == None:
+                            recentProjectList = []
+
+                        path = os.path.normpath(newProject.dataPath)
+                        print(path)
+
+                        if [os.path.basename(path), path] in recentProjectList:
+                            recentProjectList.pop(recentProjectList.index([os.path.basename(path), path]))
+
+                        recentProjectList.append([os.path.basename(newProject.dataPath), os.path.normpath(newProject.dataPath)])
+
+                        settings.setValue("recentProjects", recentProjectList)
+                    except Exception as e:
+                        self.showDialog("error", _("Failed to createNewWorkspace: ") + e, traceback.format_exc())
+                else:
+                    self.showDialog("error", _("Failed to create a new project: ") + newProject[1], newProject[2])
 
     def openProject(self, event=None, projectLocation=None):
         # Get where to open the project from
@@ -1416,7 +1416,6 @@ class MainWindow(QMainWindow):
         font = QFontDialog.getFont(self, "Select Font")
 
     def showSettings(self):
-        self.settingsWidget.loadProperties(self.settings)
         self.coreDialog.showSettingsPage()
         self.coreDialog.exec()
 

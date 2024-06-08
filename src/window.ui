@@ -108,7 +108,6 @@
     <addaction name="actionOpenFile"/>
     <addaction name="separator"/>
     <addaction name="actionSave"/>
-    <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">

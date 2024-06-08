@@ -307,7 +307,6 @@ class Ui_MainWindow(object):
         self.menuFile.addAction(self.actionOpenFile)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionSave)
-        self.menuFile.addSeparator()
         self.menuZoom.addAction(self.actionZoom_In)
         self.menuZoom.addAction(self.actionZoom_Out)
         self.menuView.addAction(self.actionToggleExplorer)
