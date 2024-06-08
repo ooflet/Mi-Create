@@ -1,0 +1,19 @@
+{
+	"QStackedWidget":[
+		{
+			"name":"sidebar",
+			"transitionAnimation":[
+				{
+					"slide":[
+						{
+							"active":true,
+							"duration": 500,
+							"direction": "horizontal",
+							"easingCurve": "OutQuint"
+						}
+					]
+				}
+			]
+		}
+	]
+}

@@ -174,6 +174,10 @@ QComboBox {
     border-radius: 4px;
 }
 
+QComboBox:!editable {
+    padding-left: 6px;
+}
+
 QComboBox::drop-down {
     width: 20px;
 }
@@ -190,12 +194,13 @@ QToolButton {
     border-radius: 5px;
     padding: 4px;
     background-color: transparent;
+    qproperty-iconSize: 18px;
     border: none;
 }
 
 QToolButton#inputField-button {
     border-radius: 5px;
-    padding: 4px;
+    padding: 3px;
     background-color: transparent;
     border: 1px solid palette(light);
 }
@@ -247,6 +252,7 @@ QToolBar {
   border: none;
   border-bottom-color: palette(alternate-base);
   padding-left: 6px;
+  qproperty-iconSize: 18px;
 }
 
 QToolBar::separator {
@@ -447,7 +453,8 @@ QListView::item:hover:!selected {
     background-color: palette(alternate-base);
 }
 
-QListWidget#ProjectList {
+
+QStackedWidget#contentPanel {
     background-color: palette(base)
 }
 

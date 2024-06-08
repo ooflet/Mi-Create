@@ -7,9 +7,7 @@
 
 
 from PyQt6 import QtCore, QtGui, QtWidgets
-import sys
-sys.path.append("..")
-from translate import QCoreApplication
+
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
@@ -78,7 +76,7 @@ class Ui_Dialog(object):
         self.settings = QtWidgets.QToolButton(parent=self.SideBar)
         icon = QtGui.QIcon.fromTheme("preferences-desktop")
         self.settings.setIcon(icon)
-        self.settings.setIconSize(QtCore.QSize(18, 18))
+        self.settings.setIconSize(QtCore.QSize(16, 16))
         self.settings.setObjectName("settings")
         self.verticalLayout.addWidget(self.settings)
         self.horizontalLayout.addWidget(self.SideBar)
@@ -90,6 +88,7 @@ class Ui_Dialog(object):
         self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.ProjectList = QtWidgets.QListWidget(parent=self.ContentPanel)
+        self.ProjectList.setStyleSheet("background-color: transparent")
         self.ProjectList.setFrameShape(QtWidgets.QFrame.Shape.NoFrame)
         self.ProjectList.setObjectName("ProjectList")
         self.verticalLayout_2.addWidget(self.ProjectList)
@@ -101,9 +100,10 @@ class Ui_Dialog(object):
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
     def retranslateUi(self, Dialog):
-        _translate = QCoreApplication.translate
+        _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "Welcome"))
         self.ApplicationName.setText(_translate("Dialog", "Mi Create"))
+        self.ApplicationVersion.setText(_translate("Dialog", "Version"))
         self.NewProject.setText(_translate("Dialog", "New Project"))
         self.OpenProject.setText(_translate("Dialog", "Open Project"))
         self.settings.setText(_translate("Dialog", "Settings"))
