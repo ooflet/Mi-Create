@@ -365,7 +365,6 @@ class MainWindow(QMainWindow):
             self.propertiesWidget.loadLanguage(os.path.basename(selectedLanguage["directory"]))
             self.ui.retranslateUi(self) # function on each precompiled window/dialog
             self.coreDialog.translate()
-            self.compileUi.retranslateUi(self.compileDialog)
             # retranslate relies on the translate.py module
             # the translate module reimplements CoreApplication's translate function to rely on gettext instead
 
@@ -736,12 +735,6 @@ class MainWindow(QMainWindow):
             currentProject: FprjProject = self.getCurrentProject()["project"]
             currentProject.setTitle(self.coreDialog.configurePageNameField.text())
             currentProject.setThumbnail(self.coreDialog.configurePagePreviewField.currentText())
-
-        self.compileDialog = QDialog(self)
-        self.compileUi = Ui_CompileDialog()
-        self.compileUi.setupUi(self.compileDialog)
-        self.compileUi.buttonBox.accepted.connect(self.compileProject)
-        self.compileUi.buttonBox.rejected.connect(self.compileDialog.close)
 
         self.coreDialog = CoreDialog(None, self.settingsWidget, f"{programVersion} | compiler {compilerVersion}", self.WatchData.models)
         self.coreDialog.welcomeSidebarOpenProject.clicked.connect(self.openProject)
