@@ -210,6 +210,10 @@ QToolButton#inputField-button {
     border: 1px solid palette(light);
 }
 
+QToolButton:focus {
+    border: 2px solid palette(highlight);
+}
+
 QToolButton:focus#inputField-button {
     border-color: palette(highlight);
 }

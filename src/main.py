@@ -22,8 +22,7 @@ from PyQt6.QtWidgets import (QDialog, QInputDialog, QMessageBox, QApplication, Q
                                QFrame, QColorDialog, QFontDialog, QSplashScreen, QSlider, QLabel, QListWidgetItem,
                                QSpacerItem, QSizePolicy, QAbstractItemView, QUndoView, QCheckBox, QHBoxLayout)
 from PyQt6.QtGui import QIcon, QPixmap, QDesktopServices, QDrag, QImage, QPainter
-from PyQt6.QtCore import Qt, QSettings, QSize, QUrl, pyqtSignal, QT_VERSION_STR, PYQT_VERSION_STR
-from PyQt6.QtQuickWidgets import QQuickWidget
+from PyQt6.QtCore import Qt, QSettings, QSize, QUrl, pyqtSignal
 from window import FramelessDialog
 
 if sys.platform == "win32": # use frameless window on windows   
@@ -76,6 +75,7 @@ class MainWindow(QMainWindow):
         super().__init__()
 
         self.fileChanged = False
+        self.compiling = False
         self.clipboard = []
         self.stagedChanges = []
         self.resourceImages = []
@@ -352,10 +352,10 @@ class MainWindow(QMainWindow):
                 selectedLanguage = language
                 break
         else:
+            self.showDialog("warning", f"An error occured while loading the language {self.settings['General']['Language']['value']}. Language settings have been reset.")
             self.settings["General"]["Language"]["value"] = "English"
             self.stagedChanges.append(["Language", "English"])
             self.saveSettings(False, False)
-            self.showDialog("warning", f"An error occured while loading the language {self.settings['General']['Language']['value']}. Language settings have been reset.")
             self.loadLanguage(True)
 
         if selectedLanguage != None:
@@ -372,7 +372,6 @@ class MainWindow(QMainWindow):
             # the translate module reimplements CoreApplication's translate function to rely on gettext instead
 
     def launchUpdater(self):
-        self.closeWithoutWarning = True
         progressBar = QProgressBar()
         progressBar.setRange(0,0)
         text = QLabel("Downloading Update...")
@@ -448,6 +447,7 @@ class MainWindow(QMainWindow):
 
     def setIconState(self, disabled):
         self.ui.actionSave.setDisabled(disabled)
+        self.ui.actionManage_Project.setDisabled(disabled)
 
         # edit
         self.ui.actionDelete.setDisabled(disabled)
@@ -730,27 +730,32 @@ class MainWindow(QMainWindow):
                 self.propertiesWidget.clearProperties()
 
     def setupDialogs(self):
-        def closeEvent(event):
+        def closeEvent():
             if not self.isVisible():
                 sys.exit()
-            event.accept()
+
+        def saveConfig():
+            currentProject: FprjProject = self.getCurrentProject()["project"]
+            currentProject.setTitle(self.coreDialog.configurePageNameField.text())
+            currentProject.setThumbnail(self.coreDialog.configurePagePreviewField.currentText())
 
         self.compileDialog = QDialog(self)
         self.compileUi = Ui_CompileDialog()
         self.compileUi.setupUi(self.compileDialog)
-        self.compileUi.buttonBox.accepted.connect(lambda: self.compileProject(1))
+        self.compileUi.buttonBox.accepted.connect(self.compileProject)
         self.compileUi.buttonBox.rejected.connect(self.compileDialog.close)
 
         self.coreDialog = CoreDialog(None, self.settingsWidget, f"{programVersion} | compiler {compilerVersion}", self.WatchData.models)
         self.coreDialog.welcomeSidebarOpenProject.clicked.connect(self.openProject)
         self.coreDialog.reloadSettings.connect(lambda: self.settingsWidget.loadProperties(self.settings))
-        self.coreDialog.closeEvent = closeEvent
+        self.coreDialog.manageProjectSidebarSave.clicked.connect(saveConfig)
+        self.coreDialog.rejected.connect(closeEvent)
 
-        deviceField = self.coreDialog.newProjectWatchfacePageDeviceField
-        nameField = self.coreDialog.newProjectWatchfacePageProjectField
-        locationField = self.coreDialog.newProjectWatchfacePageDirectoryField
+        deviceField = self.coreDialog.watchfacePageDeviceField
+        nameField = self.coreDialog.watchfacePageProjectField
+        locationField = self.coreDialog.watchfacePageDirectoryField
 
-        self.coreDialog.newProjectWatchfacePageButtonBox.accepted.connect(lambda: self.newProject(locationField.text(), nameField.text(), deviceField.currentText()))
+        self.coreDialog.watchfacePageButtonBox.accepted.connect(lambda: self.newProject(locationField.text(), nameField.text(), deviceField.currentText()))
 
         def projectListOpen():
             if len(self.coreDialog.welcomePage.selectedItems()) == 1:
@@ -789,7 +794,6 @@ class MainWindow(QMainWindow):
                     currentProject["project"].deleteWidget(currentProject["project"].getWidget(name))
                 elif type == "redo":
                     currentProject["project"].createWidget(id, name, int(currentProject["canvas"].scene().sceneRect().width()/2 - 24), int(currentProject["canvas"].scene().sceneRect().height()/2 - 24))
-                print(self.getCurrentProject()["project"].data)
                 currentProject["canvas"].loadObjects(currentProject["project"], self.settings["Canvas"]["Interpolation"]["value"])
                 self.Explorer.updateExplorer(currentProject["project"])
 
@@ -861,7 +865,6 @@ class MainWindow(QMainWindow):
 
             widgetList = []
             for item in itemList:
-                print(item.data)
                 widgetList.append([currentProject["project"].getWidget(item.data(0)), int(item.zValue())])
 
             command = CommandDeleteWidget(widgetList, commandFunc, f"Delete objects through ModifyProjectData command")
@@ -1101,7 +1104,8 @@ class MainWindow(QMainWindow):
                 thread = threading.Thread(target=lambda: self.reloadImages(project.imageFolder))
                 thread.start()
                 self.show()
-                self.coreDialog.close()
+            
+            self.coreDialog.close()
 
         else:
             self.showDialog("error", "Cannot render project!" + success[1], success[1])
@@ -1151,6 +1155,7 @@ class MainWindow(QMainWindow):
 
         # file
         self.ui.actionNewFile.triggered.connect(self.showNewProjectDialog)
+        self.ui.actionManage_Project.triggered.connect(self.showManageProjectDialog)
         self.ui.actionOpenFile.triggered.connect(self.openProject)
         self.ui.actionSave.triggered.connect(lambda: self.saveProjects("current"))
         self.ui.actionExit.triggered.connect(self.close)
@@ -1179,11 +1184,12 @@ class MainWindow(QMainWindow):
         self.ui.actionFull_Screen.triggered.connect(self.toggleFullscreen)
 
         # compile
-        self.ui.actionBuild.triggered.connect(lambda: self.compileProject(0))
+        self.ui.actionBuild.triggered.connect(self.compileProject)
         self.ui.actionUnpack.triggered.connect(self.decompileProject)
 
         # help
         self.ui.actionDocumentation.triggered.connect(lambda: QDesktopServices.openUrl(QUrl("https://ooflet.github.io/docs", QUrl.ParsingMode.TolerantMode)))
+        self.ui.actionWelcome.triggered.connect(self.showWelcome)
         self.ui.actionAbout_MiFaceStudio.triggered.connect(self.showAboutWindow)
         self.ui.actionAbout_Qt.triggered.connect(lambda: QMessageBox.aboutQt(self))
 
@@ -1282,6 +1288,16 @@ class MainWindow(QMainWindow):
             self.showDialog("error", _('Cannot open project: ') + load[1], load[2])
             return False
 
+    def showManageProjectDialog(self):
+        currentProject: FprjProject = self.getCurrentProject()["project"]
+        
+        self.coreDialog.configurePagePreviewField.addItems(self.resourceImages)
+
+        self.coreDialog.configurePageNameField.setText(currentProject.getTitle())
+        self.coreDialog.configurePagePreviewField.setCurrentText(currentProject.getThumbnail())
+
+        self.coreDialog.showManageProjectPage()
+        self.coreDialog.exec()
 
     def saveProjects(self, projectsToSave):
         if projectsToSave == "all":
@@ -1336,60 +1352,53 @@ class MainWindow(QMainWindow):
         # Save the image
         image.save("file_name.png")
 
-    def compileProject(self, stage):
+    def compileProject(self):
         if not self.getCurrentProject().get("project"):
             return
+        
+        if self.compiling:
+            return
 
-        if stage == 0:
-            currentProject = self.getCurrentProject()
+        currentProject = self.getCurrentProject()
 
-            self.currentCompileState = 0
+        if currentProject["project"].getTitle() == "" or currentProject["project"].getThumbnail() == "":
+            self.showDialog("info", _("Please set the watchface's name and thumbnail before building!"))
+            self.showManageProjectDialog()
+            return
+        
+        self.compiling = True
 
-            self.compileUi.buttonBox.clear()
+        def success():
+            self.compiling = False
+            progressBar.deleteLater()
+            text.deleteLater()
+            
+            print(output)
 
-            self.compileUi.buttonBox.addButton("Next", QDialogButtonBox.ButtonRole.AcceptRole)
-            self.compileUi.buttonBox.addButton("Cancel", QDialogButtonBox.ButtonRole.RejectRole)
+            if "Error:" in output[1]:
+                parts = output[1].split('\r\n')
+                # The desired error message is the first part
 
-            self.compileUi.watchfaceName.setText(currentProject["project"].getTitle())
-            self.compileUi.thumbnailLocation.addItems(self.resourceImages)
-            self.compileUi.thumbnailLocation.setCurrentText(currentProject["project"].getThumbnail())
+                extracted_error = parts[0]
 
-            self.compileDialog.setModal(True)
-            self.compileDialog.show()
-            self.compileUi.stackedWidget.setCurrentIndex(0)
-        elif stage == 1:
-            if self.currentCompileState == 0:
-                currentProject = self.getCurrentProject()
-                currentProject["project"].setTitle(self.compileUi.watchfaceName.text())
-                currentProject["project"].setThumbnail(self.compileUi.thumbnailLocation.currentText())
+                self.showDialog("error", _("Failed to build watchface! ")+extracted_error)
+                return
+            
+            fileLocation = str.split(os.path.basename(currentProject["project"].dataPath), ".")[0]+".face"
+            self.statusBar().showMessage(_("Watchface built successfully at ") + f"{compileDirectory}\\{fileLocation}", 3000)
 
-                reply = self.showDialog("question", _("Save project to file before building?"), "", QMessageBox.StandardButton.Save | QMessageBox.StandardButton.Discard, QMessageBox.StandardButton.Save)
-                if reply == QMessageBox.StandardButton.Save:
-                    self.saveProjects("current")
+        progressBar = QProgressBar()
+        progressBar.setRange(0,0)
+        text = QLabel("Building watchface...")
+        self.statusBar().addPermanentWidget(text, 0)
+        self.statusBar().addPermanentWidget(progressBar, 1)
 
-                compileDirectory = os.path.join(os.path.dirname(currentProject["project"].dataPath), "output")
-                self.compileUi.stackedWidget.setCurrentIndex(2)
+        compileDirectory = os.path.join(os.path.dirname(currentProject["project"].dataPath), "output")
+        output = []
 
-                self.compileUi.buttonBox.clear()
-                self.compileUi.buttonBox.addButton("OK", QDialogButtonBox.ButtonRole.AcceptRole)
-                self.compileUi.buttonBox.setDisabled(True)
-                self.compileUi.textEdit.setReadOnly(True)
-                self.compileUi.textEdit.clear()
-
-                def append(text):
-                    # append to output without a redundant newline
-                    self.compileUi.textEdit.setText(self.compileUi.textEdit.toPlainText()+text)
-
-                formattedDir = compileDirectory.replace("\\", "/")
-                append(f"Please read https://ooflet.github.io/docs/quickstart/testing to see how you can test your project\n\n")
-                process = currentProject["project"].compile(currentProject["project"].dataPath, compileDirectory, "compiler/compile.exe")
-                process.readyReadStandardOutput.connect(lambda: append(bytearray(process.readAll()).decode("utf-8")))
-                process.finished.connect(lambda: self.compileUi.buttonBox.setDisabled(False))
-
-                self.currentCompileState = 1
-
-            elif self.currentCompileState == 1:
-                self.compileDialog.close()
+        process = currentProject["project"].compile(currentProject["project"].dataPath, compileDirectory, "compiler/compile.exe")
+        process.readyReadStandardOutput.connect(lambda: output.append(bytearray(process.readAll()).decode("utf-8")))
+        process.finished.connect(success)
 
 
     def decompileProject(self):

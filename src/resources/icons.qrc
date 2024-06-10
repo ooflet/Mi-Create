@@ -22,6 +22,7 @@
     <file>MiCreate48x48.png</file>
     <file>MiCreate64x64.png</file>
     <file>MiCreate128x128.png</file>
+    <file>preview_placeholder.png</file>
     <file>mb8.png</file>
   </qresource>
 </RCC>

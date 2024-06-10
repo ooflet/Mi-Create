@@ -386,8 +386,6 @@ class Canvas(QGraphicsView):
     def createWidgetFromData(self, index, item, interpolation):
         widget = None
 
-        print(index, item.data)
-
         if interpolation == "Bilinear":
             interpolation = True
         else:

@@ -12,7 +12,7 @@ from PyQt6.QtCore import Qt, QSize, pyqtSignal, QRect
 from PyQt6.QtGui import QIcon, QPixmap, QMovie
 from PyQt6.QtWidgets import (QDialog, QLabel, QLineEdit, QComboBox, QToolButton, QSpinBox, QVBoxLayout, 
                              QHBoxLayout, QSizePolicy, QWidget, QDialogButtonBox, QFileDialog, QFrame,
-                             QPushButton, QListWidget, QListWidgetItem)
+                             QPushButton, QCheckBox, QListWidget, QListWidgetItem)
 from widgets.stackedWidget import QStackedWidget, loadJsonStyle
 
 from translate import QCoreApplication
@@ -21,6 +21,7 @@ class CoreDialog(QDialog):
     # Core dialog contains welcome screen, new project screen and compile project screen
     reloadSettings = pyqtSignal()
     saveSettings = pyqtSignal()
+    
     def __init__(self, parent, settingsWidget, versionString, deviceList):
         super().__init__(parent)
 
@@ -30,9 +31,16 @@ class CoreDialog(QDialog):
         self.resize(750, 500)
         self.setMinimumSize(QSize(750, 500))  
 
-        self.dialogLayout = QHBoxLayout(self)
+        self.dialogLayout = QVBoxLayout(self)
         self.dialogLayout.setContentsMargins(0,0,0,0)
         self.dialogLayout.setSpacing(0)
+
+        self.contentLayout = QHBoxLayout()
+        self.contentLayout.setObjectName("layout")
+        self.contentLayout.setContentsMargins(0,0,0,0)
+        self.contentLayout.setSpacing(0)
+
+        self.dialogLayout.addLayout(self.contentLayout)
 
         self.sidebar = QStackedWidget(self)
         self.sidebar.setObjectName("sidebar")
@@ -43,13 +51,20 @@ class CoreDialog(QDialog):
         self.contentPanel.setObjectName("contentPanel")
         self.contentPanel.setContentsMargins(0,0,0,0)
 
+        # self.buttonBox = QDialogButtonBox()
+        # self.buttonBox.setContentsMargins(12,12,12,12)
+        # self.buttonBox.setStandardButtons(QDialogButtonBox.StandardButton.Ok)
+
+        # self.dialogLayout.addWidget(self.buttonBox)
+
         loadJsonStyle(self)
 
-        self.dialogLayout.addWidget(self.sidebar, 0)
-        self.dialogLayout.addWidget(self.contentPanel, 1)
+        self.contentLayout.addWidget(self.sidebar, 0)
+        self.contentLayout.addWidget(self.contentPanel, 1)
 
         self.setupWelcomePage(versionString)
         self.setupNewProjectPage(deviceList)
+        self.setupManageProjectPage()
         self.setupSettingsPage(settingsWidget)
 
     def translate(self):
@@ -58,10 +73,14 @@ class CoreDialog(QDialog):
         self.newProjectSidebarTitle.setText(QCoreApplication.translate("", "New Project"))
         self.welcomeSidebarSettings.setText(QCoreApplication.translate("", "Settings"))
         self.watchfaceCategory.setText(QCoreApplication.translate("", "Watchface"))
+        self.manageProjectSidebarTitle.setText(QCoreApplication.translate("", "Manage Project"))
+        self.configureProjectCategory.setText(QCoreApplication.translate("", "Configure"))
+        self.configurePageNameTitle.setText(QCoreApplication.translate("", "Watchface name"))
+        self.configurePagePreviewText.setText(QCoreApplication.translate("", "Watchface preview"))
         self.settingsSidebarTitle.setText(QCoreApplication.translate("", "Settings"))
-        self.newProjectWatchfacePageDeviceTitle.setText(QCoreApplication.translate("", "Select device"))
-        self.newProjectWatchfacePageProjectTitle.setText(QCoreApplication.translate("", "Project name"))
-        self.newProjectWatchfacePageDirectoryTitle.setText(QCoreApplication.translate("", "Project location"))
+        self.watchfacePageDeviceTitle.setText(QCoreApplication.translate("", "Select device"))
+        self.watchfacePageProjectTitle.setText(QCoreApplication.translate("", "Project name"))
+        self.watchfacePageDirectoryTitle.setText(QCoreApplication.translate("", "Project location"))
 
     def setupWelcomePage(self, versionString):
         # sidebar
@@ -89,7 +108,7 @@ class CoreDialog(QDialog):
         self.welcomeSidebarAppName = QLabel(self.welcomeSidebar)
         self.welcomeSidebarAppName.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Maximum)
         self.welcomeSidebarAppName.setText("Mi Create")
-        self.welcomeSidebarAppName.setStyleSheet("font-size: 14pt")
+        self.welcomeSidebarAppName.setStyleSheet("font-size: 16pt")
         self.welcomeSidebarAppName.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.welcomeSidebarVersion = QLabel(self.welcomeSidebar)
@@ -149,6 +168,7 @@ class CoreDialog(QDialog):
         self.newProjectSidebarBack.setIcon(QIcon().fromTheme("application-back"))
         self.newProjectSidebarTitle = QLabel(self)
         self.newProjectSidebarTitle.setStyleSheet("font-size: 12pt")
+        self.newProjectSidebarTitle.setFixedHeight(32)
         self.newProjectSidebarHeader.addWidget(self.newProjectSidebarBack, 0)
         self.newProjectSidebarHeader.addWidget(self.newProjectSidebarTitle, 1)
 
@@ -167,81 +187,81 @@ class CoreDialog(QDialog):
 
         def update():
             # update and check if all fields are filled
-            if self.newProjectWatchfacePageProjectField.text() != "" and self.newProjectWatchfacePageDirectoryField.text() != "":
-                self.newProjectWatchfacePageButtonBox.setEnabled(True)
+            if self.watchfacePageProjectField.text() != "" and self.watchfacePageDirectoryField.text() != "":
+                self.watchfacePageButtonBox.setEnabled(True)
             else:
-                self.newProjectWatchfacePageButtonBox.setEnabled(False)
+                self.watchfacePageButtonBox.setEnabled(False)
 
         def openFolderDialog():
             location = QFileDialog.getExistingDirectory(self)
-            self.newProjectWatchfacePageDirectoryField.setText(str(location))
+            self.watchfacePageDirectoryField.setText(str(location))
 
         self.newProjectPage = QStackedWidget(self)
         self.newProjectPage.setObjectName("contentPanel")
 
-        self.newProjectWatchfacePage = QFrame()
-        self.newProjectWatchfacePage.setStyleSheet("background-color: transparent;")
-        self.newProjectWatchfacePage.setContentsMargins(9,6,9,9)
-        self.newProjectWatchfacePageLayout = QVBoxLayout()
-        self.newProjectWatchfacePageLayout.setSpacing(4)
-        self.newProjectWatchfacePageLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.watchfacePage = QFrame()
+        self.watchfacePage.setStyleSheet("background-color: transparent;")
+        self.watchfacePage.setContentsMargins(9,6,9,9)
+        self.watchfacePageLayout = QVBoxLayout()
+        self.watchfacePageLayout.setSpacing(4)
+        self.watchfacePageLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
         # device selection
 
-        self.newProjectWatchfacePageDeviceLayout = QHBoxLayout()
+        self.watchfacePageDeviceLayout = QHBoxLayout()
 
-        self.newProjectWatchfacePageDeviceTitle = QLabel(self)
-        self.newProjectWatchfacePageDeviceField = QComboBox(self)
-        self.newProjectWatchfacePageDeviceField.addItems(deviceList)
-        self.newProjectWatchfacePageDeviceField.setFixedWidth(175)
+        self.watchfacePageDeviceTitle = QLabel(self)
+        self.watchfacePageDeviceField = QComboBox(self)
+        self.watchfacePageDeviceField.addItems(deviceList)
+        self.watchfacePageDeviceField.setFixedWidth(175)
 
-        self.newProjectWatchfacePageDeviceLayout.addWidget(self.newProjectWatchfacePageDeviceTitle)
-        self.newProjectWatchfacePageDeviceLayout.addWidget(self.newProjectWatchfacePageDeviceField)
+        self.watchfacePageDeviceLayout.addWidget(self.watchfacePageDeviceTitle)
+        self.watchfacePageDeviceLayout.addWidget(self.watchfacePageDeviceField)
 
         # device name input
 
-        self.newProjectWatchfacePageProjectLayout = QHBoxLayout()
+        self.watchfacePageProjectLayout = QHBoxLayout()
 
-        self.newProjectWatchfacePageProjectTitle = QLabel(self)
-        self.newProjectWatchfacePageProjectField = QLineEdit(self)
-        self.newProjectWatchfacePageProjectField.setFixedWidth(175)
-        self.newProjectWatchfacePageProjectField.textChanged.connect(update)
+        self.watchfacePageProjectTitle = QLabel(self)
+        self.watchfacePageProjectField = QLineEdit(self)
+        self.watchfacePageProjectField.setFixedWidth(175)
+        self.watchfacePageProjectField.textChanged.connect(update)
 
-        self.newProjectWatchfacePageProjectLayout.addWidget(self.newProjectWatchfacePageProjectTitle)
-        self.newProjectWatchfacePageProjectLayout.addWidget(self.newProjectWatchfacePageProjectField)
+        self.watchfacePageProjectLayout.addWidget(self.watchfacePageProjectTitle)
+        self.watchfacePageProjectLayout.addWidget(self.watchfacePageProjectField)
 
         # directory selection
 
-        self.newProjectWatchfacePageDirectoryLayout = QHBoxLayout()
+        self.watchfacePageDirectoryLayout = QHBoxLayout()
 
-        self.newProjectWatchfacePageDirectoryTitle = QLabel(self)
-        self.newProjectWatchfacePageDirectoryField = QLineEdit(self.newProjectWatchfacePage)
-        self.newProjectWatchfacePageDirectoryField.setFixedWidth(300)
-        self.newProjectWatchfacePageDirectoryField.textChanged.connect(update)
-        self.newProjectWatchfacePageDirectoryFolderButton = QToolButton(self)
-        self.newProjectWatchfacePageDirectoryFolderButton.setObjectName("inputField-button")
-        self.newProjectWatchfacePageDirectoryFolderButton.setText("")
-        self.newProjectWatchfacePageDirectoryFolderButton.setIcon(QIcon().fromTheme("document-open"))
-        self.newProjectWatchfacePageDirectoryFolderButton.clicked.connect(openFolderDialog)
+        self.watchfacePageDirectoryTitle = QLabel(self)
+        self.watchfacePageDirectoryField = QLineEdit(self.watchfacePage)
+        self.watchfacePageDirectoryField.setFixedWidth(300)
+        self.watchfacePageDirectoryField.textChanged.connect(update)
+        self.watchfacePageDirectoryFolderButton = QToolButton(self)
+        self.watchfacePageDirectoryFolderButton.setObjectName("inputField-button")
+        self.watchfacePageDirectoryFolderButton.setText("")
+        self.watchfacePageDirectoryFolderButton.setIcon(QIcon().fromTheme("document-open"))
+        self.watchfacePageDirectoryFolderButton.clicked.connect(openFolderDialog)
 
-        self.newProjectWatchfacePageDirectoryLayout.addWidget(self.newProjectWatchfacePageDirectoryTitle)
-        self.newProjectWatchfacePageDirectoryLayout.addWidget(self.newProjectWatchfacePageDirectoryField)
-        self.newProjectWatchfacePageDirectoryLayout.addWidget(self.newProjectWatchfacePageDirectoryFolderButton)
+        self.watchfacePageDirectoryLayout.addWidget(self.watchfacePageDirectoryTitle)
+        self.watchfacePageDirectoryLayout.addWidget(self.watchfacePageDirectoryField)
+        self.watchfacePageDirectoryLayout.addWidget(self.watchfacePageDirectoryFolderButton)
 
-        self.newProjectWatchfacePageButtonBox = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok)
+        self.watchfacePageButtonBox = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok)
 
         # layout
         
-        self.newProjectWatchfacePageLayout.addLayout(self.newProjectWatchfacePageDeviceLayout)
-        self.newProjectWatchfacePageLayout.addLayout(self.newProjectWatchfacePageProjectLayout)
-        self.newProjectWatchfacePageLayout.addLayout(self.newProjectWatchfacePageDirectoryLayout)
-        self.newProjectWatchfacePageLayout.addLayout(self.newProjectWatchfacePageDeviceLayout)
-        self.newProjectWatchfacePageLayout.addStretch()
-        self.newProjectWatchfacePageLayout.addWidget(self.newProjectWatchfacePageButtonBox)
+        self.watchfacePageLayout.addLayout(self.watchfacePageDeviceLayout)
+        self.watchfacePageLayout.addLayout(self.watchfacePageProjectLayout)
+        self.watchfacePageLayout.addLayout(self.watchfacePageDirectoryLayout)
+        self.watchfacePageLayout.addLayout(self.watchfacePageDeviceLayout)
+        self.watchfacePageLayout.addStretch()
+        self.watchfacePageLayout.addWidget(self.watchfacePageButtonBox)
 
-        self.newProjectWatchfacePage.setLayout(self.newProjectWatchfacePageLayout)
+        self.watchfacePage.setLayout(self.watchfacePageLayout)
 
-        self.newProjectPage.addWidget(self.newProjectWatchfacePage)
+        self.newProjectPage.addWidget(self.watchfacePage)
 
         # add to main layout
         
@@ -249,6 +269,78 @@ class CoreDialog(QDialog):
         self.contentPanel.addWidget(self.newProjectPage)
 
         update()
+
+    def setupManageProjectPage(self):
+        # sidebar
+
+        self.manageProjectSidebar = QFrame()
+        self.manageProjectSidebarLayout = QVBoxLayout()
+        self.manageProjectSidebarLayout.setContentsMargins(0,0,0,0)
+
+        self.manageProjectSidebarHeader = QHBoxLayout()
+        self.manageProjectSidebarBack = QToolButton(self)
+        self.manageProjectSidebarBack.setIcon(QIcon().fromTheme("application-back"))
+        self.manageProjectSidebarSave = QToolButton(self)
+        self.manageProjectSidebarSave.setIcon(QIcon().fromTheme("document-save"))
+        self.manageProjectSidebarTitle = QLabel(self)
+        self.manageProjectSidebarTitle.setStyleSheet("font-size: 12pt")
+        self.manageProjectSidebarTitle.setFixedHeight(32)
+        self.manageProjectSidebarHeader.addWidget(self.manageProjectSidebarBack, 0)
+        self.manageProjectSidebarHeader.addWidget(self.manageProjectSidebarTitle, 1)
+        self.manageProjectSidebarHeader.addWidget(self.manageProjectSidebarSave, 0)
+
+        self.manageProjectSidebarList = QListWidget()
+        self.manageProjectSidebarList.setFrameShape(QFrame.Shape.NoFrame)
+        self.configureProjectCategory = QListWidgetItem(self.manageProjectSidebarList)
+        self.configureProjectCategory.setSizeHint(QSize(25, 35))
+        self.configureProjectCategory.setIcon(QIcon().fromTheme("device-watch"))
+
+        self.manageProjectSidebarLayout.addLayout(self.manageProjectSidebarHeader, 0)
+        self.manageProjectSidebarLayout.addWidget(self.manageProjectSidebarList, 1)
+        self.manageProjectSidebar.setLayout(self.manageProjectSidebarLayout)
+
+        # content
+
+        self.manageProjectPage = QStackedWidget(self)
+        self.manageProjectPage.setObjectName("contentPanel")
+
+        self.configurePage = QFrame(self)
+        self.configurePage.setContentsMargins(9,6,9,9)
+        self.configurePageLayout = QVBoxLayout(self.configurePage)
+
+        self.configurePageName = QHBoxLayout()
+        self.configurePageNameTitle = QLabel()
+        
+        self.configurePageNameField = QLineEdit()
+        self.configurePageNameField.setFixedWidth(175)
+    
+        self.configurePagePreview = QHBoxLayout()
+
+        self.configurePagePreviewText = QLabel()
+        
+        self.configurePagePreviewField = QComboBox()
+        self.configurePagePreviewField.setEditable(True)
+        self.configurePagePreviewField.setFixedWidth(175)
+        
+        #self.configurePageAutoThumbnail = QCheckBox("Auto-generate watchface preview")
+
+        self.configurePageName.addWidget(self.configurePageNameTitle)
+        self.configurePageName.addWidget(self.configurePageNameField)
+
+        self.configurePagePreview.addWidget(self.configurePagePreviewText)
+        self.configurePagePreview.addWidget(self.configurePagePreviewField)
+
+        self.configurePageLayout.addLayout(self.configurePageName)
+        self.configurePageLayout.addLayout(self.configurePagePreview)
+        self.configurePageLayout.addStretch()
+        self.configurePage.setLayout(self.configurePageLayout)
+
+        self.manageProjectPage.addWidget(self.configurePage)
+
+        # layout
+
+        self.sidebar.addWidget(self.manageProjectSidebar)
+        self.contentPanel.addWidget(self.manageProjectPage)
 
     def setupSettingsPage(self, settingsWidget):
         self.settingsSidebar = QFrame()
@@ -260,6 +352,7 @@ class CoreDialog(QDialog):
         self.settingsSidebarBack.setIcon(QIcon().fromTheme("application-back"))
         self.settingsSidebarTitle = QLabel(self)
         self.settingsSidebarTitle.setStyleSheet("font-size: 12pt")
+        self.settingsSidebarTitle.setFixedHeight(32)
         self.settingsSidebarHeader.addWidget(self.settingsSidebarBack, 0)
         self.settingsSidebarHeader.addWidget(self.settingsSidebarTitle, 1)
 
@@ -295,6 +388,18 @@ class CoreDialog(QDialog):
         else:
             self.newProjectSidebarBack.setVisible(False)
 
+    def showManageProjectPage(self, prevPageFunc=None):
+        self.setWindowTitle(QCoreApplication.translate("", "Manage Project"))
+        self.sidebar.setCurrentWidget(self.manageProjectSidebar)
+        self.contentPanel.setCurrentWidget(self.manageProjectPage)
+        self.manageProjectSidebarList.setCurrentRow(0)
+
+        if prevPageFunc:
+            self.manageProjectSidebarBack.setVisible(True)
+            self.manageProjectSidebarBack.clicked.connect(prevPageFunc)
+        else:
+            self.manageProjectSidebarBack.setVisible(False)
+
     def showSettingsPage(self, prevPageFunc=None):
         self.setWindowTitle(QCoreApplication.translate("", "Settings"))
         self.reloadSettings.emit()
@@ -325,7 +430,7 @@ class MultiFieldDialog(QDialog):
 
         self.title = QLabel(self)
         self.title.setText(QCoreApplication.translate("Dialog", title))
-        self.title.setStyleSheet("QLabel { font-size: 18pt;}")
+        self.title.setStyleSheet("QLabel { font-size: 16pt;}")
         
         self.widgetLayout.addWidget(self.title)
         self.setLayout(self.widgetLayout)
