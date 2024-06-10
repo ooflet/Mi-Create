@@ -2,13 +2,16 @@
 # tostr 2024
 import sys
 import gettext
+import threading
+from pathlib import Path
+from playsound import playsound
 
 sys.path.append("..")
 
-from PyQt6.QtCore import Qt, QSize, pyqtSignal
-from PyQt6.QtGui import QIcon, QPixmap
+from PyQt6.QtCore import Qt, QSize, pyqtSignal, QRect
+from PyQt6.QtGui import QIcon, QPixmap, QMovie
 from PyQt6.QtWidgets import (QDialog, QLabel, QLineEdit, QComboBox, QToolButton, QSpinBox, QVBoxLayout, 
-                             QHBoxLayout, QSizePolicy, QSpacerItem, QDialogButtonBox, QFileDialog, QFrame,
+                             QHBoxLayout, QSizePolicy, QWidget, QDialogButtonBox, QFileDialog, QFrame,
                              QPushButton, QListWidget, QListWidgetItem)
 from widgets.stackedWidget import QStackedWidget, loadJsonStyle
 
@@ -57,19 +60,31 @@ class CoreDialog(QDialog):
         self.watchfaceCategory.setText(QCoreApplication.translate("", "Watchface"))
         self.settingsSidebarTitle.setText(QCoreApplication.translate("", "Settings"))
         self.newProjectWatchfacePageDeviceTitle.setText(QCoreApplication.translate("", "Select device"))
-        self.newProjectWatchfacePageProjectTitle.setText(QCoreApplication.translate("", "Project Name"))
-        self.newProjectWatchfacePageDirectoryTitle.setText(QCoreApplication.translate("", "Project Location"))
+        self.newProjectWatchfacePageProjectTitle.setText(QCoreApplication.translate("", "Project name"))
+        self.newProjectWatchfacePageDirectoryTitle.setText(QCoreApplication.translate("", "Project location"))
 
     def setupWelcomePage(self, versionString):
         # sidebar
 
+        self.hertaGif = QMovie("data/herta/herta.gif")
+        self.hertaGif.frameChanged.connect(lambda: self.welcomeSidebarLogo.setIcon(QIcon(self.hertaGif.currentPixmap())))
+
+        def playHerta():
+            playsound("data/herta/herta.mp3", block=False)
+            self.welcomeSidebarLogo.setIconSize(QSize(100, 100))
+            self.hertaGif.start()
+            
         self.welcomeSidebar = QFrame(self.sidebar)
         self.welcomeSidebarLayout = QVBoxLayout(self.welcomeSidebar)
         self.welcomeSidebarLayout.setContentsMargins(0,0,0,0)
-        self.welcomeSidebarLogo = QLabel(self.welcomeSidebar)
-        self.welcomeSidebarLogo.setPixmap(QPixmap(":/Images/MiCreate48x48.png"))
+        self.welcomeSidebarLogo = QPushButton(self.welcomeSidebar)
+        self.welcomeSidebarLogo.setIcon(QIcon(":/Images/MiCreate48x48.png"))
         self.welcomeSidebarLogo.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Maximum)
-        self.welcomeSidebarLogo.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.welcomeSidebarLogo.setIconSize(QSize(48, 48))
+        self.welcomeSidebarLogo.setDefault(False)
+        self.welcomeSidebarLogo.setAutoDefault(False)
+        self.welcomeSidebarLogo.setFlat(True)
+        self.welcomeSidebarLogo.pressed.connect(playHerta)
 
         self.welcomeSidebarAppName = QLabel(self.welcomeSidebar)
         self.welcomeSidebarAppName.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Maximum)
@@ -168,7 +183,7 @@ class CoreDialog(QDialog):
         self.newProjectWatchfacePage.setStyleSheet("background-color: transparent;")
         self.newProjectWatchfacePage.setContentsMargins(9,6,9,9)
         self.newProjectWatchfacePageLayout = QVBoxLayout()
-        self.newProjectWatchfacePageLayout.setSpacing(10)
+        self.newProjectWatchfacePageLayout.setSpacing(4)
         self.newProjectWatchfacePageLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
         # device selection
@@ -201,6 +216,7 @@ class CoreDialog(QDialog):
 
         self.newProjectWatchfacePageDirectoryTitle = QLabel(self)
         self.newProjectWatchfacePageDirectoryField = QLineEdit(self.newProjectWatchfacePage)
+        self.newProjectWatchfacePageDirectoryField.setFixedWidth(300)
         self.newProjectWatchfacePageDirectoryField.textChanged.connect(update)
         self.newProjectWatchfacePageDirectoryFolderButton = QToolButton(self)
         self.newProjectWatchfacePageDirectoryFolderButton.setObjectName("inputField-button")
@@ -262,6 +278,10 @@ class CoreDialog(QDialog):
         self.setWindowTitle(QCoreApplication.translate("", "Welcome"))
         self.sidebar.setCurrentWidget(self.welcomeSidebar)
         self.contentPanel.setCurrentWidget(self.welcomePage)
+
+        self.hertaGif.stop()
+        self.welcomeSidebarLogo.setIcon(QIcon(":/Images/MiCreate48x48.png"))
+        self.welcomeSidebarLogo.setIconSize(QSize(48, 48))
 
     def showNewProjectPage(self, prevPageFunc=None):
         self.setWindowTitle(QCoreApplication.translate("", "New Project"))

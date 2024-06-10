@@ -22,11 +22,11 @@ from PyQt6.QtWidgets import (QDialog, QInputDialog, QMessageBox, QApplication, Q
                                QFrame, QColorDialog, QFontDialog, QSplashScreen, QSlider, QLabel, QListWidgetItem,
                                QSpacerItem, QSizePolicy, QAbstractItemView, QUndoView, QCheckBox, QHBoxLayout)
 from PyQt6.QtGui import QIcon, QPixmap, QDesktopServices, QDrag, QImage, QPainter
-from PyQt6.QtCore import Qt, QSettings, QSize, QUrl, pyqtSignal
+from PyQt6.QtCore import Qt, QSettings, QSize, QUrl, pyqtSignal, QT_VERSION_STR, PYQT_VERSION_STR
 from PyQt6.QtQuickWidgets import QQuickWidget
 from window import FramelessDialog
 
-if sys.platform == "win32": # use frameless window on windows
+if sys.platform == "win32": # use frameless window on windows   
     from window import QMainWindow
 else:
     from PyQt6.QtWidgets import QMainWindow
@@ -268,7 +268,7 @@ class MainWindow(QMainWindow):
                     self.coreDialog.welcomePage.setItemWidget(listItem, listWidget)
 
         self.coreDialog.showWelcomePage()
-        self.coreDialog.show()
+        self.coreDialog.exec()
 
     def getCurrentProject(self) -> dict:
         # tab paths are stored in the tabToolTip string
@@ -429,10 +429,8 @@ class MainWindow(QMainWindow):
 
 
     def reloadImages(self, imageFolder):
-        if imageFolder == None:
-            self.ui.resourceList.clear()
-        else:
-            self.ui.resourceList.clear()
+        self.ui.resourceList.clear()
+        if imageFolder != None:
             self.resourceImages.clear()
             directory = os.listdir(imageFolder)
             directory.sort()
@@ -732,6 +730,11 @@ class MainWindow(QMainWindow):
                 self.propertiesWidget.clearProperties()
 
     def setupDialogs(self):
+        def closeEvent(event):
+            if not self.isVisible():
+                sys.exit()
+            event.accept()
+
         self.compileDialog = QDialog(self)
         self.compileUi = Ui_CompileDialog()
         self.compileUi.setupUi(self.compileDialog)
@@ -741,6 +744,7 @@ class MainWindow(QMainWindow):
         self.coreDialog = CoreDialog(None, self.settingsWidget, f"{programVersion} | compiler {compilerVersion}", self.WatchData.models)
         self.coreDialog.welcomeSidebarOpenProject.clicked.connect(self.openProject)
         self.coreDialog.reloadSettings.connect(lambda: self.settingsWidget.loadProperties(self.settings))
+        self.coreDialog.closeEvent = closeEvent
 
         deviceField = self.coreDialog.newProjectWatchfacePageDeviceField
         nameField = self.coreDialog.newProjectWatchfacePageProjectField
@@ -1090,7 +1094,6 @@ class MainWindow(QMainWindow):
             canvas.setFrameShape(QFrame.Shape.NoFrame)
 
             if self.ui.workspace.count() == 1: # new tab from empty workspace does not refresh
-                self.coreDialog.close()
                 self.setIconState(False)
                 self.selectionDebounce = False
                 self.Explorer.updateExplorer(project)
@@ -1098,6 +1101,7 @@ class MainWindow(QMainWindow):
                 thread = threading.Thread(target=lambda: self.reloadImages(project.imageFolder))
                 thread.start()
                 self.show()
+                self.coreDialog.close()
 
         else:
             self.showDialog("error", "Cannot render project!" + success[1], success[1])
@@ -1208,7 +1212,6 @@ class MainWindow(QMainWindow):
                     accepted = False
 
             if accepted:
-                self.coreDialog.close()
                 newProject = FprjProject()
                 create = newProject.fromBlank(file, self.WatchData.modelID[str(watchModel)], projectName)
                 if create[0]:
@@ -1232,7 +1235,7 @@ class MainWindow(QMainWindow):
                     except Exception as e:
                         self.showDialog("error", _("Failed to createNewWorkspace: ") + e, traceback.format_exc())
                 else:
-                    self.showDialog("error", _("Failed to create a new project: ") + newProject[1], newProject[2])
+                    self.showDialog("error", _("Failed to create a new project: ") + create[1], create[2])
 
     def openProject(self, event=None, projectLocation=None):
         # Get where to open the project from
@@ -1425,12 +1428,12 @@ class MainWindow(QMainWindow):
         dialog.setContentsMargins(5, 60, 5, 5)
         aboutIcon = QLabel()
         aboutIcon.setPixmap(QPixmap(":/Images/MiCreate48x48.png"))
-        aboutIcon.setAlignment(Qt.AlignmntFlag.AlignCenter)
+        aboutIcon.setAlignment(Qt.AlignmentFlag.AlignCenter)
         aboutText = QLabel()
         aboutText.setAlignment(Qt.AlignmentFlag.AlignCenter)
         aboutText.setText(
             f'''
-            <html>e
+            <html>
             <head/>
             <body>
                 <p>Mi Create {programVersion}<br/>Visit the <a href="https://github.com/ooflet/Mi-Create/">Github Repo</a> to get help or contribute.</p>

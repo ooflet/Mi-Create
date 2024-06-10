@@ -133,6 +133,11 @@ QPushButton:disabled {
     background-color: palette(alternate-base);
 }
 
+QPushButton:flat {
+    border: 0px solid transparent;
+    background-color: transparent
+}
+
 QLineEdit {
     padding: 4px;
     background-color: transparent;

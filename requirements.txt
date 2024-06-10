@@ -1,5 +1,6 @@
 PyQt6
 PyQt6-QScintilla
 pywin32
+playsound==1.2.2
 xmltodict
 requests
