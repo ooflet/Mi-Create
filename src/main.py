@@ -61,8 +61,6 @@ from translate import QCoreApplication
 import resources.icons_rc # resource import required because it sets up the icons
 
 from window_ui import Ui_MainWindow
-from dialog.compileDialog_ui import Ui_Dialog as Ui_CompileDialog
-from dialog.welcome_ui import Ui_Dialog as Ui_WelcomeDialog
 
 _ = gettext.gettext
 
