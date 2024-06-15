@@ -617,7 +617,6 @@ class BaseWidget(QGraphicsRectItem):
             self.selectionPainterPath.addRoundedRect(self.pos().x(), self.pos().y(), self.rect().width(), self.rect().height(), self.highlightRadius, self.highlightRadius)
             self.selectionPath.setPath(self.selectionPainterPath)
             pen = QPen(self.scene().palette().highlight(), 2, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin)
-            #pen.setCosmetic(True)
             self.selectionPath.setPen(pen)
 
         # hack to get rid of bounding box ghosting
@@ -771,6 +770,8 @@ class ProgressWidget(BaseWidget):
 
         self.backgroundImage = QGraphicsPixmapItem(QPixmap(bgImage), self)
         
+        radius = radius - thickness / 2
+
         self.arc = ProgressArc(
             int(offsetX) - radius - (thickness / 2), 
             int(offsetY) - radius - (thickness / 2), 
