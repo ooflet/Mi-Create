@@ -1,5 +1,5 @@
 # Watchface Projects
-# tostr 2024
+# ooflet <ooflet@proton.me>
 
 # Projects are handled with abstractions in the form of classes
 

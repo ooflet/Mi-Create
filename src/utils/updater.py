@@ -1,7 +1,5 @@
-# Native Qt Updater
+# Updater for Mi Create
 # tostr 2024
-
-# Created this to replace the redundant Tkinter based updater
 
 import os
 import requests
@@ -9,11 +7,7 @@ import tempfile
 import threading
 import subprocess
 
-from PyQt6.QtCore import Qt, QSize, QMetaObject, QObject, pyqtSignal
-from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import QDialog, QLabel, QProgressBar, QVBoxLayout, QMessageBox
-
-QObject()
+from PyQt6.QtCore import QObject, pyqtSignal
 
 class Updater(QObject):
     updateProgress = pyqtSignal(int)

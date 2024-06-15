@@ -1,7 +1,8 @@
 PyQt6
 PyQt6-QScintilla
 pyqt-toast-notification
-pywin32
 playsound==1.2.2
 xmltodict
 requests
+
+pywin32; sys_platform == "win32"

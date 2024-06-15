@@ -1,4 +1,5 @@
-import sys
+# Explorer Widget for Mi Create
+# ooflet <ooflet@proton.me>
 
 from PyQt6.QtWidgets import QTreeWidget, QTreeWidgetItem, QFrame
 from PyQt6.QtGui import QContextMenuEvent, QIcon

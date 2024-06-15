@@ -1,5 +1,5 @@
 # Properties Widget for Mi Create
-# tostr 2023
+# ooflet <ooflet@proton.me>
 
 # Use a properties "scaffold" with the widget when creating
 

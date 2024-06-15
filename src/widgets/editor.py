@@ -1,14 +1,13 @@
 # Code Editor for Mi Create
-# tostr 2024
+# ooflet <ooflet@proton.me>
 
 # Responsible for the embedded code editor for editing XML projects and Lua/JS programs
 # Powered by the Scintilla source code editing component
 # Uses QScintilla bindings provided by Riverbank Computing's PyQt project
 
-from PyQt6.QtWidgets import *
-from PyQt6.QtCore import *
-from PyQt6.QtGui import *
-from PyQt6.Qsci import *
+from PyQt6.QtWidgets import QFrame
+from PyQt6.QtGui import QColor, QFont, QPalette
+from PyQt6.Qsci import QsciScintilla, QsciLexerXML
 
 class XMLLexer(QsciLexerXML):
     def __init__(self, parent, palette):

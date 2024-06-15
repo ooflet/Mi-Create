@@ -1,5 +1,9 @@
 # Dialog Manager
-# tostr 2024
+# ooflet <ooflet@proton.me>
+
+# Provides the CoreDialog class responsible for pretty much everything other than watchface editing
+# Convenience Multi-Field dialog class for creating quick dialogs with multiple fields
+
 import sys
 import gettext
 import threading
@@ -85,10 +89,12 @@ class CoreDialog(QDialog):
     def setupWelcomePage(self, versionString):
         # sidebar
 
+        # TODO: stop causing epilepsy on page animation when gif is playing
         self.hertaGif = QMovie("data/herta/herta.gif")
         self.hertaGif.frameChanged.connect(lambda: self.welcomeSidebarLogo.setIcon(QIcon(self.hertaGif.currentPixmap())))
 
         def playHerta():
+            # kuru kuru~
             playsound("data/herta/herta.mp3", block=False)
             self.welcomeSidebarLogo.setIconSize(QSize(100, 100))
             self.hertaGif.start()

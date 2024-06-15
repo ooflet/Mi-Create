@@ -1,4 +1,7 @@
-# Super duper barebones colorScheme.json editor
+# Color Scheme Editor
+# ooflet <ooflet@proton.me>
+
+# Super barebones colorScheme.json editor
 
 import tkinter as tk
 from tkinter import ttk, filedialog, colorchooser

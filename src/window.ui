@@ -108,6 +108,7 @@
     <addaction name="actionOpenFile"/>
     <addaction name="separator"/>
     <addaction name="actionManage_Project"/>
+    <addaction name="actionClose_Project"/>
     <addaction name="separator"/>
     <addaction name="actionSave"/>
    </widget>
@@ -832,7 +833,7 @@
   </action>
   <action name="actionManage_Project">
    <property name="text">
-    <string>Manage Project...</string>
+    <string>Manage Project</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+M</string>
@@ -841,6 +842,14 @@
   <action name="actionWelcome">
    <property name="text">
     <string>Welcome</string>
+   </property>
+  </action>
+  <action name="actionClose_Project">
+   <property name="text">
+    <string>Close Project</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+W</string>
    </property>
   </action>
  </widget>

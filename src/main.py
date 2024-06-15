@@ -14,8 +14,7 @@ import subprocess
 import platform
 import gettext
 
-os.chdir(os.path.dirname(os.path.realpath(__file__))) # switch working directory to program location
-                                                      # so that data files can be found
+os.chdir(os.path.dirname(os.path.realpath(__file__))) # switch working directory to program location so that data files can be found
 
 from PyQt6.QtWidgets import (QDialog, QInputDialog, QMessageBox, QApplication, QProgressBar,
                                QDialogButtonBox, QTreeWidgetItem, QFileDialog, QWidget, QVBoxLayout,
@@ -25,7 +24,8 @@ from PyQt6.QtGui import QIcon, QPixmap, QDesktopServices, QDrag, QImage, QPainte
 from PyQt6.QtCore import Qt, QSettings, QSize, QUrl, pyqtSignal
 from window import FramelessDialog
 
-if sys.platform == "win32": # use frameless window on windows   
+if platform.system() == "Windows": # menubar does not display on linux
+                                   # TODO: fix it
     from window import QMainWindow
 else:
     from PyQt6.QtWidgets import QMainWindow
@@ -51,7 +51,6 @@ from utils.dialog import CoreDialog, MultiFieldDialog
 from utils.theme import Theme
 from utils.updater import Updater
 from utils.history import History, CommandAddWidget, CommandDeleteWidget, CommandModifyWidgetLayer, CommandModifyProperty, CommandModifyPosition, CommandModifyProjectData
-from utils.widgetgallery import WidgetGallery
 from widgets.canvas import Canvas, ObjectIcon
 from widgets.explorer import Explorer
 from widgets.properties import PropertiesWidget
@@ -87,7 +86,7 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
-        if sys.platform == "win32": # init frameless window
+        if platform.system() == "Windows":
             self.titleBar.layout().insertWidget(0, self.ui.menubar, 0, Qt.AlignmentFlag.AlignLeft)
             self.titleBar.layout().insertStretch(1, 1)
             self.setMenuWidget(self.titleBar)
@@ -102,13 +101,6 @@ class MainWindow(QMainWindow):
         self.setupWorkspace()
         logging.info("Initializing Explorer")
         self.setupExplorer()
-
-        # Setup Settings
-        logging.info("Loading App Settings")
-
-        def close():
-            self.settingsDialog.close()
-            self.stagedChanges = []
 
         # Setup Language
 
@@ -149,8 +141,7 @@ class MainWindow(QMainWindow):
 
             if item in self.languageNames:
                 if accepted:
-                    self.stagedChanges.append(["Language", item])
-                    self.saveSettings(False)
+                    self.setSetting("Language", item)
 
         self.settingsWidget.propertyChanged.connect(lambda property, value: self.setSetting(property, value))
 
@@ -180,7 +171,6 @@ class MainWindow(QMainWindow):
         self.loadWindowState()
         self.updateFound.connect(self.promptUpdate)
         logging.info("Launch!!")
-        self.statusBar().showMessage("Ready", 3000)
 
     def closeEvent(self, event):
         logging.info("Exit requested!")
@@ -212,6 +202,7 @@ class MainWindow(QMainWindow):
             quitWindow()
 
     def showEvent(self, event):
+        # update view actions
         self.ui.actionToggleExplorer.setChecked(self.ui.explorerWidget.isVisible())
         self.ui.actionToggleResources.setChecked(self.ui.resourcesWidget.isVisible())
         self.ui.actionToggleProperties.setChecked(self.ui.propertiesWidget.isVisible())
@@ -285,8 +276,10 @@ class MainWindow(QMainWindow):
 
     def loadWindowState(self):
         settings = QSettings("Mi Create", "Workspace")
+
         if settings.value("geometry") == None or settings.value("state") == None:
             return
+        
         self.restoreGeometry(settings.value("geometry"))
         self.restoreState(settings.value("state"))
 
@@ -351,8 +344,7 @@ class MainWindow(QMainWindow):
                 break
         else:
             self.showDialog("warning", f"An error occured while loading the language {self.settings['General']['Language']['value']}. Language settings have been reset.")
-            self.settings["General"]["Language"]["value"] = "English"
-            self.stagedChanges.append(["Language", "English"])
+            self.setSetting("Language", "English")
             self.saveSettings(False, False)
             self.loadLanguage(True)
 
@@ -381,8 +373,7 @@ class MainWindow(QMainWindow):
         reply, dontCheck = self.showDialog("question", _('A new update has been found ({version}). Would you like to update now?').format(version=ver), "", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.Yes, "Never check for updates", False)
 
         if dontCheck:
-            self.stagedChanges.append(["CheckUpdate", False])
-            self.saveSettings(False)
+            self.setSetting("CheckUpdate", False)
 
         if reply == QMessageBox.StandardButton.Yes:
             self.launchUpdater()
@@ -411,15 +402,11 @@ class MainWindow(QMainWindow):
 
         if themeName == "Dark":
             themeName = "Default Dark"
-            self.settings["General"]["Theme"]["value"] = "Default Dark"
-            self.stagedChanges.append(["Theme", "Default Dark"])
-            self.saveSettings(False, False)
+            self.setSetting("Theme", "Default Dark")
 
         success = self.themes.loadTheme(app, themeName)
         if not success:
-            self.settings["General"]["Theme"]["value"] = "Default Dark"
-            self.stagedChanges.append(["Theme", "Default Dark"])
-            self.saveSettings(False, False)
+            self.setSetting("Theme", "Default Dark")
             self.loadTheme()
             self.showDialog("warning", f"An error occured while loading the theme {themeName}. Theme settings have been reset.")
 
@@ -467,39 +454,54 @@ class MainWindow(QMainWindow):
         self.ui.actionBuild.setDisabled(disabled)
         self.ui.actionUnpack.setDisabled(disabled)
 
-    def setupWorkspace(self):
-        def handleTabClose(index):
-            print(index)
-            # Fires when tab closes
-            def delProjectItem(index):
-                if self.ui.workspace.tabToolTip(index) != "":
-                    self.projects.pop(self.ui.workspace.tabToolTip(index))
-                else:
-                    self.projects.pop(self.ui.workspace.tabText(index))
+    def openFolder(self, path):
+        if platform.system() == "Windows":
+            # windows not supporting forward slashes :skull:
+            path = str.replace(path, "/", "\\")
+            # uh oh ACE vulnerability?????
+            os.startfile(path)
+        elif platform.system() == "Darwin":
+            # never buying a mac to port this hot garbage, but just keep it here
+            subprocess.Popen(["open", path])
+        else:
+            subprocess.Popen(["xdg-open", path])
 
-            project = self.ui.workspace.tabToolTip(index)
+    def closeTab(self, index):
+        print(index)
+        # Fires when tab closes
+        def delProjectItem(index):
+            if self.ui.workspace.tabToolTip(index) != "":
+                # tooltips are used to store the name of the project
+                # usually the project location
+                self.projects.pop(self.ui.workspace.tabToolTip(index))
+            else:
+                # the tab text name is used
+                self.projects.pop(self.ui.workspace.tabText(index))
 
-            if project == "":
-                self.ui.workspace.widget(index).deleteLater()
-                self.ui.workspace.removeTab(index)
+        project = self.ui.workspace.tabToolTip(index)
+
+        if project == "":
+            self.ui.workspace.widget(index).deleteLater()
+            self.ui.workspace.removeTab(index)
+            return
+
+        if self.projects.get(project) and self.projects[project]["hasFileChanged"]:
+            reply = self.showDialog("warning", "This tab has unsaved changes. Save and close?", "", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.Cancel, QMessageBox.StandardButton.Yes)
+
+            if reply == QMessageBox.StandardButton.Yes:
+                self.saveProjects("current")
+            elif reply == QMessageBox.StandardButton.Cancel:
                 return
 
-            if self.projects.get(project) and self.projects[project]["hasFileChanged"]:
-                reply = self.showDialog("warning", "This tab has unsaved changes. Save and close?", "", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.Cancel, QMessageBox.StandardButton.Yes)
+        delProjectItem(index)
+        self.ui.workspace.removeTab(index)
+        self.fileChanged = False
 
-                if reply == QMessageBox.StandardButton.Yes:
-                    self.saveProjects("current")
-                elif reply == QMessageBox.StandardButton.Cancel:
-                    return
+        if self.ui.workspace.count() == 0:
+            self.setIconState(True)
+            self.showWelcome()
 
-            delProjectItem(index)
-            self.ui.workspace.removeTab(index)
-            self.fileChanged = False
-
-            if self.ui.workspace.count() == 0:
-                self.setIconState(True)
-                self.showWelcome()
-
+    def setupWorkspace(self):
         def handleTabChange(index):
             # Fires when tab changes
             tabName = self.ui.workspace.tabText(index)
@@ -558,6 +560,14 @@ class MainWindow(QMainWindow):
             if filter_text != "" and visible_items != []:
                 self.ui.resourceList.setCurrentRow(visible_items[0])
 
+        def openResourceFolder():
+            currentProject = self.getCurrentProject()
+
+            if currentProject == None or not currentProject.get("project"):
+                return
+            
+            self.openFolder(currentProject["project"].imageFolder)
+
         def addResource():
             currentProject = self.getCurrentProject()
 
@@ -581,20 +591,6 @@ class MainWindow(QMainWindow):
 
             self.reloadImages(currentProject["project"].imageFolder)
 
-        def openResourceFolder():
-            currentProject = self.getCurrentProject()
-
-            if currentProject == None or not currentProject.get("project"):
-                return
-
-            if platform.system() == "Windows":
-                path = str.replace(currentProject["project"].imageFolder, "/", "\\")
-                os.startfile(path)
-            elif platform.system() == "Darwin":
-                subprocess.Popen(["open", currentProject["project"].imageFolder])
-            else:
-                subprocess.Popen(["xdg-open", currentProject["project"].imageFolder])
-
         self.statusBar().setContentsMargins(4,4,4,4)
 
         self.ui.resourceList.startDrag = startDrag
@@ -611,7 +607,7 @@ class MainWindow(QMainWindow):
         self.ui.actionArc_Progress.triggered.connect(lambda: self.createWatchfaceWidget("widget_arc"))
 
         # Connect tab changes
-        self.ui.workspace.tabCloseRequested.connect(handleTabClose)
+        self.ui.workspace.tabCloseRequested.connect(self.closeTab)
         self.ui.workspace.currentChanged.connect(handleTabChange)
 
     def setupExplorer(self):
@@ -1147,6 +1143,7 @@ class MainWindow(QMainWindow):
         # file
         self.ui.actionNewFile.triggered.connect(self.showNewProjectDialog)
         self.ui.actionManage_Project.triggered.connect(self.showManageProjectDialog)
+        self.ui.actionClose_Project.triggered.connect(lambda: self.closeTab(self.ui.workspace.currentIndex()))
         self.ui.actionOpenFile.triggered.connect(self.openProject)
         self.ui.actionSave.triggered.connect(lambda: self.saveProjects("current"))
         self.ui.actionExit.triggered.connect(self.close)
@@ -1437,7 +1434,7 @@ class MainWindow(QMainWindow):
             <head/>
             <body>
                 <p>Mi Create {programVersion}<br/>Visit the <a href="https://github.com/ooflet/Mi-Create/">Github Repo</a> to get help or contribute.</p>
-                <p>Copyright © 2024 ooflet<br/>Published under GNU General Public Licence version 3</p>
+                <p>ooflet 2024<br/>Published under GNU General Public Licence version 3</p>
             </body>
             </html>
             '''
@@ -1499,13 +1496,12 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
 
-    if sys.argv[1:] == ["--ResetSettings"]:
+    if sys.argv[1:] == ["-reset"]:
         QSettings("Mi Create", "Settings").clear()
         QSettings("Mi Create", "Workspace").clear()
         QMessageBox.information(None, 'Mi Create', "Settings reset.", QMessageBox.StandardButton.Ok)
 
     try:
-        app.setAttribute(Qt.ApplicationAttribute.AA_DontCreateNativeWidgetSiblings)
         main_window = MainWindow()
 
         if sys.argv[1:] != []:

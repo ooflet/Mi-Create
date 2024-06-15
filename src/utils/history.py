@@ -1,5 +1,5 @@
 # History System
-# tostr 2024
+# ooflet <ooflet@proton.me>
 
 # Uses Qt's Command-based history system
 

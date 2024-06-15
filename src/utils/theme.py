@@ -1,5 +1,5 @@
 # Theme Manager
-# tostr 2024
+# ooflet <ooflet@proton.me>
 
 import os
 

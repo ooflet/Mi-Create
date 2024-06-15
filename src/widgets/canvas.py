@@ -1,8 +1,8 @@
-# Canvas
-# tostr 2023
+# Canvas for Mi Create
+# ooflet <ooflet@proton.me>
 
-# Responsible for rendering parsed EasyFace XML projects via QGraphicsView library.
-# Parse a fprj/xml file to a dictionary, create a Canvas object and call loadObjectsFromData
+# Responsible for rendering projects via QGraphicsView library.
+# Pass a Project-derived class 
 
 import os
 import sys
@@ -16,7 +16,7 @@ from utils.project import WatchData
 from PyQt6.QtCore import pyqtSignal, QPointF, QSize, QRect, QRectF, QLineF, Qt
 from PyQt6.QtGui import QPainter, QPainterPath, QPen, QColor, QPixmap, QIcon, QBrush
 from PyQt6.QtWidgets import (QApplication, QGraphicsPathItem, QGraphicsScene, QGraphicsSceneMouseEvent, QGraphicsView, QGraphicsItem, QGraphicsRectItem, 
-                            QToolButton, QGraphicsPixmapItem, QMessageBox, QRubberBand, QGraphicsBlurEffect, QGraphicsOpacityEffect)
+                            QToolButton, QGraphicsPixmapItem, QGraphicsEllipseItem, QMessageBox, QRubberBand, QGraphicsOpacityEffect)
 
 from utils.contextMenu import ContextMenu
 
@@ -386,18 +386,24 @@ class Canvas(QGraphicsView):
     def createWidgetFromData(self, index, item, interpolation):
         widget = None
 
+        # qt calls this "smooth transformation" (????)
         if interpolation == "Bilinear":
             interpolation = True
         else:
             interpolation = False
 
         if item.getProperty("widget_type") == None:
+            # invalid widget type (most likely not supported)
+            # none type is returned when widget attempts to convert widget_type value into generic ID
             return False, f" Widget '{item.getProperty('widget_name')}' has unsupported widget type"
 
         try:
             if item.getProperty("widget_type") == "widget_analog":
                 widget = self.createAnalogDisplay(
                     item.getProperty("widget_name"),
+                    # use a QRect when defining position values
+                    # i am quite retarded and used individual x,y,w,h values instead of using qrect
+                    # oh well i'll fix later
                     QRect(
                         int(item.getProperty("widget_pos_x")),
                         int(item.getProperty("widget_pos_y")),
@@ -409,6 +415,7 @@ class Canvas(QGraphicsView):
                     item.getProperty("analog_hour_image"),
                     item.getProperty("analog_minute_image"),
                     item.getProperty("analog_second_image"),
+                    # construct table for hand's anchor points
                     {
                         "background": {
                             "x": item.getProperty("analog_bg_anchor_x"),
@@ -517,11 +524,13 @@ class Canvas(QGraphicsView):
                 )
 
             else:
+                # this only happens in the rare off chance when the item is implemented in generic widget IDs
                 return False, f"Widget {item.getProperty('widget_type')} not implemented in canvas, please report as issue."
 
+            # add widget into widget list
             self.widgets[item.getProperty("widget_name")] = widget
             return True, "Success"
-        except Exception as e:
+        except Exception:
             return False, str(f" Unable to create object {item.getProperty('widget_name')}:\n {traceback.format_exc()}")
 
     def loadObjects(self, project, interpolation=None):
@@ -532,6 +541,8 @@ class Canvas(QGraphicsView):
         else:
             self.interpolation = interpolation
 
+        # device representation shows the device as an image behind the watchface
+        # why? no reason
         #self.deviceRep = DeviceRepresentation(project.getDeviceType(), interpolation)
         if project.widgets != None:
             self.scene().clear()
@@ -557,6 +568,8 @@ class Canvas(QGraphicsView):
             return True, "Success"
         
     def reloadObject(self, objectName, widget):
+        # loads a single object without reloading every object in the canvas
+        # if using on a mass set of objects, its usually easier to call the loadobjects function
         object = self.widgets[objectName]
         objectZValue = object.zValue()
 
@@ -597,19 +610,19 @@ class BaseWidget(QGraphicsRectItem):
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemClipsChildrenToShape, True)
 
     def boundingRect(self):
-        # Creates outline and patches bounding box ghosting
+        # Create outline
         if self.selectionPos == None or self.pos().x() != self.selectionPos.x() or self.pos().y() != self.selectionPos.y():
             self.selectionPos = self.pos()
             self.selectionPainterPath.clear()
             self.selectionPainterPath.addRoundedRect(self.pos().x(), self.pos().y(), self.rect().width(), self.rect().height(), self.highlightRadius, self.highlightRadius)
             self.selectionPath.setPath(self.selectionPainterPath)
-            self.selectionPath.setPen(QPen(self.scene().palette().highlight(), 2, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin))
+            pen = QPen(self.scene().palette().highlight(), 2, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin)
+            #pen.setCosmetic(True)
+            self.selectionPath.setPen(pen)
 
-        outline_width = 2  # Adjust this value as needed
+        # hack to get rid of bounding box ghosting
+        outline_width = 4
         return self.rect().adjusted(-outline_width, -outline_width, outline_width, outline_width)
-    
-    def getRect(self):
-        return self.rect()
     
     def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent):
         super().mouseMoveEvent(event)
@@ -647,7 +660,6 @@ class BaseWidget(QGraphicsRectItem):
     def paint(self, painter, option, widget=None):
         # Paint the node in the graphic view.
 
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         painter.setBrush(QBrush(self.color))
         painter.setPen(self.pen())
 
@@ -677,7 +689,9 @@ class ImageWidget(BaseWidget):
         self.imageItems.append(item)
         if isAntialiased:
             item.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
-        self.setRect(0, 0, qPixmap.width()*len(self.imageItems)+spacing*len(self.imageItems)-spacing, qPixmap.height())
+
+        width = ( qPixmap.width() * len(self.imageItems) ) + ( spacing * len(self.imageItems) )
+        self.setRect(0, 0, width, qPixmap.height())
 
     def clearImages(self):
         for x in self.imageItems:
@@ -725,94 +739,51 @@ class AnalogWidget(BaseWidget):
         if antialiasing:
             self.hrHand.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
 
+class ProgressArc(QGraphicsEllipseItem):
+    def __init__(self, posX, posY, width, height, parent, thickness, startAngle, endAngle, pathImage):
+        super().__init__(posX, posY, width, height, parent)
+        pen = QPen()
+        pen.setWidth(thickness)
+        pen.setBrush(QBrush(QPixmap(pathImage)))
+        pen.setCapStyle(Qt.PenCapStyle.FlatCap)
 
-class CircularArcItem(QGraphicsPathItem):
-    # hate this so much!!!!!!!!
-    def __init__(self, rect, start_angle, end_angle, width, thickness, parent=None):
-        super().__init__(parent)
-        self.rect = QRectF(rect)
-        self.start_angle = -end_angle + 90
-        self.span_angle = abs(start_angle) + abs(end_angle)
-        print(self.start_angle, self.span_angle)
-        self.thickness = thickness
-        self.width = width/2
+        self.setStartAngle(((endAngle * -1) + 90) * 16)
+        self.setSpanAngle(((startAngle * -1) - (endAngle * -1)) * 16)
+        print(pen)
+        self.setPen(pen)
 
-        self.setPath(self.createArcPath())
-
-    def createArcPath(self):
-        path = QPainterPath()
-
-        # draw external arc
-        path.arcMoveTo(self.rect, self.start_angle)
-        path.arcTo(self.rect, self.start_angle, self.span_angle)
-
-        # draw internal arc
-        small_radius = min(self.rect.width(), self.rect.height()) * self.thickness / self.rect.width()
-        path.arcTo(self.rect.adjusted(small_radius, small_radius, -small_radius, -small_radius),
-                   self.start_angle + self.span_angle, -self.span_angle)
-        path.closeSubpath()
-
-        return path
-    
-class CirclularArcImage(QGraphicsPixmapItem):
-    def __init__(self, pixmap, parent, posX, posY, radius, thickness, start_angle, span_angle, antialiased):
-        super().__init__(pixmap, parent)
-        self.posX = int(posX)
-        self.posY = int(posY)
-        self.radius = radius
-        self.thickness = thickness
-        self.startAngle = start_angle
-        self.endAngle = span_angle
-        self.antialiased = antialiased
-
-    def boundingRect(self):
-        return QRectF(0, 0, self.pixmap().width(), self.pixmap().height())
-
-    def paint(self, painter, option, widget):
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing, self.antialiased)
-        if self.pixmap().isNull():
-            brush = QBrush(QColor(255, 0, 0, 100))
-        else:
-            brush = QBrush(self.pixmap())
-        pen = QPen(QColor(255,255,255,255))
-        pen.setStyle(Qt.PenStyle.DashLine)
-        painter.setBrush(brush)
-        painter.setPen(pen)
-
-        diameter = 2 * self.radius
-        arc_rect = QRectF(self.posX - self.radius - (self.thickness / 2), self.posY - self.radius - (self.thickness / 2), diameter + self.thickness, diameter + self.thickness)
-        
-        # Draw using image brush. Its very bad to use, will implement soon
-        painter.drawPath(CircularArcItem(arc_rect, self.startAngle, self.endAngle, self.pixmap().width(), self.thickness).createArcPath())
+    def paint(self, painter, option, widget=None):
+        painter.setPen(self.pen())
+        painter.setBrush(self.brush())
+        painter.drawArc(self.rect(), self.startAngle(), self.spanAngle())
 
 class ProgressWidget(BaseWidget):
     def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, name, offsetX, offsetY, radius, thickness, startAngle, endAngle, bgImage, pathImage, isAntialiased):
         super().__init__(posX, posY, sizeX, sizeY, parent, canvas, color, name)
         self.setPos(posX, posY)
-        self.setRect(0, 0, sizeX, sizeY)
-
+        
         radius = int(radius)
         thickness = int(thickness)
         startAngle = int(startAngle)
         endAngle = int(endAngle)
+        
+        self.setRect(0, 0, sizeX, sizeY)
 
-        # self.arcRect = QRectF(int(offsetX) - radius - (thickness / 2), int(offsetY) - radius - (thickness / 2), radius * 2 + thickness, radius * 2 + thickness)
-        # print(self.arcRect)
-
-        # self.arcPath = QPainterPath()
-        # self.arcPath.moveTo(radius, radius)
-        # self.arcPath.arcTo(self.arcRect, startAngle, endAngle)
-
-        # self.arcImage = QBrush(bgImage)
-
-        # self.arcPen = QPen()
-        # self.arcPen.setBrush(self.arcImage)
-        # self.arcPen.setWidth(thickness)
-        # self.arcPen.setCapStyle(Qt.PenCapStyle.RoundCap)
-
-        self.backgroundImage = QGraphicsPixmapItem(bgImage, self)
-
-        self.pathImage = CirclularArcImage(pathImage, self, offsetX, offsetY, radius, thickness, startAngle, endAngle, isAntialiased)
+        self.backgroundImage = QGraphicsPixmapItem(QPixmap(bgImage), self)
+        
+        self.arc = ProgressArc(
+            int(offsetX) - radius - (thickness / 2), 
+            int(offsetY) - radius - (thickness / 2), 
+            (radius * 2) + thickness,
+            (radius * 2) + thickness, 
+            self, 
+            int(thickness),
+            startAngle,
+            endAngle,
+            pathImage)
+        
+        
+        #self.pathImage = CirclularArcImage(pathImage, self, offsetX, offsetY, radius, thickness, startAngle, endAngle, isAntialiased)
 
         if isAntialiased:
             self.backgroundImage.setTransformationMode(Qt.TransformationMode.SmoothTransformation)

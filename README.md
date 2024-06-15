@@ -10,9 +10,9 @@
 ![window](images/window.png)
 
 ## Features:
-- Shockingly simple user interface
+- Shockingly simple & good looking user interface
 - Easy to learn (especially for EasyFace users)
-- Native, no bloated and slow Electron/web-based BS!
+- Uses native libraries, meaning its really fast
 - Multilingual
 
 ## Installation:
@@ -21,7 +21,7 @@
 Download the latest installer from the [releases](https://github.com/ooflet/Mi-Create/releases) tab. Please note only 64-bit versions of Windows 10 (1809 or later) and Windows 11 is supported.
 
 ### Linux
-For now, there are no prebuilt binaries for Linux, however I do plan to distribute on Linux once a fully stable and feature-rich release is out. If there are any Linux app maintainers who have experience in distributing applications, I would highly appreciate your help.
+Mi Create fully supports Linux, however there are no binaries for Linux. I do plan to distribute binaries on Linux once a fully stable and feature-rich release is out. If there are any Linux app maintainers who have experience in distributing applications, I would highly appreciate your help.
 
 ## Running source code
 If you want to run from source:

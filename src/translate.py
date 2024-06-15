@@ -4,6 +4,7 @@ import gettext
 _ = gettext.gettext
 
 class QCoreApplication(QCoreApplication):
+    # make translation use gnu gettext instead of whatever qt garbage was used
     @staticmethod
     def loadLanguage(language):
         translation = gettext.translation('window', localedir='locales', languages=[language])
