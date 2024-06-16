@@ -273,6 +273,11 @@
                     "value": "0",
                     "min": "-360",
                     "max": "360"
+                },
+                "arc_flat_caps": {
+                    "string": "Flat Ends",
+                    "type": "bool",
+                    "value": "0"
                 }
             },
             "Range": {

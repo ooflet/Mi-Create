@@ -35,6 +35,18 @@ class CommandDeleteWidget(QUndoCommand):
     def undo(self):
         self.commandFunc("undo", self.widget)
 
+class CommandPasteWidget(QUndoCommand):
+    def __init__(self, clipboard, commandFunc, description):
+        super(CommandPasteWidget, self).__init__(description)
+        self.clipboard = clipboard
+        self.commandFunc = commandFunc
+
+    def redo(self):
+        self.commandFunc("redo", self.clipboard)
+
+    def undo(self):
+        self.commandFunc("undo", self.clipboard)
+
 class CommandModifyWidgetLayer(QUndoCommand):
     def __init__(self, widgetList, changeType, commandFunc, description):
         super(CommandModifyWidgetLayer, self).__init__(description)

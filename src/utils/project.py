@@ -27,6 +27,7 @@ from pathlib import Path
 from pprint import pprint
 from copy import deepcopy
 from PyQt6.QtCore import QProcess
+from PyQt6.QtWidgets import QMessageBox
 
 supportedOneFileVersion = "1.0"
 logging.basicConfig(level=logging.DEBUG)
@@ -298,6 +299,7 @@ class FprjProject:
             "@Bitmap": "widget_bitmap",
             "@BitmapList": "widget_bitmaplist",
             "@Blanking": "num_hide_zeros",
+            "@Butt_cap_ending_style_En": "arc_flat_caps",
             "@DefaultIndex": "imagelist_default_index",
             "@Digits": "num_digits",
             "@EndAngle": "arc_end_angle",
@@ -481,8 +483,23 @@ class FprjProject:
                     if type(parse["FaceProject"]["Screen"]["Widget"]) == dict:
                         parse["FaceProject"]["Screen"]["Widget"] = [parse["FaceProject"]["Screen"]["Widget"]]
 
+                    # get rid of duplicate items
+                    seen = set()
+                    duplicatesRemoved = []
+                    for widget in parse["FaceProject"]["Screen"]["Widget"]:
+                        t = tuple(widget.items())
+                        if t not in seen:
+                            seen.add(t)
+                            duplicatesRemoved.append(widget)
+
+                    parse["FaceProject"]["Screen"]["Widget"] = duplicatesRemoved
+
                     self.data = parse
-                    self.widgets = parse["FaceProject"]["Screen"].get("Widget")
+                    self.widgets = parse["FaceProject"]["Screen"]["Widget"]
+
+                    for widget in self.widgets:
+                        if widget["@Shape"] == "29": # legacy circle progress
+                            widget["@Shape"] == "42" # circle progress plus 
                     
                     self.name = os.path.basename(path)
                     self.directory = projectDir
@@ -526,6 +543,9 @@ class FprjProject:
 
     def restoreWidget(self, widget, index):
         self.widgets.insert(index, widget.data)
+
+    def appendWidget(self, widget):
+        self.widgets.append(widget.data)
 
     def setWidgetLayer(self, widget, layerIndex):        
         self.widgets.pop(self.widgets.index(widget.data))
@@ -596,6 +616,12 @@ class FprjWidget:
         self.project = project
         self.data = data
     
+    def removeAssociation(self):
+        # by default, the data that is passed through in the data argument is linked to the source data list/dict
+        # removing association means that the data is instead independent as a seperate list
+        # so modifications to the widget wont get applied over to the original data list
+        self.data = deepcopy(self.data)
+
     def getProperty(self, property):
         property = [k for k, v in self.project.propertyIds.items() if v == property][0]
         if property == "WidgetType":

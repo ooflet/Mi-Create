@@ -192,7 +192,7 @@ QComboBox:focus {
 }
 
 QComboBox::item {
-    selection-background-color: palette(alternate-base);
+    selection-background-color: palette(highlight);
 }
 
 QToolButton {

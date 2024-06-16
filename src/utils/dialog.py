@@ -174,9 +174,13 @@ class CoreDialog(QDialog):
         self.newProjectSidebarBack.setIcon(QIcon().fromTheme("application-back"))
         self.newProjectSidebarTitle = QLabel(self)
         self.newProjectSidebarTitle.setStyleSheet("font-size: 12pt")
-        self.newProjectSidebarTitle.setFixedHeight(32)
+        self.newProjectSidebarTitle.setFixedHeight(26)
         self.newProjectSidebarHeader.addWidget(self.newProjectSidebarBack, 0)
         self.newProjectSidebarHeader.addWidget(self.newProjectSidebarTitle, 1)
+
+        self.newProjectSidebarHeaderLine = QFrame(self.welcomeSidebar)
+        self.newProjectSidebarHeaderLine.setFrameShape(QFrame.Shape.HLine)
+        self.newProjectSidebarHeaderLine.setFrameShadow(QFrame.Shadow.Sunken)
 
         self.newProjectSidebarList = QListWidget()
         self.newProjectSidebarList.setFrameShape(QFrame.Shape.NoFrame)
@@ -185,6 +189,7 @@ class CoreDialog(QDialog):
         self.watchfaceCategory.setIcon(QIcon().fromTheme("device-watch"))
         
         self.newProjectSidebarLayout.addLayout(self.newProjectSidebarHeader, 0)
+        self.newProjectSidebarLayout.addWidget(self.newProjectSidebarHeaderLine, 0)
         self.newProjectSidebarLayout.addWidget(self.newProjectSidebarList, 1)
 
         self.newProjectSidebar.setLayout(self.newProjectSidebarLayout)
@@ -290,10 +295,14 @@ class CoreDialog(QDialog):
         self.manageProjectSidebarSave.setIcon(QIcon().fromTheme("document-save"))
         self.manageProjectSidebarTitle = QLabel(self)
         self.manageProjectSidebarTitle.setStyleSheet("font-size: 12pt")
-        self.manageProjectSidebarTitle.setFixedHeight(32)
+        self.manageProjectSidebarTitle.setFixedHeight(26)
         self.manageProjectSidebarHeader.addWidget(self.manageProjectSidebarBack, 0)
         self.manageProjectSidebarHeader.addWidget(self.manageProjectSidebarTitle, 1)
         self.manageProjectSidebarHeader.addWidget(self.manageProjectSidebarSave, 0)
+
+        self.manageProjectSidebarHeaderLine = QFrame(self.welcomeSidebar)
+        self.manageProjectSidebarHeaderLine.setFrameShape(QFrame.Shape.HLine)
+        self.manageProjectSidebarHeaderLine.setFrameShadow(QFrame.Shadow.Sunken)
 
         self.manageProjectSidebarList = QListWidget()
         self.manageProjectSidebarList.setFrameShape(QFrame.Shape.NoFrame)
@@ -302,6 +311,7 @@ class CoreDialog(QDialog):
         self.configureProjectCategory.setIcon(QIcon().fromTheme("device-watch"))
 
         self.manageProjectSidebarLayout.addLayout(self.manageProjectSidebarHeader, 0)
+        self.manageProjectSidebarLayout.addWidget(self.manageProjectSidebarHeaderLine, 0)
         self.manageProjectSidebarLayout.addWidget(self.manageProjectSidebarList, 1)
         self.manageProjectSidebar.setLayout(self.manageProjectSidebarLayout)
 
@@ -358,14 +368,19 @@ class CoreDialog(QDialog):
         self.settingsSidebarBack.setIcon(QIcon().fromTheme("application-back"))
         self.settingsSidebarTitle = QLabel(self)
         self.settingsSidebarTitle.setStyleSheet("font-size: 12pt")
-        self.settingsSidebarTitle.setFixedHeight(32)
+        self.settingsSidebarTitle.setFixedHeight(26)
         self.settingsSidebarHeader.addWidget(self.settingsSidebarBack, 0)
         self.settingsSidebarHeader.addWidget(self.settingsSidebarTitle, 1)
+
+        self.settingsSidebarHeaderLine = QFrame(self.welcomeSidebar)
+        self.settingsSidebarHeaderLine.setFrameShape(QFrame.Shape.HLine)
+        self.settingsSidebarHeaderLine.setFrameShadow(QFrame.Shadow.Sunken)
 
         self.settingsPage = settingsWidget
         settingsWidget.setStyleSheet("background-color: transparent;")
 
         self.settingsSidebarLayout.addLayout(self.settingsSidebarHeader, 0)
+        self.settingsSidebarLayout.addWidget(self.settingsSidebarHeaderLine, 0)
         self.settingsSidebarLayout.addStretch()
 
         self.settingsSidebar.setLayout(self.settingsSidebarLayout)

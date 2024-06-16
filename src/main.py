@@ -50,7 +50,7 @@ from utils.project import WatchData, XiaomiProject, FprjProject, GMFProject
 from utils.dialog import CoreDialog, MultiFieldDialog
 from utils.theme import Theme
 from utils.updater import Updater
-from utils.history import History, CommandAddWidget, CommandDeleteWidget, CommandModifyWidgetLayer, CommandModifyProperty, CommandModifyPosition, CommandModifyProjectData
+from utils.history import History, CommandAddWidget, CommandDeleteWidget, CommandPasteWidget, CommandModifyWidgetLayer, CommandModifyProperty, CommandModifyPosition, CommandModifyProjectData
 from widgets.canvas import Canvas, ObjectIcon
 from widgets.explorer import Explorer
 from widgets.properties import PropertiesWidget
@@ -134,6 +134,11 @@ class MainWindow(QMainWindow):
         self.loadSettings()
         self.loadTheme()
 
+        self.settingsWidget.propertyChanged.connect(lambda property, value: self.setSetting(property, value))
+
+        logging.info("Initializing Dialogs")
+        self.setupDialogs()
+
         rawSettings = QSettings("Mi Create", "Settings")
         if "Language" not in rawSettings.allKeys():
             logging.info("No language selected")
@@ -142,11 +147,6 @@ class MainWindow(QMainWindow):
             if item in self.languageNames:
                 if accepted:
                     self.setSetting("Language", item)
-
-        self.settingsWidget.propertyChanged.connect(lambda property, value: self.setSetting(property, value))
-
-        logging.info("Initializing Dialogs")
-        self.setupDialogs()
 
         self.loadLanguage(True)
         self.settingsWidget.loadProperties(self.settings)
@@ -293,8 +293,7 @@ class MainWindow(QMainWindow):
                 self.loadTheme()
             if setting == "Language":
                 self.loadLanguage(True)
-                
-        self.settingsWidget.loadProperties(self.settings)
+                self.settingsWidget.loadProperties(self.settings)
 
     def saveSettings(self, retranslate, loadSettings=True):
         settings = QSettings("Mi Create", "Settings")
@@ -334,7 +333,7 @@ class MainWindow(QMainWindow):
         for project in self.projects.values():
             if project.get("canvas"):
                 project["canvas"].setRenderHint(QPainter.RenderHint.Antialiasing, self.settings["Canvas"]["Antialiasing"]["value"])
-                project["canvas"].loadObjects(project["project"], self.settings["Canvas"]["Interpolation"]["value"])
+                project["canvas"].loadObjects(project["project"], self.settings["Canvas"]["Snap"]["value"], self.settings["Canvas"]["Interpolation"]["value"])
 
     def loadLanguage(self, retranslate):
         selectedLanguage = None
@@ -686,7 +685,7 @@ class MainWindow(QMainWindow):
                 if property == "widget_name":
                     self.propertiesWidget.clearOnRefresh = False
                     self.Explorer.updateExplorer(currentProject["project"])
-                    currentProject["canvas"].loadObjects(currentProject["project"], self.settings["Canvas"]["Interpolation"]["value"])
+                    currentProject["canvas"].loadObjects(currentProject["project"], self.settings["Canvas"]["Snap"]["value"], self.settings["Canvas"]["Interpolation"]["value"])
                     currentProject["canvas"].selectObject(value)
                 else:
                     self.propertiesWidget.clearOnRefresh = False
@@ -781,7 +780,7 @@ class MainWindow(QMainWindow):
                     currentProject["project"].deleteWidget(currentProject["project"].getWidget(name))
                 elif type == "redo":
                     currentProject["project"].createWidget(id, name, int(currentProject["canvas"].scene().sceneRect().width()/2 - 24), int(currentProject["canvas"].scene().sceneRect().height()/2 - 24))
-                currentProject["canvas"].loadObjects(currentProject["project"], self.settings["Canvas"]["Interpolation"]["value"])
+                currentProject["canvas"].loadObjects(currentProject["project"], self.settings["Canvas"]["Snap"]["value"], self.settings["Canvas"]["Interpolation"]["value"])
                 self.Explorer.updateExplorer(currentProject["project"])
 
             print(name)
@@ -820,7 +819,7 @@ class MainWindow(QMainWindow):
                         currentProject["project"].setWidgetLayer(widget[0], 0)
 
 
-            currentProject["canvas"].loadObjects(currentProject["project"], self.settings["Canvas"]["Interpolation"]["value"])
+            currentProject["canvas"].loadObjects(currentProject["project"], self.settings["Canvas"]["Snap"]["value"], self.settings["Canvas"]["Interpolation"]["value"])
             self.Explorer.updateExplorer(currentProject["project"])
 
         command = CommandModifyWidgetLayer(currentCanvasSelected, changeType, commandFunc, f"Change object/s order through ModifyProjectData command")
@@ -847,7 +846,7 @@ class MainWindow(QMainWindow):
                     for widget in widgetList:
                         currentProject["project"].deleteWidget(widget[0])
 
-                currentProject["canvas"].loadObjects(currentProject["project"], self.settings["Canvas"]["Interpolation"]["value"])
+                currentProject["canvas"].loadObjects(currentProject["project"], self.settings["Canvas"]["Snap"]["value"], self.settings["Canvas"]["Interpolation"]["value"])
                 self.Explorer.updateExplorer(currentProject["project"])
 
             widgetList = []
@@ -870,7 +869,8 @@ class MainWindow(QMainWindow):
         self.clipboard = []
 
         for object in selectedObjects:
-            self.clipboard.append(currentProject["project"].getWidget(object.data(0)))
+            # preserve layer order
+            self.clipboard.insert(int(object.zValue()), currentProject["project"].getWidget(object.data(0)))
 
     def pasteWatchfaceWidgets(self):
         currentProject = self.getCurrentProject()
@@ -878,33 +878,44 @@ class MainWindow(QMainWindow):
         if not currentProject.get("project") or self.clipboard == []:
             return
 
-        for item in self.clipboard:
-            prevData = currentProject["data"]["FaceProject"]["Screen"]["Widget"]
-            newData = prevData.copy()
+        clipboardCopy = self.clipboard.copy()
+
+        for item in clipboardCopy:
             count = 0
 
-            for key in currentProject["data"]["FaceProject"]["Screen"]["Widget"]:
-                if item["@Name"] in key:
+            for existingWidget in currentProject["project"].getAllWidgets():
+                if item.getProperty("widget_name") in existingWidget.getProperty("widget_name"):
                      count += 1
-
-            modifiedItem = item.copy()
 
             if count > 0:
                 name_suffix = ' - Copy'
-                index = 1
 
-                modifiedItem["@Name"] = f"{item['@Name']}{name_suffix}{count}"
+                item.removeAssociation()
+                item.setProperty("widget_name", f"{item.getProperty("widget_name")}{name_suffix}{count}")
 
-            newData[modifiedItem["@Name"]] = modifiedItem
+        def commandFunc(type, clipboard):
+            currentProject["canvas"].clearSelected()
 
-            def commandFunc(data):
-                currentProject["data"]["FaceProject"]["Screen"]["Widget"] = data
-                currentProject["canvas"].loadObjects(currentProject["project"], self.settings["Canvas"]["Interpolation"]["value"])
-                self.Explorer.updateExplorer(currentProject["data"])
-                currentProject["canvas"].selectObject(modifiedItem["@Name"])
+            if type == "undo":
+                for widget in clipboard:
+                    currentProject["project"].deleteWidget(widget)
+            elif type == "redo":
+                for widget in clipboard:
+                    print(widget)
+                    currentProject["project"].appendWidget(widget)
+            
+            currentProject["canvas"].loadObjects(currentProject["project"], self.settings["Canvas"]["Snap"]["value"], self.settings["Canvas"]["Interpolation"]["value"])
+            self.Explorer.updateExplorer(currentProject["project"])
+            
+            # select objects pasted in
+            if type == "redo":
+                for widget in clipboard:
+                    currentProject["canvas"].selectObject(widget.getProperty("widget_name"), False)
 
-            command = CommandModifyProjectData(prevData, newData, commandFunc, f"Paste objects through ModifyProjectData command")
-            self.History.undoStack.push(command)
+        print(clipboardCopy)
+
+        command = CommandPasteWidget(clipboardCopy, commandFunc, f"Paste objects through ModifyProjectData command")
+        self.History.undoStack.push(command)
 
     def zoomCanvas(self, zoom):
         currentProject = self.getCurrentProject()
@@ -1033,7 +1044,7 @@ class MainWindow(QMainWindow):
                     for object in objects:
                         widget.setProperty("widget_pos_x", int(object["X"]))
                         widget.setProperty("widget_pos_y", int(object["Y"]))
-                currentProject["canvas"].loadObjects(currentProject["project"], self.settings["Canvas"]["Interpolation"]["value"])
+                currentProject["canvas"].loadObjects(currentProject["project"], self.settings["Canvas"]["Snap"]["value"], self.settings["Canvas"]["Interpolation"]["value"])
                 currentProject["canvas"].selectObjectsFromPropertyList(objects)
 
             command = CommandModifyPosition(prevPos, currentPos, commandFunc, f"Change object pos")
@@ -1059,7 +1070,7 @@ class MainWindow(QMainWindow):
 
         # Render objects onto the canvas
         if project is not False:
-            success = canvas.loadObjects(project, self.settings["Canvas"]["Interpolation"]["value"])
+            success = canvas.loadObjects(project, self.settings["Canvas"]["Snap"]["value"], self.settings["Canvas"]["Interpolation"]["value"])
 
         if success[0]:
             self.projects[project.directory] = {
