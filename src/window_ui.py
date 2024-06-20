@@ -7,7 +7,7 @@
 
 
 from PyQt6 import QtCore, QtGui, QtWidgets
-from translate import QCoreApplication
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -59,8 +59,8 @@ class Ui_MainWindow(object):
         self.menuEdit.setObjectName("menuEdit")
         self.menuLayers = QtWidgets.QMenu(parent=self.menuEdit)
         self.menuLayers.setObjectName("menuLayers")
-        self.menuTools = QtWidgets.QMenu(parent=self.menubar)
-        self.menuTools.setObjectName("menuTools")
+        self.menuBuild = QtWidgets.QMenu(parent=self.menubar)
+        self.menuBuild.setObjectName("menuBuild")
         self.menuInsert = QtWidgets.QMenu(parent=self.menubar)
         self.menuInsert.setTearOffEnabled(False)
         self.menuInsert.setObjectName("menuInsert")
@@ -343,9 +343,9 @@ class Ui_MainWindow(object):
         self.menuEdit.addAction(self.actionProject_XML_File)
         self.menuEdit.addSeparator()
         self.menuEdit.addAction(self.actionPreferences)
-        self.menuTools.addAction(self.actionBuild)
-        self.menuTools.addAction(self.actionUnpack)
-        self.menuTools.addSeparator()
+        self.menuBuild.addAction(self.actionBuild)
+        self.menuBuild.addAction(self.actionUnpack)
+        self.menuBuild.addSeparator()
         self.menuInsert.addAction(self.actionImage)
         self.menuInsert.addAction(self.actionImage_List)
         self.menuInsert.addSeparator()
@@ -365,7 +365,7 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuEdit.menuAction())
         self.menubar.addAction(self.menuInsert.menuAction())
         self.menubar.addAction(self.menuView.menuAction())
-        self.menubar.addAction(self.menuTools.menuAction())
+        self.menubar.addAction(self.menuBuild.menuAction())
         self.toolBar.addAction(self.actionNewFile)
         self.toolBar.addAction(self.actionOpenFile)
         self.toolBar.addAction(self.actionSave)
@@ -387,14 +387,14 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
-        _translate = QCoreApplication.translate
+        _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Mi Create"))
         self.menuFile.setTitle(_translate("MainWindow", "File"))
         self.menuView.setTitle(_translate("MainWindow", "View"))
         self.menuZoom.setTitle(_translate("MainWindow", "Zoom"))
         self.menuEdit.setTitle(_translate("MainWindow", "Edit"))
         self.menuLayers.setTitle(_translate("MainWindow", "Layers"))
-        self.menuTools.setTitle(_translate("MainWindow", "Tools"))
+        self.menuBuild.setTitle(_translate("MainWindow", "Build"))
         self.menuInsert.setTitle(_translate("MainWindow", "Create"))
         self.menuLogo.setTitle(_translate("MainWindow", "logo"))
         self.menuAbout.setTitle(_translate("MainWindow", "About"))

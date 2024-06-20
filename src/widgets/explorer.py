@@ -5,6 +5,8 @@ from PyQt6.QtWidgets import QTreeWidget, QTreeWidgetItem, QFrame
 from PyQt6.QtGui import QContextMenuEvent, QIcon
 from PyQt6.QtCore import Qt, QSize
 
+from utils.contextMenu import ContextMenu
+
 class Explorer(QTreeWidget):
     def __init__(self, parent, objectIcon, ui):
         super().__init__(parent)
@@ -13,12 +15,21 @@ class Explorer(QTreeWidget):
         self.mainWindowUI = ui
         self.setHorizontalScrollMode(QTreeWidget.ScrollMode.ScrollPerPixel)
         self.setVerticalScrollMode(QTreeWidget.ScrollMode.ScrollPerPixel)
+        self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.setFrameShape(QFrame.Shape.NoFrame)
-        self.setDragDropMode(QTreeWidget.DragDropMode.InternalMove)
+        #self.setDragDropMode(QTreeWidget.DragDropMode.InternalMove)
         self.setUniformRowHeights(True)
         self.setHeaderHidden(True)
         self.setAnimated(True)
         self.clear()
+
+        self.customContextMenuRequested.connect(self.contextMenuEvent)
+
+    def contextMenuEvent(self, pos):
+        if len(self.selectedItems()) > 0:
+            pos = self.mapToGlobal(pos)
+            menu = ContextMenu("shape", pos, self.mainWindowUI)
+            menu.exec(pos)
 
     def updateExplorer(self, project):
         self.clear()

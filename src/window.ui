@@ -160,9 +160,9 @@
     <addaction name="separator"/>
     <addaction name="actionPreferences"/>
    </widget>
-   <widget class="QMenu" name="menuTools">
+   <widget class="QMenu" name="menuBuild">
     <property name="title">
-     <string>Tools</string>
+     <string>Build</string>
     </property>
     <addaction name="actionBuild"/>
     <addaction name="actionUnpack"/>
@@ -208,7 +208,7 @@
    <addaction name="menuEdit"/>
    <addaction name="menuInsert"/>
    <addaction name="menuView"/>
-   <addaction name="menuTools"/>
+   <addaction name="menuBuild"/>
   </widget>
   <widget class="QDockWidget" name="explorerWidget">
    <property name="minimumSize">

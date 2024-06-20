@@ -14,8 +14,6 @@ from translate import QCoreApplication
 
 # Context Menu System notes:
 #
-# The context menu system uses the same data structure as the properties system
-#
 # Context menu items allow for "inheritance" from the main window, basically
 # reusing already created menu items
 
@@ -40,8 +38,7 @@ class ContextMenu(QMenu):
                 else:
                     action = menu.addAction(actionName)
                     if properties.get("icon"):
-                        icon = QIcon()
-                        icon.addFile(properties["icon"], QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+                        icon = QIcon().fromTheme(properties["icon"])
                         action.setIcon(icon)
 
         createContextMenu(self, contextMenus[type])

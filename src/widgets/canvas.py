@@ -84,7 +84,7 @@ class Scene(QGraphicsScene):
                 self.positionMap["Y"].append(item.pos().y() + item.rect().height())
 
     def getAdjacentPos(self, object: QGraphicsItem):
-        catchRange = 10 # pixel offset before the object gets snapped
+        catchRange = 3 # pixel offset before the object gets snapped
         adjacentPosList = []
         pos = [None, None, None, None] # x1, y1, x2, y2
 
@@ -667,6 +667,8 @@ class BaseWidget(QGraphicsRectItem):
                 
             if snapPos[3] != None:
                 self.setY(snapPos[3] - self.rect().height())
+
+        self.setPos(round(self.x()), round(self.y()))
 
     def mouseReleaseEvent(self, event):
         super().mouseReleaseEvent(event)
