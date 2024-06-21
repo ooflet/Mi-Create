@@ -13,7 +13,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
 
-
 msgid "You have unsaved project(s) open. Save and quit?"
 msgstr ""
 
@@ -39,6 +38,9 @@ msgid "Unable to find"
 msgstr ""
 
 msgid "Select Folder..."
+msgstr ""
+
+msgid "Add Image..."
 msgstr ""
 
 msgid "Are you sure you want to reset all dock widget positions?"
@@ -72,4 +74,7 @@ msgid "Project saved at "
 msgstr ""
 
 msgid "Save project before building?"
+msgstr ""
+
+msgid "Create Widget"
 msgstr ""

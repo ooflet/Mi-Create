@@ -4,8 +4,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
-"POT-Creation-Date: 2024-01-02 11:05+1100\n"
-"PO-Revision-Date: 2024-01-05 14:26+1100\n"
+"POT-Creation-Date: 2024-01-05 14:27+1100\n"
+"PO-Revision-Date: 2024-06-21 14:24+1000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: zh_CN\n"
@@ -47,6 +47,9 @@ msgstr "退出"
 
 msgid "Edit"
 msgstr "编辑"
+
+msgid "Search..."
+msgstr "搜索..."
 
 msgid "File"
 msgstr "文件"
@@ -144,11 +147,20 @@ msgstr "关于"
 msgid "View"
 msgstr "查看"
 
-msgid "Toolbars"
+msgid "Toolbar"
 msgstr "工具栏"
 
-msgid "Tools"
-msgstr "工具"
+msgid "Zoom"
+msgstr "飞涨"
+
+msgid "Zoom In"
+msgstr "放大"
+
+msgid "Zoom Out"
+msgstr "缩小"
+
+msgid "Full Screen"
+msgstr "全屏"
 
 msgid "Create"
 msgstr "创建"
@@ -158,15 +170,6 @@ msgstr "项目"
 
 msgid "Properties"
 msgstr "属性"
-
-msgid "File Toolbar"
-msgstr "文件工具栏"
-
-msgid "toolBar_2"
-msgstr ""
-
-msgid "toolBar"
-msgstr ""
 
 msgid "New Project..."
 msgstr "新项目..."
@@ -212,3 +215,45 @@ msgstr "..."
 
 msgid "Search:"
 msgstr "搜索："
+
+msgid "Resources"
+msgstr "资源"
+
+msgid "Add Image..."
+msgstr "添加图片..."
+
+msgid "Layers"
+msgstr "图层"
+
+msgid "Bring to Front"
+msgstr "置于顶层"
+
+msgid "Bring Forwards"
+msgstr "向前推进"
+
+msgid "Send to Back"
+msgstr "置于后面"
+
+msgid "Send Backwards"
+msgstr "向后发送"
+
+msgid "Delete"
+msgstr "删除"
+
+msgid "New Project"
+msgstr "新项目"
+
+msgid "Open Project"
+msgstr "打开项目"
+
+msgid "Manage Project"
+msgstr "管理项目"
+
+msgid "Close Project"
+msgstr "关闭项目"
+
+msgid "Tools"
+msgstr "工具"
+
+msgid "File Toolbar"
+msgstr "文件工具栏"

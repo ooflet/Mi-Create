@@ -575,7 +575,7 @@
                     "max": "999"
                 },
                 "num_hide_zeros": {
-                    "string": "Blanking",
+                    "string": "Hide Zeroes",
                     "type": "bool",
                     "value": ""
                 }

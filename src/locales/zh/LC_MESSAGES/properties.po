@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "POT-Creation-Date: 2024-01-02 11:05+1100\n"
-"PO-Revision-Date: 2024-01-05 17:30+1100\n"
+"PO-Revision-Date: 2024-06-21 14:55+1000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: en\n"
@@ -15,110 +15,140 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 "X-Generator: Poedit 3.4\n"
 
+msgid "Theme"
+msgstr "主题"
+
+msgid "Language"
+msgstr "语言"
+
+msgid "Check for Updates"
+msgstr "检查更新"
+
+msgid "Canvas"
+msgstr "帆布"
+
+msgid "Snap to Guides"
+msgstr "对齐指南"
+
+msgid "Clip to Device Shape"
+msgstr "裁剪至设备屏幕"
+
+msgid "Show Device Outline"
+msgstr "显示屏幕轮廓"
+
+msgid "Antialiasing"
+msgstr "抗锯齿"
+
+msgid "Image Interpolation"
+msgstr "图像插值模式"
+
 msgid "General"
-msgstr ""
+msgstr "一般的"
 
 msgid "Widget Type"
-msgstr ""
+msgstr "小部件类型"
 
 msgid "Name"
-msgstr ""
+msgstr "姓名"
 
 msgid "Position"
-msgstr ""
+msgstr "位置"
 
 msgid "Width"
-msgstr ""
+msgstr "宽度"
 
 msgid "Height"
-msgstr ""
+msgstr "高度"
 
 msgid "Appearance"
-msgstr ""
+msgstr "外貌"
 
 msgid "Opacity"
-msgstr ""
+msgstr "不透明度"
 
 msgid "Visibility Trigger"
-msgstr ""
+msgstr "显示控制"
 
 msgid "Hour Hand Smooth"
-msgstr ""
+msgstr "时针线性随动"
 
 msgid "Minute Hand Smooth"
-msgstr ""
+msgstr "分针线性随动"
 
 msgid "Analog Properties"
-msgstr ""
+msgstr "模拟时钟属性"
 
 msgid "Background"
-msgstr ""
+msgstr "背景"
 
 msgid "Image"
-msgstr ""
+msgstr "图像"
+
+msgid "Alignment"
+msgstr "结盟"
 
 msgid "Anchor Point"
-msgstr ""
+msgstr "锚点"
 
 msgid "Hour Hand"
-msgstr ""
+msgstr "时针"
 
 msgid "Minute Hand"
-msgstr ""
+msgstr "分针"
 
 msgid "Second Hand"
-msgstr ""
+msgstr "秒针"
 
 msgid "Progress Bar"
-msgstr ""
+msgstr "进度条"
 
 msgid "Radius"
-msgstr ""
+msgstr "半径"
 
 msgid "Thickness"
-msgstr ""
+msgstr "厚度"
 
 msgid "Start Angle"
-msgstr ""
+msgstr "起始角度"
 
 msgid "End Angle"
-msgstr ""
+msgstr "结束角度"
 
 msgid "Range"
-msgstr ""
+msgstr "范围"
 
 msgid "Minimum Value"
-msgstr ""
+msgstr "最小值"
 
 msgid "Maximum Value"
-msgstr ""
+msgstr "最大值"
 
 msgid "Minimum Step Value"
-msgstr ""
+msgstr "默认最大值"
 
 msgid "Step Value"
-msgstr ""
+msgstr "最低阈值级"
 
 msgid "Data"
-msgstr ""
+msgstr "数据"
 
 msgid "Data Source"
-msgstr ""
+msgstr "数据源"
 
 msgid "Max Value Source"
-msgstr ""
+msgstr "最大值数据源"
 
 msgid "Images"
-msgstr ""
+msgstr "图片"
 
 msgid "Default Index"
-msgstr ""
+msgstr "默认索引"
 
 msgid "Digits"
-msgstr ""
+msgstr "数字"
 
 msgid "Spacing"
-msgstr ""
+msgstr "间距"
 
-msgid "Blanking"
-msgstr ""
+msgid "Hide Zeroes"
+msgstr "隐藏零"

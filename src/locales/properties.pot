@@ -22,6 +22,9 @@ msgstr ""
 msgid "Check for Updates"
 msgstr ""
 
+msgid "Canvas"
+msgstr ""
+
 msgid "Snap to Guides"
 msgstr ""
 
@@ -145,7 +148,7 @@ msgstr ""
 msgid "Spacing"
 msgstr ""
 
-msgid "Blanking"
+msgid "Hide Zeroes"
 msgstr ""
 
 msgid "Widget Type"

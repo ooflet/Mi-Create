@@ -242,3 +242,15 @@ msgstr ""
 
 msgid "Open Project"
 msgstr ""
+
+msgid "Manage Project"
+msgstr ""
+
+msgid "Close Project"
+msgstr ""
+
+msgid "Tools"
+msgstr ""
+
+msgid "File Toolbar"
+msgstr ""
