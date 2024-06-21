@@ -283,7 +283,6 @@ QDockWidget::title {
 QDockWidget::close-button, QDockWidget::float-button {
     border: none;
     background: palette(window);
-    padding: 0px;
 }
 
 QDockWidget::close-button:hover, QDockWidget::float-button:hover {
