@@ -80,7 +80,7 @@ class CoreDialog(QDialog):
         self.manageProjectSidebarTitle.setText(QCoreApplication.translate("", "Manage Project"))
         self.configureProjectCategory.setText(QCoreApplication.translate("", "Configure"))
         self.configurePageNameTitle.setText(QCoreApplication.translate("", "Watchface name"))
-        self.configurePagePreviewText.setText(QCoreApplication.translate("", "Watchface preview"))
+        self.configurePagePreviewText.setText(QCoreApplication.translate("", "Watchface thumbnail"))
         self.settingsSidebarTitle.setText(QCoreApplication.translate("", "Settings"))
         self.watchfacePageDeviceTitle.setText(QCoreApplication.translate("", "Select device"))
         self.watchfacePageProjectTitle.setText(QCoreApplication.translate("", "Project name"))

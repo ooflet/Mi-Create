@@ -3,7 +3,7 @@
 
 # TODO
 # Put documentation on code, its a wasteland out there
-# Remove multi-project support in favor of in-line AOD editing (through a toggle)
+# In-line AOD editing (through a toggle)
 
 import os
 import time
@@ -409,7 +409,6 @@ class MainWindow(QMainWindow):
             self.loadTheme()
             self.showDialog("warning", f"An error occured while loading the theme {themeName}. Theme settings have been reset.")
 
-
     def reloadImages(self, imageFolder):
         self.ui.resourceList.clear()
         if imageFolder != None:
@@ -506,10 +505,10 @@ class MainWindow(QMainWindow):
             tabName = self.ui.workspace.tabText(index)
             currentProject = self.getCurrentProject()
             self.setWindowTitle(tabName+" - Mi Create")
+            self.updateProperties(False)
             if currentProject == None or tabName == "Project XML":
                 self.setIconState(False)
                 self.clearExplorer()
-                self.updateProperties(False)
                 self.reloadImages(None)
                 return
 
@@ -523,7 +522,6 @@ class MainWindow(QMainWindow):
             else:
                 self.setIconState(True)
                 self.clearExplorer()
-                self.updateProperties(False)
                 self.reloadImages(None)
 
 
@@ -580,6 +578,8 @@ class MainWindow(QMainWindow):
 
             for file in files[0]:
                 shutil.copyfile(file, os.path.join(currentProject["project"].imageFolder, os.path.basename(file)))
+            
+            currentProject["canvas"].clearSelected()
             self.reloadImages(currentProject["project"].imageFolder)
 
         def reloadResource():
@@ -623,7 +623,13 @@ class MainWindow(QMainWindow):
             if currentProject == None or not currentProject.get("project"):
                 return
             currentSelected = self.Explorer.currentItem()
-            currentItem = None
+            
+            # search for item by name, and if available set as currentItem
+            currentItem =  currentProject["project"].getWidget(currentSelected.data(0,101))
+
+            if currentItem == None:
+                return
+            
             currentProject["hasFileChanged"] = True
             self.fileChanged = True
 
@@ -631,8 +637,6 @@ class MainWindow(QMainWindow):
                 self.ui.workspace.setTabText(self.ui.workspace.currentIndex(), self.ui.workspace.tabText(self.ui.workspace.currentIndex())+"*")
 
             logging.info(f"Set property {args[0]}, {args[1]} for widget {currentSelected.data(0,101)}")
-            # search for item by name, and if available set as currentItem
-            currentItem =  currentProject["project"].getWidget(currentSelected.data(0,101))
 
             def updateProperty(widgetName, property, value):
                 if property == "num_source" or property == "imagelist_source" or property == "widget_visibility_source":
@@ -1018,16 +1022,21 @@ class MainWindow(QMainWindow):
             for object in selectedObjects:
                 widget = currentProject["project"].getWidget(object.data(0))
 
+                print(selectedObjects)
+
                 if int(widget.getProperty("widget_pos_x")) == round(object.pos().x()) and int(widget.getProperty("widget_pos_y")) == round(object.pos().y()):
+                    print("return")
                     return
 
                 prevPosObject = {
                     "Name": widget.getProperty("widget_name"),
+                    "Widget": widget,
                     "X": widget.getProperty("widget_pos_x"),
                     "Y": widget.getProperty("widget_pos_y")
                 }
                 currentPosObject = {
-                    "Name": object.data(0),
+                    "Name": widget.getProperty("widget_name"),
+                    "Widget": widget,
                     "X": round(object.pos().x()),
                     "Y": round(object.pos().y())
                 }
@@ -1042,8 +1051,8 @@ class MainWindow(QMainWindow):
             def commandFunc(objects):
                 if isinstance(currentProject["project"], FprjProject):
                     for object in objects:
-                        widget.setProperty("widget_pos_x", int(object["X"]))
-                        widget.setProperty("widget_pos_y", int(object["Y"]))
+                        object["Widget"].setProperty("widget_pos_x", int(object["X"]))
+                        object["Widget"].setProperty("widget_pos_y", int(object["Y"]))
                 currentProject["canvas"].loadObjects(currentProject["project"], self.settings["Canvas"]["Snap"]["value"], self.settings["Canvas"]["Interpolation"]["value"])
                 currentProject["canvas"].selectObjectsFromPropertyList(objects)
 

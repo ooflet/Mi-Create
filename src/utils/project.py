@@ -486,10 +486,11 @@ class FprjProject:
                     # get rid of duplicate items
                     seen = set()
                     duplicatesRemoved = []
+                    
                     for widget in parse["FaceProject"]["Screen"]["Widget"]:
-                        t = tuple(widget.items())
-                        if t not in seen:
-                            seen.add(t)
+                        name = widget.get("@Name")
+                        if name not in seen:
+                            seen.add(name)
                             duplicatesRemoved.append(widget)
 
                     parse["FaceProject"]["Screen"]["Widget"] = duplicatesRemoved

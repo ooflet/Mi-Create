@@ -120,7 +120,6 @@ class Scene(QGraphicsScene):
         if adjacentPosList2[1] != []:
             pos[3] = (min(adjacentPosList2[1], key=lambda x:abs(x-object.pos().y()+object.rect().height())))
 
-        print(pos)
         return pos
     
     def drawSnapLines(self, pos):
@@ -572,10 +571,13 @@ class Canvas(QGraphicsView):
  
             self.imageFolder = project.imageFolder
 
+            self.scene().originPositons = {}
+
             widgets = project.getAllWidgets()
             if type(widgets) == list:
                 for index, widget in enumerate(widgets):    
                     result, reason = self.createWidgetFromData(index, widget, snap, interpolation)
+                    self.scene().originPositions[widget.getProperty("widget_name")] = [int(widget.getProperty("widget_pos_x")), int(widget.getProperty("widget_pos_y"))]
                     if not result:
                         return False, reason
                 self.scene().updatePosMap()
@@ -599,6 +601,7 @@ class Canvas(QGraphicsView):
             if not result:
                 return False, reason 
             else:
+                self.scene().originPositions[objectName] = [int(widget.getProperty("widget_pos_x")), int(widget.getProperty("widget_pos_y"))]
                 self.scene().updatePosMap()
                 return True, "Success"
         
@@ -612,6 +615,7 @@ class BaseWidget(QGraphicsRectItem):
         super().__init__(posX, posY, sizeX, sizeY, parent)
         self.setRect(0, 0, sizeX, sizeY)
         self.setPen(QPen(QColor(0,0,0,0)))
+        self.origPos = None
         self.size = QPointF(sizeX, sizeY)
         self.color = color
         self.canvas = canvas
@@ -669,6 +673,15 @@ class BaseWidget(QGraphicsRectItem):
                 self.setY(snapPos[3] - self.rect().height())
 
         self.setPos(round(self.x()), round(self.y()))
+
+        if len(self.scene().selectedItems()) > 1:
+            for item in self.scene().selectedItems():
+                x = self.scene().originPositions[item.data(0)][0] + (self.pos().x() - self.origPos.x())
+                y = self.scene().originPositions[item.data(0)][1] + (self.pos().y() - self.origPos.y())
+                item.setPos(x, y)
+
+    def mousePressEvent(self, event):
+        self.origPos = self.pos()
 
     def mouseReleaseEvent(self, event):
         super().mouseReleaseEvent(event)
