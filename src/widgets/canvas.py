@@ -68,6 +68,7 @@ class DeviceFrame(QGraphicsPathItem):
 class Scene(QGraphicsScene):
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.originPositions = {}
         self.positionMap = {
             "X": [],
             "Y": []
