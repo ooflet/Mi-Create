@@ -812,6 +812,9 @@ class MainWindow(QMainWindow):
                 for widget in widgets:
                     currentProject["project"].setWidgetLayer(widget[0], widget[1])
             elif type == "redo":
+                if layerChange == "bottom":
+                    widgets.reverse() # preserve widget stacking order by doing the first widgets last
+
                 for widget in widgets:
                     if layerChange == "raise":
                         currentProject["project"].setWidgetLayer(widget[0], widget[1] + 1)
@@ -1333,9 +1336,9 @@ class MainWindow(QMainWindow):
                     self.showDialog("error", _("Failed to save project: ")+str(message))
             elif currentProject.get("editor"):
                 try:
-                    with open(currentProject["project"].dataPath, "w", encoding="utf8") as file:
+                    with open(currentProject["path"], "w", encoding="utf8") as file:
                         file.write(currentProject["editor"].text())
-                    self.statusBar().showMessage(_("Project saved at ")+currentProject["project"].dataPath, 2000)
+                    self.statusBar().showMessage(_("Project saved at ")+currentProject["path"], 2000)
                 except Exception as e:
                     self.statusBar().showMessage(_("Failed to save: ")+str(e), 10000)
                     self.showDialog("error", _("Failed to save project: ")+str(e))
@@ -1477,7 +1480,7 @@ class MainWindow(QMainWindow):
         dialog.exec()
 
     def showDialog(self, type, text, detailedText="", buttons=None, defaultButton=None, checkbox=None, checkboxTicked=None):
-        MessageBox = QMessageBox(self)
+        MessageBox = QMessageBox()
         MessageBox.setWindowTitle("Mi Create")
         MessageBox.setWindowIcon(QIcon(":/Images/MiCreate48x48.png"))
         MessageBox.setText(text)
