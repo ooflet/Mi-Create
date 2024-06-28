@@ -19,6 +19,7 @@ import os
 import traceback
 import logging
 import json
+import shutil
 import xmltodict
 import xml
 import xml.dom.minidom as minidom
@@ -26,7 +27,7 @@ import xml.dom.minidom as minidom
 from pathlib import Path
 from pprint import pprint
 from copy import deepcopy
-from PyQt6.QtCore import QProcess
+from PyQt6.QtCore import QProcess, QSettings
 from PyQt6.QtWidgets import QMessageBox
 
 supportedOneFileVersion = "1.0"
@@ -232,7 +233,15 @@ class WatchData:
             'app_alarm_minute'
         ]
 
-        dataPath = os.path.join(os.getcwd(), "data", "DeviceInfo.db")
+        self.update()
+
+    def update(self):
+        dataPath = "data/DeviceInfo.db"
+        self.models.clear()
+        self.modelID.clear()
+        self.modelSize.clear()
+        self.modelSourceData.clear()
+        self.modelSourceList.clear()
 
         with open(dataPath, "r") as file:
             deviceInfo = xmltodict.parse(file.read())
@@ -244,6 +253,23 @@ class WatchData:
                 self.modelSourceList[x["@Type"]] = []
                 for y in x["SourceDataList"]["SRC"]:
                     self.modelSourceList[x["@Type"]].append(y["@Name"])
+
+    def updateDataFiles(self, compiler, deviceInfo):
+        try:
+            settings = QSettings("Mi Create", "Workspace")
+            shutil.copyfile(compiler, os.path.join(os.getcwd(), "compiler/compile.exe"))
+            shutil.copyfile(deviceInfo, os.path.join(os.getcwd(), "data/DeviceInfo.db"))
+            self.update()
+            settings.setValue("compilerVersion", "custom")
+            QMessageBox.information(None, "Data File Update", "Compiler updated successfully. Please restart the program.")
+        except Exception as e:
+            QMessageBox.critical(None, "Data File Update", "Failed to update: "+str(e))
+
+    def getCompilerVersion(self):
+        settings = QSettings("Mi Create", "Workspace")
+        if settings.value("compilerVersion") is None:
+            settings.setValue("compilerVersion", "m0tral-v4.13")
+        return settings.value("compilerVersion")
 
     def getWatchModel(self, id):
         return self.watchID[id]

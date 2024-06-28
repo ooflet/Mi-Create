@@ -394,6 +394,11 @@ class PropertiesWidget(QWidget):
 
                     createInput(10, "Negative Sign")
 
+                    createInput(11, "Decimal Point")
+
+                    for index in range(11, 21):
+                        createInput(index, "Decimal "+str(index-10))
+
                 elif property["type"] == "int":
                     if len(property) < 5:
                         QMessageBox.critical(None, "Properties", f"Int property for {property['string']} requires a min/max val")

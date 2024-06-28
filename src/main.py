@@ -8,6 +8,7 @@
 import os
 import sys
 import shutil
+import argparse
 import requests
 import subprocess
 import platform
@@ -66,8 +67,6 @@ from window_ui import Ui_MainWindow
 _ = gettext.gettext
 
 programVersion = 'v0.4'
-compilerVersion = 'm0tral-v4.13'
-
 
 class MainWindow(QMainWindow):
     updateFound = pyqtSignal(str)
@@ -764,10 +763,23 @@ class MainWindow(QMainWindow):
             currentProject.setTitle(self.coreDialog.configurePageNameField.text())
             currentProject.setThumbnail(self.coreDialog.configurePagePreviewField.currentText())
 
-        self.coreDialog = CoreDialog(None, self.settingsWidget, f"{programVersion} | compiler {compilerVersion}",
+        def resetSettings():
+            result = self.showDialog("question", "Are you sure you want to clear all settings?", buttons=QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, defaultButton=QMessageBox.StandardButton.No)
+            print(result)
+            if result == QMessageBox.StandardButton.Yes:
+                QSettings("Mi Create", "Settings").clear()
+                QSettings("Mi Create", "Workspace").clear()
+                self.loadSettings()
+                self.loadTheme()
+                self.loadLanguage(True)
+                self.settingsWidget.loadProperties(self.settings)
+
+        self.coreDialog = CoreDialog(None, self.settingsWidget, f"{programVersion} | compiler {self.WatchData.getCompilerVersion()}",
                                      self.WatchData.models)
         self.coreDialog.welcomeSidebarOpenProject.clicked.connect(self.openProject)
         self.coreDialog.reloadSettings.connect(lambda: self.settingsWidget.loadProperties(self.settings))
+        self.coreDialog.updateCompiler.connect(lambda compiler, db: self.WatchData.updateDataFiles(compiler, db))
+        self.coreDialog.resetSettings.connect(resetSettings)
         self.coreDialog.manageProjectSidebarSave.clicked.connect(saveConfig)
         self.coreDialog.rejected.connect(closeEvent)
 
@@ -782,7 +794,7 @@ class MainWindow(QMainWindow):
             if len(self.coreDialog.welcomePage.selectedItems()) == 1:
                 listItem = self.coreDialog.welcomePage.selectedItems()[0]
                 print(listItem.toolTip())
-                self.openProject(None, listItem.toolTip())
+                self.openProject(projectLocation=listItem.toolTip())
 
         self.coreDialog.welcomePage.itemClicked.connect(projectListOpen)
 
@@ -1588,9 +1600,14 @@ class MainWindow(QMainWindow):
 if __name__ == "__main__":
     logging.info("-- Starting Mi Create --")
 
+    parser = argparse.ArgumentParser()
+    parser.add_argument('filename', nargs='?', default=False)
+    parser.add_argument('-reset', action='store_true')
+    args = parser.parse_args()
+
     app = QApplication(sys.argv)
 
-    if sys.argv[1:] == ["-reset"]:
+    if args.reset:
         QSettings("Mi Create", "Settings").clear()
         QSettings("Mi Create", "Workspace").clear()
         QMessageBox.information(None, 'Mi Create', "Settings reset.", QMessageBox.StandardButton.Ok)
@@ -1598,9 +1615,9 @@ if __name__ == "__main__":
     try:
         main_window = MainWindow()
 
-        if sys.argv[1:] != []:
+        if args.filename:
             logging.info("Opening file from argument 1")
-            result = main_window.openProject(None, sys.argv[1:])
+            result = main_window.openProject(projectLocation=args.filename)
             if result == False:
                 main_window.showWelcome()
         else:

@@ -1,9 +1,10 @@
 # Dialog Manager
 # ooflet <ooflet@proton.me>
 
-# Provides the CoreDialog class responsible for pretty much everything other than watchface editing
-# Convenience Multi-Field dialog class for creating quick dialogs with multiple fields
+# Provides the CoreDialog class responsible for pretty much everything 
+# Convenience Multi-Field dialog class for creating quick nice looking dialogs with multiple fields
 
+import os
 import sys
 import gettext
 import threading
@@ -16,7 +17,7 @@ from PyQt6.QtCore import Qt, QSize, pyqtSignal, QRect
 from PyQt6.QtGui import QIcon, QPixmap, QMovie
 from PyQt6.QtWidgets import (QDialog, QLabel, QLineEdit, QComboBox, QToolButton, QSpinBox, QVBoxLayout, 
                              QHBoxLayout, QSizePolicy, QWidget, QDialogButtonBox, QFileDialog, QFrame,
-                             QPushButton, QCheckBox, QListWidget, QListWidgetItem)
+                             QPushButton, QCheckBox, QListWidget, QListWidgetItem, QMenu)
 from widgets.stackedWidget import QStackedWidget, loadJsonStyle
 
 from translate import QCoreApplication
@@ -25,7 +26,9 @@ class CoreDialog(QDialog):
     # Core dialog contains welcome screen, new project screen and compile project screen
     reloadSettings = pyqtSignal()
     saveSettings = pyqtSignal()
-    
+    updateCompiler = pyqtSignal(str, str)
+    resetSettings = pyqtSignal()
+
     def __init__(self, parent, settingsWidget, versionString, deviceList):
         super().__init__(parent)
 
@@ -363,14 +366,33 @@ class CoreDialog(QDialog):
         self.settingsSidebarLayout = QVBoxLayout()
         self.settingsSidebarLayout.setContentsMargins(0,0,0,0)
 
+        self.settingsMenu = QMenu()
+        updateAction = self.settingsMenu.addAction("Update Compiler from EasyFace")
+        resetAction = self.settingsMenu.addAction("Reset Settings")
+
+        def update():
+            folder = QFileDialog.getExistingDirectory(self)
+            print(folder)
+            if folder:
+                self.updateCompiler.emit(os.path.join(folder, "Compiler.exe"), os.path.join(folder, "DeviceInfo.db"))
+
+        updateAction.triggered.connect(update)
+        resetAction.triggered.connect(self.resetSettings.emit)
+
         self.settingsSidebarHeader = QHBoxLayout()
         self.settingsSidebarBack = QToolButton(self)
         self.settingsSidebarBack.setIcon(QIcon().fromTheme("application-back"))
+        self.settingsSidebarMore = QToolButton(self)
+        self.settingsSidebarMore.setStyleSheet("QToolButton::menu-indicator { image: none; }")
+        self.settingsSidebarMore.setIcon(QIcon().fromTheme("application-more"))
+        self.settingsSidebarMore.setMenu(self.settingsMenu)
+        self.settingsSidebarMore.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
         self.settingsSidebarTitle = QLabel(self)
         self.settingsSidebarTitle.setStyleSheet("font-size: 12pt")
         self.settingsSidebarTitle.setFixedHeight(26)
         self.settingsSidebarHeader.addWidget(self.settingsSidebarBack, 0)
         self.settingsSidebarHeader.addWidget(self.settingsSidebarTitle, 1)
+        self.settingsSidebarHeader.addWidget(self.settingsSidebarMore, 0)
 
         self.settingsSidebarHeaderLine = QFrame(self.welcomeSidebar)
         self.settingsSidebarHeaderLine.setFrameShape(QFrame.Shape.HLine)
