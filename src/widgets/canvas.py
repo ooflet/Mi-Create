@@ -781,7 +781,12 @@ class ProgressArc(QGraphicsEllipseItem):
         super().__init__(posX, posY, width, height, parent)
         pen = QPen()
         pen.setWidth(thickness)
-        pen.setBrush(QBrush(pathImage))
+        QPixmap.isNull
+        if pathImage.isNull():
+            pen.setColor(QColor(255, 0, 0, 100))    
+        else:
+            pen.setBrush(QBrush(pathImage))
+        
         pen.setCapStyle(Qt.PenCapStyle.FlatCap)
 
         if isFlat == "1":

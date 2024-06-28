@@ -115,9 +115,9 @@ class PropertiesWidget(QWidget):
             else:        
                 self.treeWidget.setItemWidget(item, 1, valueWidget)
             
-            self.propertyItems[srcProperty] = valueWidget
+            if srcProperty != "":
+                self.propertyItems[srcProperty] = valueWidget
         else:
-
             item = QTreeWidgetItem()
             item.setText(0, _(name))
 
@@ -127,7 +127,8 @@ class PropertiesWidget(QWidget):
             else:        
                 self.treeWidget.setItemWidget(item, 1, valueWidget)
 
-            self.propertyItems[srcProperty] = valueWidget
+            if srcProperty != "":
+                self.propertyItems[srcProperty] = valueWidget
 
         item.setExpanded(True)
         return item
@@ -225,10 +226,11 @@ class PropertiesWidget(QWidget):
         else:
             comboBox.setCursor(Qt.CursorShape.PointingHandCursor)
         if selected:
-            if not selected.isnumeric():
-                comboBox.setCurrentIndex(items.index(selected))
-            else:
-                comboBox.setCurrentIndex(int(selected))
+            if selected in items:
+                if not selected.isnumeric():
+                    comboBox.setCurrentIndex(items.index(selected))
+                else:
+                    comboBox.setCurrentIndex(int(selected))
         comboBox.activated.connect(onChanged)
         return comboBox
     
@@ -465,6 +467,8 @@ class PropertiesWidget(QWidget):
 
     def clearProperties(self):
         for item in self.propertyItems.values():
+            item.setParent(None)
+        for item in self.imageListCategories:
             item.setParent(None)
         self.treeWidget.clear()
         self.propertyItems = {}

@@ -420,7 +420,7 @@ class FprjProject:
                 "@Rotate_yc":"100",
                 "@Radius":"75",
                 "@Line_Width":"30",
-                "@Butt_cap_ending_style_En":"1",
+                "@Butt_cap_ending_style_En":"0",
                 "@StartAngle":"-120",
                 "@EndAngle":"120",
                 "@Range_Min":"0",
