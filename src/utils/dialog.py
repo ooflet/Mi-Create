@@ -162,8 +162,8 @@ class CoreDialog(QDialog):
         self.contentPanel.addWidget(self.welcomePage)
 
         # setup interactive things
-        self.welcomeSidebarNewProject.clicked.connect(lambda: self.showNewProjectPage(self.showWelcomePage))
-        self.welcomeSidebarSettings.clicked.connect(lambda: self.showSettingsPage(self.showWelcomePage))
+        self.welcomeSidebarNewProject.clicked.connect(lambda: self.showNewProjectPage(self.showWelcomePage, True))
+        self.welcomeSidebarSettings.clicked.connect(lambda: self.showSettingsPage(self.showWelcomePage, True))
 
     def setupNewProjectPage(self, deviceList):
         # sidebar
@@ -410,48 +410,69 @@ class CoreDialog(QDialog):
         self.sidebar.addWidget(self.settingsSidebar)
         self.contentPanel.addWidget(self.settingsPage)
 
-    def showWelcomePage(self):
+    def showWelcomePage(self, animate=False):
         self.setWindowTitle(QCoreApplication.translate("", "Welcome"))
-        self.sidebar.setCurrentWidget(self.welcomeSidebar)
+
+        if animate:
+            self.sidebar.setCurrentWidget(self.welcomeSidebar)
+        else:
+            self.sidebar.setCurrentIndex(self.sidebar.indexOf(self.welcomeSidebar))
+
         self.contentPanel.setCurrentWidget(self.welcomePage)
 
         self.hertaGif.stop()
         self.welcomeSidebarLogo.setIcon(QIcon(":/Images/MiCreate48x48.png"))
         self.welcomeSidebarLogo.setIconSize(QSize(48, 48))
 
-    def showNewProjectPage(self, prevPageFunc=None):
+    def showNewProjectPage(self, prevPageFunc=None, animate=False):
         self.setWindowTitle(QCoreApplication.translate("", "New Project"))
-        self.sidebar.setCurrentWidget(self.newProjectSidebar)
+
+        if animate:
+            self.sidebar.setCurrentWidget(self.newProjectSidebar)
+        else:
+            self.sidebar.setCurrentIndex(self.sidebar.indexOf(self.newProjectSidebar))
+
         self.contentPanel.setCurrentWidget(self.newProjectPage)
+
         self.newProjectSidebarList.setCurrentRow(0)
 
         if prevPageFunc:
             self.newProjectSidebarBack.setVisible(True)
-            self.newProjectSidebarBack.clicked.connect(prevPageFunc)
+            self.newProjectSidebarBack.clicked.connect(lambda: prevPageFunc(animate=True))
         else:
             self.newProjectSidebarBack.setVisible(False)
 
-    def showManageProjectPage(self, prevPageFunc=None):
+    def showManageProjectPage(self, prevPageFunc=None, animate=False):
         self.setWindowTitle(QCoreApplication.translate("", "Manage Project"))
-        self.sidebar.setCurrentWidget(self.manageProjectSidebar)
-        self.contentPanel.setCurrentWidget(self.manageProjectPage)
+        if animate:
+            self.sidebar.setCurrentWidget(self.manageProjectSidebar)
+            self.contentPanel.setCurrentWidget(self.manageProjectPage)
+        else:
+            self.sidebar.setCurrentIndex(self.sidebar.indexOf(self.manageProjectSidebar))
+            self.contentPanel.setCurrentIndex(self.sidebar.indexOf(self.manageProjectPage))
+
         self.manageProjectSidebarList.setCurrentRow(0)
 
         if prevPageFunc:
             self.manageProjectSidebarBack.setVisible(True)
-            self.manageProjectSidebarBack.clicked.connect(prevPageFunc)
+            self.manageProjectSidebarBack.clicked.connect(lambda: prevPageFunc(animate=True))
         else:
             self.manageProjectSidebarBack.setVisible(False)
 
-    def showSettingsPage(self, prevPageFunc=None):
+    def showSettingsPage(self, prevPageFunc=None, animate=False):
         self.setWindowTitle(QCoreApplication.translate("", "Settings"))
         self.reloadSettings.emit()
-        self.sidebar.setCurrentWidget(self.settingsSidebar)
-        self.contentPanel.setCurrentWidget(self.settingsPage)
 
+        if animate:
+            self.sidebar.setCurrentWidget(self.settingsSidebar)
+        else:
+            self.sidebar.setCurrentIndex(self.sidebar.indexOf(self.settingsSidebar))
+        
+        self.contentPanel.setCurrentWidget(self.settingsPage)
+        
         if prevPageFunc:
             self.settingsSidebarBack.setVisible(True)
-            self.settingsSidebarBack.clicked.connect(prevPageFunc)
+            self.settingsSidebarBack.clicked.connect(lambda: prevPageFunc(animate=True))
         else:
             self.settingsSidebarBack.setVisible(False)
 

@@ -225,12 +225,14 @@ class PropertiesWidget(QWidget):
             comboBox.setEditable(True)
         else:
             comboBox.setCursor(Qt.CursorShape.PointingHandCursor)
+            
         if selected:
-            if selected in items:
-                if not selected.isnumeric():
+            if selected.isnumeric():
+                comboBox.setCurrentIndex(int(selected))
+            else:
+                if selected in items:
                     comboBox.setCurrentIndex(items.index(selected))
-                else:
-                    comboBox.setCurrentIndex(int(selected))
+
         comboBox.activated.connect(onChanged)
         return comboBox
     
@@ -247,7 +249,7 @@ class PropertiesWidget(QWidget):
         comboBox.currentTextChanged.connect(onChanged)
         return comboBox
 
-    def createCheckBox(self, checked, srcProperty):
+    def createCheckBox(self, checked, srcProperty, propertySignalDisabled=False):
         def onChecked():
             self.sendPropertyChangedSignal(srcProperty, checkBox.isChecked())
 
@@ -266,12 +268,14 @@ class PropertiesWidget(QWidget):
         inputSinker = QPushButton(self)
         inputSinker.setStyleSheet("background: none; border: none;")
         inputSinker.clicked.connect(onClick)
+
         checkBox = QCheckBox(inputSinker)
         checkBox.setObjectName("propertyField-input")
         if checked == None or checked == "":
             checked = False
         checkBox.setChecked(checked)
-        checkBox.stateChanged.connect(onChecked)
+        if propertySignalDisabled == False:
+            checkBox.stateChanged.connect(onChecked)
         return inputSinker, checkBox
     
     def createCategory(self, name, parent=None):
@@ -355,8 +359,10 @@ class PropertiesWidget(QWidget):
 
                     def updateImageAmount(value):
                         value = int(value)
+                        prevLocation = self.treeWidget.verticalScrollBar().value()
                         deleteAllCategories()
                         createImageCategories(propertyValue, value)
+                        self.treeWidget.verticalScrollBar().setValue(prevLocation)
 
                     ignorePropertyCreation = True
                     imageAmountInput = self.createSpinBox(len(propertyValue), False, True, key, 0, 100)
@@ -371,6 +377,23 @@ class PropertiesWidget(QWidget):
                 elif property["type"] == "numlist":
                     ignorePropertyCreation = True
 
+                    decimalList = []
+
+                    checked = False
+
+                    print(len(propertyValue))
+
+                    if len(propertyValue) > 11:
+                        checked = True
+
+                    def toggled(checked):
+                        if checked:
+                            createDecimalInputList()
+                        else:
+                            for item in decimalList:
+                                item.parent().removeChild(item)
+                            decimalList.clear()
+
                     def updateNumberList(index, text):
                         if index >= len(propertyValue):
                             propertyValue.insert(index, text)
@@ -378,26 +401,38 @@ class PropertiesWidget(QWidget):
                             propertyValue[index] = text
                         self.sendPropertyChangedSignal(key, propertyValue)
 
-                    def createInput(index, definedText=None):
+                    def createInput(index, definedText=None, isDecimal=False):
                         text = ""
                         if index < len(propertyValue):
                             text = propertyValue[index]
                         imageInput = self.createResourceEdit(text, False, resourceList, True)
                         if definedText == None:
-                            self.addProperty("", "Number "+str(index), imageInput, parent)
+                            item = self.addProperty("", "Number "+str(index), imageInput, parent)
                         else:
-                            self.addProperty("", definedText, imageInput, parent)
+                            item = self.addProperty("", definedText, imageInput, parent)
                         imageInput.currentTextChanged.connect(lambda *event, index=index: updateNumberList(index, imageInput.currentText()))
+                        
+                        if isDecimal:
+                            decimalList.append(item)
+
+                    def createDecimalInputList():
+                        createInput(11, "Decimal Point", True)
+
+                        for index in range(11, 21):
+                            createInput(index, "Decimal "+str(index-10), True)
+
+                    showDecimalCheckbox = self.createCheckBox(checked, "", True)
+                    showDecimalCheckbox[1].toggled.connect(toggled)
+
+                    self.addProperty("", "Show Decimals", showDecimalCheckbox[0], parent)
 
                     for index in range(0, 10):
                         createInput(index)
 
                     createInput(10, "Negative Sign")
-
-                    createInput(11, "Decimal Point")
-
-                    for index in range(11, 21):
-                        createInput(index, "Decimal "+str(index-10))
+                    
+                    if checked:
+                        createDecimalInputList()
 
                 elif property["type"] == "int":
                     if len(property) < 5:
@@ -408,17 +443,18 @@ class PropertiesWidget(QWidget):
                 elif property["type"] == "src":
                     for x in self.sourceData[str(device)]:
                         if propertyValue != '':
-                            try:
-                                if int(x["@ID"], 0) == int(propertyValue):
+                            if propertyValue.isnumeric():
+                                if int(x["@ID"]) == int(propertyValue):
                                     inputWidget = self.createComboBox(self.sourceList[str(device)], x["@Name"], key, True)
                                     break
-                            except:
-                                if int(x["@ID"]) == int(propertyValue):
+                            else:
+                                if x["@ID"] == propertyValue:
                                     inputWidget = self.createComboBox(self.sourceList[str(device)], x["@Name"], key, True)
                                     break
                         else:
                             inputWidget = self.createComboBox(self.sourceList[str(device)], False, key, True)
                             break   
+
                     else:
                         QMessageBox.warning(None, "Properties", f"Data source not found.")
                         inputWidget = self.createComboBox(self.sourceList[str(device)], False, key, True)

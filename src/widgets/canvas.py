@@ -365,7 +365,7 @@ class Canvas(QGraphicsView):
 
         for x in range(int(digits)):
             # Get QPixmap from file string
-            if len(numList) == 11:
+            if len(numList) >= 11:
                 image = QPixmap()
                 image.load(os.path.join(self.imageFolder, numList[x]))
 

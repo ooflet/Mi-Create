@@ -107,10 +107,10 @@
     <addaction name="actionNewFile"/>
     <addaction name="actionOpenFile"/>
     <addaction name="separator"/>
+    <addaction name="actionSave"/>
+    <addaction name="separator"/>
     <addaction name="actionManage_Project"/>
     <addaction name="actionClose_Project"/>
-    <addaction name="separator"/>
-    <addaction name="actionSave"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -165,8 +165,6 @@
      <string>Build</string>
     </property>
     <addaction name="actionBuild"/>
-    <addaction name="actionUnpack"/>
-    <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuInsert">
     <property name="tearOffEnabled">
@@ -481,7 +479,7 @@
     <string>Settings</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+P</string>
+    <string>Ctrl+,</string>
    </property>
   </action>
   <action name="actionBuild">

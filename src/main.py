@@ -5,6 +5,19 @@
 # Put documentation on code, its a wasteland out there
 # In-line AOD editing (through a toggle)
 
+import logging
+
+# check if compiled and if so, logs to a file
+if "__compiled__" in globals():
+    logging.basicConfig(level=logging.DEBUG, filemode="w", filename="data/app.log",
+                        format="%(asctime)s %(module)s.py:%(lineno)d %(threadName)-10s %(levelname)s %(message)s")
+else:
+    logging.basicConfig(level=logging.DEBUG,
+                        format="%(asctime)s %(module)s.py:%(lineno)d %(threadName)-10s %(levelname)s %(message)s")
+    
+logging.info("-- Starting Mi Create --")
+logging.info("Initializing modules")
+
 import os
 import sys
 import shutil
@@ -35,16 +48,6 @@ from pprint import pprint, pformat
 import xml.dom.minidom
 import configparser
 import threading
-import logging
-
-# check if compiled and if so, logs to a file
-if "__compiled__" in globals():
-    logging.basicConfig(level=logging.DEBUG, filemode="w", filename="data/app.log",
-                        format="%(asctime)s %(module)s.py:%(lineno)d %(threadName)-10s %(levelname)s %(message)s")
-else:
-    logging.basicConfig(level=logging.DEBUG,
-                        format="%(asctime)s %(module)s.py:%(lineno)d %(threadName)-10s %(levelname)s %(message)s")
-
 import json
 import traceback
 
@@ -440,7 +443,7 @@ class MainWindow(QMainWindow):
                     item = QListWidgetItem(QIcon(file), os.path.basename(file))
                     item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
                     item.setData(0, os.path.basename(file))
-                    item.setSizeHint(QSize(64, 64))
+                    item.setSizeHint(QSize(14, 64))
 
                     self.resourceImages.append(os.path.basename(file))
                     self.ui.resourceList.addItem(item)
@@ -677,6 +680,7 @@ class MainWindow(QMainWindow):
                             return
                 elif property == "num_alignment":
                     alignmentList = ["Left", "Center", "Right"]
+                    print(str(alignmentList.index(value)))
                     currentItem.setProperty(property, str(alignmentList.index(value)))
                 elif property == "widget_name":
                     if value == widgetName:
@@ -765,7 +769,6 @@ class MainWindow(QMainWindow):
 
         def resetSettings():
             result = self.showDialog("question", "Are you sure you want to clear all settings?", buttons=QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, defaultButton=QMessageBox.StandardButton.No)
-            print(result)
             if result == QMessageBox.StandardButton.Yes:
                 QSettings("Mi Create", "Settings").clear()
                 QSettings("Mi Create", "Workspace").clear()
@@ -1259,7 +1262,7 @@ class MainWindow(QMainWindow):
 
         # compile
         self.ui.actionBuild.triggered.connect(self.compileProject)
-        self.ui.actionUnpack.triggered.connect(self.decompileProject)
+        #self.ui.actionUnpack.triggered.connect(self.decompileProject)
 
         # help
         self.ui.actionDocumentation.triggered.connect(
@@ -1445,8 +1448,15 @@ class MainWindow(QMainWindow):
         if platform.system() != "Windows":
             self.showDialog("info", "The compiler only supports Windows. Linux support will be added soon.")
             return
+        
+        result = self.showDialog("question", _("Save project before building?"), buttons=QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, defaultButton=QMessageBox.StandardButton.Yes)
 
         currentProject = self.getCurrentProject()
+
+        if result == QMessageBox.StandardButton.Yes:
+            self.saveProjects("current")
+        elif result == QMessageBox.StandardButton.Cancel:
+            return
 
         if currentProject["project"].getTitle() == "" or currentProject["project"].getThumbnail() == "":
             self.showDialog("info", _("Please set the watchface's name and thumbnail before building!"))
@@ -1490,14 +1500,20 @@ class MainWindow(QMainWindow):
         process.finished.connect(success)
 
     def decompileProject(self):
-        self.showDialog("warning", "Please note that images may be glitched when unpacking.")
+        self.showDialog("warning", _("Please note that unpacking is not perfect, some parts of the watchface may be glitched."))
 
-        dialog = MultiFieldDialog(self, _("Unpack Binary"), "Unpack Binary")
-        dialog.addFileField(_("Watchface Binary"), mandatory=True)
-        dialog.addFolderField(_("Output Location"), mandatory=True)
+        dialog = MultiFieldDialog(self, _("Unpack Binary"), _("Unpack Binary"))
+        binaryField = dialog.addFileField(_("Watchface Binary"), mandatory=True)
+        outputField = dialog.addFolderField(_("Output Location"), mandatory=True)
         dialog.addButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
 
         dialog.exec()
+
+        def accept():
+            project = FprjProject()
+            success, message = project.fromBinary(outputField.text(), binaryField.text())
+
+        dialog.accepted
 
     def editProjectXML(self):
         currentProject = self.getCurrentProject()
@@ -1598,11 +1614,9 @@ class MainWindow(QMainWindow):
 
 
 if __name__ == "__main__":
-    logging.info("-- Starting Mi Create --")
-
     parser = argparse.ArgumentParser()
     parser.add_argument('filename', nargs='?', default=False)
-    parser.add_argument('-reset', action='store_true')
+    parser.add_argument('--reset', action='store_true')
     args = parser.parse_args()
 
     app = QApplication(sys.argv)
@@ -1610,7 +1624,7 @@ if __name__ == "__main__":
     if args.reset:
         QSettings("Mi Create", "Settings").clear()
         QSettings("Mi Create", "Workspace").clear()
-        QMessageBox.information(None, 'Mi Create', "Settings reset.", QMessageBox.StandardButton.Ok)
+        print("Settings reset.")
 
     try:
         main_window = MainWindow()

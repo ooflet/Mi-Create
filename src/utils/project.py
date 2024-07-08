@@ -539,6 +539,17 @@ class FprjProject:
         except Exception as e:
             return False, str(e), traceback.format_exc()
         
+    def fromBinary(self, outputDir, path, decompilerPath):
+        logging.info("Decompiling project "+path)
+        process = QProcess()
+        process.setWorkingDirectory(outputDir)
+        process.setProgram(decompilerPath)
+        process.setArguments([path])
+        process.start()
+        process.waitForFinished()
+        print(process.readAllStandardOutput())
+        
+        
     def getDeviceType(self):
         return self.data["FaceProject"]["@DeviceType"]
         

@@ -1,38 +1,16 @@
-########################################################################
-## SPINN DESIGN CODE
-# YOUTUBE: (SPINN TV) https://www.youtube.com/spinnTv
-# WEBSITE: spinndesign.com
-########################################################################
-"""
-This is an extension of QStackedWidget which adds transition animation 
-And Navigation Functions to
-your QStackedWidget widgets
-You can customize the animations using a JSon file or Python statements
-"""
-########################################################################
-## IMPORTS
-########################################################################
+# Stacked Widget with animation
+# From Spinn TV https://www.youtube.com/c/SpinnTV
+
 from PyQt6 import QtWidgets, QtGui, QtCore
 from PyQt6.QtCore import QTimeLine
 from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
-# JSON FOR READING THE JSON STYLESHEET
 import json
-########################################################################
-## 
-########################################################################
 
-########################################################################
-## QStackedWidget Class
-########################################################################
 class QStackedWidget(QtWidgets.QStackedWidget):
     def __init__(self, parent=None):
         super(QStackedWidget, self).__init__(parent)
-
-        ########################################################################
-        ## Initialize Default Values
-        ########################################################################
         # Fade transition
         self.fadeTransition = False
         # Slide transition
@@ -57,74 +35,43 @@ class QStackedWidget(QtWidgets.QStackedWidget):
         self.widgetActive = False
                             
 
-    ########################################################################
-    ## Function to update transition direction
-    ########################################################################
     def setTransitionDirection(self, direction):
         self.transitionDirection = direction
 
-    ########################################################################
-    ## Function to update transition speed
-    ########################################################################
     def setTransitionSpeed(self, speed):
         self.transitionTime = speed
 
-    ########################################################################
-    ## Function to update fade speed
-    ########################################################################
     def setFadeSpeed(self, speed):
         self.fadeTime = speed
 
-    ########################################################################
-    ## Function to update transition easing curve
-    ########################################################################
     def setTransitionEasingCurve(self, aesingCurve):
         self.transitionEasingCurve = aesingCurve
 
-    ########################################################################
-    ## Function to update fade easing curve
-    ########################################################################
     def setFadeCurve(self, aesingCurve):
         self.fadeEasingCurve = aesingCurve
 
-    ########################################################################
-    ## Function to update fade animation playing state
-    ########################################################################
     def setFadeTransition(self, fadeState):
         if isinstance(fadeState, bool):
             self.fadeTransition = fadeState
         else:
             raise Exception("setFadeTransition() only accepts boolean variables")
 
-    ########################################################################
-    ## Function to update slide  playing state
-    ########################################################################
     def setSlideTransition(self, slideState):
         if isinstance(slideState, bool):
             self.slideTransition = slideState
         else:
             raise Exception("setSlideTransition() only accepts boolean variables")
 
-    ########################################################################
-    ## Function to transition to previous widget
-    ########################################################################
     def slideToPreviousWidget(self):
         currentWidgetIndex = self.currentIndex()
         if currentWidgetIndex > 0:
             self.slideToWidgetIndex(currentWidgetIndex - 1)
 
-    ########################################################################
-    ## Function to transition to next widget
-    ########################################################################
     def slideToNextWidget(self):
         currentWidgetIndex = self.currentIndex()
         if currentWidgetIndex < (self.count() - 1):
             self.slideToWidgetIndex(currentWidgetIndex + 1)
 
-
-    ########################################################################
-    ## Function to transition to a given widget index
-    ########################################################################
     def slideToWidgetIndex(self, index):
         if index > (self.count() - 1):
             index = index % self.count()
@@ -135,9 +82,6 @@ class QStackedWidget(QtWidgets.QStackedWidget):
         else:
             self.setCurrentIndex(index)
 
-    ########################################################################
-    ## Function to transition to a given widget
-    ########################################################################
     def slideToWidget(self, newWidget):
         # If the widget is active, exit the function
         if self.widgetActive:
@@ -215,18 +159,12 @@ class QStackedWidget(QtWidgets.QStackedWidget):
         if self.fadeTransition:
             FadeWidgetTransition(self, self.widget(_currentWidgetIndex), self.widget(_nextWidgetIndex))
 
-    ########################################################################
-    ## Function to hide old widget and show new widget after animation is done
-    ########################################################################
     def animationDoneSlot(self):
         self.setCurrentIndex(self.nextWidget)
         self.widget(self.currentWidget).hide()
         self.widget(self.currentWidget).move(self._currentWidgetPosition)
         self.widgetActive = False
 
-    ########################################################################
-    ## Function extending the QStackedWidget setCurrentWidget to animate transition
-    ########################################################################
     def setCurrentWidget(self, widget):
         currentIndex = self.currentIndex()
         nextIndex = self.indexOf(widget)
@@ -244,10 +182,6 @@ class QStackedWidget(QtWidgets.QStackedWidget):
         if not self.slideTransition and not self.fadeTransition:
             self.setCurrentIndex(nextIndex)
 
-
-########################################################################
-## Fade widget class
-########################################################################
 class FadeWidgetTransition(QWidget):
     def __init__(self, animationSettings, oldWidget, newWidget):
     
@@ -279,11 +213,6 @@ class FadeWidgetTransition(QWidget):
         self.pixmapOpacity = 1.0 - value
         self.repaint()
 
-
-    
-########################################################################
-## Read JSon stylesheet
-########################################################################
 def loadJsonStyle(self):
     file = open('data/stackWidgetAnim.json',)
     data = json.load(file)
@@ -291,12 +220,10 @@ def loadJsonStyle(self):
     if "QStackedWidget" in data:
         for stackedWidget in data['QStackedWidget']:
             if "name" in stackedWidget and len(str(stackedWidget["name"])) > 0:
-                print(hasattr(self, str(stackedWidget["name"])))
                 if hasattr(self, str(stackedWidget["name"])):
                     widget = getattr(self, str(stackedWidget["name"]))                    
                     if widget.objectName() == stackedWidget["name"]:
                         if "transitionAnimation" in stackedWidget:
-                            print('anim')
                             for transitionAnimation in stackedWidget["transitionAnimation"]:
                                 if "fade" in transitionAnimation:
                                     for fade in transitionAnimation["fade"]:
