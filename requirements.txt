@@ -1,6 +1,6 @@
 PyQt6
 PyQt6-QScintilla
-pyqt-toast-notification
+superqt
 playsound==1.2.2
 xmltodict
 requests

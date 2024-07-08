@@ -6,6 +6,7 @@
 # In-line AOD editing (through a toggle)
 
 import logging
+import traceback
 
 # check if compiled and if so, logs to a file
 if "__compiled__" in globals():
@@ -211,10 +212,6 @@ class MainWindow(QMainWindow):
 
     def showEvent(self, event):
         # update view actions
-        self.ui.actionToggleExplorer.setChecked(self.ui.explorerWidget.isVisible())
-        self.ui.actionToggleResources.setChecked(self.ui.resourcesWidget.isVisible())
-        self.ui.actionToggleProperties.setChecked(self.ui.propertiesWidget.isVisible())
-        self.ui.actionToggleToolbar.setChecked(self.ui.toolBar.isVisible())
         if self.settings["General"]["CheckUpdate"]["value"] == True:
             threading.Thread(target=self.checkForUpdates).start()
 
@@ -768,7 +765,7 @@ class MainWindow(QMainWindow):
             currentProject.setThumbnail(self.coreDialog.configurePagePreviewField.currentText())
 
         def resetSettings():
-            result = self.showDialog("question", "Are you sure you want to clear all settings?", buttons=QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, defaultButton=QMessageBox.StandardButton.No)
+            result = self.showDialog("question", _("Are you sure you want to reset all settings?"), buttons=QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, defaultButton=QMessageBox.StandardButton.No)
             if result == QMessageBox.StandardButton.Yes:
                 QSettings("Mi Create", "Settings").clear()
                 QSettings("Mi Create", "Workspace").clear()
@@ -1248,6 +1245,13 @@ class MainWindow(QMainWindow):
         self.ui.actionPreferences.triggered.connect(self.showSettings)
 
         # view
+        def updateViewMenu():
+            self.ui.actionToggleExplorer.setChecked(self.ui.explorerWidget.isVisible())
+            self.ui.actionToggleResources.setChecked(self.ui.resourcesWidget.isVisible())
+            self.ui.actionToggleProperties.setChecked(self.ui.propertiesWidget.isVisible())
+            self.ui.actionToggleToolbar.setChecked(self.ui.toolBar.isVisible())
+        
+        self.ui.menuView.aboutToShow.connect(updateViewMenu)
         self.ui.actionToggleExplorer.triggered.connect(
             lambda: toggleViewOfWidget(self.ui.actionToggleExplorer, self.ui.explorerWidget))
         self.ui.actionToggleResources.triggered.connect(
@@ -1612,6 +1616,13 @@ class MainWindow(QMainWindow):
         else:
             MessageBox.exec()
 
+def onException(exc_type, exc_value, exc_traceback):
+    exception = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
+    errString = "Uncaught Exception! "+exception
+    logging.error(errString)
+    QMessageBox.critical(None, 'Error', errString, QMessageBox.StandardButton.Ok)
+
+sys.excepthook = onException
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

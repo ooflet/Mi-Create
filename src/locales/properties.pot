@@ -153,3 +153,30 @@ msgstr ""
 
 msgid "Widget Type"
 msgstr ""
+
+msgid "Image List"
+msgstr ""
+
+msgid "Image Count"
+msgstr ""
+
+msgid "Image"
+msgstr ""
+
+msgid "Index"
+msgstr ""
+
+msgid "Show Decimals"
+msgstr ""
+
+msgid "Number"
+msgstr ""
+
+msgid "Negative Sign"
+msgstr ""
+
+msgid "Decimal Point"
+msgstr ""
+
+msgid "Decimal"
+msgstr ""

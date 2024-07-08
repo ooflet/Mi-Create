@@ -418,8 +418,8 @@ class PropertiesWidget(QWidget):
                     def createDecimalInputList():
                         createInput(11, "Decimal Point", True)
 
-                        for index in range(11, 21):
-                            createInput(index, "Decimal "+str(index-10), True)
+                        for index in range(12, 22):
+                            createInput(index, "Decimal "+str(index-12), True)
 
                     showDecimalCheckbox = self.createCheckBox(checked, "", True)
                     showDecimalCheckbox[1].toggled.connect(toggled)
