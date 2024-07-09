@@ -1,4 +1,4 @@
-# Watchface Projects
+# Project Abstraction Classes (PAC)
 # ooflet <ooflet@proton.me>
 
 # Projects are handled with abstractions in the form of classes

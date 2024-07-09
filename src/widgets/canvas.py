@@ -230,8 +230,6 @@ class Canvas(QGraphicsView):
                     topLevelItem = item
                 elif topLevelItem.zValue() < item.zValue():
                     topLevelItem = item
-        
-        #print(topLevelItem, topLevelItem.zValue())
 
         if topLevelItem != None:
             if not topLevelItem.isSelected():
@@ -682,6 +680,7 @@ class BaseWidget(QGraphicsRectItem):
                 item.setPos(x, y)
 
     def mousePressEvent(self, event):
+        super().mousePressEvent(event)
         self.origPos = self.pos()
 
     def mouseReleaseEvent(self, event):

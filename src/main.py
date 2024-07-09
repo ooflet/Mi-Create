@@ -851,8 +851,6 @@ class MainWindow(QMainWindow):
         if currentCanvasSelected == []:
             return
 
-        print(currentCanvasSelected)
-
         def commandFunc(type, layerChange, widgets):
             if type == "undo":
                 for widget in widgets:
@@ -957,7 +955,6 @@ class MainWindow(QMainWindow):
                     currentProject["project"].deleteWidget(widget)
             elif type == "redo":
                 for widget in clipboard:
-                    print(widget)
                     currentProject["project"].appendWidget(widget)
 
             currentProject["canvas"].loadObjects(currentProject["project"], self.settings["Canvas"]["Snap"]["value"],
@@ -1076,8 +1073,6 @@ class MainWindow(QMainWindow):
 
             for object in selectedObjects:
                 widget = currentProject["project"].getWidget(object.data(0))
-
-                print(selectedObjects)
 
                 if int(widget.getProperty("widget_pos_x")) == round(object.pos().x()) and int(
                         widget.getProperty("widget_pos_y")) == round(object.pos().y()):
@@ -1214,7 +1209,6 @@ class MainWindow(QMainWindow):
         # Connect menu actions
 
         def toggleViewOfWidget(action, widget):
-            print(widget.isVisible(), action.isChecked())
             if widget.isVisible():
                 widget.hide()
                 action.setChecked(False)
@@ -1293,43 +1287,30 @@ class MainWindow(QMainWindow):
     def newProject(self, file, projectName, watchModel):
         # Check if file was selected
         if file:
-            accepted = True
-            if file[0] != "C" and file[0] != "/":
-                reply = self.showDialog("question",
-                                        _("Are you sure you want to create your project in the directory of this program?"),
-                                        "", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-                                        QMessageBox.StandardButton.Yes)
-                if reply == QMessageBox.StandardButton.Yes:
-                    accepted = True
-                else:
-                    accepted = False
+            newProject = FprjProject()
+            create = newProject.fromBlank(file, self.WatchData.modelID[str(watchModel)], projectName)
+            if create[0]:
+                try:
+                    self.createNewWorkspace(newProject)
+                    settings = QSettings("Mi Create", "Workspace")
+                    recentProjectList = settings.value("recentProjects")
 
-            if accepted:
-                newProject = FprjProject()
-                create = newProject.fromBlank(file, self.WatchData.modelID[str(watchModel)], projectName)
-                if create[0]:
-                    try:
-                        self.createNewWorkspace(newProject)
-                        settings = QSettings("Mi Create", "Workspace")
-                        recentProjectList = settings.value("recentProjects")
+                    if recentProjectList == None:
+                        recentProjectList = []
 
-                        if recentProjectList == None:
-                            recentProjectList = []
+                    path = os.path.normpath(newProject.dataPath)
 
-                        path = os.path.normpath(newProject.dataPath)
-                        print(path)
+                    if [os.path.basename(path), path] in recentProjectList:
+                        recentProjectList.pop(recentProjectList.index([os.path.basename(path), path]))
 
-                        if [os.path.basename(path), path] in recentProjectList:
-                            recentProjectList.pop(recentProjectList.index([os.path.basename(path), path]))
+                    recentProjectList.append(
+                        [os.path.basename(newProject.dataPath), os.path.normpath(newProject.dataPath)])
 
-                        recentProjectList.append(
-                            [os.path.basename(newProject.dataPath), os.path.normpath(newProject.dataPath)])
-
-                        settings.setValue("recentProjects", recentProjectList)
-                    except Exception as e:
-                        self.showDialog("error", _("Failed to createNewWorkspace: ") + e, traceback.format_exc())
-                else:
-                    self.showDialog("error", _("Failed to create a new project: ") + create[1], create[2])
+                    settings.setValue("recentProjects", recentProjectList)
+                except Exception as e:
+                    self.showDialog("error", _("Failed to createNewWorkspace: ") + e, traceback.format_exc())
+            else:
+                self.showDialog("error", _("Failed to create a new project: ") + create[1], create[2])
 
     def openProject(self, event=None, projectLocation=None):
         # Get where to open the project from
