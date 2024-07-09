@@ -269,7 +269,6 @@ class CoreDialog(QDialog):
         self.watchfacePageLayout.addLayout(self.watchfacePageDeviceLayout)
         self.watchfacePageLayout.addLayout(self.watchfacePageProjectLayout)
         self.watchfacePageLayout.addLayout(self.watchfacePageDirectoryLayout)
-        self.watchfacePageLayout.addLayout(self.watchfacePageDeviceLayout)
         self.watchfacePageLayout.addStretch()
         self.watchfacePageLayout.addWidget(self.watchfacePageButtonBox)
 

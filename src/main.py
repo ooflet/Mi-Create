@@ -184,9 +184,10 @@ class MainWindow(QMainWindow):
 
         def quitWindow():
             logging.info("-- Exiting Mi Create --")
-            currentProject = self.getCurrentProject()
-            if not currentProject == None and currentProject.get("canvas"):
-                currentProject["canvas"].scene().selectionChanged.disconnect()
+            logging.info("Disconnecting selectionChanged event")
+            for project in self.projects.values():
+                if project.get("canvas"):
+                    project["canvas"].scene().selectionChanged.disconnect()
             logging.info("Saving Window State")
             self.saveWindowState()
             logging.info("Quitting")
@@ -796,7 +797,7 @@ class MainWindow(QMainWindow):
                 print(listItem.toolTip())
                 self.openProject(projectLocation=listItem.toolTip())
 
-        self.coreDialog.welcomePage.itemClicked.connect(projectListOpen)
+        self.coreDialog.welcomePage.itemPressed.connect(projectListOpen)
 
     def changeSelectionInExplorer(self, name):
         if isinstance(name, str):
