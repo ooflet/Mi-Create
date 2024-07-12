@@ -1598,14 +1598,6 @@ class MainWindow(QMainWindow):
         else:
             MessageBox.exec()
 
-def onException(exc_type, exc_value, exc_traceback):
-    exception = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
-    errString = "Uncaught Exception! "+exception
-    logging.error(errString)
-    QMessageBox.critical(None, 'Error', errString, QMessageBox.StandardButton.Ok)
-
-sys.excepthook = onException
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('filename', nargs='?', default=False)
@@ -1613,6 +1605,14 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     app = QApplication(sys.argv)
+
+    def onException(exc_type, exc_value, exc_traceback):
+        exception = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
+        errString = "Uncaught Exception! "+exception
+        logging.error(errString)
+        QMessageBox.critical(None, 'Error', errString, QMessageBox.StandardButton.Ok)
+
+    sys.excepthook = onException
 
     if args.reset:
         QSettings("Mi Create", "Settings").clear()

@@ -1,6 +1,6 @@
 <br />
 <h2 align="center"> Mi Create </h2>
-<p align="center"> Unofficial watchface and application creator for Xiaomi Wearables. Compatible with all Xiaomi wearables made ~2021 and above </p>
+<p align="center"> Unofficial watchface creator for Xiaomi Wearables. Compatible with all Xiaomi wearables made ~2021 and above </p>
 
 <p align="center">
     <img src="images/linux.png" alt="linux">
@@ -32,14 +32,19 @@ If you want to run from source:
 
 Executing from source however will not create log files, it will output logs to console.
 
+## Troubleshooting
+Mi Create can end up running into a few bugs. Please report them with the main log file attached. If you have not changed the install location on Windows during setup, the main log file will be located at  
+`C:\Users\{username}\AppData\Local\Programs\Mi Create\data\app.log`
+
+## Help
+If you are looking for a tutorial on Mi Create, please view the documentation at https://ooflet.github.io/docs. If you have any further questions that are not covered by the documentation, feel free to ask on the [discussions](https://github.com/ooflet/Mi-Create/discussions) tab. Otherwise, if there is a bug or issue with Mi Create, submit an [issue](https://github.com/ooflet/Mi-Create/issues) report.
+
 ## Redistribution
 
 I do not mind the program being redistributed, however please link the Github repository somewhere whether it be the post or the description.
 
 Compiling for different platforms must be done using Nuitka, there are some specific compiled checks special for Nutika in the program. Plus, Nutika gives an added performance benefit.
 
-## Help
-If you are looking for a tutorial on Mi Create, please view the documentation at https://ooflet.github.io/docs. If you have any further questions that are not covered by the documentation, feel free to ask on the [discussions](https://github.com/ooflet/Mi-Create/discussions) tab. Otherwise, if there is a bug or issue with Mi Create, submit an [issue](https://github.com/ooflet/Mi-Create/issues) report.
 
 ## Licensing:
 Mi Create is licensed under the GPL-3 licence. [View what you can and can't do](https://gist.github.com/kn9ts/cbe95340d29fc1aaeaa5dd5c059d2e60)   

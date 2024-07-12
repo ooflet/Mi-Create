@@ -25,23 +25,15 @@ class Theme:
             if os.path.isdir(themeFolder):
                 logging.debug("Themes directory found: "+themeFolder)
                 config.read_file(open(os.path.join(themeFolder, "config.ini"), encoding="utf8"))
-                with open(os.path.join(themeFolder, "colorScheme.json")) as colorSchemes:
-                    schemes = json.load(colorSchemes)
-                    self.themes[config.get('config', 'themeName')] = {
-                        "themeName": config.get('config', 'themeName'), 
-                        "directory": themeFolder,
-                        "baseStyle": config.get('theme', 'baseStyle'), 
-                        "colorSchemes": schemes,
-                        "stylesheet": os.path.join(themeFolder, config.get('theme', 'stylesheet')),
-                        "iconFolder": os.path.join(themeFolder, config.get('theme', 'iconFolder'))
-                    }
-                    if schemes.get("Base"): # no different color schemes for theme
-                        self.themeNames.append(config.get('config', 'themeName'))
-                    else:
-                        for scheme in schemes:
-                            self.themeNames.append(f"{config.get('config', 'themeName')} {scheme}")
-                                
-
+                self.themes[config.get('config', 'themeName')] = {
+                    "themeName": config.get('config', 'themeName'), 
+                    "directory": themeFolder,
+                    "baseStyle": config.get('theme', 'baseStyle'), 
+                    "colorSchemes": json.loads(config.get('theme', 'colorSchemes')),
+                    "dataFolder": os.path.join(themeFolder, config.get('theme', 'dataFolder')),
+                    "iconFolder": os.path.join(themeFolder, config.get('theme', 'iconFolder'))
+                }
+                
     def loadTheme(self, app, themeName):
         themeName = themeName.split(" ")
 
@@ -49,40 +41,34 @@ class Theme:
             return False
         theme = self.themes[themeName[0]]
 
+        dataFolder = os.path.join(theme["dataFolder"], themeName[1])
+
+        with open(os.path.join(dataFolder, "colorScheme.json")) as file: 
+            colorSchemeJson = json.loads(file.read())
+
+        stylesheet = os.path.join(dataFolder, "style.qss")
+
         palette = QPalette()
 
-        if len(themeName) < 2:
-            scheme = None
-            for colorGroup, colors in theme["colorSchemes"].items():
-                for colorRole, color in colors.items():
-                    if colorGroup == "Disabled":
-                        palette.setColor(QPalette.ColorGroup.Disabled, getattr(QPalette.ColorRole, colorRole), QColor(color[0], color[1], color[2]))
-                    else:
-                        palette.setColor(getattr(QPalette.ColorRole, colorRole), QColor(color[0], color[1], color[2]))
-        else:
-            scheme = themeName[1]
-            for colorGroup, colors in theme["colorSchemes"][scheme].items():
-                for colorRole, color in colors.items():
-                    if colorGroup == "Disabled":
-                        palette.setColor(QPalette.ColorGroup.Disabled, getattr(QPalette.ColorRole, colorRole), QColor(color[0], color[1], color[2]))
-                    else:
-                        palette.setColor(getattr(QPalette.ColorRole, colorRole), QColor(color[0], color[1], color[2]))
+        scheme = themeName[1]
+        for colorGroup, colors in colorSchemeJson.items():
+            for colorRole, color in colors.items():
+                if colorGroup == "Disabled":
+                    palette.setColor(QPalette.ColorGroup.Disabled, getattr(QPalette.ColorRole, colorRole), QColor(color[0], color[1], color[2]))
+                else:
+                    palette.setColor(getattr(QPalette.ColorRole, colorRole), QColor(color[0], color[1], color[2]))
         
         app.setPalette(palette)
 
         palette = QPalette()
 
         QIcon().setThemeSearchPaths([theme["iconFolder"]])
-
-        if scheme:
-            QIcon().setThemeName(scheme)
-        else:
-            QIcon().setThemeName(themeName[0])
+        QIcon().setThemeName(themeName[1])
                 
         if theme["baseStyle"] != "none":
             app.setStyle(theme["baseStyle"])
 
-        with open(theme["stylesheet"]) as stylesheet:
-            app.setStyleSheet(stylesheet.read())
+        with open(stylesheet) as stylesheetFile:
+            app.setStyleSheet(stylesheetFile.read())
 
         return True

@@ -1,7 +1,6 @@
 PyQt6
 PyQt6-QScintilla
-superqt
-playsound==1.2.2
+qt6-applications
 xmltodict
 requests
 

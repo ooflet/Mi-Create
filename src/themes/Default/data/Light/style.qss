@@ -1,6 +1,6 @@
 /* 
 
-    Mi Create Default stylesheet
+    Mi Create Modern Light Stylesheet
     ooflet 2024
 
  */
@@ -39,19 +39,19 @@ QCheckBox::indicator, QRadioButton::indicator {
 }
 
 QRadioButton::indicator:checked {
-    image: url(:/Dark/radio_checked.svg);
+    image: url(:/Icons/radio_checked.svg);
 }
 
 QRadioButton::indicator:unchecked {
-    image: url(:/Dark/radio_unchecked.svg);
+    image: url(:/Icons/radio_unchecked.svg);
 }
 
 QRadioButton::indicator:checked:disabled {
-    image: url(:/Dark/radio_checked_disabled.svg);
+    image: url(:/Icons/radio_checked_disabled.svg);
 }
 
 QRadioButton::indicator:unchecked:disabled {
-    image: url(:/Dark/radio_unchecked_disabled.svg);
+    image: url(:/Icons/radio_unchecked_disabled.svg);
 }
 
 QAbstractItemView::indicator:checked,
@@ -59,7 +59,7 @@ QCheckBox::indicator:checked,
 QGroupBox::indicator:checked,
 QTreeView::indicator:checked,
 QMenu::indicator:checked {
-    image: url(:/Dark/checkbox_checked.svg);
+    image: url(:/Icons/checkbox_checked.svg);
 }
 
 QAbstractItemView::indicator:unchecked,
@@ -67,7 +67,7 @@ QCheckBox::indicator:unchecked,
 QGroupBox::indicator:unchecked,
 QTreeView::indicator:unchecked,
 QMenu::indicator:unchecked {
-    image: url(:/Dark/checkbox_unchecked.svg);
+    image: url(:/Icons/checkbox_unchecked.svg);
 }
 
 QAbstractItemView::indicator:indeterminate,
@@ -75,7 +75,7 @@ QCheckBox::indicator:indeterminate,
 QGroupBox::indicator:indeterminate,
 QTreeView::indicator:indeterminate,
 QMenu::indicator:indeterminate {
-    image: url(:/Dark/checkbox_partial.svg);
+    image: url(:/Icons/checkbox_partial.svg);
 }
 
 QAbstractItemView::indicator:checked:disabled,
@@ -83,7 +83,7 @@ QCheckBox::indicator:checked:disabled,
 QGroupBox::indicator:checked:disabled,
 QTreeView::indicator:checked:disabled,
 QMenu::indicator:checked:disabled {
-    image: url(:/Dark/checkbox_checked_disabled.svg);
+    image: url(:/Icons/checkbox_checked_disabled.svg);
 }
 
 QAbstractItemView::indicator:unchecked:disabled,
@@ -91,7 +91,7 @@ QCheckBox::indicator:unchecked:disabled,
 QGroupBox::indicator:unchecked:disabled,
 QTreeView::indicator:unchecked:disabled,
 QMenu::indicator:unchecked:disabled {
-    image: url(:/Dark/checkbox_unchecked_disabled.svg);
+    image: url(:/Icons/checkbox_unchecked_disabled.svg);
 }
 
 QAbstractItemView::indicator:indeterminate:disabled,
@@ -99,7 +99,7 @@ QCheckBox::indicator:indeterminate:disabled,
 QGroupBox::indicator:indeterminate:disabled,
 QTreeView::indicator:indeterminate:disabled,
 QMenu::indicator:indeterminate:disabled {
-    image: url(:/Dark/checkbox_partial_disabled.svg);
+    image: url(:/Icons/checkbox_partial_disabled.svg);
 }
 
 QMenu::indicator {
@@ -281,7 +281,8 @@ QDockWidget::title {
 }
 
 QDockWidget::close-button, QDockWidget::float-button {
-    border: none;
+    border: 1px solid transparent;
+    border-radius: 12px;
     background: palette(window);
 }
 
@@ -539,7 +540,7 @@ QSpinBox::up-button#propertyField-input {
 }
 
 QSpinBox::up-arrow#propertyField-input {
-    image: url(:/Dark/up-arrow.png);
+    image: url(:/Images/up-arrow.png);
     width: 7px;
     height: 7px;
 }
@@ -584,7 +585,7 @@ QComboBox::drop-down#propertyField-input {
 }
 
 QComboBox::down-arrow#propertyField-input {
-    image: url(:/Dark/down-arrow.png);
+    image: url(:/Images/down-arrow.png);
     width: 7px;
     height: 7px;
 }

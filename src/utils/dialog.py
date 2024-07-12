@@ -9,15 +9,15 @@ import sys
 import gettext
 import threading
 from pathlib import Path
-from playsound import playsound
 
 sys.path.append("..")
 
-from PyQt6.QtCore import Qt, QSize, pyqtSignal, QRect
+from PyQt6.QtCore import Qt, QSize, pyqtSignal, QUrl
 from PyQt6.QtGui import QIcon, QPixmap, QMovie
 from PyQt6.QtWidgets import (QDialog, QLabel, QLineEdit, QComboBox, QToolButton, QSpinBox, QVBoxLayout, 
                              QHBoxLayout, QSizePolicy, QWidget, QDialogButtonBox, QFileDialog, QFrame,
                              QPushButton, QCheckBox, QListWidget, QListWidgetItem, QMenu)
+from PyQt6.QtMultimedia import QSoundEffect
 from widgets.stackedWidget import QStackedWidget, loadJsonStyle
 
 from translate import QCoreApplication
@@ -93,14 +93,16 @@ class CoreDialog(QDialog):
         # sidebar
 
         # TODO: stop causing epilepsy on page animation when gif is playing
-        self.hertaGif = QMovie("data/herta/herta.gif")
+        self.hertaGif = QMovie(":/Herta/herta.gif")
         self.hertaGif.frameChanged.connect(lambda: self.welcomeSidebarLogo.setIcon(QIcon(self.hertaGif.currentPixmap())))
-
+        hertaSound = QSoundEffect()
+        hertaSound.setSource(QUrl("qrc:/Herta/herta.wav"))
+        
         def playHerta():
             # kuru kuru~
-            playsound("data/herta/herta.mp3", block=False)
             self.welcomeSidebarLogo.setIconSize(QSize(100, 100))
             self.hertaGif.start()
+            hertaSound.play()
             
         self.welcomeSidebar = QFrame(self.sidebar)
         self.welcomeSidebarLayout = QVBoxLayout(self.welcomeSidebar)
@@ -262,7 +264,8 @@ class CoreDialog(QDialog):
         self.watchfacePageDirectoryLayout.addWidget(self.watchfacePageDirectoryField)
         self.watchfacePageDirectoryLayout.addWidget(self.watchfacePageDirectoryFolderButton)
 
-        self.watchfacePageButtonBox = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok)
+        self.watchfacePageButtonBox = QDialogButtonBox()
+        self.watchfacePageButtonBox.setStandardButtons(QDialogButtonBox.StandardButton.Ok)
 
         # layout
         
@@ -443,12 +446,13 @@ class CoreDialog(QDialog):
 
     def showManageProjectPage(self, prevPageFunc=None, animate=False):
         self.setWindowTitle(QCoreApplication.translate("", "Manage Project"))
+        
         if animate:
             self.sidebar.setCurrentWidget(self.manageProjectSidebar)
-            self.contentPanel.setCurrentWidget(self.manageProjectPage)
         else:
             self.sidebar.setCurrentIndex(self.sidebar.indexOf(self.manageProjectSidebar))
-            self.contentPanel.setCurrentIndex(self.sidebar.indexOf(self.manageProjectPage))
+
+        self.contentPanel.setCurrentWidget(self.manageProjectPage)
 
         self.manageProjectSidebarList.setCurrentRow(0)
 
