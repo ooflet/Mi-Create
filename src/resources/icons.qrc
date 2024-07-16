@@ -1,9 +1,16 @@
 <RCC>
   <qresource prefix="Dark">
     <file>close_dark.png</file>
-    <file>close_hover_dark.png</file>
+    <file>close_dark.svg</file>
+    <file>close_hover_dark.svg</file>
+    <file>window_dark.png</file>
   </qresource>
-  <qresource prefix="Light"/>
+  <qresource prefix="Light">
+    <file>close_light.png</file>
+    <file>close_light.svg</file>
+    <file>close_hover_light.svg</file>
+    <file>window_light.png</file>
+  </qresource>
   <qresource prefix="Icons">
     <file>down-arrow.png</file>
     <file>up-arrow.png</file>
@@ -20,6 +27,7 @@
   </qresource>
   <qresource prefix="Images">
     <file>MiCreate.png</file>
+    <file>splash.png</file>
     <file>MiCreate48x48.png</file>
     <file>MiCreate64x64.png</file>
     <file>MiCreate128x128.png</file>

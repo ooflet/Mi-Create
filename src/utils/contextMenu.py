@@ -21,7 +21,7 @@ with open("data/contextMenus.json") as file:
     contextMenus = json.load(file)
 
 class ContextMenu(QMenu):
-    def __init__(self, type, pos, ui):
+    def __init__(self, type, ui):
         super().__init__()
         def createContextMenu(menu, actions):
             for actionName, properties in actions.items():

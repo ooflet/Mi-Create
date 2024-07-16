@@ -235,11 +235,11 @@ class Canvas(QGraphicsView):
             if not topLevelItem.isSelected():
                 self.scene().clearSelection()
                 topLevelItem.setSelected(True)
-            menu = ContextMenu("shape", viewPos, self.mainWindowUI)
+            menu = ContextMenu("shape", self.mainWindowUI)
         else:
-            menu = ContextMenu("default", viewPos, self.mainWindowUI)
+            menu = ContextMenu("default", self.mainWindowUI)
 
-        action = menu.exec(viewPos)
+        menu.exec(viewPos)
 
     def wheelEvent(self, event):
         modifiers = QApplication.keyboardModifiers()

@@ -271,8 +271,8 @@ QToolBar::separator {
 }
 
 QDockWidget{
-  titlebar-close-icon: url(:/Dark/x_dim.png);
-  titlebar-normal-icon: url(:/Dark/copy.png);
+  titlebar-close-icon: url(:/Light/close_light.png);
+  titlebar-normal-icon: url(:/Light/window_light.png);
 }
 
 QDockWidget::title {
@@ -318,12 +318,12 @@ QTabBar::tab:selected {
 }
 
 QTabBar::close-button {
-	image: url(:/Dark/x_dim.png);
+	image: url(:/Light/close_light.svg);
 }
 
 
 QTabBar::close-button:hover {
-	image: url(:/Dark/x.png);
+	image: url(:/Light/close_hover_light.svg);
 }
 
 /*
@@ -471,6 +471,7 @@ QGraphicsView {
     background-color: palette(base)
 }
 
+
 QMenuBar {
     background-color: palette(base);
     border-bottom: 1px solid transparent;
@@ -487,6 +488,10 @@ QMenuBar::item {
 
 QMenuBar::item:selected {
     background-color: palette(alternate-base);
+}
+
+QMenuBar::item:pressed {
+    background-color: palette(highlight);
 }
 
 QMenu {
@@ -510,7 +515,7 @@ QMenu::item {
 }
 
 QMenu::item:selected {
-    background-color: palette(alternate-base);
+    background-color: palette(highlight);
 }
 
 QLineEdit#propertyField-input {
@@ -522,7 +527,6 @@ QLineEdit#propertyField-input {
 
 QLineEdit:focus#propertyField-input {
     background-color: palette(dark);
-    border: 1px solid black;
 }
 
 QSpinBox#propertyField-input {
@@ -540,7 +544,7 @@ QSpinBox::up-button#propertyField-input {
 }
 
 QSpinBox::up-arrow#propertyField-input {
-    image: url(:/Images/up-arrow.png);
+    image: url(:/Icons/up-arrow.png);
     width: 7px;
     height: 7px;
 }
@@ -553,14 +557,13 @@ QSpinBox::down-button#propertyField-input {
 }
 
 QSpinBox::down-arrow#propertyField-input {
-    image: url(:/Dark/down-arrow.png);
+    image: url(:/Icons/down-arrow.png);
     width: 7px;
     height: 7px;
 }
 
 QSpinBox:focus#propertyField-input {
     background-color: palette(dark);
-    border: 1px solid black;
 }
 
 QCheckBox#propertyField-input {
@@ -585,12 +588,11 @@ QComboBox::drop-down#propertyField-input {
 }
 
 QComboBox::down-arrow#propertyField-input {
-    image: url(:/Images/down-arrow.png);
+    image: url(:/Icons/down-arrow.png);
     width: 7px;
     height: 7px;
 }
 
 QComboBox:focus#propertyField-input {
     background-color: palette(dark);
-    border: 1px solid black;
-}  
+}

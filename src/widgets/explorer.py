@@ -13,6 +13,7 @@ class Explorer(QTreeWidget):
         self.items = {}
         self.objectIcon = objectIcon
         self.mainWindowUI = ui
+        self.setEditTriggers(QTreeWidget.EditTrigger.NoEditTriggers)
         self.setHorizontalScrollMode(QTreeWidget.ScrollMode.ScrollPerPixel)
         self.setVerticalScrollMode(QTreeWidget.ScrollMode.ScrollPerPixel)
         self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
@@ -28,7 +29,7 @@ class Explorer(QTreeWidget):
     def contextMenuEvent(self, pos):
         if len(self.selectedItems()) > 0:
             pos = self.mapToGlobal(pos)
-            menu = ContextMenu("shape", pos, self.mainWindowUI)
+            menu = ContextMenu("shape", self.mainWindowUI)
             menu.exec(pos)
 
     def updateExplorer(self, project):

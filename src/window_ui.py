@@ -450,7 +450,7 @@ class Ui_MainWindow(object):
         self.actionFull_Screen.setText(_translate("MainWindow", "Full Screen"))
         self.actionFull_Screen.setShortcut(_translate("MainWindow", "F11"))
         self.actionDelete.setText(_translate("MainWindow", "Delete"))
-        self.actionDelete.setShortcut(_translate("MainWindow", "Backspace"))
+        self.actionDelete.setShortcut(_translate("MainWindow", "Del"))
         self.actionBring_to_Front.setText(_translate("MainWindow", "Bring to Front"))
         self.actionBring_Forwards.setText(_translate("MainWindow", "Bring Forwards"))
         self.actionSend_to_Back.setText(_translate("MainWindow", "Send to Back"))

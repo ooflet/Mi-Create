@@ -19,7 +19,7 @@ class Theme:
         self.currentWelcomePage = ""
         
         config = configparser.ConfigParser()
-        logging.debug("Initializing Themes")
+        logging.info("Initializing Themes")
         for file in os.listdir(themeDirectory):
             themeFolder = os.path.join(themeDirectory, file)
             if os.path.isdir(themeFolder):
@@ -33,6 +33,8 @@ class Theme:
                     "dataFolder": os.path.join(themeFolder, config.get('theme', 'dataFolder')),
                     "iconFolder": os.path.join(themeFolder, config.get('theme', 'iconFolder'))
                 }
+                for scheme in json.loads(config.get('theme', 'colorSchemes')):
+                    self.themeNames.append(f"{config.get('config', 'themeName')} {scheme}")
                 
     def loadTheme(self, app, themeName):
         themeName = themeName.split(" ")

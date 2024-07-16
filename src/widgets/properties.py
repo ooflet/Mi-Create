@@ -16,7 +16,7 @@ from utils.project import FprjProject, XiaomiProject
 
 from PyQt6.QtWidgets import (QStyleOptionViewItem, QStyledItemDelegate, QWidget, QFileDialog, QTreeWidget, QFrame, QHeaderView, QPushButton,
                                QDialog, QDialogButtonBox, QVBoxLayout, QListWidgetItem, QTreeWidgetItem, QLineEdit, 
-                               QSpinBox, QComboBox, QStyle, QCheckBox, QMessageBox, QAbstractItemView)
+                               QSpinBox, QComboBox, QStyle, QCheckBox, QMessageBox, QAbstractItemView, QApplication)
 from PyQt6.QtCore import Qt, pyqtSignal, QPoint, QSize, QModelIndex
 from PyQt6.QtGui import QColor, QPen, QGuiApplication, QIcon, QPalette, QStandardItemModel
 from pprint import pprint

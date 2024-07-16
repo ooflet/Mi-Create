@@ -271,8 +271,8 @@ QToolBar::separator {
 }
 
 QDockWidget{
-  titlebar-close-icon: url(:/Dark/x_dim.png);
-  titlebar-normal-icon: url(:/Dark/copy.png);
+  titlebar-close-icon: url(:/Dark/close_dark.png);
+  titlebar-normal-icon: url(:/Dark/window_dark.png);
 }
 
 QDockWidget::title {
@@ -318,12 +318,12 @@ QTabBar::tab:selected {
 }
 
 QTabBar::close-button {
-	image: url(:/Dark/x_dim.png);
+	image: url(:/Dark/close_dark.svg);
 }
 
 
 QTabBar::close-button:hover {
-	image: url(:/Dark/x.png);
+	image: url(:/Dark/close_hover_dark.svg);
 }
 
 /*
@@ -489,6 +489,10 @@ QMenuBar::item:selected {
     background-color: palette(alternate-base);
 }
 
+QMenuBar::item:pressed {
+    background-color: palette(highlight);
+}
+
 QMenu {
     background-color: palette(window);
     padding: 5px 0 5px 0;
@@ -510,7 +514,7 @@ QMenu::item {
 }
 
 QMenu::item:selected {
-    background-color: palette(alternate-base);
+    background-color: palette(highlight);
 }
 
 QLineEdit#propertyField-input {
@@ -540,7 +544,7 @@ QSpinBox::up-button#propertyField-input {
 }
 
 QSpinBox::up-arrow#propertyField-input {
-    image: url(:/Images/up-arrow.png);
+    image: url(:/Icons/up-arrow.png);
     width: 7px;
     height: 7px;
 }
@@ -553,7 +557,7 @@ QSpinBox::down-button#propertyField-input {
 }
 
 QSpinBox::down-arrow#propertyField-input {
-    image: url(:/Dark/down-arrow.png);
+    image: url(:/Icons/down-arrow.png);
     width: 7px;
     height: 7px;
 }
@@ -585,7 +589,7 @@ QComboBox::drop-down#propertyField-input {
 }
 
 QComboBox::down-arrow#propertyField-input {
-    image: url(:/Images/down-arrow.png);
+    image: url(:/Icons/down-arrow.png);
     width: 7px;
     height: 7px;
 }

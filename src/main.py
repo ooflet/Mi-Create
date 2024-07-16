@@ -34,7 +34,7 @@ os.chdir(os.path.dirname(
 from PyQt6.QtWidgets import (QInputDialog, QMessageBox, QApplication, QProgressBar,
                              QDialogButtonBox, QFileDialog, QWidget, QVBoxLayout,
                              QFrame, QColorDialog, QFontDialog, QLabel, QListWidgetItem,
-                             QAbstractItemView, QUndoView, QCheckBox, QHBoxLayout)
+                             QAbstractItemView, QDialog, QUndoView, QCheckBox, QHBoxLayout)
 from PyQt6.QtGui import QIcon, QPixmap, QDesktopServices, QDrag, QImage, QPainter
 from PyQt6.QtCore import Qt, QSettings, QSize, QUrl, pyqtSignal
 from window import FramelessDialog
@@ -694,6 +694,7 @@ class MainWindow(QMainWindow):
                     pixmap.load(os.path.join(currentProject["project"].imageFolder, value))
 
                     # set widget size to image size
+                    currentProject["canvas"].selectObject(widgetName) # load object property
                     currentItem.setProperty("widget_size_width", pixmap.width())
                     self.propertiesWidget.propertyItems["widget_size_width"].setText(str(pixmap.width()))
                     currentItem.setProperty("widget_size_height", pixmap.height())
@@ -775,7 +776,7 @@ class MainWindow(QMainWindow):
                 self.loadLanguage(True)
                 self.settingsWidget.loadProperties(self.settings)
 
-        self.coreDialog = CoreDialog(None, self.settingsWidget, f"{programVersion} | compiler {self.WatchData.getCompilerVersion()}",
+        self.coreDialog = CoreDialog(None, self.settingsWidget, f"{programVersion} • compiler {self.WatchData.getCompilerVersion()}",
                                      self.WatchData.models)
         self.coreDialog.welcomeSidebarOpenProject.clicked.connect(self.openProject)
         self.coreDialog.reloadSettings.connect(lambda: self.settingsWidget.loadProperties(self.settings))
@@ -1003,7 +1004,6 @@ class MainWindow(QMainWindow):
             return
 
         if subject == "canvas":
-            print("selection canvas")
             self.selectionDebounce = True
 
             if len(currentCanvasSelected) > 1:
@@ -1025,7 +1025,6 @@ class MainWindow(QMainWindow):
 
             self.selectionDebounce = False
         elif subject == "explorer":
-            print("selection canvas")
             self.selectionDebounce = True
 
             for item in currentExplorerSelected:
@@ -1608,7 +1607,7 @@ if __name__ == "__main__":
 
     def onException(exc_type, exc_value, exc_traceback):
         exception = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
-        errString = "Uncaught Exception! "+exception
+        errString = "Internal error! Please report as a bug.\n\n"+exception
         logging.error(errString)
         QMessageBox.critical(None, 'Error', errString, QMessageBox.StandardButton.Ok)
 
