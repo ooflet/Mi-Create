@@ -92,7 +92,6 @@ class CoreDialog(QDialog):
     def setupWelcomePage(self, versionString):
         # sidebar
 
-        # TODO: stop causing epilepsy on page animation when gif is playing
         self.hertaGif = QMovie(":/Herta/herta.gif")
         self.hertaGif.frameChanged.connect(lambda: self.welcomeSidebarLogo.setIcon(QIcon(self.hertaGif.currentPixmap())))
         hertaSound = QSoundEffect()
@@ -428,6 +427,7 @@ class CoreDialog(QDialog):
 
     def showNewProjectPage(self, prevPageFunc=None, animate=False):
         self.setWindowTitle(QCoreApplication.translate("", "New Project"))
+        self.hertaGif.stop()
 
         if animate:
             self.sidebar.setCurrentWidget(self.newProjectSidebar)
@@ -464,6 +464,7 @@ class CoreDialog(QDialog):
 
     def showSettingsPage(self, prevPageFunc=None, animate=False):
         self.setWindowTitle(QCoreApplication.translate("", "Settings"))
+        self.hertaGif.stop()
         self.reloadSettings.emit()
 
         if animate:

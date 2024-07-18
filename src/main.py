@@ -290,6 +290,7 @@ class MainWindow(QMainWindow):
         self.restoreState(settings.value("state"))
 
     def setSetting(self, setting, value, loadSettings=True):
+        logging.info(f"Set setting {setting} to {value}")
         settings = QSettings("Mi Create", "Settings")
         settings.setValue(setting, value)
 
@@ -340,8 +341,11 @@ class MainWindow(QMainWindow):
             if project.get("canvas"):
                 project["canvas"].setRenderHint(QPainter.RenderHint.Antialiasing,
                                                 self.settings["Canvas"]["Antialiasing"]["value"])
-                project["canvas"].loadObjects(project["project"], self.settings["Canvas"]["Snap"]["value"],
-                                              self.settings["Canvas"]["Interpolation"]["value"])
+                project["canvas"].loadObjects(project["project"],
+                                                self.settings["Canvas"]["Snap"]["value"],
+                                                self.settings["Canvas"]["Interpolation"]["value"],
+                                                self.settings["Canvas"]["ClipDeviceShape"]["value"],
+                                                self.settings["Canvas"]["ShowDeviceOutline"]["value"])
 
     def loadLanguage(self, retranslate):
         selectedLanguage = None
@@ -599,7 +603,11 @@ class MainWindow(QMainWindow):
                 return
 
             for file in files[0]:
-                shutil.copyfile(file, os.path.join(currentProject["project"].imageFolder, os.path.basename(file)))
+                destFile = os.path.join(currentProject["project"].imageFolder, os.path.basename(file))
+                if os.path.isfile(destFile):
+                    self.showDialog("info", f"File {destFile} already exists!")
+                else:
+                    shutil.copyfile(file, destFile)
 
             currentProject["canvas"].clearSelected()
             self.reloadImages(currentProject["project"].imageFolder)
@@ -716,14 +724,14 @@ class MainWindow(QMainWindow):
                     self.Explorer.updateExplorer(currentProject["project"])
                     currentProject["canvas"].loadObjects(currentProject["project"],
                                                          self.settings["Canvas"]["Snap"]["value"],
-                                                         self.settings["Canvas"]["Interpolation"]["value"])
+                                                        self.settings["Canvas"]["Interpolation"]["value"],
+                                                        self.settings["Canvas"]["ClipDeviceShape"]["value"],
+                                                        self.settings["Canvas"]["ShowDeviceOutline"]["value"])
                     currentProject["canvas"].selectObject(value)
                 else:
                     self.propertiesWidget.clearOnRefresh = False
                     currentProject["canvas"].reloadObject(widgetName, currentItem)
                     currentProject["canvas"].selectObject(widgetName)
-
-                #self.propertiesWidget.ignorePropertyChange = True
 
             if self.ignoreHistoryInvoke:
                 self.ignoreHistoryInvoke = False
@@ -765,6 +773,7 @@ class MainWindow(QMainWindow):
             currentProject: FprjProject = self.getCurrentProject()["project"]
             currentProject.setTitle(self.coreDialog.configurePageNameField.text())
             currentProject.setThumbnail(self.coreDialog.configurePagePreviewField.currentText())
+            self.coreDialog.close()
 
         def resetSettings():
             result = self.showDialog("question", _("Are you sure you want to reset all settings?"), buttons=QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, defaultButton=QMessageBox.StandardButton.No)
@@ -795,7 +804,7 @@ class MainWindow(QMainWindow):
         def projectListOpen():
             if len(self.coreDialog.welcomePage.selectedItems()) == 1:
                 listItem = self.coreDialog.welcomePage.selectedItems()[0]
-                print(listItem.toolTip())
+                QApplication.instance().processEvents()
                 self.openProject(projectLocation=listItem.toolTip())
 
         self.coreDialog.welcomePage.itemPressed.connect(projectListOpen)
@@ -827,12 +836,12 @@ class MainWindow(QMainWindow):
                 if type == "undo":
                     currentProject["project"].deleteWidget(currentProject["project"].getWidget(name))
                 elif type == "redo":
-                    currentProject["project"].createWidget(id, name, int(
-                        currentProject["canvas"].scene().sceneRect().width() / 2 - 24), int(
-                        currentProject["canvas"].scene().sceneRect().height() / 2 - 24))
-                currentProject["canvas"].loadObjects(currentProject["project"],
-                                                     self.settings["Canvas"]["Snap"]["value"],
-                                                     self.settings["Canvas"]["Interpolation"]["value"])
+                    currentProject["project"].createWidget(id, name, 25, 25)
+                    currentProject["canvas"].loadObjects(currentProject["project"],
+                                            self.settings["Canvas"]["Snap"]["value"],
+                                            self.settings["Canvas"]["Interpolation"]["value"],
+                                            self.settings["Canvas"]["ClipDeviceShape"]["value"],
+                                            self.settings["Canvas"]["ShowDeviceOutline"]["value"])
                 self.Explorer.updateExplorer(currentProject["project"])
 
             print(name)
@@ -872,7 +881,9 @@ class MainWindow(QMainWindow):
                         currentProject["project"].setWidgetLayer(widget[0], 0)
 
             currentProject["canvas"].loadObjects(currentProject["project"], self.settings["Canvas"]["Snap"]["value"],
-                                                 self.settings["Canvas"]["Interpolation"]["value"])
+                                                self.settings["Canvas"]["Interpolation"]["value"],
+                                                self.settings["Canvas"]["ClipDeviceShape"]["value"],
+                                                self.settings["Canvas"]["ShowDeviceOutline"]["value"])
             self.Explorer.updateExplorer(currentProject["project"])
 
         command = CommandModifyWidgetLayer(currentCanvasSelected, changeType, commandFunc,
@@ -902,7 +913,9 @@ class MainWindow(QMainWindow):
 
                 currentProject["canvas"].loadObjects(currentProject["project"],
                                                      self.settings["Canvas"]["Snap"]["value"],
-                                                     self.settings["Canvas"]["Interpolation"]["value"])
+                                                    self.settings["Canvas"]["Interpolation"]["value"],
+                                                    self.settings["Canvas"]["ClipDeviceShape"]["value"],
+                                                    self.settings["Canvas"]["ShowDeviceOutline"]["value"])
                 self.Explorer.updateExplorer(currentProject["project"])
 
             widgetList = []
@@ -960,7 +973,9 @@ class MainWindow(QMainWindow):
                     currentProject["project"].appendWidget(widget)
 
             currentProject["canvas"].loadObjects(currentProject["project"], self.settings["Canvas"]["Snap"]["value"],
-                                                 self.settings["Canvas"]["Interpolation"]["value"])
+                                                self.settings["Canvas"]["Interpolation"]["value"],
+                                                self.settings["Canvas"]["ClipDeviceShape"]["value"],
+                                                self.settings["Canvas"]["ShowDeviceOutline"]["value"])
             self.Explorer.updateExplorer(currentProject["project"])
 
             # select objects pasted in
@@ -1107,7 +1122,9 @@ class MainWindow(QMainWindow):
                         object["Widget"].setProperty("widget_pos_y", int(object["Y"]))
                 currentProject["canvas"].loadObjects(currentProject["project"],
                                                      self.settings["Canvas"]["Snap"]["value"],
-                                                     self.settings["Canvas"]["Interpolation"]["value"])
+                                                     self.settings["Canvas"]["Interpolation"]["value"],
+                                                     self.settings["Canvas"]["ClipDeviceShape"]["value"],
+                                                     self.settings["Canvas"]["ShowDeviceOutline"]["value"])
                 currentProject["canvas"].selectObjectsFromPropertyList(objects)
 
             command = CommandModifyPosition(prevPos, currentPos, commandFunc, f"Change object pos")
@@ -1134,8 +1151,11 @@ class MainWindow(QMainWindow):
 
         # Render objects onto the canvas
         if project is not False:
-            success = canvas.loadObjects(project, self.settings["Canvas"]["Snap"]["value"],
-                                         self.settings["Canvas"]["Interpolation"]["value"])
+            success = canvas.loadObjects(project,
+                                         self.settings["Canvas"]["Snap"]["value"],
+                                         self.settings["Canvas"]["Interpolation"]["value"],
+                                         self.settings["Canvas"]["ClipDeviceShape"]["value"],
+                                         self.settings["Canvas"]["ShowDeviceOutline"]["value"])
 
         if success[0]:
             self.projects[project.directory] = {

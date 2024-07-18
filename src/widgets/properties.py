@@ -472,14 +472,18 @@ class PropertiesWidget(QWidget):
                             if self.propertyItems[changeState[0]].isChecked() == changeState[2]:
                                 if changeState[1] == "disabled":
                                     updateWidget.setDisabled(False)
+                                    updateWidget.setChecked(True)
                                     item.setDisabled(False)
                                 elif changeState[1] == "visible":
+                                    updateWidget.setChecked(True)
                                     item.setHidden(False)
                             else:
                                 if changeState[1] == "disabled":
                                     updateWidget.setDisabled(True)
+                                    updateWidget.setChecked(False)
                                     item.setDisabled(True)
                                 elif changeState[1] == "visible":
+                                    updateWidget.setChecked(False)
                                     item.setHidden(True)
 
                         item = self.addProperty(key, property["string"], inputWidget, parent, inputSinker)

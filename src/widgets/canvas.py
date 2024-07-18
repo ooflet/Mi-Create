@@ -56,13 +56,16 @@ class DeviceOutline(QGraphicsPathItem):
 
 class DeviceFrame(QGraphicsPathItem):
     # Shape that crops the screen to the border radius
-    def __init__(self, size):
+    def __init__(self, size, clip):
         super().__init__()
         outline = QPainterPath()
-        outline.addRoundedRect(0, 0, size[0], size[1], size[2], size[2])
+        if clip:
+            outline.addRoundedRect(0, 0, size[0], size[1], size[2], size[2])
+        else:
+            outline.addRoundedRect(0, 0, size[0], size[1], 0, 0)
         self.setPath(outline)
         self.setBrush(QColor(0,0,0,255))
-        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemClipsChildrenToShape, True)
+        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemClipsChildrenToShape, clip)
         self.setZValue(0)
 
 class Scene(QGraphicsScene):
@@ -176,7 +179,7 @@ class Canvas(QGraphicsView):
         self.graphicsScene = Scene()
         self.graphicsScene.setSceneRect(0,0,self.deviceSize[0],self.deviceSize[1])
 
-        self.deviceOutline = DeviceOutline(self.deviceSize)
+        
         
         self.drawDecorations()
 
@@ -546,8 +549,9 @@ class Canvas(QGraphicsView):
         except Exception:
             return False, str(f" Unable to create object {item.getProperty('widget_name')}:\n {traceback.format_exc()}")
 
-    def loadObjects(self, project, snap=None, interpolation=None):
-        self.frame = DeviceFrame(self.deviceSize)
+    def loadObjects(self, project, snap=None, interpolation=None, clip=True, outline=False):
+        print(clip, outline)
+        self.frame = DeviceFrame(self.deviceSize, clip)
         
         if interpolation == None:
             interpolation = self.interpolation
@@ -567,6 +571,10 @@ class Canvas(QGraphicsView):
             self.widgets.clear()
             #self.scene().addItem(self.deviceRep)
             self.scene().addItem(self.frame)
+
+            if outline:
+                self.deviceOutline = DeviceOutline(self.deviceSize)
+                self.scene().addItem(self.deviceOutline)
  
             self.imageFolder = project.imageFolder
 
