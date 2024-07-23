@@ -34,7 +34,7 @@ os.chdir(os.path.dirname(
 from PyQt6.QtWidgets import (QInputDialog, QMessageBox, QApplication, QProgressBar,
                              QDialogButtonBox, QFileDialog, QWidget, QVBoxLayout,
                              QFrame, QColorDialog, QFontDialog, QLabel, QListWidgetItem,
-                             QAbstractItemView, QDialog, QUndoView, QCheckBox, QHBoxLayout)
+                             QAbstractItemView, QSplashScreen, QDialog, QUndoView, QCheckBox, QHBoxLayout)
 from PyQt6.QtGui import QIcon, QPixmap, QDesktopServices, QDrag, QImage, QPainter
 from PyQt6.QtCore import Qt, QSettings, QSize, QUrl, pyqtSignal
 from window import FramelessDialog
@@ -70,7 +70,7 @@ from window_ui import Ui_MainWindow
 
 _ = gettext.gettext
 
-programVersion = 'v0.4'
+programVersion = 'v1.0'
 
 class MainWindow(QMainWindow):
     updateFound = pyqtSignal(str)
@@ -517,6 +517,9 @@ class MainWindow(QMainWindow):
             elif reply == QMessageBox.StandardButton.Cancel:
                 return
 
+        if isinstance(self.ui.workspace.widget(index), Canvas):
+            self.ui.workspace.widget(index).scene().selectionChanged.disconnect()
+
         delProjectItem(index)
         self.ui.workspace.removeTab(index)
         self.fileChanged = False
@@ -670,6 +673,11 @@ class MainWindow(QMainWindow):
             logging.info(f"Set property {args[0]}, {args[1]} for widget {currentSelected.data(0, 101)}")
 
             def updateProperty(widgetName, property, value):
+                print("select")
+                if currentProject["canvas"].getObject(widgetName).isSelected() is not True:
+                    currentProject["canvas"].selectObject(widgetName)
+                    
+                print("chk property")
                 if property == "num_source" or property == "imagelist_source" or property == "widget_visibility_source":
                     if value == "None":
                         currentItem.setProperty(property, 0)
@@ -702,7 +710,6 @@ class MainWindow(QMainWindow):
                     pixmap.load(os.path.join(currentProject["project"].imageFolder, value))
 
                     # set widget size to image size
-                    currentProject["canvas"].selectObject(widgetName) # load object property
                     currentItem.setProperty("widget_size_width", pixmap.width())
                     self.propertiesWidget.propertyItems["widget_size_width"].setText(str(pixmap.width()))
                     currentItem.setProperty("widget_size_height", pixmap.height())
@@ -719,9 +726,12 @@ class MainWindow(QMainWindow):
                 else:
                     currentItem.setProperty(property, value)
 
+                print("update")
                 if property == "widget_name":
                     self.propertiesWidget.clearOnRefresh = False
+                    print("explorer update")
                     self.Explorer.updateExplorer(currentProject["project"])
+                    print("load obj")
                     currentProject["canvas"].loadObjects(currentProject["project"],
                                                          self.settings["Canvas"]["Snap"]["value"],
                                                         self.settings["Canvas"]["Interpolation"]["value"],
@@ -730,13 +740,25 @@ class MainWindow(QMainWindow):
                     currentProject["canvas"].selectObject(value)
                 else:
                     self.propertiesWidget.clearOnRefresh = False
+                    
+                    # segfaults when when ClipDeviceShape is false
+                    # but doesn't when canvas is reloaded beforehand?????
+                    # what is going on???????? did i fuck it up that much????????
+
+                    # ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄ 
                     currentProject["canvas"].reloadObject(widgetName, currentItem)
+                    # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+                    # high level languages <3 interacting with c++
+
                     currentProject["canvas"].selectObject(widgetName)
 
             if self.ignoreHistoryInvoke:
+                print("ignore history")
                 self.ignoreHistoryInvoke = False
                 updateProperty(currentSelected.data(0, 101), args[0], args[1])
             else:
+                print("command")
                 command = CommandModifyProperty(currentItem.getProperty("widget_name"), args[0],
                                                 currentItem.getProperty(args[0]), args[1], updateProperty,
                                                 f"Change property {args[0]} to {args[1]}")
@@ -960,7 +982,7 @@ class MainWindow(QMainWindow):
                 name_suffix = ' - Copy'
 
                 item.removeAssociation()
-                item.setProperty("widget_name", f"{item.getProperty("widget_name")}{name_suffix}{count}")
+                item.setProperty("widget_name", f"{item.getProperty('widget_name')}{name_suffix}{count}")
 
         def commandFunc(type, clipboard):
             currentProject["canvas"].clearSelected()
@@ -1545,7 +1567,7 @@ class MainWindow(QMainWindow):
 
     def showAboutWindow(self):
         dialog = FramelessDialog(self)
-        dialog.setFixedSize(350, 300)
+        dialog.setFixedSize(350, 325)
         dialog.setContentsMargins(5, 60, 5, 5)
         aboutIcon = QLabel()
         aboutIcon.setPixmap(QPixmap(":/Images/MiCreate48x48.png"))
@@ -1558,7 +1580,10 @@ class MainWindow(QMainWindow):
             <head/>
             <body>
                 <p>Mi Create {programVersion}<br/>Visit the <a href="https://github.com/ooflet/Mi-Create/">Github Repo</a> to get help or contribute.</p>
-                <p>ooflet 2024<br/>Published under GNU General Public Licence version 3</p>
+                <p>Copyright (C) 2024 ooflet<br/>
+                    This program comes with ABSOLUTELY NO WARRANTY.<br/>
+                    This is free software, and you are welcome to redistribute it<br/>
+                    under certain conditions.</p>
             </body>
             </html>
             '''
@@ -1625,6 +1650,9 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
 
+    splash = QSplashScreen(QPixmap(":/Images/splash.png"))
+    splash.show()
+
     def onException(exc_type, exc_value, exc_traceback):
         exception = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
         errString = "Internal error! Please report as a bug.\n\n"+exception
@@ -1645,8 +1673,10 @@ if __name__ == "__main__":
             logging.info("Opening file from argument 1")
             result = main_window.openProject(projectLocation=args.filename)
             if result == False:
+                splash.close()
                 main_window.showWelcome()
         else:
+            splash.close()
             main_window.showWelcome()
     except Exception as e:
         error_message = "Critical error during initialization: " + traceback.format_exc()

@@ -130,6 +130,7 @@ class PropertiesWidget(QWidget):
             if srcProperty != "":
                 self.propertyItems[srcProperty] = valueWidget
 
+        item.setToolTip(0, _(name))
         item.setExpanded(True)
         return item
 
@@ -407,7 +408,7 @@ class PropertiesWidget(QWidget):
                             text = propertyValue[index]
                         imageInput = self.createResourceEdit(text, False, resourceList, True)
                         if definedText == None:
-                            item = self.addProperty("", "Number "+str(index), imageInput, parent)
+                            item = self.addProperty("", f"{_('Number')} {str(index)}", imageInput, parent)
                         else:
                             item = self.addProperty("", definedText, imageInput, parent)
                         imageInput.currentTextChanged.connect(lambda *event, index=index: updateNumberList(index, imageInput.currentText()))
@@ -419,7 +420,7 @@ class PropertiesWidget(QWidget):
                         createInput(11, "Decimal Point", True)
 
                         for index in range(12, 22):
-                            createInput(index, "Decimal "+str(index-12), True)
+                            createInput(index, f"{_('Decimal')} {str(index-12)}", True)
 
                     showDecimalCheckbox = self.createCheckBox(checked, "", True)
                     showDecimalCheckbox[1].toggled.connect(toggled)

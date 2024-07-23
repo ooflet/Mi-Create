@@ -8,7 +8,7 @@ import os
 import sys
 import traceback
 import logging
-from tracemalloc import start
+from pprint import pprint
 
 sys.path.append("..")
 from utils.project import WatchData
@@ -50,7 +50,7 @@ class DeviceOutline(QGraphicsPathItem):
         outline = QPainterPath()
         outline.addRoundedRect(thickness/2, thickness/2, (size[0]-thickness), (size[1]-thickness), size[2], size[2])
         self.setPath(outline)
-        self.setPen(QPen(QColor(200, 200, 200, 100), thickness, Qt.PenStyle.SolidLine))
+        self.setPen(QPen(QColor(255, 255, 255, 100), thickness, Qt.PenStyle.SolidLine))
         self.setBrush(QColor(0,0,0,0))
         self.setZValue(9999)
 
@@ -447,7 +447,6 @@ class Canvas(QGraphicsView):
                 )
 
             elif item.getProperty("widget_type") == "widget_arc":
-                print(item.getProperty("arc_flat_caps"))
                 widget = self.createProgressArc(
                     item.getProperty("widget_name"),
                     QRect(
@@ -544,6 +543,8 @@ class Canvas(QGraphicsView):
                 return False, f"Widget {item.getProperty('widget_type')} not implemented in canvas, please report as issue."
 
             # add widget into widget list
+            print(item.getProperty("widget_name"))
+            pprint(self.widgets)
             self.widgets[item.getProperty("widget_name")] = widget
             return True, "Success"
         except Exception:
@@ -603,13 +604,14 @@ class Canvas(QGraphicsView):
         objectZValue = object.zValue()
 
         if object != None:
-            object.delete()
+
             result, reason = self.createWidgetFromData(objectZValue, widget, self.snap, self.interpolation)
             if not result:
                 return False, reason 
             else:
                 self.scene().originPositions[objectName] = [int(widget.getProperty("widget_pos_x")), int(widget.getProperty("widget_pos_y"))]
                 self.scene().updatePosMap()
+                object.delete()
                 return True, "Success"
         
 class BaseWidget(QGraphicsRectItem):
@@ -637,7 +639,7 @@ class BaseWidget(QGraphicsRectItem):
         self.setData(0, name)
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsMovable, True)
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsSelectable, True)
-        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemSendsGeometryChanges, True)
+        #self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemSendsGeometryChanges, True)
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsFocusable, True)
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemClipsChildrenToShape, True)
 

@@ -1,13 +1,14 @@
 # Explorer Widget for Mi Create
 # ooflet <ooflet@proton.me>
 
-from PyQt6.QtWidgets import QTreeWidget, QTreeWidgetItem, QFrame
-from PyQt6.QtGui import QContextMenuEvent, QIcon
-from PyQt6.QtCore import Qt, QSize
+from PyQt6.QtWidgets import QTreeWidget, QTreeWidgetItem, QFrame, QMessageBox
+from PyQt6.QtGui import QContextMenuEvent, QIcon, QStandardItemModel
+from PyQt6.QtCore import Qt, QSize, pyqtSignal, QModelIndex, QPoint
 
 from utils.contextMenu import ContextMenu
 
 class Explorer(QTreeWidget):
+    itemReordered = pyqtSignal(str, int)
     def __init__(self, parent, objectIcon, ui):
         super().__init__(parent)
         self.items = {}
@@ -18,13 +19,29 @@ class Explorer(QTreeWidget):
         self.setVerticalScrollMode(QTreeWidget.ScrollMode.ScrollPerPixel)
         self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.setFrameShape(QFrame.Shape.NoFrame)
-        #self.setDragDropMode(QTreeWidget.DragDropMode.InternalMove)
+        self.setDragDropMode(QTreeWidget.DragDropMode.InternalMove)
         self.setUniformRowHeights(True)
         self.setHeaderHidden(True)
         self.setAnimated(True)
         self.clear()
 
         self.customContextMenuRequested.connect(self.contextMenuEvent)
+
+    def dragMoveEvent(self, event):
+        self.setDropIndicatorShown(True)
+        super(QTreeWidget, self).dragMoveEvent(event)
+        if self.dropIndicatorPosition() == self.DropIndicatorPosition.OnItem or self.dropIndicatorPosition() == self.DropIndicatorPosition.OnViewport:
+            self.setDropIndicatorShown(False)
+            event.ignore()
+
+    def dropEvent(self, event):
+        model = QStandardItemModel()
+        model.dropMimeData(event.mimeData(), Qt.DropAction.CopyAction, 0, 0, QModelIndex())
+
+        if model.item(0, 0).data(101) in self.items:
+            print(model.item(0, 0).data(101))
+            dropIndex = self.indexAt(event.position().toPoint())
+            self.itemReordered.emit(model.item(0, 0).data(101), dropIndex)
 
     def contextMenuEvent(self, pos):
         if len(self.selectedItems()) > 0:

@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "POT-Creation-Date: 2024-01-02 11:05+1100\n"
-"PO-Revision-Date: 2024-06-21 14:55+1000\n"
+"PO-Revision-Date: 2024-07-19 09:31+1000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ru\n"
@@ -13,7 +13,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
-"X-Generator: Poedit 3.4\n"
+"X-Generator: Poedit 3.4.4\n"
 
 msgid "Theme"
 msgstr "Тема"
@@ -152,3 +152,27 @@ msgstr "Расстояние"
 
 msgid "Hide Zeroes"
 msgstr "Скрыть Нули"
+
+msgid "Image List"
+msgstr "Список изображений"
+
+msgid "Image Count"
+msgstr "Количество изображений"
+
+msgid "Index"
+msgstr "Индекс"
+
+msgid "Show Decimals"
+msgstr "Показать децималы"
+
+msgid "Number"
+msgstr "Номер"
+
+msgid "Negative Sign"
+msgstr "Знак минус"
+
+msgid "Decimal Point"
+msgstr "Разделитель десятичных"
+
+msgid "Decimal"
+msgstr "Десятичный"
