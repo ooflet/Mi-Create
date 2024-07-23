@@ -26,7 +26,7 @@ Mi Create fully supports Linux, however there are no binaries for Linux. I do pl
 ## Running source code
 If you want to run from source:
 - Clone repo
-- Install Python version >3.8 & install dependencies:
+- Install Python version 3.12 or above & install dependencies:
 `pip install -r requirements.txt` or `python -m pip install -r requirements.txt`
 - Execute main.py
 
