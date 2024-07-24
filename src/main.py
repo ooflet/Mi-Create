@@ -740,16 +740,7 @@ class MainWindow(QMainWindow):
                     currentProject["canvas"].selectObject(value)
                 else:
                     self.propertiesWidget.clearOnRefresh = False
-                    
-                    # segfaults when when ClipDeviceShape is false
-                    # but doesn't when canvas is reloaded beforehand?????
-                    # what is going on???????? did i fuck it up that much????????
-
-                    # ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄ 
                     currentProject["canvas"].reloadObject(widgetName, currentItem)
-                    # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-                    # high level languages <3 interacting with c++
 
                     currentProject["canvas"].selectObject(widgetName)
 

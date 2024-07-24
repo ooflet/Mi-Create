@@ -71,6 +71,18 @@ class DeviceFrame(QGraphicsPathItem):
 class Scene(QGraphicsScene):
     def __init__(self, parent=None):
         super().__init__(parent)
+
+        # hack incoming!!!!
+        # qt breaks down and segfaults when removing items in some cases
+        # something something BSP index doesn't properly get updated
+        
+        # i haven't seen major performance hits without BSP
+        # there may be, so good luck future maintainers in fixing my shitty patch :)
+
+        self.setItemIndexMethod(QGraphicsScene.ItemIndexMethod.NoIndex)
+
+        # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
         self.originPositions = {}
         self.positionMap = {
             "X": [],
@@ -611,6 +623,7 @@ class Canvas(QGraphicsView):
             else:
                 self.scene().originPositions[objectName] = [int(widget.getProperty("widget_pos_x")), int(widget.getProperty("widget_pos_y"))]
                 self.scene().updatePosMap()
+                object.selectionPath.prepareGeometryChange()
                 object.delete()
                 return True, "Success"
         
