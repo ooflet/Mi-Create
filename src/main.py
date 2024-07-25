@@ -35,7 +35,7 @@ from PyQt6.QtWidgets import (QInputDialog, QMessageBox, QApplication, QProgressB
                              QDialogButtonBox, QFileDialog, QWidget, QVBoxLayout,
                              QFrame, QColorDialog, QFontDialog, QLabel, QListWidgetItem,
                              QAbstractItemView, QSplashScreen, QDialog, QUndoView, QCheckBox, QHBoxLayout)
-from PyQt6.QtGui import QIcon, QPixmap, QDesktopServices, QDrag, QImage, QPainter
+from PyQt6.QtGui import QIcon, QPixmap, QDesktopServices, QDrag, QImage, QPainter, QFontDatabase
 from PyQt6.QtCore import Qt, QSettings, QSize, QUrl, pyqtSignal
 from window import FramelessDialog
 
@@ -64,7 +64,7 @@ from widgets.properties import PropertiesWidget
 from widgets.editor import Editor, XMLLexer
 from translate import QCoreApplication
 
-import resources.icons_rc  # resource import required because it sets up the icons
+import resources.resource_rc  # resource import required because it sets up the icons
 
 from window_ui import Ui_MainWindow
 
@@ -92,6 +92,8 @@ class MainWindow(QMainWindow):
         logging.info("Initializing MainWindow")
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+
+        QFontDatabase.addApplicationFont(":/Fonts/Inter.ttf")
 
         if platform.system() == "Windows":
             self.titleBar.layout().insertWidget(0, self.ui.menubar, 0, Qt.AlignmentFlag.AlignLeft)
