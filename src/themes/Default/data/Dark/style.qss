@@ -5,12 +5,6 @@
 
  */
 
-QMainWindow
-{
-    font-family: Inter;
-    font-size: 10px;
-}
-
 QWidget#windowTitleBar {
     background-color: palette(base);
 }
