@@ -1648,7 +1648,9 @@ if __name__ == "__main__":
         exception = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
         errString = "Internal error! Please report as a bug.\n\n"+exception
         logging.error(errString)
-        QMessageBox.critical(None, 'Error', errString, QMessageBox.StandardButton.Ok)
+        if "C++" not in traceback.format_exception(exc_type, exc_value, exc_traceback): # prevent C++ class already deleted message from appearing on app close
+                                                                                        # i will fix (soon)
+            QMessageBox.critical(None, 'Error', errString, QMessageBox.StandardButton.Ok)
 
     sys.excepthook = onException
 
