@@ -294,6 +294,10 @@ QDockWidget::close-button:pressed, QDockWidget::float-button:pressed {
     background: palette(light);
 }
 
+QDialogButtonBox {
+    dialogbuttonbox-buttons-have-icons: 0;
+}
+
 /*
  * QTabBar
  */

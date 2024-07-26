@@ -99,7 +99,7 @@ class Scene(QGraphicsScene):
                 self.positionMap["Y"].append(item.pos().y())
                 self.positionMap["Y"].append(item.pos().y() + item.rect().height())
 
-    def getAdjacentPos(self, object: QGraphicsItem):
+    def getAdjacentPos(self, object: QGraphicsRectItem):
         catchRange = 3 # pixel offset before the object gets snapped
         adjacentPosList = []
         pos = [None, None, None, None] # x1, y1, x2, y2
@@ -135,6 +135,24 @@ class Scene(QGraphicsScene):
 
         if adjacentPosList2[1] != []:
             pos[3] = (min(adjacentPosList2[1], key=lambda x:abs(x-object.pos().y()+object.rect().height())))
+
+        # prioritize snap positions
+
+        if pos[0] != None and pos[2] != None:
+            if pos[2] - pos[0] != object.rect().width():
+                if pos[0] - object.pos().x() > pos[2] - (object.pos().x() + object.rect().width()):
+                    pos[0] = None
+                else:
+                    pos[2] = None
+
+        if pos[1] != None and pos[3] != None:
+            if pos[1] - pos[3] != object.rect().width():
+                if pos[1] - object.pos().y() > pos[3] - (object.pos().y() + object.rect().height()):
+                    pos[1] = None
+                else:
+                    pos[3] = None
+
+        print(pos)
 
         return pos
     
