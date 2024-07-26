@@ -19,7 +19,7 @@ class Explorer(QTreeWidget):
         self.setVerticalScrollMode(QTreeWidget.ScrollMode.ScrollPerPixel)
         self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.setFrameShape(QFrame.Shape.NoFrame)
-        self.setDragDropMode(QTreeWidget.DragDropMode.InternalMove)
+        #self.setDragDropMode(QTreeWidget.DragDropMode.InternalMove)
         self.setUniformRowHeights(True)
         self.setHeaderHidden(True)
         self.setAnimated(True)
