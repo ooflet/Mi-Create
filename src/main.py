@@ -841,7 +841,7 @@ class MainWindow(QMainWindow):
                 count += 1
 
         name = "widget-" + str(count)
-
+    
         if self.ignoreHistoryInvoke:
             self.ignoreHistoryInvoke = False
         else:
@@ -849,7 +849,7 @@ class MainWindow(QMainWindow):
                 if type == "undo":
                     currentProject["project"].deleteWidget(currentProject["project"].getWidget(name))
                 elif type == "redo":
-                    currentProject["project"].createWidget(id, name, 25, 25)
+                    currentProject["project"].createWidget(id, name, "center", "center")
                     currentProject["canvas"].loadObjects(currentProject["project"],
                                             self.settings["Canvas"]["Snap"]["value"],
                                             self.settings["Canvas"]["Interpolation"]["value"],

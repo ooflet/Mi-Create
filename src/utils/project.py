@@ -282,6 +282,7 @@ class FprjProject:
     def __init__(self):
         self.data = None
         self.widgets = None
+        self.watchData = WatchData()
 
         self.name = None
         self.directory = None
@@ -504,6 +505,8 @@ class FprjProject:
                 parse = xmltodict.parse(xmlsource)
                 if parse.get("FaceProject"):
                     imagesDir = os.path.join(projectDir, "images")
+
+                    # set widget to a list
                     if not parse["FaceProject"]["Screen"].get("Widget"):
                         parse["FaceProject"]["Screen"]["Widget"] = []
                     if type(parse["FaceProject"]["Screen"]["Widget"]) == dict:
@@ -569,8 +572,17 @@ class FprjProject:
     def createWidget(self, id, name, posX, posY):
         widget = self.defaultItems[id].copy()
         widget["@Name"] = name
-        widget["@X"] = posX
-        widget["@Y"] = posY
+        if posX == "center":
+            widget["@X"] = self.watchData.modelSize[self.getDeviceType()][0] / 2 - int(widget["@Width"]) / 2
+        else:
+            widget["@X"] = posX
+
+        if posY == "center":
+            widget["@Y"] = self.watchData.modelSize[self.getDeviceType()][1] / 2 - int(widget["@Height"]) / 2
+        else:
+            widget["@Y"] = posY
+
+        
         print(self.widgets)
         self.widgets.append(widget)
         

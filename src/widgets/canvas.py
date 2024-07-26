@@ -185,7 +185,7 @@ class Canvas(QGraphicsView):
     onObjectChange = pyqtSignal(str, str, object) # hate hacky workarounds, just support any type already Qt
     onObjectPosChange = pyqtSignal()
 
-    def __init__(self, device: int, antialiasingEnabled: bool, deviceOutlineVisible: bool, ui: object, parent=None):
+    def __init__(self, device, antialiasingEnabled: bool, deviceOutlineVisible: bool, ui: object, parent=None):
         super().__init__(parent)
 
         if antialiasingEnabled:
