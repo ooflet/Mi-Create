@@ -573,12 +573,12 @@ class FprjProject:
         widget = self.defaultItems[id].copy()
         widget["@Name"] = name
         if posX == "center":
-            widget["@X"] = self.watchData.modelSize[self.getDeviceType()][0] / 2 - int(widget["@Width"]) / 2
+            widget["@X"] = int(self.watchData.modelSize[self.getDeviceType()][0] / 2 - int(widget["@Width"]) / 2)
         else:
             widget["@X"] = posX
 
         if posY == "center":
-            widget["@Y"] = self.watchData.modelSize[self.getDeviceType()][1] / 2 - int(widget["@Height"]) / 2
+            widget["@Y"] = int(self.watchData.modelSize[self.getDeviceType()][1] / 2 - int(widget["@Height"]) / 2)
         else:
             widget["@Y"] = posY
 
