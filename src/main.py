@@ -8,6 +8,9 @@
 import logging
 import traceback
 
+os.chdir(os.path.dirname(
+    os.path.realpath(__file__)))  # switch working directory to program location so that data files can be found
+
 # check if compiled and if so, logs to a file
 if "__compiled__" in globals():
     logging.basicConfig(level=logging.DEBUG, filemode="w", filename="data/app.log",
@@ -27,9 +30,6 @@ import requests
 import subprocess
 import platform
 import gettext
-
-os.chdir(os.path.dirname(
-    os.path.realpath(__file__)))  # switch working directory to program location so that data files can be found
 
 from PyQt6.QtWidgets import (QInputDialog, QMessageBox, QApplication, QProgressBar,
                              QDialogButtonBox, QFileDialog, QWidget, QVBoxLayout,
