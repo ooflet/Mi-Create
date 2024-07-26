@@ -7,6 +7,7 @@
 
 import logging
 import traceback
+import os
 
 os.chdir(os.path.dirname(
     os.path.realpath(__file__)))  # switch working directory to program location so that data files can be found
@@ -22,7 +23,6 @@ else:
 logging.info("-- Starting Mi Create --")
 logging.info("Initializing modules")
 
-import os
 import sys
 import shutil
 import argparse
