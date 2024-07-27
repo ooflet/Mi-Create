@@ -3,17 +3,18 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: 1.0\n"
+"Project-Id-Version: 1.1\n"
 "POT-Creation-Date: 2024-01-02 11:05+1100\n"
-"PO-Revision-Date: 2024-07-19 09:31+1000\n"
-"Last-Translator: \n"
+"PO-Revision-Date: 2024-07-26 22:42+0000\n"
+"Last-Translator: Serhii Horichenko <mail@sgg.im>\n"
 "Language-Team: \n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
 "Generated-By: pygettext.py 1.5\n"
-"X-Generator: Poedit 3.4.4\n"
+"X-Generator: Poedit 3.2.2\n"
 
 msgid "Theme"
 msgstr "Тема"
@@ -22,13 +23,13 @@ msgid "Language"
 msgstr "Язык"
 
 msgid "Check for Updates"
-msgstr "Проверьте наличие обновлений"
+msgstr "Проверить наличие обновлений"
 
 msgid "Canvas"
 msgstr "Холст"
 
 msgid "Snap to Guides"
-msgstr "Привязка к направляющим"
+msgstr "Привязывать к направляющим"
 
 msgid "Clip to Device Shape"
 msgstr "Обрезать по форме экрана"
@@ -49,7 +50,7 @@ msgid "Widget Type"
 msgstr "Тип виджета"
 
 msgid "Name"
-msgstr "Имя"
+msgstr "Название"
 
 msgid "Position"
 msgstr "Позиция"
@@ -64,19 +65,19 @@ msgid "Appearance"
 msgstr "Появление"
 
 msgid "Opacity"
-msgstr "Непрозрачность"
+msgstr "Прозрачность"
 
 msgid "Visibility Trigger"
 msgstr "Триггер видимости"
 
 msgid "Hour Hand Smooth"
-msgstr "Гладкая часовая стрелка"
+msgstr "Сглаживать часовую стрелку"
 
 msgid "Minute Hand Smooth"
-msgstr "Гладкая минутная стрелка"
+msgstr "Сглаживать минутную стрелку"
 
 msgid "Analog Properties"
-msgstr "Аналоговый"
+msgstr "Аналоговые свойства"
 
 msgid "Background"
 msgstr "Фон"
@@ -100,7 +101,7 @@ msgid "Second Hand"
 msgstr "Секундная стрелка"
 
 msgid "Progress Bar"
-msgstr "Индикатор"
+msgstr "Шкала"
 
 msgid "Radius"
 msgstr "Радиус"
@@ -139,7 +140,7 @@ msgid "Max Value Source"
 msgstr "Источник максимального значения"
 
 msgid "Images"
-msgstr "Изображений"
+msgstr "Изображения"
 
 msgid "Default Index"
 msgstr "Индекс по умолчанию"
@@ -148,10 +149,10 @@ msgid "Digits"
 msgstr "Цифры"
 
 msgid "Spacing"
-msgstr "Расстояние"
+msgstr "Отступы"
 
 msgid "Hide Zeroes"
-msgstr "Скрыть Нули"
+msgstr "Скрыть нули"
 
 msgid "Image List"
 msgstr "Список изображений"
@@ -163,10 +164,10 @@ msgid "Index"
 msgstr "Индекс"
 
 msgid "Show Decimals"
-msgstr "Показать децималы"
+msgstr "Показать десятичные"
 
 msgid "Number"
-msgstr "Номер"
+msgstr "Число"
 
 msgid "Negative Sign"
 msgstr "Знак минус"
@@ -175,4 +176,4 @@ msgid "Decimal Point"
 msgstr "Разделитель десятичных"
 
 msgid "Decimal"
-msgstr "Десятичный"
+msgstr "Десятичное"

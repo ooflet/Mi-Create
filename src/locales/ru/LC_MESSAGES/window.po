@@ -3,17 +3,19 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: 1.0\n"
+"Project-Id-Version: 1.1\n"
 "POT-Creation-Date: 2024-01-05 14:27+1100\n"
-"PO-Revision-Date: 2024-06-21 14:23+1000\n"
-"Last-Translator: \n"
+"PO-Revision-Date: 2024-07-26 22:52+0000\n"
+"Last-Translator: Serhii Horichenko <mail@sgg.im>\n"
 "Language-Team: \n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
 "Generated-By: pygettext.py 1.5\n"
-"X-Generator: Poedit 3.4\n"
+"X-Generator: Poedit 3.2.2\n"
 
 msgid "Mi Create"
 msgstr ""
@@ -25,19 +27,19 @@ msgid "Save as..."
 msgstr "Сохранить как..."
 
 msgid "About Mi Create"
-msgstr "О компании Mi Create"
+msgstr "О программе Mi Create"
 
 msgid "Settings"
 msgstr "Настройки"
 
 msgid "Build..."
-msgstr "Построить..."
+msgstr "Собрать..."
 
 msgid "Build"
-msgstr "Построить"
+msgstr "Собрать"
 
 msgid "Explorer"
-msgstr "Исследователь"
+msgstr "Обозреватель"
 
 msgid "Attributes"
 msgstr "Атрибуты"
@@ -64,25 +66,25 @@ msgid "New File"
 msgstr "Новый файл"
 
 msgid "Open..."
-msgstr "Откройте..."
+msgstr "Открыть..."
 
 msgid "Open File"
 msgstr "Открыть файл"
 
 msgid "Undo"
-msgstr "Отменить"
+msgstr "Отменить действие"
 
 msgid "Redo"
-msgstr "Редо"
+msgstr "Повторить действие"
 
 msgid "About Qt"
 msgstr "О Qt"
 
 msgid "Third Party Notices"
-msgstr "Уведомления третьих лиц"
+msgstr "Уведомления третьих сторон"
 
 msgid "Unpack..."
-msgstr "Распакуйте..."
+msgstr "Распаковать..."
 
 msgid "Cut"
 msgstr "Вырезать"
@@ -97,7 +99,7 @@ msgid "Project Source Code"
 msgstr "Исходный код проекта"
 
 msgid "Resize Images"
-msgstr "Изменение размера изображений"
+msgstr "Измененить размеры изображений"
 
 msgid "Image"
 msgstr "Изображение"
@@ -112,7 +114,7 @@ msgid "Analog Display"
 msgstr "Аналоговый дисплей"
 
 msgid "Arc Progress"
-msgstr "Прогресс дуги"
+msgstr "Дуговая шкала"
 
 msgid "Documentation"
 msgstr "Документация"
@@ -142,25 +144,25 @@ msgid "Help"
 msgstr "Помощь"
 
 msgid "About"
-msgstr "О сайте"
+msgstr "О программе"
 
 msgid "View"
-msgstr "Посмотреть"
+msgstr "Вид"
 
 msgid "Toolbar"
 msgstr "Панель инструментов"
 
 msgid "Zoom"
-msgstr "Увеличить"
+msgstr "Масштаб"
 
 msgid "Zoom In"
-msgstr "Приблизить"
+msgstr "Увеличить"
 
 msgid "Zoom Out"
 msgstr "Уменьшить"
 
 msgid "Full Screen"
-msgstr "Полноэкранный"
+msgstr "На весь экран"
 
 msgid "Create"
 msgstr "Создать"
@@ -181,16 +183,16 @@ msgid "Project name"
 msgstr "Название проекта"
 
 msgid "Create project..."
-msgstr "Создайте проект..."
+msgstr "Создать проект..."
 
 msgid "Project location"
 msgstr "Расположение проекта"
 
 msgid "Build Project..."
-msgstr "Постройте проект..."
+msgstr "Собрать проект..."
 
 msgid "Configure project..."
-msgstr "Настройте проект..."
+msgstr "Настроить проект..."
 
 msgid "Watchface name"
 msgstr "Название часового интерфейса"
@@ -199,13 +201,13 @@ msgid "Watchface thumbnail"
 msgstr "Миниатюра часового интерфейса"
 
 msgid "Build project..."
-msgstr "Постройте проект..."
+msgstr "Собрать проект..."
 
 msgid "Building project..."
-msgstr "Строительный проект..."
+msgstr "Сборка проекта..."
 
 msgid "Build results..."
-msgstr "Постройте результаты..."
+msgstr "Результат сборки..."
 
 msgid "Select resource..."
 msgstr "Выберите ресурс..."
@@ -229,13 +231,13 @@ msgid "Bring to Front"
 msgstr "На передний план"
 
 msgid "Bring Forwards"
-msgstr "Принесите вперед"
+msgstr "Перенести вперёд"
 
 msgid "Send to Back"
-msgstr "Отправить назад"
+msgstr "На задний план"
 
 msgid "Send Backwards"
-msgstr "Отправьте его назад"
+msgstr "Перенести назад"
 
 msgid "Delete"
 msgstr "Удалить"
@@ -256,4 +258,4 @@ msgid "Tools"
 msgstr "Инструменты"
 
 msgid "File Toolbar"
-msgstr "Панель инструментов файла"
+msgstr "Файловая панель инструментов"
