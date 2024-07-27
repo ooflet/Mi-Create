@@ -1,0 +1,261 @@
+# Window Translation for Mi Create.
+# FIRST AUTHOR <ooflet@proton.me>, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.0\n"
+"POT-Creation-Date: 2024-01-05 14:27+1100\n"
+"PO-Revision-Date: 2024-07-26 23:59+0000\n"
+"Last-Translator: Serhii Horichenko <mail@sgg.im>\n"
+"Language-Team: \n"
+"Language: uk\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
+"Generated-By: pygettext.py 1.5\n"
+"X-Generator: Poedit 3.2.2\n"
+
+msgid "Mi Create"
+msgstr "Mi Create"
+
+msgid "Save..."
+msgstr "Зберегти..."
+
+msgid "Save as..."
+msgstr "Зберегти як..."
+
+msgid "About Mi Create"
+msgstr "Про Mi Create"
+
+msgid "Settings"
+msgstr "Налаштування"
+
+msgid "Build..."
+msgstr "Зібрати..."
+
+msgid "Build"
+msgstr "Зібрати"
+
+msgid "Explorer"
+msgstr "Перегладач"
+
+msgid "Attributes"
+msgstr "Атрибути"
+
+msgid "Exit"
+msgstr "Вихід"
+
+msgid "Edit"
+msgstr "Редагувати"
+
+msgid "Search..."
+msgstr "Пошук..."
+
+msgid "File"
+msgstr "Файл"
+
+msgid "Layout"
+msgstr "Макет"
+
+msgid "New..."
+msgstr "Новий..."
+
+msgid "New File"
+msgstr "Новий файл"
+
+msgid "Open..."
+msgstr "Відкрити..."
+
+msgid "Open File"
+msgstr "Відкрити файл"
+
+msgid "Undo"
+msgstr "Скасувати дію"
+
+msgid "Redo"
+msgstr "Повернути дію"
+
+msgid "About Qt"
+msgstr "Про Qt"
+
+msgid "Third Party Notices"
+msgstr "Інформація третіх сторін"
+
+msgid "Unpack..."
+msgstr "Розпакувати..."
+
+msgid "Cut"
+msgstr "Вирізати"
+
+msgid "Copy"
+msgstr "Копіювати"
+
+msgid "Paste"
+msgstr "Вставити"
+
+msgid "Project Source Code"
+msgstr "Вихідний код проєкту"
+
+msgid "Resize Images"
+msgstr "Зміна розміру зображень"
+
+msgid "Image"
+msgstr "Зображення"
+
+msgid "Image List"
+msgstr "Список зображень"
+
+msgid "Digital Number"
+msgstr "Цифрове число"
+
+msgid "Analog Display"
+msgstr "Аналоговий дисплей"
+
+msgid "Arc Progress"
+msgstr "Дугова шкала"
+
+msgid "Documentation"
+msgstr "Документація"
+
+msgid ""
+"<html><head/><body><p><img src=\":/Dark/folder-open.png\"/> <a "
+"href=\"\\&quot;\\&quot;\"><span style=\" text-decoration: underline; color:"
+"#55aaff;\">Open Project...</span></a></p></body></html>"
+msgstr ""
+"<html><head/><body><p><img src=\":/Dark/folder-open.png\"/> <a "
+"href=\"\\&quot;\\&quot;\"><span style=\" text-decoration: underline; color:"
+"#55aaff;\">Відкрити проєкт...</span></a></p></body></html>"
+
+msgid "Welcome"
+msgstr "Ласкаво просимо"
+
+msgid ""
+"<html><head/><body><p><img src=\":/Dark/file-plus.png\"/> <a href=\"\\&quot;"
+"\\&quot;\"><span style=\" text-decoration: underline; color:#55aaff;\">New "
+"Project...</span></a></p></body></html>"
+msgstr ""
+"<html><head/><body><p><img src=\":/Dark/file-plus.png\"/> <a href=\"\\&quot;"
+"\\&quot;\"><span style=\" text-decoration: underline; color:#55aaff;"
+"\">Новий проєкт...</span></a></p></body></html>"
+
+msgid "Help"
+msgstr "Довідка"
+
+msgid "About"
+msgstr "Про програму"
+
+msgid "View"
+msgstr "Вигляд"
+
+msgid "Toolbar"
+msgstr "Панель інструментів"
+
+msgid "Zoom"
+msgstr "Масштаб"
+
+msgid "Zoom In"
+msgstr "Збільшити"
+
+msgid "Zoom Out"
+msgstr "Зменшити"
+
+msgid "Full Screen"
+msgstr "На весь екран"
+
+msgid "Create"
+msgstr "Створити"
+
+msgid "Project"
+msgstr "Проєкт"
+
+msgid "Properties"
+msgstr "Властивості"
+
+msgid "New Project..."
+msgstr "Новий проєкт..."
+
+msgid "Select device"
+msgstr "Оберіть пристрій"
+
+msgid "Project name"
+msgstr "Назва проєкту"
+
+msgid "Create project..."
+msgstr "Створити проєкт..."
+
+msgid "Project location"
+msgstr "Розташування проєкту"
+
+msgid "Build Project..."
+msgstr "Зібрати проєкт..."
+
+msgid "Configure project..."
+msgstr "Налаштувати проєкт..."
+
+msgid "Watchface name"
+msgstr "Назва інтерфейсу"
+
+msgid "Watchface thumbnail"
+msgstr "Скріншот інтерфейсу"
+
+msgid "Build project..."
+msgstr "Зібрати проєкт..."
+
+msgid "Building project..."
+msgstr "Збирання проєкту..."
+
+msgid "Build results..."
+msgstr "Результат збирання..."
+
+msgid "Select resource..."
+msgstr "Оберіть ресурс..."
+
+msgid "..."
+msgstr "..."
+
+msgid "Search:"
+msgstr "Пошук:"
+
+msgid "Resources"
+msgstr "Ресурси"
+
+msgid "Add Image..."
+msgstr "Додати зображення..."
+
+msgid "Layers"
+msgstr "Шари"
+
+msgid "Bring to Front"
+msgstr "Перенести наперед"
+
+msgid "Bring Forwards"
+msgstr "Зсунути наперед"
+
+msgid "Send to Back"
+msgstr "Перенести назад"
+
+msgid "Send Backwards"
+msgstr "Зсунути назад"
+
+msgid "Delete"
+msgstr "Видалити"
+
+msgid "New Project"
+msgstr "Новий проєкт"
+
+msgid "Open Project"
+msgstr "Відкрити проєкт"
+
+msgid "Manage Project"
+msgstr "Керування проєктом"
+
+msgid "Close Project"
+msgstr "Закрити проєкт"
+
+msgid "Tools"
+msgstr "Інструменти"
+
+msgid "File Toolbar"
+msgstr "Файлові інструменти"

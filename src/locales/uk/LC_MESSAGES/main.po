@@ -1,0 +1,91 @@
+# Main Translation for Mi Create.
+# FIRST AUTHOR <ooflet@proton.me>, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.0\n"
+"POT-Creation-Date: 2024-01-02 11:05+1100\n"
+"PO-Revision-Date: 2024-07-26 23:13+0000\n"
+"Last-Translator: Serhii Horichenko <mail@sgg.im>\n"
+"Language-Team: \n"
+"Language: uk\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
+"Generated-By: pygettext.py 1.5\n"
+"X-Generator: Poedit 3.2.2\n"
+
+msgid "You have unsaved project(s) open. Save and quit?"
+msgstr "У Вас є відкриті незбережені дані. Зберегти та вийти?"
+
+msgid "An urgent update {version} was released! The app will now update."
+msgstr "Вийшло термінове оновлення {version}! Програму буде оновлено."
+
+msgid "A new update has been found ({version}). Would you like to update now?"
+msgstr "Знайдено оновлення ({version}). Встановити оновлення зараз?"
+
+msgid "Widget {shape} not implemented in ObjectIcon(), please report as issue."
+msgstr ""
+"Віджет {shape} у ObjectIcon() не реалізований. Повідомте як про проблему."
+
+msgid "Failed to obtain currentItem"
+msgstr "Збій отримання поточного елементу currentItem"
+
+msgid ""
+"No object found in widget list that has the name of currently selected "
+"graphics item: "
+msgstr ""
+"У списку віджетів не знайдено жодного об'єкта з назвою обраного графічного "
+"елемента: "
+
+msgid "Error occured during property update: Object not found!"
+msgstr "Під час оновлення властивостей виникла помилка: Об'єкт не знайдений!"
+
+msgid "Unable to find"
+msgstr "Знайти не вийшло"
+
+msgid "Select Folder..."
+msgstr "Обрати теку..."
+
+msgid "Add Image..."
+msgstr "Додати зображення..."
+
+msgid "Are you sure you want to reset all dock widget positions?"
+msgstr "Ви дійсно хочете скинути усі позиції віджета?"
+
+msgid ""
+"Are you sure you want to create your project in the directory of this "
+"program?"
+msgstr "Ви дійсно хочете створити свій проєкт у теці цієї програми?"
+
+msgid "Failed to createNewWorkspace: "
+msgstr "Збій створення нового робочого простору: "
+
+msgid "Cannot open project: "
+msgstr "Неможливо відкрити проєкт: "
+
+msgid "Failed to create a new project: "
+msgstr "Збій створення нового проєкту: "
+
+msgid "Open Project..."
+msgstr "Відкрити проєкт..."
+
+msgid "Failed to open project: "
+msgstr "Збій відкриття проєкту: "
+
+msgid "Failed to save: "
+msgstr "Збій збереження: "
+
+msgid "Failed to save project: "
+msgstr "Збій збереження проєкту: "
+
+msgid "Project saved at "
+msgstr "Проєкт збережений о "
+
+msgid "Save project before building?"
+msgstr "Зберегти проєкт перед збиранням?"
+
+msgid "Create Widget"
+msgstr "Створити віджет"
