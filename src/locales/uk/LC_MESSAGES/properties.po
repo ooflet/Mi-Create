@@ -1,0 +1,179 @@
+# Property Translation for Mi Create.
+# FIRST AUTHOR <ooflet@proton.me>, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.0\n"
+"POT-Creation-Date: 2024-01-02 11:05+1100\n"
+"PO-Revision-Date: 2024-07-26 23:29+0000\n"
+"Last-Translator: Serhii Horichenko <mail@sgg.im>\n"
+"Language-Team: \n"
+"Language: uk\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
+"Generated-By: pygettext.py 1.5\n"
+"X-Generator: Poedit 3.2.2\n"
+
+msgid "Theme"
+msgstr "Тема"
+
+msgid "Language"
+msgstr "Мова"
+
+msgid "Check for Updates"
+msgstr "Перевірити оновлення"
+
+msgid "Canvas"
+msgstr "Полотно"
+
+msgid "Snap to Guides"
+msgstr "Притягувати до сітки"
+
+msgid "Clip to Device Shape"
+msgstr "Обрізати під контур пристрою"
+
+msgid "Show Device Outline"
+msgstr "Показати контур пристрою"
+
+msgid "Antialiasing"
+msgstr "Сглажування"
+
+msgid "Image Interpolation"
+msgstr "Інтерполяція зображення"
+
+msgid "General"
+msgstr "Основне"
+
+msgid "Widget Type"
+msgstr "Тип віджету"
+
+msgid "Name"
+msgstr "Назва"
+
+msgid "Position"
+msgstr "Розташування"
+
+msgid "Width"
+msgstr "Ширина"
+
+msgid "Height"
+msgstr "Висота"
+
+msgid "Appearance"
+msgstr "Вигляд"
+
+msgid "Opacity"
+msgstr "Прозорість"
+
+msgid "Visibility Trigger"
+msgstr "Перемикач видимості"
+
+msgid "Hour Hand Smooth"
+msgstr "Зглажування стрілки годин"
+
+msgid "Minute Hand Smooth"
+msgstr "Зглажування стрілки хвилин"
+
+msgid "Analog Properties"
+msgstr "Аналогові властивості"
+
+msgid "Background"
+msgstr "Тло"
+
+msgid "Image"
+msgstr "Зображення"
+
+msgid "Alignment"
+msgstr "Вирівнювання"
+
+msgid "Anchor Point"
+msgstr "Точка прив'язки"
+
+msgid "Hour Hand"
+msgstr "Стрілка годин"
+
+msgid "Minute Hand"
+msgstr "Стрілка хвилин"
+
+msgid "Second Hand"
+msgstr "Стрілка секунд"
+
+msgid "Progress Bar"
+msgstr "Шкала"
+
+msgid "Radius"
+msgstr "Радіус"
+
+msgid "Thickness"
+msgstr "Товщина"
+
+msgid "Start Angle"
+msgstr "Початковий кут"
+
+msgid "End Angle"
+msgstr "Кінцевий кут"
+
+msgid "Range"
+msgstr "Діапазон"
+
+msgid "Minimum Value"
+msgstr "Мінімальне значення"
+
+msgid "Maximum Value"
+msgstr "Максимальне значення"
+
+msgid "Minimum Step Value"
+msgstr "Значення мінімального кроку"
+
+msgid "Step Value"
+msgstr "Значення кроку"
+
+msgid "Data"
+msgstr "Дані"
+
+msgid "Data Source"
+msgstr "Джерело даних"
+
+msgid "Max Value Source"
+msgstr "Джерело максимального значення"
+
+msgid "Images"
+msgstr "Зображення"
+
+msgid "Default Index"
+msgstr "Типовий індекс"
+
+msgid "Digits"
+msgstr "Цифри"
+
+msgid "Spacing"
+msgstr "Відступи"
+
+msgid "Hide Zeroes"
+msgstr "Сховати нулі"
+
+msgid "Image List"
+msgstr "Список зображень"
+
+msgid "Image Count"
+msgstr "Кількість зображень"
+
+msgid "Index"
+msgstr "Індекс"
+
+msgid "Show Decimals"
+msgstr "Показувати десяткові"
+
+msgid "Number"
+msgstr "Число"
+
+msgid "Negative Sign"
+msgstr "Від'ємний знак"
+
+msgid "Decimal Point"
+msgstr "Десятковий знак"
+
+msgid "Decimal"
+msgstr "Десяткові"
