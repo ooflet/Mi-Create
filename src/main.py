@@ -1514,7 +1514,7 @@ class MainWindow(QMainWindow):
 
         process = currentProject["project"].compile(currentProject["project"].dataPath, compileDirectory,
                                                     "compiler/compile.exe")
-        process.readyReadStandardOutput.connect(lambda: output.append(bytearray(process.readAll()).decode("utf-8")))
+        process.readyReadStandardOutput.connect(lambda: output.append(bytearray(process.readAll()).decode('utf-8', 'backslashreplace')))
         process.finished.connect(success)
 
     def decompileProject(self):
