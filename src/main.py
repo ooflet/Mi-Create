@@ -70,7 +70,7 @@ from window_ui import Ui_MainWindow
 
 _ = gettext.gettext
 
-programVersion = 'v1.0'
+programVersion = 'v1.0.1'
 
 class MainWindow(QMainWindow):
     updateFound = pyqtSignal(str)
