@@ -1672,8 +1672,8 @@ if __name__ == "__main__":
         if args.filename:
             logging.info("Opening file from argument 1")
             result = main_window.openProject(projectLocation=args.filename)
+            splash.close()
             if result == False:
-                splash.close()
                 main_window.showWelcome()
         else:
             splash.close()
