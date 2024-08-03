@@ -535,6 +535,12 @@ class MainWindow(QMainWindow):
             tabName = self.ui.workspace.tabText(index)
             currentProject = self.getCurrentProject()
             self.setWindowTitle(tabName + " - Mi Create")
+
+            # Clear selection of all canvases
+            for project in self.projects.values():
+                if project.get("canvas"):
+                    project["canvas"].clearSelected()
+
             self.updateProperties(False)
             if currentProject is None or tabName == "Project XML":
                 self.setIconState(False)
