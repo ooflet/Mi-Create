@@ -177,16 +177,24 @@ class PropertiesWidget(QWidget):
 
             event.acceptProposedAction()
 
+        def wheelEvent(event):
+            if resourceEdit.hasFocus():
+                return QComboBox.wheelEvent(resourceEdit, event)
+            else:
+                event.ignore()
+
         def onChange(event):
             self.sendPropertyChangedSignal(srcProperty, resourceEdit.currentText())
 
         resourceEdit = QComboBox(self)
+        resourceEdit.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         resourceEdit.setEditable(True)
         resourceEdit.setAcceptDrops(True)
         resourceEdit.setObjectName("propertyField-input")
         resourceEdit.addItems(resourceList)
         resourceEdit.setCurrentText(text)
         resourceEdit.setDisabled(disabled)
+        resourceEdit.wheelEvent = wheelEvent
         resourceEdit.dragEnterEvent = dragEnterEvent
         resourceEdit.dragMoveEvent = dragMoveEvent
         resourceEdit.dropEvent = dropEvent
@@ -203,13 +211,21 @@ class PropertiesWidget(QWidget):
             spinBox.clearFocus()
             self.treeWidget.setCurrentItem(None)
 
+        def wheelEvent(event):
+            if spinBox.hasFocus():
+                return QSpinBox.wheelEvent(spinBox, event)
+            else:
+                event.ignore()
+
         spinBox = QSpinBox(self)
+        spinBox.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         spinBox.setObjectName("propertyField-input")
         spinBox.setRange(minVal, maxVal)
         if text == None:
             text = "0"
         spinBox.setValue(int(text))
         spinBox.setDisabled(disabled)
+        spinBox.wheelEvent = wheelEvent
         spinBox.valueChanged.connect(onChanged)
         spinBox.editingFinished.connect(onDeselect)
         return spinBox
@@ -219,9 +235,18 @@ class PropertiesWidget(QWidget):
             comboBox.clearFocus()
             self.sendPropertyChangedSignal(srcProperty, comboBox.currentText())
 
+        def wheelEvent(event):
+            if comboBox.hasFocus():
+                return QComboBox.wheelEvent(comboBox, event)
+            else:
+                event.ignore()
+
         comboBox = QComboBox(self)
+        comboBox.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         comboBox.addItems(items)
         comboBox.setObjectName("propertyField-input")
+        comboBox.wheelEvent = wheelEvent
+
         if editable:
             comboBox.setEditable(True)
         else:
@@ -240,13 +265,21 @@ class PropertiesWidget(QWidget):
     def createAlignmentComboBox(self, selected, srcProperty):
         items = ["Left", "Center", "Right"]
 
+        def wheelEvent(event):
+            if comboBox.hasFocus():
+                return QComboBox.wheelEvent(comboBox, event)
+            else:
+                event.ignore()
+
         def onChanged():
             self.sendPropertyChangedSignal(srcProperty, comboBox.currentText())
 
         comboBox = QComboBox(self)
+        comboBox.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         comboBox.addItems(items)
         if selected:
             comboBox.setCurrentIndex(int(selected))
+        comboBox.wheelEvent = wheelEvent
         comboBox.currentTextChanged.connect(onChanged)
         return comboBox
 
@@ -419,9 +452,6 @@ class PropertiesWidget(QWidget):
                     def createDecimalInputList():
                         createInput(11, "Decimal Point", True)
 
-                        for index in range(12, 22):
-                            createInput(index, f"{_('Decimal')} {str(index-12)}", True)
-
                     showDecimalCheckbox = self.createCheckBox(checked, "", True)
                     showDecimalCheckbox[1].toggled.connect(toggled)
 
@@ -444,7 +474,7 @@ class PropertiesWidget(QWidget):
                 elif property["type"] == "src":
                     for x in self.sourceData[str(device)]:
                         if propertyValue != '':
-                            if propertyValue.isnumeric():
+                            if isinstance(propertyValue, int) or propertyValue.isnumeric():
                                 if int(x["@ID"]) == int(propertyValue):
                                     inputWidget = self.createComboBox(self.sourceList[str(device)], x["@Name"], key, True)
                                     break
