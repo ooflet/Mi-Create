@@ -1,0 +1,260 @@
+# Window Translation for Mi Create.
+# FIRST AUTHOR <ooflet@proton.me>, 2024.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.0\n"
+"POT-Creation-Date: 2024-01-05 14:27+1100\n"
+"PO-Revision-Date: 2024-08-06 18:46+0200\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: it\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+"X-Generator: Poedit 3.4.2\n"
+
+msgid "Mi Create"
+msgstr "Mi Create"
+
+msgid "Save..."
+msgstr "Salva..."
+
+msgid "Save as..."
+msgstr "Salva come..."
+
+msgid "About Mi Create"
+msgstr "Informazioni su Mi Create"
+
+msgid "Settings"
+msgstr "Impostazioni"
+
+msgid "Build..."
+msgstr "Compila..."
+
+msgid "Build"
+msgstr "Compila"
+
+msgid "Explorer"
+msgstr "Principale"
+
+msgid "Attributes"
+msgstr "Attributi"
+
+msgid "Exit"
+msgstr "Uscita"
+
+msgid "Edit"
+msgstr "Modifica"
+
+msgid "Search..."
+msgstr "Ricerca..."
+
+msgid "File"
+msgstr "File"
+
+msgid "Layout"
+msgstr "Disposizione"
+
+msgid "New..."
+msgstr "Nuovo..."
+
+msgid "New File"
+msgstr "Nuovo File"
+
+msgid "Open..."
+msgstr "Apri..."
+
+msgid "Open File"
+msgstr "Apri File"
+
+msgid "Undo"
+msgstr "Annulla modifica"
+
+msgid "Redo"
+msgstr "Rifai modifica"
+
+msgid "About Qt"
+msgstr "Informazioni su Qt"
+
+msgid "Third Party Notices"
+msgstr "Avvisi di terze parti"
+
+msgid "Unpack..."
+msgstr "Disimballare..."
+
+msgid "Cut"
+msgstr "Taglia"
+
+msgid "Copy"
+msgstr "Copia"
+
+msgid "Paste"
+msgstr "Incolla"
+
+msgid "Project Source Code"
+msgstr "Codice sorgente del progetto"
+
+msgid "Resize Images"
+msgstr "Ridimensiona le immagini"
+
+msgid "Image"
+msgstr "Immagine"
+
+msgid "Image List"
+msgstr "Elenco immagini"
+
+msgid "Digital Number"
+msgstr "Numero digitale"
+
+msgid "Analog Display"
+msgstr "Display analogico"
+
+msgid "Arc Progress"
+msgstr "Progresso circolare"
+
+msgid "Documentation"
+msgstr "Documentazione"
+
+msgid ""
+"<html><head/><body><p><img src=\":/Dark/folder-open.png\"/> <a "
+"href=\"\\&quot;\\&quot;\"><span style=\" text-decoration: underline; color:"
+"#55aaff;\">Open Project...</span></a></p></body></html>"
+msgstr ""
+"<html><head/><body><p><img src=\":/Dark/folder-open.png\"/> <a "
+"href=\"\\&quot;\\&quot;\"><span style=\" text-decoration: underline; color:"
+"#55aaff;\">Apri Progetto...</span></a></p></body></html>"
+
+msgid "Welcome"
+msgstr "Benvenuto"
+
+msgid ""
+"<html><head/><body><p><img src=\":/Dark/file-plus.png\"/> <a href=\"\\&quot;"
+"\\&quot;\"><span style=\" text-decoration: underline; color:#55aaff;\">New "
+"Project...</span></a></p></body></html>"
+msgstr ""
+"<html><head/><body><p><img src=\":/Dark/file-plus.png\"/> <a href=\"\\&quot;"
+"\\&quot;\"><span style=\" text-decoration: underline; color:#55aaff;"
+"\">Nuovo Progetto...</span></a></p></body></html>"
+
+msgid "Help"
+msgstr "Aiuto"
+
+msgid "About"
+msgstr "A riguardo"
+
+msgid "View"
+msgstr "Vista"
+
+msgid "Toolbar"
+msgstr "Barra degli strumenti"
+
+msgid "Zoom"
+msgstr "Ingrandire"
+
+msgid "Zoom In"
+msgstr "Ingrandisci"
+
+msgid "Zoom Out"
+msgstr "Rimpicciolisci"
+
+msgid "Full Screen"
+msgstr "A schermo intero"
+
+msgid "Create"
+msgstr "Creare"
+
+msgid "Project"
+msgstr "Progetto"
+
+msgid "Properties"
+msgstr "Proprietà"
+
+msgid "New Project..."
+msgstr "Nuovo progetto..."
+
+msgid "Select device"
+msgstr "Seleziona dispositivo"
+
+msgid "Project name"
+msgstr "Nome del progetto"
+
+msgid "Create project..."
+msgstr "Crea progetto..."
+
+msgid "Project location"
+msgstr "Destinazione progetto"
+
+msgid "Build Project..."
+msgstr "Compila il progetto..."
+
+msgid "Configure project..."
+msgstr "Configura progetto..."
+
+msgid "Watchface name"
+msgstr "Nome del quadrante"
+
+msgid "Watchface thumbnail"
+msgstr "Miniatura del quadrante"
+
+msgid "Build project..."
+msgstr "Compila progetto..."
+
+msgid "Building project..."
+msgstr "Compilando il progetto..."
+
+msgid "Build results..."
+msgstr "Resoconto compilazione..."
+
+msgid "Select resource..."
+msgstr "Seleziona la risorsa..."
+
+msgid "..."
+msgstr "..."
+
+msgid "Search:"
+msgstr "Ricerca:"
+
+msgid "Resources"
+msgstr "Risorse"
+
+msgid "Add Image..."
+msgstr "Aggiungi immagine..."
+
+msgid "Layers"
+msgstr "Livelli"
+
+msgid "Bring to Front"
+msgstr "Mettere in primo piano"
+
+msgid "Bring Forwards"
+msgstr "Sposta in avanti"
+
+msgid "Send to Back"
+msgstr "Mettere in secondo piano"
+
+msgid "Send Backwards"
+msgstr "Sposta all'indietro"
+
+msgid "Delete"
+msgstr "Eliminare"
+
+msgid "New Project"
+msgstr "Nuovo progetto"
+
+msgid "Open Project"
+msgstr "Apri progetto"
+
+msgid "Manage Project"
+msgstr "Gestisci progetto"
+
+msgid "Close Project"
+msgstr "Chiudi Progetto"
+
+msgid "Tools"
+msgstr "Utensili"
+
+msgid "File Toolbar"
+msgstr "Barra degli strumenti File"
