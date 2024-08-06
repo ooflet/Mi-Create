@@ -1,0 +1,96 @@
+# Main Translation for Mi Create.
+# FIRST AUTHOR <ooflet@proton.me>, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.0\n"
+"POT-Creation-Date: 2024-01-02 11:05+1100\n"
+"PO-Revision-Date: 2024-07-30 21:48+0200\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: it\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+"X-Generator: Poedit 3.4.2\n"
+
+msgid "You have unsaved project(s) open. Save and quit?"
+msgstr "Hai progetti aperti non salvati. Vuoi salvarli e uscire?"
+
+msgid "An urgent update {version} was released! The app will now update."
+msgstr ""
+"È stato rilasciato un aggiornamento urgente {version}! L'applicazione verrà "
+"ora aggiornata."
+
+msgid "A new update has been found ({version}). Would you like to update now?"
+msgstr ""
+"È stato trovato un nuovo aggiornamento ({version}). Vuoi aggiornare ora?"
+
+msgid "Widget {shape} not implemented in ObjectIcon(), please report as issue."
+msgstr ""
+"Il widget {shape} non è implementato in ObjectIcon(), segnala il problema."
+
+msgid "Failed to obtain currentItem"
+msgstr "Impossibile ottenere l'elemento corrente"
+
+msgid ""
+"No object found in widget list that has the name of currently selected "
+"graphics item: "
+msgstr ""
+"Nessun oggetto trovato nell'elenco dei widget che abbia il nome "
+"dell'elemento grafico attualmente selezionato:"
+
+msgid "Error occured during property update: Object not found!"
+msgstr ""
+"Si è verificato un errore durante l'aggiornamento della proprietà: oggetto "
+"non trovato!"
+
+msgid "Unable to find"
+msgstr "Non trovato!"
+
+msgid "Select Folder..."
+msgstr "Seleziona cartella..."
+
+msgid "Add Image..."
+msgstr "Aggiungi immagine..."
+
+msgid "Are you sure you want to reset all dock widget positions?"
+msgstr "Vuoi davvero reimpostare tutte le posizioni dei widget ?"
+
+msgid ""
+"Are you sure you want to create your project in the directory of this "
+"program?"
+msgstr ""
+"Sei sicuro di voler creare il tuo progetto nella cartella di questo "
+"programma ?"
+
+msgid "Failed to createNewWorkspace: "
+msgstr "Impossibile creare una nuova area di lavoro:"
+
+msgid "Cannot open project: "
+msgstr "Impossibile aprire il progetto:"
+
+msgid "Failed to create a new project: "
+msgstr "Impossibile creare un nuovo progetto:"
+
+msgid "Open Project..."
+msgstr "Progetto aperto..."
+
+msgid "Failed to open project: "
+msgstr "Impossibile aprire il progetto:"
+
+msgid "Failed to save: "
+msgstr "Impossibile salvare:"
+
+msgid "Failed to save project: "
+msgstr "Impossibile salvare il progetto:"
+
+msgid "Project saved at "
+msgstr "Progetto salvato in"
+
+msgid "Save project before building?"
+msgstr "Salvare il progetto prima di compilare ?"
+
+msgid "Create Widget"
+msgstr "Crea widget"
