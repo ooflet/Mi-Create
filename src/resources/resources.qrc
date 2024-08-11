@@ -1,0 +1,43 @@
+<RCC>
+  <qresource prefix="Fonts">
+    <file>Inter.ttf</file>
+  </qresource>
+  <qresource prefix="Dark">
+    <file>close_dark.png</file>
+    <file>close_dark.svg</file>
+    <file>close_hover_dark.svg</file>
+    <file>window_dark.png</file>
+  </qresource>
+  <qresource prefix="Light">
+    <file>close_light.png</file>
+    <file>close_light.svg</file>
+    <file>close_hover_light.svg</file>
+    <file>window_light.png</file>
+  </qresource>
+  <qresource prefix="Icons">
+    <file>down-arrow.png</file>
+    <file>up-arrow.png</file>
+    <file>radio_checked.svg</file>
+    <file>radio_checked_disabled.svg</file>
+    <file>radio_unchecked.svg</file>
+    <file>radio_unchecked_disabled.svg</file>
+    <file>checkbox_partial.svg</file>
+    <file>checkbox_partial_disabled.svg</file>
+    <file>checkbox_checked_disabled.svg</file>
+    <file>checkbox_unchecked_disabled.svg</file>
+    <file>checkbox_checked.svg</file>
+    <file>checkbox_unchecked.svg</file>
+  </qresource>
+  <qresource prefix="Images">
+    <file>MiCreate.png</file>
+    <file>splash.png</file>
+    <file>MiCreate48x48.png</file>
+    <file>MiCreate64x64.png</file>
+    <file>MiCreate128x128.png</file>
+    <file>mb8.png</file>
+  </qresource>
+  <qresource prefix="Herta">
+    <file>herta.gif</file>
+    <file>herta.wav</file>
+  </qresource>
+</RCC>

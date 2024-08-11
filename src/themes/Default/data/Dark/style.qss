@@ -114,6 +114,7 @@ QPushButton {
     padding: 4px 8px;
     border-radius: 4px;
     border: 1px solid palette(light);
+    font-weight: normal
 }
 
 QPushButton:default {
@@ -462,8 +463,19 @@ QListView {
   background-color: palette(window);
 }
 
+QListView::item {
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+
 QListView::item:hover:!selected {
+    border-color: palette(alternate-base);
     background-color: palette(alternate-base);
+}
+
+QListView::item:selected{
+    border-color: palette(highlight);
+    background-color: palette(highlight);
 }
 
 
@@ -601,4 +613,4 @@ QComboBox::down-arrow#propertyField-input {
 QComboBox:focus#propertyField-input {
     background-color: palette(dark);
     border: 1px solid black;
-}  
+} 

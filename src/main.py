@@ -35,7 +35,7 @@ from PyQt6.QtWidgets import (QInputDialog, QMessageBox, QApplication, QProgressB
                              QDialogButtonBox, QFileDialog, QWidget, QVBoxLayout,
                              QFrame, QColorDialog, QFontDialog, QLabel, QListWidgetItem,
                              QAbstractItemView, QSplashScreen, QDialog, QUndoView, QCheckBox, QHBoxLayout)
-from PyQt6.QtGui import QIcon, QPixmap, QDesktopServices, QDrag, QImage, QPainter
+from PyQt6.QtGui import QIcon, QPixmap, QDesktopServices, QDrag, QImage, QPainter, QFontDatabase, QFont
 from PyQt6.QtCore import Qt, QSettings, QSize, QUrl, pyqtSignal
 from window import FramelessDialog
 
@@ -64,14 +64,13 @@ from widgets.properties import PropertiesWidget
 from widgets.editor import Editor, XMLLexer
 from translate import QCoreApplication
 
-import resources.icons_rc  # resource import required because it sets up the icons
+import resources.resources_rc  # resource import required because it sets up the icons
 
 from window_ui import Ui_MainWindow
 
 _ = gettext.gettext
 
-programVersion = 'v1.0.1'
-revision = 'rev-1'
+programVersion = 'v1.1'
 
 class MainWindow(QMainWindow):
     updateFound = pyqtSignal(str)
@@ -1647,9 +1646,13 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     app = QApplication(sys.argv)
-
+    
     splash = QSplashScreen(QPixmap(":/Images/splash.png"))
     splash.show()
+    
+    # setup font
+    
+    QFontDatabase.addApplicationFont(":/Fonts/Inter.ttf")
 
     def onException(exc_type, exc_value, exc_traceback):
         exception = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))

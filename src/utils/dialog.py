@@ -32,22 +32,21 @@ class CoreDialog(QDialog):
     def __init__(self, parent, settingsWidget, versionString, deviceList):
         super().__init__(parent)
 
+        self.dialogButtonCallback = None
+
         self.setWindowTitle(QCoreApplication.translate("", "Welcome"))
         self.setWindowIcon(QIcon(":Images/MiCreate48x48.png"))      
 
         self.resize(750, 500)
         self.setMinimumSize(QSize(750, 500))  
 
-        self.dialogLayout = QVBoxLayout(self)
+        self.dialogLayout = QHBoxLayout(self)
         self.dialogLayout.setContentsMargins(0,0,0,0)
         self.dialogLayout.setSpacing(0)
 
-        self.contentLayout = QHBoxLayout()
-        self.contentLayout.setObjectName("layout")
+        self.contentLayout = QVBoxLayout()
         self.contentLayout.setContentsMargins(0,0,0,0)
         self.contentLayout.setSpacing(0)
-
-        self.dialogLayout.addLayout(self.contentLayout)
 
         self.sidebar = QStackedWidget(self)
         self.sidebar.setObjectName("sidebar")
@@ -58,16 +57,18 @@ class CoreDialog(QDialog):
         self.contentPanel.setObjectName("contentPanel")
         self.contentPanel.setContentsMargins(0,0,0,0)
 
-        # self.buttonBox = QDialogButtonBox()
-        # self.buttonBox.setContentsMargins(12,12,12,12)
-        # self.buttonBox.setStandardButtons(QDialogButtonBox.StandardButton.Ok)
-
-        # self.dialogLayout.addWidget(self.buttonBox)
+        self.buttonBox = QDialogButtonBox()
+        self.buttonBox.setHidden(True)
+        self.buttonBox.setEnabled(False)
+        self.buttonBox.setContentsMargins(12,12,12,12)
+        self.buttonBox.setStandardButtons(QDialogButtonBox.StandardButton.Ok)
 
         loadJsonStyle(self)
 
-        self.contentLayout.addWidget(self.sidebar, 0)
+        self.dialogLayout.addWidget(self.sidebar, 0)
         self.contentLayout.addWidget(self.contentPanel, 1)
+        self.contentLayout.addWidget(self.buttonBox)
+        self.dialogLayout.addLayout(self.contentLayout)
 
         self.setupWelcomePage(versionString)
         self.setupNewProjectPage(deviceList)
@@ -88,6 +89,14 @@ class CoreDialog(QDialog):
         self.watchfacePageDeviceTitle.setText(QCoreApplication.translate("", "Select device"))
         self.watchfacePageProjectTitle.setText(QCoreApplication.translate("", "Project name"))
         self.watchfacePageDirectoryTitle.setText(QCoreApplication.translate("", "Project location"))
+
+    def showButtonBox(self):
+        self.buttonBox.setHidden(False)
+        self.buttonBox.setEnabled(True)
+
+    def hideButtonBox(self):
+        self.buttonBox.setHidden(True)
+        self.buttonBox.setEnabled(False)
 
     def setupWelcomePage(self, versionString):
         # sidebar
@@ -413,26 +422,25 @@ class CoreDialog(QDialog):
 
     def showWelcomePage(self, animate=False):
         self.setWindowTitle(QCoreApplication.translate("", "Welcome"))
+        self.hideButtonBox()
 
-        if animate:
-            self.sidebar.setCurrentWidget(self.welcomeSidebar)
-        else:
-            self.sidebar.setCurrentIndex(self.sidebar.indexOf(self.welcomeSidebar))
+        self.sidebar.setSlideTransition(animate)
+        self.sidebar.setCurrentWidget(self.welcomeSidebar)
 
         self.contentPanel.setCurrentWidget(self.welcomePage)
 
         self.hertaGif.stop()
+        self.welcomeSidebarNewProject.setFocus()
         self.welcomeSidebarLogo.setIcon(QIcon(":/Images/MiCreate48x48.png"))
         self.welcomeSidebarLogo.setIconSize(QSize(48, 48))
 
     def showNewProjectPage(self, prevPageFunc=None, animate=False):
         self.setWindowTitle(QCoreApplication.translate("", "New Project"))
         self.hertaGif.stop()
+        self.showButtonBox()
 
-        if animate:
-            self.sidebar.setCurrentWidget(self.newProjectSidebar)
-        else:
-            self.sidebar.setCurrentIndex(self.sidebar.indexOf(self.newProjectSidebar))
+        self.sidebar.setSlideTransition(animate)
+        self.sidebar.setCurrentWidget(self.newProjectSidebar)
 
         self.contentPanel.setCurrentWidget(self.newProjectPage)
 
@@ -446,12 +454,11 @@ class CoreDialog(QDialog):
 
     def showManageProjectPage(self, prevPageFunc=None, animate=False):
         self.setWindowTitle(QCoreApplication.translate("", "Manage Project"))
+        self.showButtonBox()
         
-        if animate:
-            self.sidebar.setCurrentWidget(self.manageProjectSidebar)
-        else:
-            self.sidebar.setCurrentIndex(self.sidebar.indexOf(self.manageProjectSidebar))
-
+        self.sidebar.setSlideTransition(animate)
+        self.sidebar.setCurrentWidget(self.manageProjectSidebar)
+        
         self.contentPanel.setCurrentWidget(self.manageProjectPage)
 
         self.manageProjectSidebarList.setCurrentRow(0)
@@ -466,11 +473,10 @@ class CoreDialog(QDialog):
         self.setWindowTitle(QCoreApplication.translate("", "Settings"))
         self.hertaGif.stop()
         self.reloadSettings.emit()
+        self.showButtonBox()
 
-        if animate:
-            self.sidebar.setCurrentWidget(self.settingsSidebar)
-        else:
-            self.sidebar.setCurrentIndex(self.sidebar.indexOf(self.settingsSidebar))
+        self.sidebar.setSlideTransition(animate)
+        self.sidebar.setCurrentWidget(self.settingsSidebar)
         
         self.contentPanel.setCurrentWidget(self.settingsPage)
         
