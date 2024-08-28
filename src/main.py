@@ -1516,6 +1516,8 @@ class MainWindow(QMainWindow):
         self.statusBar().addPermanentWidget(progressBar, 1)
 
         compileDirectory = os.path.join(os.path.dirname(currentProject["project"].dataPath), "output")
+        if not os.path.exists(compileDirectory): # if output folder does not exist
+            os.makedirs(compileDirectory)        # create new output folder
         output = []
 
         process = currentProject["project"].compile(currentProject["project"].dataPath, compileDirectory,
