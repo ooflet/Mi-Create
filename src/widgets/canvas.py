@@ -328,16 +328,20 @@ class Canvas(QGraphicsView):
         # Add images
 
         bgImg = QPixmap()
-        bgImg.load(os.path.join(self.imageFolder, backgroundImage))
+        if backgroundImage is not None:        # check if there is a background image exist
+          bgImg.load(os.path.join(self.imageFolder, backgroundImage))
 
         hrImg = QPixmap()
-        hrImg.load(os.path.join(self.imageFolder, hourHandImage))
+        if hourHandImage is not None:
+          hrImg.load(os.path.join(self.imageFolder, hourHandImage))
 
         minImg = QPixmap()
-        minImg.load(os.path.join(self.imageFolder, minuteHandImage))
+        if minuteHandImage is not None:
+          minImg.load(os.path.join(self.imageFolder, minuteHandImage))
         
         secImg = QPixmap()
-        secImg.load(os.path.join(self.imageFolder, secondHandImage))
+        if secondHandImage is not None:        # check if there is a second hand image exist some AOD does not have this
+          secImg.load(os.path.join(self.imageFolder, secondHandImage))
 
         widget.addBackground(bgImg, itemAnchors["background"]["x"], itemAnchors["background"]["y"], interpolationStyle)
         widget.addHourHand(hrImg, itemAnchors["hour"]["x"], itemAnchors["hour"]["y"], interpolationStyle)
@@ -408,7 +412,8 @@ class Canvas(QGraphicsView):
 
     def createProgressArc(self, name, rect, zValue, backgroundImage, arcImage, arcX, arcY, radius, lineWidth, startAngle, endAngle, isFlat, snap, interpolationStyle):
         bgImage = QPixmap()
-        bgImage.load(os.path.join(self.imageFolder, backgroundImage))
+        if backgroundImage is not None:
+          bgImage.load(os.path.join(self.imageFolder, backgroundImage))
     
         fgImage = QPixmap()
         fgImage.load(os.path.join(self.imageFolder, arcImage))
