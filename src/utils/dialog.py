@@ -197,6 +197,7 @@ class CoreDialog(QDialog):
 
         self.newProjectSidebarList = QListWidget()
         self.newProjectSidebarList.setFrameShape(QFrame.Shape.NoFrame)
+        self.newProjectSidebarList.setProperty("floating", True)
         self.watchfaceCategory = QListWidgetItem(self.newProjectSidebarList)
         self.watchfaceCategory.setSizeHint(QSize(25, 35))
         self.watchfaceCategory.setIcon(QIcon().fromTheme("device-watch"))

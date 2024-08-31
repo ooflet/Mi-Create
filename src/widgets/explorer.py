@@ -8,18 +8,19 @@ from PyQt6.QtCore import Qt, QSize, pyqtSignal, QModelIndex, QPoint
 from utils.contextMenu import ContextMenu
 
 class Explorer(QTreeWidget):
-    itemReordered = pyqtSignal(str, int)
+    itemReordered = pyqtSignal(int)
     def __init__(self, parent, objectIcon, ui):
         super().__init__(parent)
         self.items = {}
         self.objectIcon = objectIcon
         self.mainWindowUI = ui
+        self.setSelectionMode(QTreeWidget.SelectionMode.ExtendedSelection)
         self.setEditTriggers(QTreeWidget.EditTrigger.NoEditTriggers)
         self.setHorizontalScrollMode(QTreeWidget.ScrollMode.ScrollPerPixel)
         self.setVerticalScrollMode(QTreeWidget.ScrollMode.ScrollPerPixel)
         self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.setFrameShape(QFrame.Shape.NoFrame)
-        #self.setDragDropMode(QTreeWidget.DragDropMode.InternalMove)
+        self.setDragDropMode(QTreeWidget.DragDropMode.InternalMove)
         self.setUniformRowHeights(True)
         self.setHeaderHidden(True)
         self.setAnimated(True)
@@ -30,7 +31,7 @@ class Explorer(QTreeWidget):
     def dragMoveEvent(self, event):
         self.setDropIndicatorShown(True)
         super(QTreeWidget, self).dragMoveEvent(event)
-        if self.dropIndicatorPosition() == self.DropIndicatorPosition.OnItem or self.dropIndicatorPosition() == self.DropIndicatorPosition.OnViewport:
+        if self.dropIndicatorPosition() == self.DropIndicatorPosition.OnViewport:
             self.setDropIndicatorShown(False)
             event.ignore()
 
@@ -39,9 +40,9 @@ class Explorer(QTreeWidget):
         model.dropMimeData(event.mimeData(), Qt.DropAction.CopyAction, 0, 0, QModelIndex())
 
         if model.item(0, 0).data(101) in self.items:
-            print(model.item(0, 0).data(101))
-            dropIndex = self.indexAt(event.position().toPoint())
-            self.itemReordered.emit(model.item(0, 0).data(101), dropIndex)
+            dropIndex = self.indexAt(event.position().toPoint()).row()
+            print(model.item(0, 0).data(101), dropIndex)
+            self.itemReordered.emit(dropIndex)
 
     def contextMenuEvent(self, pos):
         if len(self.selectedItems()) > 0:

@@ -39,8 +39,7 @@ from PyQt6.QtGui import QIcon, QPixmap, QDesktopServices, QDrag, QImage, QPainte
 from PyQt6.QtCore import Qt, QSettings, QSize, QUrl, pyqtSignal
 from window import FramelessDialog
 
-if platform.system() == "Windows":  # menubar does not display on linux
-    # TODO: fix it
+if platform.system() == "Windows":
     from window import QMainWindow
 else:
     from PyQt6.QtWidgets import QMainWindow
@@ -68,6 +67,9 @@ import resources.resources_rc  # resource import required because it sets up the
 
 from window_ui import Ui_MainWindow
 
+storedSettings = QSettings("Mi Create", "Settings")
+workspaceSettings = QSettings("Mi Create", "Workspace")
+    
 _ = gettext.gettext
 
 programVersion = 'v1.1'
@@ -146,8 +148,7 @@ class MainWindow(QMainWindow):
         logging.info("Initializing Dialogs")
         self.setupDialogs()
 
-        rawSettings = QSettings("Mi Create", "Settings")
-        if "Language" not in rawSettings.allKeys():
+        if "Language" not in storedSettings.allKeys():
             logging.info("No language selected")
             item, accepted = QInputDialog().getItem(None, "Mi Create", "Select Language", self.languageNames, 0, False)
 
@@ -223,12 +224,10 @@ class MainWindow(QMainWindow):
             self.showFullScreen()
 
     def showWelcome(self):
-        settings = QSettings("Mi Create", "Workspace")
-
         self.coreDialog.welcomePage.clear()
 
-        if settings.value("recentProjects") != None:
-            projectList = settings.value("recentProjects")
+        if storedSettings.value("recentProjects") != None:
+            projectList = storedSettings.value("recentProjects")
             projectList.reverse()
             for name, location in projectList:
                 if os.path.isfile(location):
@@ -276,23 +275,19 @@ class MainWindow(QMainWindow):
         return currentProject
 
     def saveWindowState(self):
-        settings = QSettings("Mi Create", "Workspace")
-        settings.setValue("geometry", self.saveGeometry())
-        settings.setValue("state", self.saveState())
+        workspaceSettings.setValue("geometry", self.saveGeometry())
+        workspaceSettings.setValue("state", self.saveState())
 
     def loadWindowState(self):
-        settings = QSettings("Mi Create", "Workspace")
-
-        if settings.value("geometry") == None or settings.value("state") == None:
+        if workspaceSettings.value("geometry") is None or workspaceSettings.value("state") is None:
             return
 
-        self.restoreGeometry(settings.value("geometry"))
-        self.restoreState(settings.value("state"))
+        self.restoreGeometry(workspaceSettings.value("geometry"))
+        self.restoreState(workspaceSettings.value("state"))
 
     def setSetting(self, setting, value, loadSettings=True):
         logging.info(f"Set setting {setting} to {value}")
-        settings = QSettings("Mi Create", "Settings")
-        settings.setValue(setting, value)
+        storedSettings.setValue(setting, value)
 
         if loadSettings:
             self.loadSettings()
@@ -303,9 +298,8 @@ class MainWindow(QMainWindow):
                 self.settingsWidget.loadProperties(self.settings)
 
     def saveSettings(self, retranslate, loadSettings=True):
-        settings = QSettings("Mi Create", "Settings")
         for property, value in self.stagedChanges:
-            settings.setValue(property, value)
+            storedSettings.setValue(property, value)
 
         if loadSettings:
             self.loadSettings()
@@ -317,25 +311,24 @@ class MainWindow(QMainWindow):
         # settings are stored through QSettings, not the settingItems.json file
         # on windows its located at Computer\HKEY_CURRENT_USER\Software\Mi Create
         # on linux its located at /home/user/.config/Mi Create/
-        savedSettings = QSettings("Mi Create", "Settings")
         with open("data/settingItems.json") as file:
             self.settings = json.load(file)
             logging.info("settingItems.json loaded")
             self.settings["General"]["Theme"]["options"] = self.themes.themeNames
             self.settings["General"]["Language"]["options"] = self.languageNames
 
-        for key in savedSettings.allKeys():
+        for key in storedSettings.allKeys():
             for category, properties in self.settings.items():
                 for property, value in properties.items():
                     if key == property:
                         logging.info("Property load " + property)
                         # convert string to bool
-                        if savedSettings.value(key) == "true":
+                        if storedSettings.value(key) == "true":
                             value["value"] = True
-                        elif savedSettings.value(key) == "false":
+                        elif storedSettings.value(key) == "false":
                             value["value"] = False
                         else:
-                            value["value"] = savedSettings.value(key)
+                            value["value"] = storedSettings.value(key)
 
         for project in self.projects.values():
             if project.get("canvas"):
@@ -453,6 +446,7 @@ class MainWindow(QMainWindow):
     def setIconState(self, disabled):
         self.ui.actionSave.setDisabled(disabled)
         self.ui.actionManage_Project.setDisabled(disabled)
+        self.ui.actionClose_Project.setDisabled(disabled)
 
         # edit
         self.ui.actionDelete.setDisabled(disabled)
@@ -466,6 +460,13 @@ class MainWindow(QMainWindow):
         self.ui.actionSend_to_Back.setDisabled(disabled)
         self.ui.actionSend_Backwards.setDisabled(disabled)
         self.ui.actionProject_XML_File.setDisabled(disabled)
+
+        # create
+        self.ui.actionImage.setDisabled(disabled)
+        self.ui.actionImage_List.setDisabled(disabled)
+        self.ui.actionDigital_Number.setDisabled(disabled)
+        self.ui.actionAnalog_Display.setDisabled(disabled)
+        self.ui.actionArc_Progress.setDisabled(disabled)
 
         # view
         self.ui.actionZoom_In.setDisabled(disabled)
@@ -652,6 +653,7 @@ class MainWindow(QMainWindow):
         self.Explorer = Explorer(self, ObjectIcon(), self.ui)
         self.ui.explorerWidget.setWidget(self.Explorer)
         self.Explorer.itemSelectionChanged.connect(lambda: self.updateProjectSelections("explorer"))
+        self.Explorer.itemReordered.connect(lambda row: self.changeSelectedWatchfaceWidgetLayer(row))
 
     def clearExplorer(self):
         self.Explorer.clear()
@@ -797,8 +799,8 @@ class MainWindow(QMainWindow):
         def resetSettings():
             result = self.showDialog("question", _("Are you sure you want to reset all settings?"), buttons=QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, defaultButton=QMessageBox.StandardButton.No)
             if result == QMessageBox.StandardButton.Yes:
-                QSettings("Mi Create", "Settings").clear()
-                QSettings("Mi Create", "Workspace").clear()
+                storedSettings.clear()
+                workspaceSettings.clear()
                 self.loadSettings()
                 self.loadTheme()
                 self.loadLanguage(True)
@@ -868,6 +870,7 @@ class MainWindow(QMainWindow):
             self.History.undoStack.push(command)
 
     def changeSelectedWatchfaceWidgetLayer(self, changeType):
+        # change type can also be int value to manually set layer
         currentProject = self.getCurrentProject()
         currentCanvasSelected = []
 
@@ -876,7 +879,10 @@ class MainWindow(QMainWindow):
 
         for item in currentProject["canvas"].getSelectedObjects():
             currentCanvasSelected.insert(int(item.zValue()),
-                                         [currentProject["project"].getWidget(item.data(0)), int(item.zValue())])
+                                         [currentProject["project"].getWidget(item.data(0)), 
+                                         int(item.zValue()),
+                                         changeType
+                                         ])
 
         if currentCanvasSelected == []:
             return
@@ -898,12 +904,16 @@ class MainWindow(QMainWindow):
                         currentProject["project"].setWidgetLayer(widget[0], "top")
                     elif layerChange == "bottom":
                         currentProject["project"].setWidgetLayer(widget[0], 0)
+                    elif isinstance(layerChange, int):
+                        currentProject["project"].setWidgetLayer(widget[0], widget[2])
 
             currentProject["canvas"].loadObjects(currentProject["project"], self.settings["Canvas"]["Snap"]["value"],
                                                 self.settings["Canvas"]["Interpolation"]["value"],
                                                 self.settings["Canvas"]["ClipDeviceShape"]["value"],
                                                 self.settings["Canvas"]["ShowDeviceOutline"]["value"])
             self.Explorer.updateExplorer(currentProject["project"])
+            for widget in widgets:
+                currentProject["canvas"].selectObject(widget[0].getProperty("widget_name"), False)
 
         command = CommandModifyWidgetLayer(currentCanvasSelected, changeType, commandFunc,
                                            f"Change object/s order through ModifyProjectData command")
@@ -1060,9 +1070,10 @@ class MainWindow(QMainWindow):
             self.selectionDebounce = False
         elif subject == "explorer":
             self.selectionDebounce = True
+            currentProject["canvas"].clearSelected()
 
             for item in currentExplorerSelected:
-                currentProject["canvas"].selectObject(currentExplorerSelected[0])
+                currentProject["canvas"].selectObject(item, False)
 
             if currentExplorerSelected == [] or currentExplorerSelected[0] == None:
                 self.selectionDebounce = False
@@ -1314,9 +1325,8 @@ class MainWindow(QMainWindow):
                                      QMessageBox.StandardButton.No)
 
         if reply == QMessageBox.Yes:
-            settings = QSettings("Mi Create", "Workspace")
-            settings.setValue("geometry", None)
-            settings.setValue("state", None)
+            workspaceSettings.setValue("geometry", None)
+            workspaceSettings.setValue("state", None)
             os.execl(sys.executable, os.path.abspath(__file__), *sys.argv)
 
     def showNewProjectDialog(self):
@@ -1331,8 +1341,7 @@ class MainWindow(QMainWindow):
             if create[0]:
                 try:
                     self.createNewWorkspace(newProject)
-                    settings = QSettings("Mi Create", "Workspace")
-                    recentProjectList = settings.value("recentProjects")
+                    recentProjectList = storedSettings.value("recentProjects")
 
                     if recentProjectList == None:
                         recentProjectList = []
@@ -1345,7 +1354,7 @@ class MainWindow(QMainWindow):
                     recentProjectList.append(
                         [os.path.basename(newProject.dataPath), os.path.normpath(newProject.dataPath)])
 
-                    settings.setValue("recentProjects", recentProjectList)
+                    storedSettings.setValue("recentProjects", recentProjectList)
                 except Exception as e:
                     self.showDialog("error", _("Failed to createNewWorkspace: ") + e, traceback.format_exc())
             else:
@@ -1373,8 +1382,7 @@ class MainWindow(QMainWindow):
         if load[0]:
             try:
                 self.createNewWorkspace(project)
-                settings = QSettings("Mi Create", "Workspace")
-                recentProjectList = settings.value("recentProjects")
+                recentProjectList = storedSettings.value("recentProjects")
 
                 if recentProjectList == None:
                     recentProjectList = []
@@ -1388,7 +1396,7 @@ class MainWindow(QMainWindow):
 
                 recentProjectList.append(projectListing)
 
-                settings.setValue("recentProjects", recentProjectList)
+                storedSettings.setValue("recentProjects", recentProjectList)
             except Exception as e:
                 self.showDialog("error", _("Failed to open project: ") + str(e), traceback.format_exc())
                 return False
@@ -1516,8 +1524,6 @@ class MainWindow(QMainWindow):
         self.statusBar().addPermanentWidget(progressBar, 1)
 
         compileDirectory = os.path.join(os.path.dirname(currentProject["project"].dataPath), "output")
-        if not os.path.exists(compileDirectory): # if output folder does not exist
-            os.makedirs(compileDirectory)        # create new output folder
         output = []
 
         process = currentProject["project"].compile(currentProject["project"].dataPath, compileDirectory,
@@ -1652,10 +1658,6 @@ if __name__ == "__main__":
     splash = QSplashScreen(QPixmap(":/Images/splash.png"))
     splash.show()
     
-    # setup font
-    
-    QFontDatabase.addApplicationFont(":/Fonts/Inter.ttf")
-
     def onException(exc_type, exc_value, exc_traceback):
         exception = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
         errString = "Internal error! Please report as a bug.\n\n"+exception
@@ -1667,8 +1669,8 @@ if __name__ == "__main__":
     sys.excepthook = onException
 
     if args.reset:
-        QSettings("Mi Create", "Settings").clear()
-        QSettings("Mi Create", "Workspace").clear()
+        storedSettings.clear()
+        workspaceSettings.clear()
         print("Settings reset.")
 
     try:

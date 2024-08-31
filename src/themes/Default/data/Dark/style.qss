@@ -224,6 +224,7 @@ QToolButton#canvasDecoration-button {
     padding: 0px;
 }
 
+
 QToolButton::menu-indicator#canvasDecoration-button {
     image: none;
 }
@@ -238,6 +239,10 @@ QToolButton:hover#canvasDecoration-button {
 
 QToolButton:pressed {
     background-color: palette(link-visited);
+}
+
+QToolButton:pressed#canvasDecoration-button {
+    background-color: palette(highlight)
 }
 
 /*
@@ -463,7 +468,7 @@ QListView {
   background-color: palette(window);
 }
 
-QListView::item {
+QListView::item[floating="true"] {
     border: 1px solid transparent;
     border-radius: 4px;
 }

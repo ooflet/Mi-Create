@@ -454,7 +454,7 @@ QTreeView#propertiesList::item {
   height: 26px;
 }
 
-QListView::item {
+QListView::item[floating="true"] {
     border: 1px solid transparent;
     border-radius: 4px;
 }
