@@ -415,8 +415,6 @@ class PropertiesWidget(QWidget):
 
                     checked = False
 
-                    print(len(propertyValue))
-
                     if len(propertyValue) > 11:
                         checked = True
 
@@ -439,6 +437,7 @@ class PropertiesWidget(QWidget):
                         text = ""
                         if index < len(propertyValue):
                             text = propertyValue[index]
+
                         imageInput = self.createResourceEdit(text, False, resourceList, True)
                         if definedText == None:
                             item = self.addProperty("", f"{_('Number')} {str(index)}", imageInput, parent)

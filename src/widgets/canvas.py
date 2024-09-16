@@ -152,8 +152,6 @@ class Scene(QGraphicsScene):
                 else:
                     pos[3] = None
 
-        print(pos)
-
         return pos
     
     def drawSnapLines(self, pos):
@@ -578,15 +576,12 @@ class Canvas(QGraphicsView):
                 return False, f"Widget {item.getProperty('widget_type')} not implemented in canvas, please report as issue."
 
             # add widget into widget list
-            print(item.getProperty("widget_name"))
-            pprint(self.widgets)
             self.widgets[item.getProperty("widget_name")] = widget
             return True, "Success"
         except Exception:
             return False, str(f" Unable to create object {item.getProperty('widget_name')}:\n {traceback.format_exc()}")
 
     def loadObjects(self, project, snap=None, interpolation=None, clip=True, outline=False):
-        print(clip, outline)
         self.frame = DeviceFrame(self.deviceSize, clip)
         
         if interpolation == None:
@@ -841,7 +836,6 @@ class ProgressArc(QGraphicsEllipseItem):
 
         self.setStartAngle(((endAngle * -1) + 90) * 16)
         self.setSpanAngle(((startAngle * -1) - (endAngle * -1)) * 16)
-        print(pen)
         self.setPen(pen)
 
     def paint(self, painter, option, widget=None):

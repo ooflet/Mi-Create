@@ -195,6 +195,7 @@ QComboBox::item {
     selection-background-color: palette(highlight);
 }
 
+
 QToolButton {
     border-radius: 5px;
     padding: 4px;
@@ -223,6 +224,7 @@ QToolButton#canvasDecoration-button {
     padding: 0px;
 }
 
+
 QToolButton::menu-indicator#canvasDecoration-button {
     image: none;
 }
@@ -238,6 +240,11 @@ QToolButton:hover#canvasDecoration-button {
 QToolButton:pressed {
     background-color: palette(link-visited);
 }
+
+QToolButton:pressed#canvasDecoration-button {
+    background-color: palette(highlight)
+}
+
 
 /*
  * QGroupBox
@@ -452,6 +459,14 @@ QTreeView::item {
 
 QTreeView#propertiesList::item {
   height: 26px;
+}
+
+QTreeView::item:hover:!selected {
+  background-color: palette(alternate-base);
+}
+
+QListView {
+  background-color: palette(window);
 }
 
 QListView::item[floating="true"] {

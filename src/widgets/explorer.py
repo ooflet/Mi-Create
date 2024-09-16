@@ -14,6 +14,7 @@ class Explorer(QTreeWidget):
         self.items = {}
         self.objectIcon = objectIcon
         self.mainWindowUI = ui
+        self.dropPos = None
         self.setSelectionMode(QTreeWidget.SelectionMode.ExtendedSelection)
         self.setEditTriggers(QTreeWidget.EditTrigger.NoEditTriggers)
         self.setHorizontalScrollMode(QTreeWidget.ScrollMode.ScrollPerPixel)
@@ -41,7 +42,6 @@ class Explorer(QTreeWidget):
 
         if model.item(0, 0).data(101) in self.items:
             dropIndex = self.indexAt(event.position().toPoint()).row()
-            print(model.item(0, 0).data(101), dropIndex)
             self.itemReordered.emit(dropIndex)
 
     def contextMenuEvent(self, pos):

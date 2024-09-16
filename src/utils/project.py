@@ -529,7 +529,7 @@ class FprjProject:
 
                     for widget in self.widgets:
                         if widget["@Shape"] == "29": # legacy circle progress
-                            widget["@Shape"] == "42" # circle progress plus 
+                            widget["@Shape"] = "42" # circle progress plus 
                     
                     self.name = os.path.basename(path)
                     self.directory = projectDir
@@ -551,7 +551,6 @@ class FprjProject:
         process.start()
         process.waitForFinished()
         print(process.readAllStandardOutput())
-        
         
     def getDeviceType(self):
         return self.data["FaceProject"]["@DeviceType"]
@@ -582,8 +581,6 @@ class FprjProject:
         else:
             widget["@Y"] = posY
 
-        
-        print(self.widgets)
         self.widgets.append(widget)
         
     def deleteWidget(self, widget):
@@ -673,7 +670,13 @@ class FprjWidget:
         self.data = deepcopy(self.data)
 
     def getProperty(self, property):
-        property = [k for k, v in self.project.propertyIds.items() if v == property][0]
+        property = [k for k, v in self.project.propertyIds.items() if v == property]
+        
+        if len(property) > 0:
+            property = property[0]
+        else:
+            return
+
         if property == "WidgetType":
             return
 
@@ -682,11 +685,14 @@ class FprjWidget:
         elif property == "@BitmapList":
             bitmapString = self.data[property]
             bitmapList = bitmapString.split("|")
-            for index, item in enumerate(bitmapList):
-                split = item.split(":")
-                if len(split) > 1:
-                    split[0] = split[0].strip("()")
-                    bitmapList[index] = split
+
+            if self.getProperty("@Shape") == "widget_imagelist": # only split colons if its from an imagelist
+                for index, item in enumerate(bitmapList):
+                    split = item.split(":")
+                    if len(split) > 1:
+                        split[0] = split[0].strip("()")
+                        bitmapList[index] = split
+
             return bitmapList
         else:
             return self.data.get(property)

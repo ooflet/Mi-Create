@@ -12,7 +12,7 @@ from pathlib import Path
 
 sys.path.append("..")
 
-from PyQt6.QtCore import Qt, QSize, pyqtSignal, QUrl
+from PyQt6.QtCore import Qt, QObject, QSize, pyqtSignal, QUrl, QMetaMethod
 from PyQt6.QtGui import QIcon, QPixmap, QMovie
 from PyQt6.QtWidgets import (QDialog, QLabel, QLineEdit, QComboBox, QToolButton, QSpinBox, QVBoxLayout, 
                              QHBoxLayout, QSizePolicy, QWidget, QDialogButtonBox, QFileDialog, QFrame,
@@ -90,13 +90,32 @@ class CoreDialog(QDialog):
         self.watchfacePageProjectTitle.setText(QCoreApplication.translate("", "Project name"))
         self.watchfacePageDirectoryTitle.setText(QCoreApplication.translate("", "Project location"))
 
-    def showButtonBox(self):
+    def getSignal (self, oObject : QObject, strSignalName : str):
+        oMetaObj = oObject.metaObject()
+        for i in range (oMetaObj.methodCount()):
+            oMetaMethod = oMetaObj.method(i)
+            if not oMetaMethod.isValid():
+                continue
+            if oMetaMethod.methodType () == QMetaMethod.MethodType.Signal and \
+                oMetaMethod.name() == strSignalName:
+                return oMetaMethod
+
+        return None
+
+
+    def showButtonBox(self, accepted=None):
         self.buttonBox.setHidden(False)
         self.buttonBox.setEnabled(True)
+        if accepted != None:
+            self.buttonBox.accepted.connect(accepted)
+        else:
+            self.buttonBox.accepted.connect(self.accept)
 
     def hideButtonBox(self):
         self.buttonBox.setHidden(True)
         self.buttonBox.setEnabled(False)
+        if self.buttonBox.isSignalConnected(self.getSignal(self.buttonBox, "clicked")):
+            self.buttonBox.clicked.disconnect()
 
     def setupWelcomePage(self, versionString):
         # sidebar
@@ -320,6 +339,7 @@ class CoreDialog(QDialog):
 
         self.manageProjectSidebarList = QListWidget()
         self.manageProjectSidebarList.setFrameShape(QFrame.Shape.NoFrame)
+        self.manageProjectSidebarList.setProperty("floating", True)
         self.configureProjectCategory = QListWidgetItem(self.manageProjectSidebarList)
         self.configureProjectCategory.setSizeHint(QSize(25, 35))
         self.configureProjectCategory.setIcon(QIcon().fromTheme("device-watch"))

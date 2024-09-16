@@ -187,14 +187,23 @@ class MainWindow(QMainWindow):
             logging.info("-- Exiting Mi Create --")
             logging.info("Disconnecting selectionChanged event")
             for project in self.projects.values():
+                print(project)
                 if project.get("canvas"):
+                    print('canvas')
                     project["canvas"].scene().selectionChanged.disconnect()
             logging.info("Saving Window State")
             self.saveWindowState()
             logging.info("Quitting")
             event.accept()
 
-        if self.fileChanged == True:
+        fileChanged = False
+
+        for project in self.projects.values():
+            if project["hasFileChanged"]:
+                fileChanged = True
+                break
+
+        if fileChanged:
             quit_msg = _("You have unsaved project(s) open. Save and quit?")
             reply = self.showDialog("warning", quit_msg, "",
                                     QMessageBox.StandardButton.SaveAll | QMessageBox.StandardButton.Discard | QMessageBox.StandardButton.Cancel)
@@ -273,6 +282,20 @@ class MainWindow(QMainWindow):
         else:
             currentProject = self.projects.get(self.ui.workspace.tabText(currentIndex))
         return currentProject
+    
+    def markCurrentProjectChanged(self, changed):
+        currentProject = self.getCurrentProject()
+        currentProject["hasFileChanged"] = changed
+
+        if changed:
+            if "*" not in self.ui.workspace.tabText(self.ui.workspace.currentIndex()):
+                self.ui.workspace.setTabText(self.ui.workspace.currentIndex(),
+                                                self.ui.workspace.tabText(self.ui.workspace.currentIndex()) + "*")
+        else:
+            if "*" in self.ui.workspace.tabText(self.ui.workspace.currentIndex()):
+                self.ui.workspace.setTabText(self.ui.workspace.currentIndex(),
+                                             self.ui.workspace.tabText(self.ui.workspace.currentIndex()).replace("*",
+                                                                                                                 ""))
 
     def saveWindowState(self):
         workspaceSettings.setValue("geometry", self.saveGeometry())
@@ -489,8 +512,6 @@ class MainWindow(QMainWindow):
             subprocess.Popen(["xdg-open", path])
 
     def closeTab(self, index):
-        print(index)
-
         # Fires when tab closes
         def delProjectItem(index):
             if self.ui.workspace.tabToolTip(index) != "":
@@ -671,21 +692,14 @@ class MainWindow(QMainWindow):
             if currentItem == None:
                 return
 
-            currentProject["hasFileChanged"] = True
-            self.fileChanged = True
-
-            if "*" not in self.ui.workspace.tabText(self.ui.workspace.currentIndex()):
-                self.ui.workspace.setTabText(self.ui.workspace.currentIndex(),
-                                             self.ui.workspace.tabText(self.ui.workspace.currentIndex()) + "*")
+            self.markCurrentProjectChanged(True)
 
             logging.info(f"Set property {args[0]}, {args[1]} for widget {currentSelected.data(0, 101)}")
 
             def updateProperty(widgetName, property, value):
-                print("select")
                 if currentProject["canvas"].getObject(widgetName).isSelected() is not True:
                     currentProject["canvas"].selectObject(widgetName)
                     
-                print("chk property")
                 if property == "num_source" or property == "imagelist_source" or property == "widget_visibility_source":
                     if value == "None":
                         currentItem.setProperty(property, 0)
@@ -702,7 +716,6 @@ class MainWindow(QMainWindow):
                             return
                 elif property == "num_alignment":
                     alignmentList = ["Left", "Center", "Right"]
-                    print(str(alignmentList.index(value)))
                     currentItem.setProperty(property, str(alignmentList.index(value)))
                 elif property == "widget_name":
                     if value == widgetName:
@@ -734,12 +747,9 @@ class MainWindow(QMainWindow):
                 else:
                     currentItem.setProperty(property, value)
 
-                print("update")
                 if property == "widget_name":
                     self.propertiesWidget.clearOnRefresh = False
-                    print("explorer update")
                     self.Explorer.updateExplorer(currentProject["project"])
-                    print("load obj")
                     currentProject["canvas"].loadObjects(currentProject["project"],
                                                          self.settings["Canvas"]["Snap"]["value"],
                                                         self.settings["Canvas"]["Interpolation"]["value"],
@@ -753,11 +763,9 @@ class MainWindow(QMainWindow):
                     currentProject["canvas"].selectObject(widgetName)
 
             if self.ignoreHistoryInvoke:
-                print("ignore history")
                 self.ignoreHistoryInvoke = False
                 updateProperty(currentSelected.data(0, 101), args[0], args[1])
             else:
-                print("command")
                 command = CommandModifyProperty(currentItem.getProperty("widget_name"), args[0],
                                                 currentItem.getProperty(args[0]), args[1], updateProperty,
                                                 f"Change property {args[0]} to {args[1]}")
@@ -854,18 +862,19 @@ class MainWindow(QMainWindow):
             self.ignoreHistoryInvoke = False
         else:
             def commandFunc(type, name):
+                self.markCurrentProjectChanged(True)
                 if type == "undo":
                     currentProject["project"].deleteWidget(currentProject["project"].getWidget(name))
                 elif type == "redo":
                     currentProject["project"].createWidget(id, name, "center", "center")
-                    currentProject["canvas"].loadObjects(currentProject["project"],
-                                            self.settings["Canvas"]["Snap"]["value"],
-                                            self.settings["Canvas"]["Interpolation"]["value"],
-                                            self.settings["Canvas"]["ClipDeviceShape"]["value"],
-                                            self.settings["Canvas"]["ShowDeviceOutline"]["value"])
+
+                currentProject["canvas"].loadObjects(currentProject["project"],
+                                        self.settings["Canvas"]["Snap"]["value"],
+                                        self.settings["Canvas"]["Interpolation"]["value"],
+                                        self.settings["Canvas"]["ClipDeviceShape"]["value"],
+                                        self.settings["Canvas"]["ShowDeviceOutline"]["value"])
                 self.Explorer.updateExplorer(currentProject["project"])
 
-            print(name)
             command = CommandAddWidget(name, commandFunc, f"Add object {name}")
             self.History.undoStack.push(command)
 
@@ -888,6 +897,7 @@ class MainWindow(QMainWindow):
             return
 
         def commandFunc(type, layerChange, widgets):
+            self.markCurrentProjectChanged(True)
             if type == "undo":
                 for widget in widgets:
                     currentProject["project"].setWidgetLayer(widget[0], widget[1])
@@ -1012,8 +1022,6 @@ class MainWindow(QMainWindow):
                 for widget in clipboard:
                     currentProject["canvas"].selectObject(widget.getProperty("widget_name"), False)
 
-        print(clipboardCopy)
-
         command = CommandPasteWidget(clipboardCopy, commandFunc, f"Paste objects through ModifyProjectData command")
         self.History.undoStack.push(command)
 
@@ -1121,7 +1129,6 @@ class MainWindow(QMainWindow):
 
                 if int(widget.getProperty("widget_pos_x")) == round(object.pos().x()) and int(
                         widget.getProperty("widget_pos_y")) == round(object.pos().y()):
-                    print("return")
                     return
 
                 prevPosObject = {
@@ -1139,11 +1146,7 @@ class MainWindow(QMainWindow):
                 prevPos.append(prevPosObject)
                 currentPos.append(currentPosObject)
 
-            if "*" not in self.ui.workspace.tabText(self.ui.workspace.currentIndex()):
-                self.ui.workspace.setTabText(self.ui.workspace.currentIndex(),
-                                             self.ui.workspace.tabText(self.ui.workspace.currentIndex()) + "*")
-                self.fileChanged = True
-                currentProject["hasFileChanged"] = True
+            self.markCurrentProjectChanged(True)
 
             def commandFunc(objects):
                 if isinstance(currentProject["project"], FprjProject):
@@ -1227,9 +1230,7 @@ class MainWindow(QMainWindow):
         # Creates a new instance of QScintilla in a Codespace (code workspace)
         def textChanged():
             self.fileChanged = True
-            if "*" not in self.ui.workspace.tabText(self.ui.workspace.currentIndex()):
-                self.ui.workspace.setTabText(self.ui.workspace.currentIndex(),
-                                             self.ui.workspace.tabText(self.ui.workspace.currentIndex()) + "*")
+            self.markCurrentProjectChanged(True)
 
         widget = QWidget()
         editor = Editor(widget, self.palette(), language)
@@ -1389,7 +1390,6 @@ class MainWindow(QMainWindow):
 
                 path = os.path.normpath(projectLocation)
                 projectListing = [os.path.basename(path), path]
-                print(path)
 
                 if projectListing in recentProjectList:
                     recentProjectList.pop(recentProjectList.index(projectListing))
@@ -1422,7 +1422,7 @@ class MainWindow(QMainWindow):
                 if project["hasFileChanged"]:
                     if not project.get("project"):
                         return
-                    success, message = project.save()
+                    success, message = project["project"].save()
                     if not success:
                         self.showDialog("error", _("Failed to save project: ") + str(message))
 
@@ -1448,10 +1448,7 @@ class MainWindow(QMainWindow):
                     self.statusBar().showMessage(_("Failed to save: ") + str(e), 10000)
                     self.showDialog("error", _("Failed to save project: ") + str(e))
 
-            if "*" in self.ui.workspace.tabText(self.ui.workspace.currentIndex()):
-                self.ui.workspace.setTabText(self.ui.workspace.currentIndex(),
-                                             self.ui.workspace.tabText(self.ui.workspace.currentIndex()).replace("*",
-                                                                                                                 ""))
+            self.markCurrentProjectChanged(False)
 
     def createPreview(self):
         currentProject = self.getCurrentProject()
@@ -1501,8 +1498,6 @@ class MainWindow(QMainWindow):
             self.compiling = False
             progressBar.deleteLater()
             text.deleteLater()
-
-            print(output)
 
             if "Error:" in output[1]:
                 parts = output[1].split('\r\n')
