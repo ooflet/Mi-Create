@@ -686,7 +686,7 @@ class FprjWidget:
             bitmapString = self.data[property]
             bitmapList = bitmapString.split("|")
 
-            if self.getProperty("@Shape") == "widget_imagelist": # only split colons if its from an imagelist
+            if self.data.get("@Shape") == "31": # only split colons if its from an imagelist
                 for index, item in enumerate(bitmapList):
                     split = item.split(":")
                     if len(split) > 1:

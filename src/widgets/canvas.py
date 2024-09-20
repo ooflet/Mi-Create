@@ -16,7 +16,7 @@ from utils.project import WatchData
 from PyQt6.QtCore import pyqtSignal, QPointF, QSize, QRect, QRectF, QLineF, Qt
 from PyQt6.QtGui import QPainter, QPainterPath, QPen, QColor, QPixmap, QIcon, QBrush
 from PyQt6.QtWidgets import (QApplication, QGraphicsPathItem, QGraphicsScene, QGraphicsSceneMouseEvent, QGraphicsView, QGraphicsItem, QGraphicsRectItem, 
-                            QToolButton, QGraphicsPixmapItem, QGraphicsEllipseItem, QMessageBox, QRubberBand, QGraphicsOpacityEffect)
+                            QToolButton, QGraphicsPixmapItem, QGraphicsEllipseItem, QMessageBox, QRubberBand, QGraphicsOpacityEffect, QHBoxLayout, QVBoxLayout)
 
 from utils.contextMenu import ContextMenu
 
@@ -207,8 +207,6 @@ class Canvas(QGraphicsView):
         self.graphicsScene = Scene()
         self.graphicsScene.setSceneRect(0,0,self.deviceSize[0],self.deviceSize[1])
 
-        
-        
         self.drawDecorations()
 
         self.setScene(self.graphicsScene)
@@ -218,15 +216,27 @@ class Canvas(QGraphicsView):
         self.onObjectPosChange.emit()
 
     def drawDecorations(self):
+        mainLayout = QVBoxLayout(self)
+        mainLayout.setContentsMargins(20, 20, 20, 20)
+
+        toolButtonLayout = QHBoxLayout()
+        toolButtonLayout.setContentsMargins(0, 0, 0, 0)
+
         insertButton = QToolButton(self)
         insertButton.setObjectName("canvasDecoration-button")
-        insertButton.setGeometry(20, 20, 40, 25)
+        insertButton.setFixedSize(40, 25)
         insertButton.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
         insertButton.setMenu(self.mainWindowUI.menuInsert)
         insertButton.setIcon(QIcon().fromTheme("insert-object"))
         insertButton.setIconSize(QSize(18, 18))
         insertButton.setToolTip("Create Widget")
         insertButton.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
+
+        mainLayout.addLayout(toolButtonLayout)
+        mainLayout.addStretch()
+
+        toolButtonLayout.addWidget(insertButton)
+        toolButtonLayout.addStretch()
 
     def mousePressEvent(self, event):
         if not any(isinstance(item, BaseWidget) for item in self.items(event.pos())):
