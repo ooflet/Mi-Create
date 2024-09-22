@@ -20,12 +20,16 @@ Steps to reproduce the behavior:
 **Expected behavior**
 A clear and concise description of what you expected to happen.
 
+**Troubleshooting**
+- Log File/Error Message: [on Windows, log file is located at C:\Users\{username}\AppData\Local\Programs\Mi Create\data\app.log]
+- .fprj file
+
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
 **Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - Version [e.g. 22]
+ - OS: [e.g. Linux]
+ - Version
 
 **Additional context**
 Add any other context about the problem here.

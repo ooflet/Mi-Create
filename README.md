@@ -23,11 +23,15 @@ Download the latest installer from the [releases](https://github.com/ooflet/Mi-C
 ### Linux
 Mi Create fully supports Linux, however there are no binaries for Linux. I do plan to distribute binaries on Linux once a fully stable and feature-rich release is out. If there are any Linux app maintainers who have experience in distributing applications, I would highly appreciate your help.
 
+### MacOS
+Mi Create is not tested on MacOS. All code and libraries should support MacOS, but I make no guarantees. 
+
 ## Running source code
 If you want to run from source:
-- Clone repo
-- Install Python version 3.12 or above & install dependencies:
-`pip install -r requirements.txt` or `python -m pip install -r requirements.txt`
+- Clone repo/download source code directly from GitHub
+- Install Python version 3.12 or above
+- Make a Python virtual environment (optional but recommended)
+- Install dependencies: `pip install -r requirements.txt` or `python -m pip install -r requirements.txt`
 - Execute main.py
 
 Executing from source however will not create log files, it will output logs to console.
@@ -48,4 +52,4 @@ Compiling for different platforms must be done using Nuitka, there are some spec
 
 ## Licensing:
 Mi Create is licensed under the GPL-3 licence. [View what you can and can't do](https://gist.github.com/kn9ts/cbe95340d29fc1aaeaa5dd5c059d2e60)   
-Please note that the compiler & decompiler is made by a third party and is **NOT** open source.
+Please note that the compiler is made by a third party and is **NOT** open source.
