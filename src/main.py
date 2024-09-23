@@ -820,14 +820,14 @@ class MainWindow(QMainWindow):
         self.coreDialog.reloadSettings.connect(lambda: self.settingsWidget.loadProperties(self.settings))
         self.coreDialog.updateCompiler.connect(lambda compiler, db: self.WatchData.updateDataFiles(compiler, db))
         self.coreDialog.resetSettings.connect(resetSettings)
-        self.coreDialog.manageProjectSidebarSave.clicked.connect(saveConfig)
+        self.coreDialog.projectConfigSaved.connect(saveConfig)
         self.coreDialog.rejected.connect(closeEvent)
 
         deviceField = self.coreDialog.watchfacePageDeviceField
         nameField = self.coreDialog.watchfacePageProjectField
         locationField = self.coreDialog.watchfacePageDirectoryField
 
-        self.coreDialog.watchfacePageButtonBox.accepted.connect(
+        self.coreDialog.newProjectCreated.connect(
             lambda: self.newProject(locationField.text(), nameField.text(), deviceField.currentText()))
 
         def projectListOpen():

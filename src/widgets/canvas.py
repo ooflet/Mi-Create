@@ -414,7 +414,7 @@ class Canvas(QGraphicsView):
             # Get QPixmap from file string
             if len(numList) >= 11:
                 image = QPixmap()
-                image.load(os.path.join(self.imageFolder, numList[x]))
+                image.load(os.path.join(self.imageFolder, numList[x % len(numList)]))
 
                 widget.addImage(image, (image.size().width() * x) + (int(spacing) * x), 0, int(spacing), interpolationStyle)
             else:

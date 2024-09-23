@@ -26,8 +26,13 @@ class CoreDialog(QDialog):
     # Core dialog contains welcome screen, new project screen and compile project screen
     reloadSettings = pyqtSignal()
     saveSettings = pyqtSignal()
+
     updateCompiler = pyqtSignal(str, str)
     resetSettings = pyqtSignal()
+
+    newProjectCreated = pyqtSignal()
+
+    projectConfigSaved = pyqtSignal()
 
     def __init__(self, parent, settingsWidget, versionString, deviceList):
         super().__init__(parent)
@@ -106,6 +111,7 @@ class CoreDialog(QDialog):
     def showButtonBox(self, accepted=None):
         self.buttonBox.setHidden(False)
         self.buttonBox.setEnabled(True)
+
         if accepted != None:
             self.buttonBox.accepted.connect(accepted)
         else:
@@ -116,6 +122,9 @@ class CoreDialog(QDialog):
         self.buttonBox.setEnabled(False)
         if self.buttonBox.isSignalConnected(self.getSignal(self.buttonBox, "clicked")):
             self.buttonBox.clicked.disconnect()
+
+    def setButtonBoxEnabled(self, enabled):
+        self.buttonBox.setEnabled(enabled)
 
     def setupWelcomePage(self, versionString):
         # sidebar
@@ -232,9 +241,9 @@ class CoreDialog(QDialog):
         def update():
             # update and check if all fields are filled
             if self.watchfacePageProjectField.text() != "" and self.watchfacePageDirectoryField.text() != "":
-                self.watchfacePageButtonBox.setEnabled(True)
+                self.setButtonBoxEnabled(True)
             else:
-                self.watchfacePageButtonBox.setEnabled(False)
+                self.setButtonBoxEnabled(False)
 
         def openFolderDialog():
             location = QFileDialog.getExistingDirectory(self)
@@ -292,16 +301,12 @@ class CoreDialog(QDialog):
         self.watchfacePageDirectoryLayout.addWidget(self.watchfacePageDirectoryField)
         self.watchfacePageDirectoryLayout.addWidget(self.watchfacePageDirectoryFolderButton)
 
-        self.watchfacePageButtonBox = QDialogButtonBox()
-        self.watchfacePageButtonBox.setStandardButtons(QDialogButtonBox.StandardButton.Ok)
-
         # layout
         
         self.watchfacePageLayout.addLayout(self.watchfacePageDeviceLayout)
         self.watchfacePageLayout.addLayout(self.watchfacePageProjectLayout)
         self.watchfacePageLayout.addLayout(self.watchfacePageDirectoryLayout)
         self.watchfacePageLayout.addStretch()
-        self.watchfacePageLayout.addWidget(self.watchfacePageButtonBox)
 
         self.watchfacePage.setLayout(self.watchfacePageLayout)
 
@@ -311,8 +316,6 @@ class CoreDialog(QDialog):
         
         self.sidebar.addWidget(self.newProjectSidebar)
         self.contentPanel.addWidget(self.newProjectPage)
-
-        update()
 
     def setupManageProjectPage(self):
         # sidebar
@@ -324,14 +327,11 @@ class CoreDialog(QDialog):
         self.manageProjectSidebarHeader = QHBoxLayout()
         self.manageProjectSidebarBack = QToolButton(self)
         self.manageProjectSidebarBack.setIcon(QIcon().fromTheme("application-back"))
-        self.manageProjectSidebarSave = QToolButton(self)
-        self.manageProjectSidebarSave.setIcon(QIcon().fromTheme("document-save"))
         self.manageProjectSidebarTitle = QLabel(self)
         self.manageProjectSidebarTitle.setStyleSheet("font-size: 12pt")
         self.manageProjectSidebarTitle.setFixedHeight(26)
         self.manageProjectSidebarHeader.addWidget(self.manageProjectSidebarBack, 0)
         self.manageProjectSidebarHeader.addWidget(self.manageProjectSidebarTitle, 1)
-        self.manageProjectSidebarHeader.addWidget(self.manageProjectSidebarSave, 0)
 
         self.manageProjectSidebarHeaderLine = QFrame(self.welcomeSidebar)
         self.manageProjectSidebarHeaderLine.setFrameShape(QFrame.Shape.HLine)
@@ -342,7 +342,7 @@ class CoreDialog(QDialog):
         self.manageProjectSidebarList.setProperty("floating", True)
         self.configureProjectCategory = QListWidgetItem(self.manageProjectSidebarList)
         self.configureProjectCategory.setSizeHint(QSize(25, 35))
-        self.configureProjectCategory.setIcon(QIcon().fromTheme("device-watch"))
+        self.configureProjectCategory.setIcon(QIcon().fromTheme("project-config"))
 
         self.manageProjectSidebarLayout.addLayout(self.manageProjectSidebarHeader, 0)
         self.manageProjectSidebarLayout.addWidget(self.manageProjectSidebarHeaderLine, 0)
@@ -458,7 +458,8 @@ class CoreDialog(QDialog):
     def showNewProjectPage(self, prevPageFunc=None, animate=False):
         self.setWindowTitle(QCoreApplication.translate("", "New Project"))
         self.hertaGif.stop()
-        self.showButtonBox()
+        self.showButtonBox(self.newProjectCreated.emit)
+        self.setButtonBoxEnabled(False)
 
         self.sidebar.setSlideTransition(animate)
         self.sidebar.setCurrentWidget(self.newProjectSidebar)
@@ -475,7 +476,6 @@ class CoreDialog(QDialog):
 
     def showManageProjectPage(self, prevPageFunc=None, animate=False):
         self.setWindowTitle(QCoreApplication.translate("", "Manage Project"))
-        self.showButtonBox()
         
         self.sidebar.setSlideTransition(animate)
         self.sidebar.setCurrentWidget(self.manageProjectSidebar)
@@ -488,13 +488,13 @@ class CoreDialog(QDialog):
             self.manageProjectSidebarBack.setVisible(True)
             self.manageProjectSidebarBack.clicked.connect(lambda: prevPageFunc(animate=True))
         else:
+            self.showButtonBox(self.projectConfigSaved.emit)
             self.manageProjectSidebarBack.setVisible(False)
 
     def showSettingsPage(self, prevPageFunc=None, animate=False):
         self.setWindowTitle(QCoreApplication.translate("", "Settings"))
         self.hertaGif.stop()
         self.reloadSettings.emit()
-        self.showButtonBox()
 
         self.sidebar.setSlideTransition(animate)
         self.sidebar.setCurrentWidget(self.settingsSidebar)
@@ -505,6 +505,7 @@ class CoreDialog(QDialog):
             self.settingsSidebarBack.setVisible(True)
             self.settingsSidebarBack.clicked.connect(lambda: prevPageFunc(animate=True))
         else:
+            self.showButtonBox()
             self.settingsSidebarBack.setVisible(False)
 
 class MultiFieldDialog(QDialog):
