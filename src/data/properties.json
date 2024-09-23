@@ -480,7 +480,7 @@
                     "type": "int",
                     "value": "0",
                     "min": "0",
-                    "max": "99"
+                    "max": "999"
                 },
                 "widget_bitmaplist": {
                     "string": "Images",

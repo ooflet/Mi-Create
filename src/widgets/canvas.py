@@ -376,7 +376,7 @@ class Canvas(QGraphicsView):
         
         return widget
 
-    def createImageList(self, name, rect, zValue, bitmapList, snap, interpolationStyle):
+    def createImageList(self, name, rect, zValue, defaultValue, bitmapList, snap, interpolationStyle):
         # Create widget
         widget = ImageWidget(int(rect.x()), int(rect.y()), int(rect.width()), int(rect.height()), self.frame, self, QColor(255,255,255,0), name)
         widget.setZValue(zValue)
@@ -384,14 +384,18 @@ class Canvas(QGraphicsView):
         widget.snap = snap
 
         # Split image strings from the Bitmaplist
-        
-        firstImage = bitmapList[0]
+        if len(bitmapList) > defaultValue:
+            displayImage = bitmapList[defaultValue]
+        else:
+            displayImage = bitmapList[0]
+
+        # displayImage is a list with 2 values, image index & image
 
         if bitmapList != []:
             # Get Image
-            if len(firstImage) >= 2:
+            if len(displayImage) >= 2:
                 image = QPixmap()
-                image.load(os.path.join(self.imageFolder, firstImage[1]))
+                image.load(os.path.join(self.imageFolder, displayImage[1]))
                 widget.addImage(image, 0, 0, 0, interpolationStyle)
             else:
                 widget.representNoImage()
@@ -537,6 +541,7 @@ class Canvas(QGraphicsView):
                         int(item.getProperty("widget_size_height"))
                     ),
                     index,
+                    int(item.getProperty("imagelist_default_index")),
                     item.getProperty("widget_bitmaplist"),
                     snap,
                     interpolation
@@ -771,6 +776,7 @@ class ImageWidget(BaseWidget):
         if qPixmap.isNull():
             self.representNoImage()
             return
+        
         item = QGraphicsPixmapItem(qPixmap, self)
         item.setPos(posX, posY)
         self.imageItems.append(item)
