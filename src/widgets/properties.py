@@ -220,7 +220,17 @@ class PropertiesWidget(QWidget):
         spinBox = QSpinBox(self)
         spinBox.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         spinBox.setObjectName("propertyField-input")
-        spinBox.setRange(minVal, maxVal)
+
+        if minVal != "none":
+            spinBox.setMinimum(int(minVal))
+        else:
+            spinBox.setMinimum(-2147483647) # max int32 signed integer
+
+        if maxVal != "none":
+            spinBox.setMaximum(int(maxVal))
+        else:
+            spinBox.setMaximum(2147483647)
+
         if text == None:
             text = "0"
         spinBox.setValue(int(text))
@@ -399,7 +409,7 @@ class PropertiesWidget(QWidget):
                         self.treeWidget.verticalScrollBar().setValue(prevLocation)
 
                     ignorePropertyCreation = True
-                    imageAmountInput = self.createSpinBox(len(propertyValue), False, True, key, 0, 100)
+                    imageAmountInput = self.createSpinBox(len(propertyValue), False, True, key, 0, 9999)
                     imageAmountInput.textChanged.connect(lambda value=imageAmountInput.value(): updateImageAmount(value))
                     self.addProperty("", "Image Count", imageAmountInput, parent)
 
@@ -466,8 +476,8 @@ class PropertiesWidget(QWidget):
 
                 elif property["type"] == "int":
                     if len(property) < 5:
-                        QMessageBox.critical(None, "Properties", f"Int property for {property['string']} requires a min/max val")
-                    inputWidget = self.createSpinBox(propertyValue, False, False, key, int(property["min"]), int(property["max"]))
+                        QMessageBox.critical(None, "Properties", f"Int property for {property['string']} requires a min/max val or 'none'")
+                    inputWidget = self.createSpinBox(propertyValue, False, False, key, property["min"], property["max"])
                 elif property["type"] == "bool":
                     inputSinker, inputWidget = self.createCheckBox(propertyValue, key)
                 elif property["type"] == "src":

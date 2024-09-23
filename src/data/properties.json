@@ -479,8 +479,8 @@
                     "string": "Default Index",
                     "type": "int",
                     "value": "0",
-                    "min": "0",
-                    "max": "999"
+                    "min": "none",
+                    "max": "none"
                 },
                 "widget_bitmaplist": {
                     "string": "Images",

@@ -383,9 +383,11 @@ class Canvas(QGraphicsView):
         widget.setData(1, "widget_imagelist") # Item ID 
         widget.snap = snap
 
+        values = [int(x[0]) for x in bitmapList]
+
         # Split image strings from the Bitmaplist
-        if len(bitmapList) > defaultValue:
-            displayImage = bitmapList[defaultValue]
+        if defaultValue in values:
+            displayImage = bitmapList[values.index(defaultValue)]
         else:
             displayImage = bitmapList[0]
 
