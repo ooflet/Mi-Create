@@ -1,7 +1,7 @@
 # Explorer Widget for Mi Create
 # ooflet <ooflet@proton.me>
 
-from PyQt6.QtWidgets import QTreeWidget, QTreeWidgetItem, QFrame, QMessageBox
+from PyQt6.QtWidgets import QTreeWidget, QTreeWidgetItem, QFrame, QMessageBox, QPushButton
 from PyQt6.QtGui import QContextMenuEvent, QIcon, QStandardItemModel
 from PyQt6.QtCore import Qt, QSize, pyqtSignal, QModelIndex, QPoint
 
@@ -32,17 +32,16 @@ class Explorer(QTreeWidget):
     def dragMoveEvent(self, event):
         self.setDropIndicatorShown(True)
         super(QTreeWidget, self).dragMoveEvent(event)
-        if self.dropIndicatorPosition() == self.DropIndicatorPosition.OnViewport:
+
+        if self.dropIndicatorPosition() == self.DropIndicatorPosition.OnViewport or self.dropIndicatorPosition() == self.DropIndicatorPosition.AboveItem:
+            # dropping above item is ignored for now
+            # will fix behaviour when the time comes
             self.setDropIndicatorShown(False)
             event.ignore()
 
     def dropEvent(self, event):
-        model = QStandardItemModel()
-        model.dropMimeData(event.mimeData(), Qt.DropAction.CopyAction, 0, 0, QModelIndex())
-
-        if model.item(0, 0).data(101) in self.items:
-            dropIndex = self.indexAt(event.position().toPoint()).row()
-            self.itemReordered.emit(dropIndex)
+        dropIndex = self.indexAt(event.position().toPoint()).row()
+        self.itemReordered.emit(dropIndex)
 
     def contextMenuEvent(self, pos):
         if len(self.selectedItems()) > 0:

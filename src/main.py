@@ -74,7 +74,7 @@ _ = gettext.gettext
 
 programVersion = 'v1.1'
 
-class MainWindow(QMainWindow):
+class Editor(QMainWindow):
     updateFound = pyqtSignal(str)
 
     def __init__(self):
@@ -1669,17 +1669,17 @@ if __name__ == "__main__":
         print("Settings reset.")
 
     try:
-        main_window = MainWindow()
+        editor = Editor()
 
         if args.filename:
             logging.info("Opening file from argument 1")
-            result = main_window.openProject(projectLocation=args.filename)
+            result = editor.openProject(projectLocation=args.filename)
             splash.close()
             if result == False:
-                main_window.showWelcome()
+                editor.showWelcome()
         else:
             splash.close()
-            main_window.showWelcome()
+            editor.showWelcome()
     except Exception as e:
         error_message = "Critical error during initialization: " + traceback.format_exc()
         logging.error(error_message)

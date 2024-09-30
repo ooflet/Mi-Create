@@ -496,8 +496,8 @@ class PropertiesWidget(QWidget):
                             break   
 
                     else:
-                        QMessageBox.warning(None, "Properties", f"Data source not found.")
                         inputWidget = self.createComboBox(self.sourceList[str(device)], False, key, True)
+                
                 if not ignorePropertyCreation:
                     if property.get("visibleOn") != None:
                         if int(device) in property["visibleOn"]:
