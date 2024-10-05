@@ -875,6 +875,9 @@ class Editor(QMainWindow):
                                         self.settings["Canvas"]["ShowDeviceOutline"]["value"])
                 self.Explorer.updateExplorer(currentProject["project"])
 
+                if type == "redo":
+                    currentProject["canvas"].selectObject(name)
+
             command = CommandAddWidget(name, commandFunc, f"Add object {name}")
             self.History.undoStack.push(command)
 
