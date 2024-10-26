@@ -268,7 +268,7 @@ class WatchData:
     def getCompilerVersion(self):
         settings = QSettings("Mi Create", "Workspace")
         if settings.value("compilerVersion") is None:
-            settings.setValue("compilerVersion", "m0tral-v4.13")
+            settings.setValue("compilerVersion", "m0tral-v4.16")
         return settings.value("compilerVersion")
 
     def getWatchModel(self, id):
@@ -684,6 +684,10 @@ class FprjWidget:
             return self.project.widgetIds.get(self.data.get(property))
         elif property == "@BitmapList":
             bitmapString = self.data[property]
+
+            if bitmapString == "":
+                return []
+
             bitmapList = bitmapString.split("|")
 
             if self.data.get("@Shape") == "31": # only split colons if its from an imagelist

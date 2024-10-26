@@ -106,11 +106,21 @@ class CoreDialog(QDialog):
                 return oMetaMethod
 
         return None
+    
+    def disconnectButtonBoxAccepted(self):
+        if self.buttonBox.isSignalConnected(self.getSignal(self.buttonBox, "accepted")):
+            print("signal")
+            self.buttonBox.accepted.disconnect()
 
-
-    def showButtonBox(self, accepted=None):
+    def showButtonBox(self, accepted=None, defaultButton=QDialogButtonBox.StandardButton.Ok):
         self.buttonBox.setHidden(False)
         self.buttonBox.setEnabled(True)
+
+        self.disconnectButtonBoxAccepted()
+
+        dialogButton = self.buttonBox.button(defaultButton)
+        dialogButton.setAutoDefault(True)
+        dialogButton.setDefault(True)
 
         if accepted != None:
             self.buttonBox.accepted.connect(accepted)
@@ -120,8 +130,8 @@ class CoreDialog(QDialog):
     def hideButtonBox(self):
         self.buttonBox.setHidden(True)
         self.buttonBox.setEnabled(False)
-        if self.buttonBox.isSignalConnected(self.getSignal(self.buttonBox, "clicked")):
-            self.buttonBox.clicked.disconnect()
+
+        self.disconnectButtonBoxAccepted()
 
     def setButtonBoxEnabled(self, enabled):
         self.buttonBox.setEnabled(enabled)

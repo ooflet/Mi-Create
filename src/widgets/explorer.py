@@ -33,8 +33,8 @@ class Explorer(QTreeWidget):
         self.setDropIndicatorShown(True)
         super(QTreeWidget, self).dragMoveEvent(event)
 
-        if self.dropIndicatorPosition() == self.DropIndicatorPosition.OnViewport or self.dropIndicatorPosition() == self.DropIndicatorPosition.AboveItem:
-            # dropping above item is ignored for now
+        if self.dropIndicatorPosition() != self.DropIndicatorPosition.OnItem:
+            # dropping anywhere but on item is disabled
             # will fix behaviour when the time comes
             self.setDropIndicatorShown(False)
             event.ignore()

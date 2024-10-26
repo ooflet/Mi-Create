@@ -240,9 +240,10 @@ class Canvas(QGraphicsView):
 
     def mousePressEvent(self, event):
         if not any(isinstance(item, BaseWidget) for item in self.items(event.pos())):
-            self.rubberBandOrigin = event.pos()
-            self.rubberBand.setGeometry(QRect(self.rubberBandOrigin, QSize()))
-            self.rubberBand.show()
+            if event.button() == Qt.MouseButton.LeftButton:
+                self.rubberBandOrigin = event.pos()
+                self.rubberBand.setGeometry(QRect(self.rubberBandOrigin, QSize()))
+                self.rubberBand.show()
         return super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event):
@@ -314,6 +315,7 @@ class Canvas(QGraphicsView):
             return
         if clearSelection:
             self.scene().clearSelection()
+        print(self.widgets)
         self.widgets[name].setSelected(True)
 
     def selectObjectsFromPropertyList(self, items: list):
@@ -383,17 +385,18 @@ class Canvas(QGraphicsView):
         widget.setData(1, "widget_imagelist") # Item ID 
         widget.snap = snap
 
-        values = [int(x[0]) for x in bitmapList]
-
-        # Split image strings from the Bitmaplist
-        if defaultValue in values:
-            displayImage = bitmapList[values.index(defaultValue)]
-        else:
-            displayImage = bitmapList[0]
 
         # displayImage is a list with 2 values, image index & image
 
         if bitmapList != []:
+            values = [int(x[0]) for x in bitmapList]
+
+            # Get default image if available
+            if defaultValue in values:
+                displayImage = bitmapList[values.index(defaultValue)]
+            else:
+                displayImage = bitmapList[0]
+
             # Get Image
             if len(displayImage) >= 2:
                 image = QPixmap()

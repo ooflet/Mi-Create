@@ -74,7 +74,7 @@ _ = gettext.gettext
 
 programVersion = 'v1.1'
 
-class Editor(QMainWindow):
+class WatchfaceEditor(QMainWindow):
     updateFound = pyqtSignal(str)
 
     def __init__(self):
@@ -269,6 +269,11 @@ class Editor(QMainWindow):
                     listItem.setToolTip(location)
                     listItem.setSizeHint(listWidget.sizeHint())
                     self.coreDialog.welcomePage.setItemWidget(listItem, listWidget)
+                else:
+                    print(f"Project {name, location} not found")
+                    projectList.pop(projectList.index([name, location]))
+            
+            storedSettings.setValue("recentProjects", projectList)
 
         self.coreDialog.showWelcomePage()
         self.coreDialog.exec()
@@ -836,7 +841,7 @@ class Editor(QMainWindow):
                 QApplication.instance().processEvents()
                 self.openProject(projectLocation=listItem.toolTip())
 
-        self.coreDialog.welcomePage.itemPressed.connect(projectListOpen)
+        self.coreDialog.welcomePage.itemClicked.connect(projectListOpen)
 
     def changeSelectionInExplorer(self, name):
         if isinstance(name, str):
@@ -868,12 +873,18 @@ class Editor(QMainWindow):
                 elif type == "redo":
                     currentProject["project"].createWidget(id, name, "center", "center")
 
-                currentProject["canvas"].loadObjects(currentProject["project"],
+                success, message = currentProject["canvas"].loadObjects(currentProject["project"],
                                         self.settings["Canvas"]["Snap"]["value"],
                                         self.settings["Canvas"]["Interpolation"]["value"],
                                         self.settings["Canvas"]["ClipDeviceShape"]["value"],
                                         self.settings["Canvas"]["ShowDeviceOutline"]["value"])
                 self.Explorer.updateExplorer(currentProject["project"])
+
+                print(currentProject["project"].data)
+
+                if not success:
+                    self.showDialog("error", message)
+                    return
 
                 if type == "redo":
                     currentProject["canvas"].selectObject(name)
@@ -1228,6 +1239,7 @@ class Editor(QMainWindow):
 
         else:
             self.showDialog("error", "Cannot render project!" + success[1], success[1])
+            canvas.deleteLater()
 
     def createNewCodespace(self, name, path, text, language):
         # Creates a new instance of QScintilla in a Codespace (code workspace)
@@ -1672,7 +1684,7 @@ if __name__ == "__main__":
         print("Settings reset.")
 
     try:
-        editor = Editor()
+        editor = WatchfaceEditor()
 
         if args.filename:
             logging.info("Opening file from argument 1")
