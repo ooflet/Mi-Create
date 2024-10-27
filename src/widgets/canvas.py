@@ -328,9 +328,9 @@ class Canvas(QGraphicsView):
     def onObjectDeleted(self, name, widget):
         self.objectDeleted.emit(name)
 
-    def createAnalogDisplay(self, name, pos, zValue, backgroundImage, hourHandImage, minuteHandImage, secondHandImage, itemAnchors, snap, interpolationStyle):
+    def createAnalogDisplay(self, transparency, name, pos, zValue, backgroundImage, hourHandImage, minuteHandImage, secondHandImage, itemAnchors, snap, interpolationStyle):
         # Create widget
-        widget = AnalogWidget(int(pos.x()), int(pos.y()), int(pos.width()), int(pos.height()), self.frame, self, QColor(255,255,255,0), name)
+        widget = AnalogWidget(int(pos.x()), int(pos.y()), int(pos.width()), int(pos.height()), self.frame, self, QColor(255,255,255,0), transparency, name)
         widget.setZValue(zValue)
         widget.setData(1, "widget_analog") # Item ID
         widget.snap = snap
@@ -363,9 +363,9 @@ class Canvas(QGraphicsView):
 
         return widget
 
-    def createImage(self, name, rect, zValue, image, snap, interpolationStyle):
+    def createImage(self, transparency, name, rect, zValue, image, snap, interpolationStyle):
         # Create widget
-        widget = ImageWidget(int(rect.x()), int(rect.y()), int(rect.width()), int(rect.height()), self.frame, self, QColor(255,255,255,0), name)
+        widget = ImageWidget(int(rect.x()), int(rect.y()), int(rect.width()), int(rect.height()), self.frame, self, QColor(255,255,255,0), transparency, name)
         widget.setZValue(zValue)
         widget.setData(1, "widget") # Item ID
         widget.snap = snap
@@ -378,9 +378,9 @@ class Canvas(QGraphicsView):
         
         return widget
 
-    def createImageList(self, name, rect, zValue, defaultValue, bitmapList, snap, interpolationStyle):
+    def createImageList(self, transparency, name, rect, zValue, defaultValue, bitmapList, snap, interpolationStyle):
         # Create widget
-        widget = ImageWidget(int(rect.x()), int(rect.y()), int(rect.width()), int(rect.height()), self.frame, self, QColor(255,255,255,0), name)
+        widget = ImageWidget(int(rect.x()), int(rect.y()), int(rect.width()), int(rect.height()), self.frame, self, QColor(255,255,255,0), transparency, name)
         widget.setZValue(zValue)
         widget.setData(1, "widget_imagelist") # Item ID 
         widget.snap = snap
@@ -409,8 +409,8 @@ class Canvas(QGraphicsView):
             
         return widget
 
-    def createDigitalNumber(self, name, rect, zValue, numList, digits, spacing, snap, interpolationStyle):
-        widget = ImageWidget(rect.x(), rect.y(), rect.width(), rect.height(), self.frame, self, QColor(255,255,255,0), name)
+    def createDigitalNumber(self, transparency, name, rect, zValue, numList, digits, spacing, snap, interpolationStyle):
+        widget = ImageWidget(rect.x(), rect.y(), rect.width(), rect.height(), self.frame, self, QColor(255,255,255,0), transparency, name)
         widget.setZValue(zValue)
         widget.setData(1, "widget_imagelist") # Item ID
         widget.snap = snap
@@ -427,7 +427,7 @@ class Canvas(QGraphicsView):
                 
         return widget
 
-    def createProgressArc(self, name, rect, zValue, backgroundImage, arcImage, arcX, arcY, radius, lineWidth, startAngle, endAngle, isFlat, snap, interpolationStyle):
+    def createProgressArc(self, transparency, name, rect, zValue, backgroundImage, arcImage, arcX, arcY, radius, lineWidth, startAngle, endAngle, isFlat, snap, interpolationStyle):
         bgImage = QPixmap()
         if backgroundImage is not None:
           bgImage.load(os.path.join(self.imageFolder, backgroundImage))
@@ -460,10 +460,8 @@ class Canvas(QGraphicsView):
         try:
             if item.getProperty("widget_type") == "widget_analog":
                 widget = self.createAnalogDisplay(
+                    item.getProperty("widget_alpha"),
                     item.getProperty("widget_name"),
-                    # use a QRect when defining position values
-                    # i am quite retarded and used individual x,y,w,h values instead of using qrect
-                    # oh well i'll fix later
                     QRect(
                         int(item.getProperty("widget_pos_x")),
                         int(item.getProperty("widget_pos_y")),
@@ -500,6 +498,7 @@ class Canvas(QGraphicsView):
 
             elif item.getProperty("widget_type") == "widget_arc":
                 widget = self.createProgressArc(
+                    item.getProperty("widget_alpha"),
                     item.getProperty("widget_name"),
                     QRect(
                         int(item.getProperty("widget_pos_x")),
@@ -523,6 +522,7 @@ class Canvas(QGraphicsView):
 
             elif item.getProperty("widget_type") == "widget":
                 widget = self.createImage(
+                    item.getProperty("widget_alpha"),
                     item.getProperty("widget_name"),
                     QRect(
                         int(item.getProperty("widget_pos_x")),
@@ -538,6 +538,7 @@ class Canvas(QGraphicsView):
 
             elif item.getProperty("widget_type") == "widget_imagelist":
                 widget = self.createImageList(
+                    item.getProperty("widget_alpha"),
                     item.getProperty("widget_name"),
                     QRect(
                         int(item.getProperty("widget_pos_x")),
@@ -554,6 +555,7 @@ class Canvas(QGraphicsView):
 
             elif item.getProperty("widget_type") == "widget_num":
                 widget = self.createDigitalNumber(
+                    item.getProperty("widget_alpha"),
                     item.getProperty("widget_name"),
                     QRect(
                         int(item.getProperty("widget_pos_x")),
@@ -571,6 +573,7 @@ class Canvas(QGraphicsView):
 
             elif item.getProperty("widget_type") == "widget_arc":
                 widget = self.createProgressArc(
+                    item.getProperty("widget_alpha"),
                     item.getProperty("widget_name"),
                     QRect(
                         int(item.getProperty("widget_pos_x")),
@@ -671,7 +674,7 @@ class BaseWidget(QGraphicsRectItem):
     # Allows for snap to guides
     # Adding child QGraphicsItems to this widget extends functionality 
 
-    def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, name):
+    def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name):
         # Initialize the shape.
         super().__init__(posX, posY, sizeX, sizeY, parent)
         self.setRect(0, 0, sizeX, sizeY)
@@ -688,6 +691,7 @@ class BaseWidget(QGraphicsRectItem):
         self.snap = True
         self.scene().addItem(self.selectionPath)
         self.setAcceptHoverEvents(True)
+        self.setOpacity(int(transparency) / 255)
         self.setData(0, name)
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsMovable, True)
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsSelectable, True)
@@ -773,8 +777,8 @@ class ImageWidget(BaseWidget):
     # All ImageList related things are handled in the addImage function
     # Live previews of animations are planned with this widget
 
-    def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, name):
-        super().__init__(posX, posY, sizeX, sizeY, parent, canvas, color, name)
+    def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name):
+        super().__init__(posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name)
         self.imageItems = []
         self.setPos(posX, posY)
 
@@ -803,8 +807,8 @@ class ImageWidget(BaseWidget):
 class AnalogWidget(BaseWidget):
     # Widget for handling AnalogDisplays
     
-    def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, name):
-        super().__init__(posX, posY, sizeX, sizeY, parent, canvas, color, name)
+    def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name):
+        super().__init__(posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name)
         self.setPos(posX, posY)
 
     def addBackground(self, backgroundImage, bgX, bgY, antialiasing):
@@ -866,8 +870,8 @@ class ProgressArc(QGraphicsEllipseItem):
         painter.drawArc(self.rect(), self.startAngle(), self.spanAngle())
 
 class ProgressWidget(BaseWidget):
-    def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, name, offsetX, offsetY, radius, thickness, startAngle, endAngle, isFlat, bgImage, pathImage, isAntialiased):
-        super().__init__(posX, posY, sizeX, sizeY, parent, canvas, color, name)
+    def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name, offsetX, offsetY, radius, thickness, startAngle, endAngle, isFlat, bgImage, pathImage, isAntialiased):
+        super().__init__(posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name)
         self.setPos(posX, posY)
         
         radius = int(radius)
