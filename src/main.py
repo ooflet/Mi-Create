@@ -763,9 +763,12 @@ class WatchfaceEditor(QMainWindow):
                     currentProject["canvas"].selectObject(value)
                 else:
                     self.propertiesWidget.clearOnRefresh = False
-                    currentProject["canvas"].reloadObject(widgetName, currentItem)
+                    success, userFacingReason, debugReason = currentProject["canvas"].reloadObject(widgetName, currentItem)
 
-                    currentProject["canvas"].selectObject(widgetName)
+                    if success:
+                        currentProject["canvas"].selectObject(widgetName)
+                    else:
+                        self.showDialog("error", userFacingReason, debugReason)
 
             if self.ignoreHistoryInvoke:
                 self.ignoreHistoryInvoke = False
@@ -873,7 +876,7 @@ class WatchfaceEditor(QMainWindow):
                 elif type == "redo":
                     currentProject["project"].createWidget(id, name, "center", "center")
 
-                success, message = currentProject["canvas"].loadObjects(currentProject["project"],
+                success, userFacingMessage, debugMessage = currentProject["canvas"].loadObjects(currentProject["project"],
                                         self.settings["Canvas"]["Snap"]["value"],
                                         self.settings["Canvas"]["Interpolation"]["value"],
                                         self.settings["Canvas"]["ClipDeviceShape"]["value"],
@@ -883,7 +886,7 @@ class WatchfaceEditor(QMainWindow):
                 print(currentProject["project"].data)
 
                 if not success:
-                    self.showDialog("error", message)
+                    self.showDialog("error", userFacingMessage, debugMessage)
                     return
 
                 if type == "redo":
@@ -1194,8 +1197,6 @@ class WatchfaceEditor(QMainWindow):
         # Add Icons
         icon = QIcon().fromTheme("project-icon")
 
-        success = True
-
         # Render objects onto the canvas
         if project is not False:
             success = canvas.loadObjects(project,
@@ -1238,7 +1239,7 @@ class WatchfaceEditor(QMainWindow):
             self.coreDialog.close()
 
         else:
-            self.showDialog("error", "Cannot render project!" + success[1], success[1])
+            self.showDialog("error", success[1], success[2])
             canvas.deleteLater()
 
     def createNewCodespace(self, name, path, text, language):

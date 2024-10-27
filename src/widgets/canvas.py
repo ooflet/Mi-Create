@@ -455,7 +455,7 @@ class Canvas(QGraphicsView):
         if item.getProperty("widget_type") == None:
             # invalid widget type (most likely not supported)
             # none type is returned when widget attempts to convert widget_type value into generic ID
-            return False, f" Widget '{item.getProperty('widget_name')}' has unsupported widget type"
+            return False, f" Widget '{item.getProperty('widget_name')}' has unsupported widget type", ""
 
         try:
             if item.getProperty("widget_type") == "widget_analog":
@@ -592,14 +592,15 @@ class Canvas(QGraphicsView):
                 )
 
             else:
-                # this only happens in the rare off chance when the item is implemented in generic widget IDs
-                return False, f"Widget {item.getProperty('widget_type')} not implemented in canvas, please report as issue."
+                # this only happens in the rare off chance when the item ID is added, but not implemented in the canvas
+                return False, f"Widget {item.getProperty('widget_type')} not implemented in canvas. Please report this as an issue.", ""
 
             # add widget into widget list
             self.widgets[item.getProperty("widget_name")] = widget
-            return True, "Success"
+            return True, "Success", ""
         except Exception:
-            return False, str(f" Unable to create object {item.getProperty('widget_name')}:\n {traceback.format_exc()}")
+            # status, user facing message, debug info
+            return False, f"Widget '{item.getProperty('widget_name')}' has malformed data or is corrupt", f"Canvas failed to create object {item.getProperty('widget_name')}:\n {traceback.format_exc()}"
 
     def loadObjects(self, project, snap=None, interpolation=None, clip=True, outline=False):
         self.frame = DeviceFrame(self.deviceSize, clip)
@@ -634,18 +635,18 @@ class Canvas(QGraphicsView):
             widgets = project.getAllWidgets()
             if type(widgets) == list:
                 for index, widget in enumerate(widgets):    
-                    result, reason = self.createWidgetFromData(index, widget, snap, interpolation)
+                    result, userFacingReason, debugReason = self.createWidgetFromData(index, widget, snap, interpolation)
                     self.scene().originPositions[widget.getProperty("widget_name")] = [int(widget.getProperty("widget_pos_x")), int(widget.getProperty("widget_pos_y"))]
                     if not result:
-                        return False, reason
+                        return False, userFacingReason, debugReason
                 self.scene().updatePosMap()
-                return True, "Success"
+                return True, "Success", ""
             else:
-                return False, "Widgets not in list!"
+                return False, "Widgets not in list!", ""
             
         else:
             self.scene().addItem(self.frame)
-            return True, "Success"
+            return True, "Success", ""
         
     def reloadObject(self, objectName, widget):
         # loads a single object without reloading every object in the canvas
@@ -655,15 +656,15 @@ class Canvas(QGraphicsView):
 
         if object != None:
 
-            result, reason = self.createWidgetFromData(objectZValue, widget, self.snap, self.interpolation)
+            result, userFacingReason, debugReason = self.createWidgetFromData(objectZValue, widget, self.snap, self.interpolation)
             if not result:
-                return False, reason 
+                return False, userFacingReason, debugReason
             else:
                 self.scene().originPositions[objectName] = [int(widget.getProperty("widget_pos_x")), int(widget.getProperty("widget_pos_y"))]
                 self.scene().updatePosMap()
                 object.selectionPath.prepareGeometryChange()
                 object.delete()
-                return True, "Success"
+                return True, "Success", ""
         
 class BaseWidget(QGraphicsRectItem):
     # Basic widget with draggable and selectable controls

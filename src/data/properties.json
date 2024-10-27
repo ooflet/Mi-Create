@@ -52,15 +52,15 @@
                     "min": "0",
                     "max": "255"
                 },
-                "widget_visiblity_source": {
+                "widget_visibility_source": {
                     "string": "Visibility Trigger",
                     "type": "src",
                     "value": "",
                     "visibleOn": [
-                        0,
-                        1,
-                        3,
-                        4
+                        "xiaomi_color",
+                        "xiaomi_color_sport",
+                        "xiaomi_color_2/s1/s2",
+                        "xiaomi_watch_s1_pro"
                     ]
                 },
                 "analog_hour_smooth_motion": {
@@ -219,15 +219,15 @@
                     "min": "0",
                     "max": "255"
                 },
-                "widget_visiblity_source": {
+                "widget_visibility_source": {
                     "string": "Visibility Trigger",
                     "type": "src",
                     "value": "",
                     "visibleOn": [
-                        0,
-                        1,
-                        3,
-                        4
+                        "xiaomi_color",
+                        "xiaomi_color_sport",
+                        "xiaomi_color_2/s1/s2",
+                        "xiaomi_watch_s1_pro"
                     ]
                 }
             },
@@ -385,15 +385,15 @@
                     "min": "0",
                     "max": "255"
                 },
-                "widget_visiblity_source": {
+                "widget_visibility_source": {
                     "string": "Visibility Trigger",
                     "type": "src",
                     "value": "",
                     "visibleOn": [
-                        0,
-                        1,
-                        3,
-                        4
+                        "xiaomi_color",
+                        "xiaomi_color_sport",
+                        "xiaomi_color_2/s1/s2",
+                        "xiaomi_watch_s1_pro"
                     ]
                 }
             },
@@ -455,15 +455,15 @@
                     "min": "0",
                     "max": "255"
                 },
-                "widget_visiblity_source": {
+                "widget_visibility_source": {
                     "string": "Visibility Trigger",
                     "type": "src",
                     "value": "",
                     "visibleOn": [
-                        0,
-                        1,
-                        3,
-                        4
+                        "xiaomi_color",
+                        "xiaomi_color_sport",
+                        "xiaomi_color_2/s1/s2",
+                        "xiaomi_watch_s1_pro"
                     ]
                 }
             },
@@ -549,15 +549,15 @@
                     "min": "0",
                     "max": "255"
                 },
-                "widget_visiblity_source": {
+                "widget_visibility_source": {
                     "string": "Visibility Trigger",
                     "type": "src",
                     "value": "",
                     "visibleOn": [
-                        0,
-                        1,
-                        3,
-                        4
+                        "xiaomi_color",
+                        "xiaomi_color_sport",
+                        "xiaomi_color_2/s1/s2",
+                        "xiaomi_watch_s1_pro"
                     ]
                 },
                 "num_digits": {

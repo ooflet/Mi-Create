@@ -500,8 +500,11 @@ class PropertiesWidget(QWidget):
                 
                 if not ignorePropertyCreation:
                     if property.get("visibleOn") != None:
-                        if int(device) in property["visibleOn"]:
+                        print(property["visibleOn"], device)
+                        if device in property["visibleOn"]:
                             self.addProperty(key, property["string"], inputWidget, parent)
+                        else:
+                            return
 
                     if property.get("changeState") != None:
                         # store in variables to allow for update function to access

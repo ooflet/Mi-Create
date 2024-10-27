@@ -40,6 +40,24 @@ class WatchData:
         self.modelSize = {}
         self.modelSourceList = {}
         self.modelSourceData = {}
+        self.fprjDeviceIds = {
+            "0": "xiaomi_color",
+            "1": "xiaomi_color_sport",
+            "2": "70mai_saphir",
+            "3": "xiaomi_color_2/s1/s2",
+            "4": "xiaomi_watch_s1_pro",
+            "5": "redmi/poco_watch",
+            "6": "xiaomi_band_7_pro",
+            "7": "redmi_watch_3",
+            "8": "redmi_band_pro",
+            "9": "xiaomi_band_8",
+            "10": "redmi_watch_2_lite",
+            "11": "xiaomi_band_8_pro",
+            "12": "redmi_watch_3_active",
+            "362": "xiaomi_watch_s3",
+            "365": "redmi_watch_4",
+            "366": "xiaomi_band_9",
+        }
         self.deviceId = [
             "xiaomi_color",
             "70mai_saphir",
@@ -248,11 +266,11 @@ class WatchData:
             for x in deviceInfo["DeviceList"]["DeviceInfo"]:
                 self.models.append(x["@Name"])
                 self.modelID[x["@Name"]] = x["@Type"]
-                self.modelSize[x["@Type"]] = [int(x["@Width"]), int(x["@Height"]), int(x["@Radius"])]
-                self.modelSourceData[x["@Type"]] = x["SourceDataList"]["SRC"]
-                self.modelSourceList[x["@Type"]] = []
+                self.modelSize[self.fprjDeviceIds[x["@Type"]]] = [int(x["@Width"]), int(x["@Height"]), int(x["@Radius"])]
+                self.modelSourceData[self.fprjDeviceIds[x["@Type"]]] = x["SourceDataList"]["SRC"]
+                self.modelSourceList[self.fprjDeviceIds[x["@Type"]]] = []
                 for y in x["SourceDataList"]["SRC"]:
-                    self.modelSourceList[x["@Type"]].append(y["@Name"])
+                    self.modelSourceList[self.fprjDeviceIds[x["@Type"]]].append(y["@Name"])
 
     def updateDataFiles(self, compiler, deviceInfo):
         try:
@@ -553,7 +571,7 @@ class FprjProject:
         print(process.readAllStandardOutput())
         
     def getDeviceType(self):
-        return self.data["FaceProject"]["@DeviceType"]
+        return self.deviceIds.get(str(self.data["FaceProject"]["@DeviceType"]))
         
     def getAllWidgets(self, type=None, theme=None): # type and theme are for theme support someday over the rainbow
         widgetList = []
