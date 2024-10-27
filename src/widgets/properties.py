@@ -499,13 +499,7 @@ class PropertiesWidget(QWidget):
                         inputWidget = self.createComboBox(self.sourceList[str(device)], False, key, True)
                 
                 if not ignorePropertyCreation:
-                    if property.get("visibleOn") != None:
-                        print(property["visibleOn"], device)
-                        if device in property["visibleOn"]:
-                            self.addProperty(key, property["string"], inputWidget, parent)
-                        else:
-                            return
-
+                    
                     if property.get("changeState") != None:
                         # store in variables to allow for update function to access
                         changeState = property["changeState"]
@@ -529,12 +523,20 @@ class PropertiesWidget(QWidget):
                                     updateWidget.setChecked(False)
                                     item.setHidden(True)
 
+                        if property.get("visibleOn") != None:
+                            if device not in property["visibleOn"]:
+                               return
+                            
                         item = self.addProperty(key, property["string"], inputWidget, parent, inputSinker)
 
                         self.propertyItems[changeState[0]].stateChanged.connect(update)
                         update()
 
                     else:
+                        if property.get("visibleOn") != None:
+                            if device not in property["visibleOn"]:
+                               return
+
                         if isinstance(inputWidget, QCheckBox):
                             self.addProperty(key, property["string"], inputWidget, parent, inputSinker)
                         else:

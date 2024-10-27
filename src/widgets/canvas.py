@@ -434,9 +434,12 @@ class Canvas(QGraphicsView):
     
         fgImage = QPixmap()
         fgImage.load(os.path.join(self.imageFolder, arcImage))
+
+        # the amount of arguments is horrific, might fix
+        widget = ProgressWidget(rect.x(), rect.y(), rect.width(), rect.height(), self.frame, self, QColor(255,255,255,0), 
+                                transparency, name, arcX, arcY, radius, lineWidth, startAngle, endAngle, isFlat, bgImage, fgImage, 
+                                interpolationStyle)
         
-        # the amount of arguments is horrific, but im too lazy to fix it
-        widget = ProgressWidget(rect.x(), rect.y(), rect.width(), rect.height(), self.frame, self, QColor(255,255,255,0), name, arcX, arcY, radius, lineWidth, startAngle, endAngle, isFlat, bgImage, fgImage, interpolationStyle)
         widget.setZValue(zValue)
         widget.setData(1, "widget_arc")
         widget.snap = snap
