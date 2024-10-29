@@ -21,7 +21,7 @@ from PyQt6.QtCore import Qt, pyqtSignal, QPoint, QSize, QModelIndex
 from PyQt6.QtGui import QColor, QPen, QGuiApplication, QIcon, QPalette, QStandardItemModel
 from pprint import pprint
 
-from translate import QCoreApplication
+from translate import Translator
 
 _ = gettext.gettext
 
@@ -86,7 +86,7 @@ class PropertiesWidget(QWidget):
         self.treeWidget.setItemDelegate(TreeWidgetDelegate())
 
         # self.searchWidget = QLineEdit(self)
-        # self.searchWidget.setPlaceholderText(QCoreApplication.translate("MainWindow", "Search..."))
+        # self.searchWidget.setPlaceholderText(Translator.translate("MainWindow", "Search..."))
 
         layout = QVBoxLayout(self)
         # layout.addWidget(self.searchWidget)
@@ -107,6 +107,7 @@ class PropertiesWidget(QWidget):
             self.ignorePropertyChange = False
 
     def addProperty(self, srcProperty, name, valueWidget, parent=None, inputSinker=None) -> QTreeWidgetItem:
+        print(srcProperty)
         if parent != None:
             item = QTreeWidgetItem(parent, [_(name), ""])
 
@@ -523,24 +524,18 @@ class PropertiesWidget(QWidget):
                                     updateWidget.setChecked(False)
                                     item.setHidden(True)
 
-                        if property.get("visibleOn") != None:
-                            if device not in property["visibleOn"]:
-                               return
-                            
-                        item = self.addProperty(key, property["string"], inputWidget, parent, inputSinker)
+                        if property.get("visibleOn") == None or device in property["visibleOn"]:
+                            item = self.addProperty(key, property["string"], inputWidget, parent, inputSinker)
 
-                        self.propertyItems[changeState[0]].stateChanged.connect(update)
-                        update()
-
+                            self.propertyItems[changeState[0]].stateChanged.connect(update)
+                            update()
+                    
                     else:
-                        if property.get("visibleOn") != None:
-                            if device not in property["visibleOn"]:
-                               return
-
-                        if isinstance(inputWidget, QCheckBox):
-                            self.addProperty(key, property["string"], inputWidget, parent, inputSinker)
-                        else:
-                            self.addProperty(key, property["string"], inputWidget, parent)
+                        if property.get("visibleOn") == None or device in property["visibleOn"]:
+                            if isinstance(inputWidget, QCheckBox):
+                                self.addProperty(key, property["string"], inputWidget, parent, inputSinker)
+                            else:
+                                self.addProperty(key, property["string"], inputWidget, parent)
 
                 inputWidget = None
 

@@ -61,7 +61,7 @@ from widgets.canvas import Canvas, ObjectIcon
 from widgets.explorer import Explorer
 from widgets.properties import PropertiesWidget
 from widgets.editor import Editor, XMLLexer
-from translate import QCoreApplication
+from translate import Translator
 
 import resources.resources_rc  # resource import required because it sets up the icons
 
@@ -387,7 +387,7 @@ class WatchfaceEditor(QMainWindow):
             mainTranslation.install()
             global _  # fetch global translation variable (gettext)
             _ = mainTranslation.gettext
-            QCoreApplication.loadLanguage(os.path.basename(selectedLanguage["directory"]))
+            Translator.loadLanguage(os.path.basename(selectedLanguage["directory"]))
             self.propertiesWidget.loadLanguage(os.path.basename(selectedLanguage["directory"]))
             self.ui.retranslateUi(self)  # function on each precompiled window/dialog
             self.coreDialog.translate()
@@ -1386,8 +1386,11 @@ class WatchfaceEditor(QMainWindow):
             projectLocation = projectLocation[0].replace("\\", "/")
 
         if os.path.isfile(projectLocation):
-            if os.path.splitext(projectLocation)[1] == '.fprj':
+            extension = os.path.splitext(projectLocation)[1]
+            if extension == '.fprj':
                 project = FprjProject()
+            elif extension == ".json":
+                project = GMFProject()
             else:
                 self.showDialog("error", "Invalid project!")
                 return False

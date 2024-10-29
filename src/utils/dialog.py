@@ -20,7 +20,7 @@ from PyQt6.QtWidgets import (QDialog, QLabel, QLineEdit, QComboBox, QToolButton,
 from PyQt6.QtMultimedia import QSoundEffect
 from widgets.stackedWidget import QStackedWidget, loadJsonStyle
 
-from translate import QCoreApplication
+from translate import Translator
 
 class CoreDialog(QDialog):
     # Core dialog contains welcome screen, new project screen and compile project screen
@@ -39,7 +39,7 @@ class CoreDialog(QDialog):
 
         self.dialogButtonCallback = None
 
-        self.setWindowTitle(QCoreApplication.translate("", "Welcome"))
+        self.setWindowTitle(Translator.translate("", "Welcome"))
         self.setWindowIcon(QIcon(":Images/MiCreate48x48.png"))      
 
         self.resize(750, 500)
@@ -81,19 +81,19 @@ class CoreDialog(QDialog):
         self.setupSettingsPage(settingsWidget)
 
     def translate(self):
-        self.welcomeSidebarNewProject.setText(QCoreApplication.translate("", "New Project"))
-        self.welcomeSidebarOpenProject.setText(QCoreApplication.translate("", "Open Project"))
-        self.newProjectSidebarTitle.setText(QCoreApplication.translate("", "New Project"))
-        self.welcomeSidebarSettings.setText(QCoreApplication.translate("", "Settings"))
-        self.watchfaceCategory.setText(QCoreApplication.translate("", "Watchface"))
-        self.manageProjectSidebarTitle.setText(QCoreApplication.translate("", "Manage Project"))
-        self.configureProjectCategory.setText(QCoreApplication.translate("", "Configure"))
-        self.configurePageNameTitle.setText(QCoreApplication.translate("", "Watchface name"))
-        self.configurePagePreviewText.setText(QCoreApplication.translate("", "Watchface thumbnail"))
-        self.settingsSidebarTitle.setText(QCoreApplication.translate("", "Settings"))
-        self.watchfacePageDeviceTitle.setText(QCoreApplication.translate("", "Select device"))
-        self.watchfacePageProjectTitle.setText(QCoreApplication.translate("", "Project name"))
-        self.watchfacePageDirectoryTitle.setText(QCoreApplication.translate("", "Project location"))
+        self.welcomeSidebarNewProject.setText(Translator.translate("", "New Project"))
+        self.welcomeSidebarOpenProject.setText(Translator.translate("", "Open Project"))
+        self.newProjectSidebarTitle.setText(Translator.translate("", "New Project"))
+        self.welcomeSidebarSettings.setText(Translator.translate("", "Settings"))
+        self.watchfaceCategory.setText(Translator.translate("", "Watchface"))
+        self.manageProjectSidebarTitle.setText(Translator.translate("", "Manage Project"))
+        self.configureProjectCategory.setText(Translator.translate("", "Configure"))
+        self.configurePageNameTitle.setText(Translator.translate("", "Watchface name"))
+        self.configurePagePreviewText.setText(Translator.translate("", "Watchface thumbnail"))
+        self.settingsSidebarTitle.setText(Translator.translate("", "Settings"))
+        self.watchfacePageDeviceTitle.setText(Translator.translate("", "Select device"))
+        self.watchfacePageProjectTitle.setText(Translator.translate("", "Project name"))
+        self.watchfacePageDirectoryTitle.setText(Translator.translate("", "Project location"))
 
     def getSignal (self, oObject : QObject, strSignalName : str):
         oMetaObj = oObject.metaObject()
@@ -452,7 +452,7 @@ class CoreDialog(QDialog):
         self.contentPanel.addWidget(self.settingsPage)
 
     def showWelcomePage(self, animate=False):
-        self.setWindowTitle(QCoreApplication.translate("", "Welcome"))
+        self.setWindowTitle(Translator.translate("", "Welcome"))
         self.hideButtonBox()
 
         self.sidebar.setSlideTransition(animate)
@@ -466,7 +466,7 @@ class CoreDialog(QDialog):
         self.welcomeSidebarLogo.setIconSize(QSize(48, 48))
 
     def showNewProjectPage(self, prevPageFunc=None, animate=False):
-        self.setWindowTitle(QCoreApplication.translate("", "New Project"))
+        self.setWindowTitle(Translator.translate("", "New Project"))
         self.hertaGif.stop()
         self.showButtonBox(self.newProjectCreated.emit)
         self.setButtonBoxEnabled(False)
@@ -485,7 +485,7 @@ class CoreDialog(QDialog):
             self.newProjectSidebarBack.setVisible(False)
 
     def showManageProjectPage(self, prevPageFunc=None, animate=False):
-        self.setWindowTitle(QCoreApplication.translate("", "Manage Project"))
+        self.setWindowTitle(Translator.translate("", "Manage Project"))
         
         self.sidebar.setSlideTransition(animate)
         self.sidebar.setCurrentWidget(self.manageProjectSidebar)
@@ -502,7 +502,7 @@ class CoreDialog(QDialog):
             self.manageProjectSidebarBack.setVisible(False)
 
     def showSettingsPage(self, prevPageFunc=None, animate=False):
-        self.setWindowTitle(QCoreApplication.translate("", "Settings"))
+        self.setWindowTitle(Translator.translate("", "Settings"))
         self.hertaGif.stop()
         self.reloadSettings.emit()
 
@@ -524,7 +524,7 @@ class MultiFieldDialog(QDialog):
 
         self.mandatoryFields = []
 
-        self.setWindowTitle(QCoreApplication.translate("Dialog", windowTitle))
+        self.setWindowTitle(Translator.translate("Dialog", windowTitle))
         self.setWindowIcon(QIcon(":Images/MiCreate48x48.png"))
         self.resize(500, 300)
         self.setMinimumSize(QSize(500, 300))
@@ -535,7 +535,7 @@ class MultiFieldDialog(QDialog):
         self.setContentsMargins(9,0,4,4)
 
         self.title = QLabel(self)
-        self.title.setText(QCoreApplication.translate("Dialog", title))
+        self.title.setText(Translator.translate("Dialog", title))
         self.title.setStyleSheet("QLabel { font-size: 16pt;}")
         
         self.widgetLayout.addWidget(self.title)
@@ -555,7 +555,7 @@ class MultiFieldDialog(QDialog):
         self.mandatoryFields.clear()         
 
     def addTextField(self, titleText, defaultText="", placeholderText="", mandatory=False):
-        title = QLabel(QCoreApplication.translate("Dialog", titleText), self)
+        title = QLabel(Translator.translate("Dialog", titleText), self)
         field = QLineEdit(defaultText, self)
         field.setFixedWidth(175)
         field.setPlaceholderText(placeholderText)
@@ -573,7 +573,7 @@ class MultiFieldDialog(QDialog):
             location = QFileDialog.getExistingDirectory(self)
             field.setText(str(location))
 
-        title = QLabel(QCoreApplication.translate("Dialog", titleText), self)
+        title = QLabel(Translator.translate("Dialog", titleText), self)
         field = QLineEdit(defaultText, self)
         field.setFixedWidth(175)
         field.setPlaceholderText(placeholderText)
@@ -602,7 +602,7 @@ class MultiFieldDialog(QDialog):
             location = QFileDialog.getOpenFileName(self)
             field.setText(str(location[0]))
 
-        title = QLabel(QCoreApplication.translate("Dialog", titleText), self)
+        title = QLabel(Translator.translate("Dialog", titleText), self)
         field = QLineEdit(defaultText, self)
         field.setFixedWidth(175)
         field.setPlaceholderText(placeholderText)
@@ -627,7 +627,7 @@ class MultiFieldDialog(QDialog):
         return field
 
     def addDropdown(self, titleText, itemList, defaultItem=None, textEditable=False):
-        title = QLabel(QCoreApplication.translate("Dialog", titleText), self)
+        title = QLabel(Translator.translate("Dialog", titleText), self)
         field = QComboBox(self)
         field.addItems(itemList)
         if defaultItem:

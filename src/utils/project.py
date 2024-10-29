@@ -1,4 +1,4 @@
-# Project Abstraction Classes (PAC)
+# Project Classes
 # ooflet <ooflet@proton.me>
 
 # Projects are handled with abstractions in the form of classes
@@ -10,7 +10,7 @@
 # All project manipulation is done through functions
 # There are designated IDs for each property, device type and data source.
 
-# Processes like compilation are handled by Qt's QProcess class because it is discreet and robust. 
+# Processes like compilation are handled by Qt's QProcess. 
 # If you are planning to port the code over to your own project, make sure you either:
 # - install PyQt/PySide libraries if you are fine with the extra bloat
 # - port to Python's subprocess
@@ -28,7 +28,9 @@ from pathlib import Path
 from pprint import pprint
 from copy import deepcopy
 from PyQt6.QtCore import QProcess, QSettings
-from PyQt6.QtWidgets import QMessageBox
+from PyQt6.QtWidgets import QMessageBox, QInputDialog
+
+from translate import Translator
 
 supportedOneFileVersion = "1.0"
 logging.basicConfig(level=logging.DEBUG)
@@ -556,7 +558,7 @@ class FprjProject:
 
                     return True, "Success"
                 else:
-                    return False, "Invalid/corrupted fprj project!", ""
+                    return False, "Invalid/corrupted fprj project!", "FaceProject root not found"
         except Exception as e:
             return False, str(e), traceback.format_exc()
         
@@ -816,4 +818,43 @@ class XiaomiProject:
 
 class GMFProject:
     def __init__(self):
-        pass
+        self.data = None
+        self.widgets = None
+        self.widgetsAOD = None
+        self.watchData = WatchData()
+
+        self.name = None
+        self.directory = None
+        self.dataPath = None
+        self.imageFolder = None
+
+    def fromExisting(self, location):
+        projectDir = os.path.dirname(location)
+        try:
+            with open(location, "r", encoding="utf8") as project:
+                projectJson = dict(json.load(project))
+                imagesDir = os.path.join(projectDir, "images")
+                if projectJson.get("elementsNormal"):
+                    if not projectJson.get("deviceType"):
+                        item, accepted = QInputDialog().getItem(None, "GMFProject", Translator.translate("Project", "Select the device the watchface was made for:"), self.watchData.deviceId, 0, False)
+                        if item in self.watchData.deviceId and accepted:
+                            projectJson["deviceType"] = item
+                    
+                    self.name = os.path.basename(location)
+                    self.directory = projectDir
+                    self.dataPath = location
+                    self.imageFolder = imagesDir
+
+                    self.data = projectJson
+                    self.widgets = projectJson["elementsNormal"]
+                    self.widgetsAOD = projectJson["elementsAOD"]
+
+                    return True, "Success"
+                else:
+                    return False, "Invalid/corrupted GMF project!", "elementsNormal not found"
+
+        except Exception as e:
+            return False, str(e), traceback.format_exc()
+        
+    def getDeviceType(self):
+        return self.data["deviceType"]

@@ -3,8 +3,7 @@ import gettext
 
 _ = gettext.gettext
 
-class QCoreApplication(QCoreApplication):
-    # make translation use gnu gettext instead of whatever qt garbage was used
+class Translator():
     @staticmethod
     def loadLanguage(language):
         translation = gettext.translation('window', localedir='locales', languages=[language])
@@ -14,8 +13,11 @@ class QCoreApplication(QCoreApplication):
 
     @staticmethod
     def translate(context, key):
-        with open("locales/window.pot", "a") as file:
-            if not "Ctrl" in key:
-                return _(key)
-            else:
-                return key
+        if not "Ctrl" in key:
+            return _(key)
+        else:
+            return key
+
+class QCoreApplication(Translator): # easily replace existing translate function
+    def __init__(self):             # when using Qt Designer
+        super().__init__()
