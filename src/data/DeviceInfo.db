@@ -916,6 +916,7 @@
       
 	  <SRC ID="0821" Name="Current step count" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Current real-time pedometer"/>
       <SRC ID="1021" Name="Current step (percent)" SupportedFaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Pedometry goal achievement rate (percentage)"/>
+	  <SRC ID="1821" Name="Current step (kilometer)" SupportedFaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Pedometry goal achievement rate (kilometer)"/>
       
       <SRC ID="0823" Name="Active Calorie" FaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Active Calorie"/>
       <SRC ID="1023" Name="Active Calorie (percent)" SupportedFaceProgramma_Version="0" Device_Version="1.0.0" UsingNewFileTypeID_En="0" Tip="Activity calorie goal achievement rate (percentage)"/>
