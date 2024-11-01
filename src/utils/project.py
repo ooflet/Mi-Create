@@ -21,8 +21,7 @@ import logging
 import json
 import shutil
 import xmltodict
-import xml
-import xml.dom.minidom as minidom
+import uuid
 
 from pathlib import Path
 from pprint import pprint
@@ -288,8 +287,10 @@ class WatchData:
     def getCompilerVersion(self):
         settings = QSettings("Mi Create", "Workspace")
         if settings.value("compilerVersion") is None:
-            settings.setValue("compilerVersion", "m0tral-v4.16")
-        return settings.value("compilerVersion")
+            version = "m0tral-v4.16"
+        else:
+            version = settings.value("compilerVersion")
+        return version
 
     def getWatchModel(self, id):
         return self.watchID[id]
@@ -500,10 +501,8 @@ class FprjProject:
             os.makedirs(os.path.join(folder, "images"))
             os.makedirs(os.path.join(folder, "output"))
             with open(os.path.join(folder, f"{name}.fprj"), "x", encoding="utf8") as fprj:
-                rawXml = xmltodict.unparse(template)
-                dom = minidom.parseString(rawXml)
-                prettyXml = dom.toprettyxml()
-                fprj.write(prettyXml)
+                xml_string = xmltodict.unparse(template, pretty=True)
+                fprj.write(xml_string)
 
             self.data = template
             self.widgets = template["FaceProject"]["Screen"].get("Widget")
@@ -642,20 +641,15 @@ class FprjProject:
         self.data["FaceProject"]["Screen"]["@Bitmap"] = value
 
     def toString(self):
-        raw = xmltodict.unparse(self.data)
-        dom = xml.dom.minidom.parseString(raw)
-        pretty_xml = dom.toprettyxml()
-
-        return pretty_xml
+        xml_string = xmltodict.unparse(self.data, pretty=True)
+        return xml_string
 
     def save(self):
-        raw = xmltodict.unparse(self.data)
-        dom = xml.dom.minidom.parseString(raw)
-        pretty_xml = dom.toprettyxml()
+        xml_string = xmltodict.unparse(self.data, pretty=True)
 
         try:
             with open(self.dataPath, "w", encoding="utf8") as file:
-                file.write(pretty_xml)
+                file.write(xml_string)
             return True, "success"
             
         except Exception as e:
@@ -828,6 +822,40 @@ class GMFProject:
         self.dataPath = None
         self.imageFolder = None
 
+        self.widgetIds = {
+            "element": "widget",
+            "widge_imagelist": "widget_imagelist",
+            "widge_dignum": "widget_num",
+            "widge_pointer": "widget_pointer"
+        }
+
+        self.propertyIds = {
+            "align": "num_alignment",
+            "dataSrc": "num_source",
+            "image": "widget_bitmap",
+            "imageList": "widget_bitmaplist",
+            "name": "widget_name",
+            "showCount": "num_digits",
+            "showZero": "num_hide_zeros",
+            "spacing": "num_spacing",
+            "type": "widget_type",
+            "width": "widget_size_width", # temporary
+            "height": "widget_size_height", # temporary
+            "alpha": "widget_alpha", # temporary
+            "defaultIndex": "imagelist_default_index", # temporary
+            "x": "widget_pos_x",
+            "y": "widget_pos_y"
+        }
+
+    def setNameToWidgetList(self, widgetList):
+        # applies a Universally Unique identifier for widgets
+        # GMF projects dont use names for widgets
+        nameList = []
+
+        for widget in widgetList:
+            widget["name"] = widget["type"] + str(nameList.count(widget["type"]))
+            nameList.append(widget["type"])
+
     def fromExisting(self, location):
         projectDir = os.path.dirname(location)
         try:
@@ -839,7 +867,10 @@ class GMFProject:
                         item, accepted = QInputDialog().getItem(None, "GMFProject", Translator.translate("Project", "Select the device the watchface was made for:"), self.watchData.deviceId, 0, False)
                         if item in self.watchData.deviceId and accepted:
                             projectJson["deviceType"] = item
-                    
+
+                    self.setNameToWidgetList(projectJson["elementsNormal"])
+                    self.setNameToWidgetList(projectJson["elementsAod"])
+
                     self.name = os.path.basename(location)
                     self.directory = projectDir
                     self.dataPath = location
@@ -847,7 +878,7 @@ class GMFProject:
 
                     self.data = projectJson
                     self.widgets = projectJson["elementsNormal"]
-                    self.widgetsAOD = projectJson["elementsAOD"]
+                    self.widgetsAOD = projectJson["elementsAod"]
 
                     return True, "Success"
                 else:
@@ -858,3 +889,81 @@ class GMFProject:
         
     def getDeviceType(self):
         return self.data["deviceType"]
+    
+    def getAllWidgets(self, type=None, theme=None):
+        widgetList = []
+        for widget in self.widgets:
+            widgetList.append(GMFWidget(self, widget))
+        return widgetList
+    
+    def getTitle(self):
+        return self.data["name"]
+    
+    def getThumbnail(self):
+        return self.data["previewImg"]
+
+class GMFWidget:
+    def __init__(self, project, data):
+        self.project = project
+        self.data = data
+    
+    def removeAssociation(self):
+        # by default, the data that is passed through in the data argument is linked to the source data list/dict
+        # removing association means that the data is instead independent as a seperate list
+        # so modifications to the widget wont get applied over to the original data list
+        self.data = deepcopy(self.data)
+
+    def getProperty(self, property):
+        property = [k for k, v in self.project.propertyIds.items() if v == property]
+        
+        if len(property) > 0:
+            property = property[0]
+        else:
+            return
+
+        if property == "WidgetType":
+            return
+
+        if property == "type":
+            return self.project.widgetIds.get(self.data.get(property))
+        
+        elif property == "width":
+            return "0"
+
+        elif property == "height":
+            return "0"
+        
+        elif property == "alpha":
+            return "255"
+
+        elif property == "defaultIndex":
+            return "0"
+
+        elif property == "imageList":
+            bitmapList = self.data[property]
+
+            if self.data["type"] == "widge_imagelist":
+                if self.data.get("imageIndexList"): 
+                    for index, item in enumerate(bitmapList):
+                        merge = [self.data["imageIndexList"][index], item]
+                        bitmapList[index] = merge
+                else:
+                    for index, item in enumerate(bitmapList):
+                        bitmapList[index] = [index, item]
+
+            print(bitmapList)
+            return bitmapList
+        else:
+            return self.data.get(property)
+
+    def setProperty(self, property, value):
+        property = [k for k, v in self.project.propertyIds.items() if v == property][0]
+        if property == "@BitmapList":
+            for index, item in enumerate(value):
+                if isinstance(item, list): # contains index info
+                    item[0] = f"({item[0]})" # add brackets
+                    value[index] = ":".join(item)
+            value = "|".join(value)
+        self.data[property] = value
+
+    
