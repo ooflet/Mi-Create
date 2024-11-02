@@ -26,7 +26,7 @@
    <string>Mi Create</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="resources/icons.qrc">
+   <iconset resource="resources/resources.qrc">
     <normaloff>:/Images/MiCreate48x48.png</normaloff>:/Images/MiCreate48x48.png</iconset>
   </property>
   <property name="animated">
@@ -108,6 +108,7 @@
     <addaction name="actionOpenFile"/>
     <addaction name="separator"/>
     <addaction name="actionSave"/>
+    <addaction name="actionExport"/>
     <addaction name="separator"/>
     <addaction name="actionManage_Project"/>
     <addaction name="actionClose_Project"/>
@@ -185,7 +186,8 @@
      <string>logo</string>
     </property>
     <property name="icon">
-     <iconset theme="application-logo"/>
+     <iconset theme="application-logo">
+      <normaloff>.</normaloff>.</iconset>
     </property>
     <widget class="QMenu" name="menuAbout">
      <property name="title">
@@ -310,7 +312,8 @@
         <string>Reload</string>
        </property>
        <property name="icon">
-        <iconset theme="view-refresh"/>
+        <iconset theme="view-refresh">
+         <normaloff>.</normaloff>.</iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -326,7 +329,8 @@
         <string>openFolder</string>
        </property>
        <property name="icon">
-        <iconset theme="folder"/>
+        <iconset theme="folder">
+         <normaloff>.</normaloff>.</iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -404,7 +408,8 @@
         <string>addImage</string>
        </property>
        <property name="icon">
-        <iconset theme="insert-image"/>
+        <iconset theme="insert-image">
+         <normaloff>.</normaloff>.</iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -457,7 +462,8 @@
   </widget>
   <action name="actionSave">
    <property name="icon">
-    <iconset theme="document-save"/>
+    <iconset theme="document-save">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Save...</string>
@@ -473,7 +479,8 @@
   </action>
   <action name="actionPreferences">
    <property name="icon">
-    <iconset theme="preferences-system"/>
+    <iconset theme="preferences-system">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Settings</string>
@@ -484,7 +491,8 @@
   </action>
   <action name="actionBuild">
    <property name="icon">
-    <iconset theme="project-build"/>
+    <iconset theme="project-build">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Build...</string>
@@ -558,7 +566,8 @@
   </action>
   <action name="actionNewFile">
    <property name="icon">
-    <iconset theme="document-new"/>
+    <iconset theme="document-new">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>New...</string>
@@ -572,7 +581,8 @@
   </action>
   <action name="actionOpenFile">
    <property name="icon">
-    <iconset theme="document-open"/>
+    <iconset theme="document-open">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Open...</string>
@@ -586,7 +596,8 @@
   </action>
   <action name="actionUndo">
    <property name="icon">
-    <iconset theme="edit-undo"/>
+    <iconset theme="edit-undo">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Undo</string>
@@ -600,7 +611,8 @@
   </action>
   <action name="actionRedo">
    <property name="icon">
-    <iconset theme="edit-redo"/>
+    <iconset theme="edit-redo">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Redo</string>
@@ -633,7 +645,8 @@
   </action>
   <action name="actionCut">
    <property name="icon">
-    <iconset theme="edit-cut"/>
+    <iconset theme="edit-cut">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Cut</string>
@@ -644,7 +657,8 @@
   </action>
   <action name="actionCopy">
    <property name="icon">
-    <iconset theme="edit-copy"/>
+    <iconset theme="edit-copy">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Copy</string>
@@ -655,7 +669,8 @@
   </action>
   <action name="actionPaste">
    <property name="icon">
-    <iconset theme="edit-paste"/>
+    <iconset theme="edit-paste">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Paste</string>
@@ -666,7 +681,8 @@
   </action>
   <action name="actionProject_XML_File">
    <property name="icon">
-    <iconset theme="project-source"/>
+    <iconset theme="project-source">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Project Source Code</string>
@@ -679,7 +695,8 @@
   </action>
   <action name="actionImage">
    <property name="icon">
-    <iconset theme="widget-image"/>
+    <iconset theme="widget-image">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Image</string>
@@ -687,7 +704,8 @@
   </action>
   <action name="actionImage_List">
    <property name="icon">
-    <iconset theme="widget-imagelist"/>
+    <iconset theme="widget-imagelist">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Image List</string>
@@ -695,7 +713,8 @@
   </action>
   <action name="actionDigital_Number">
    <property name="icon">
-    <iconset theme="widget-digitalnumber"/>
+    <iconset theme="widget-digitalnumber">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Digital Number</string>
@@ -703,7 +722,8 @@
   </action>
   <action name="actionAnalog_Display">
    <property name="icon">
-    <iconset theme="widget-analogdisplay"/>
+    <iconset theme="widget-analogdisplay">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Analog Display</string>
@@ -711,7 +731,8 @@
   </action>
   <action name="actionArc_Progress">
    <property name="icon">
-    <iconset theme="widget-arcprogress"/>
+    <iconset theme="widget-arcprogress">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Arc Progress</string>
@@ -740,7 +761,8 @@
   </action>
   <action name="actionDelete">
    <property name="icon">
-    <iconset theme="edit-delete"/>
+    <iconset theme="edit-delete">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Delete</string>
@@ -751,7 +773,8 @@
   </action>
   <action name="actionBring_to_Front">
    <property name="icon">
-    <iconset theme="go-top"/>
+    <iconset theme="go-top">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Bring to Front</string>
@@ -764,7 +787,8 @@
   </action>
   <action name="actionSend_to_Back">
    <property name="icon">
-    <iconset theme="go-bottom"/>
+    <iconset theme="go-bottom">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Send to Back</string>
@@ -777,7 +801,8 @@
   </action>
   <action name="actionZoom_In">
    <property name="icon">
-    <iconset theme="zoom-in"/>
+    <iconset theme="zoom-in">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Zoom In</string>
@@ -788,7 +813,8 @@
   </action>
   <action name="actionZoom_Out">
    <property name="icon">
-    <iconset theme="zoom-out"/>
+    <iconset theme="zoom-out">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Zoom Out</string>
@@ -850,9 +876,14 @@
     <string>Ctrl+W</string>
    </property>
   </action>
+  <action name="actionExport">
+   <property name="text">
+    <string>Export...</string>
+   </property>
+  </action>
  </widget>
  <resources>
-  <include location="resources/icons.qrc"/>
+  <include location="resources/resources.qrc"/>
  </resources>
  <connections/>
  <designerdata>

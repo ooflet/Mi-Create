@@ -230,7 +230,6 @@ class Canvas(QGraphicsView):
         insertButton.setIcon(QIcon().fromTheme("insert-object"))
         insertButton.setIconSize(QSize(18, 18))
         insertButton.setToolTip("Create Widget")
-        insertButton.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
 
         mainLayout.addLayout(toolButtonLayout)
         mainLayout.addStretch()
@@ -417,7 +416,7 @@ class Canvas(QGraphicsView):
 
         for x in range(int(digits)):
             # Get QPixmap from file string
-            if len(numList) >= 11:
+            if len(numList) >= 10:
                 image = QPixmap()
                 image.load(os.path.join(self.imageFolder, numList[x % len(numList)]))
 

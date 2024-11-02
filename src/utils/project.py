@@ -928,10 +928,10 @@ class GMFWidget:
             return self.project.widgetIds.get(self.data.get(property))
         
         elif property == "width":
-            return "0"
+            return "50"
 
         elif property == "height":
-            return "0"
+            return "50"
         
         elif property == "alpha":
             return "255"

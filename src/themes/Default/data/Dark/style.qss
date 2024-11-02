@@ -245,6 +245,10 @@ QToolButton:pressed#canvasDecoration-button {
     background-color: palette(highlight)
 }
 
+QToolButton:checked {
+    background-color: palette(highlight)   
+}
+
 /*
  * QGroupBox
  */

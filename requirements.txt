@@ -1,5 +1,8 @@
 PyQt6
 PyQt6-QScintilla
+BeautifulSoup4
+pillow
+lxml
 qt6-applications
 xmltodict
 requests

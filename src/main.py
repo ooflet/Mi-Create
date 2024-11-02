@@ -57,6 +57,7 @@ from utils.theme import Theme
 from utils.updater import Updater
 from utils.history import History, CommandAddWidget, CommandDeleteWidget, CommandPasteWidget, CommandModifyWidgetLayer, \
     CommandModifyProperty, CommandModifyPosition
+from utils.fprjConverter import FprjConverter
 from widgets.canvas import Canvas, ObjectIcon
 from widgets.explorer import Explorer
 from widgets.properties import PropertiesWidget
@@ -1285,6 +1286,7 @@ class WatchfaceEditor(QMainWindow):
 
         # file
         self.ui.actionNewFile.triggered.connect(self.showNewProjectDialog)
+        self.ui.actionExport.triggered.connect(self.exportCurrentProject)
         self.ui.actionManage_Project.triggered.connect(self.showManageProjectDialog)
         self.ui.actionClose_Project.triggered.connect(lambda: self.closeTab(self.ui.workspace.currentIndex()))
         self.ui.actionOpenFile.triggered.connect(self.openProject)
@@ -1390,12 +1392,14 @@ class WatchfaceEditor(QMainWindow):
             if extension == '.fprj':
                 project = FprjProject()
             elif extension == ".json":
+                self.showDialog("warning", "GMFProjects are experimental! Most (if not all) editing features have not been implemented. Mi Create can currently only preview GMFProjects")
                 project = GMFProject()
             else:
                 self.showDialog("error", "Invalid project!")
                 return False
         else:
             # no file was selected
+            logging.debug(f"openProject failed to open project {projectLocation}: isfile failed!")
             return False
 
         load = project.fromExisting(projectLocation)
@@ -1468,6 +1472,34 @@ class WatchfaceEditor(QMainWindow):
                     self.showDialog("error", _("Failed to save project: ") + str(e))
 
             self.markCurrentProjectChanged(False)
+
+    def exportCurrentProject(self):
+        currentProject = self.getCurrentProject()
+        exportDialog = MultiFieldDialog(self, _("Export project"), _("Export project"))
+
+        def exportFprj():
+            exportDialog.close()
+            if exportDialog.exportFormat.currentText() == "GMFProject (wfDef.json)":
+                result = FprjConverter(currentProject["project"].directory, exportDialog.exportLocation.text(), currentProject["project"].getDeviceType()).make()
+                if not result:
+                    return
+
+                openExported = self.showDialog("question", _("Export success. Open the exported project?"), buttons=QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+                if openExported == QMessageBox.StandardButton.Yes:
+                    logging.debug(os.path.join(exportDialog.exportLocation.text(), "wfDef.json"))
+                    self.openProject(projectLocation=os.path.join(exportDialog.exportLocation.text(), "wfDef.json"))
+
+
+        if isinstance(currentProject["project"], FprjProject):
+            exportDialog.exportFormat = exportDialog.addDropdown(_("Export format"), ["GMFProject (wfDef.json)"], "GMFProject (wfDef.json)")
+            exportDialog.exportLocation = exportDialog.addFolderField(_("Export to"), mandatory=True)
+            buttonBox = exportDialog.addButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+            buttonBox.accepted.connect(exportFprj)
+            buttonBox.rejected.connect(exportDialog.close)
+        else:
+            return
+
+        exportDialog.exec()
 
     def createPreview(self):
         currentProject = self.getCurrentProject()
