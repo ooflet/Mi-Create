@@ -1,5 +1,5 @@
 {
-    "widget_analog": {
+    "widget_pointer": {
         "Shape": "AnalogDisplay",
         "properties": {
             "General": {
@@ -365,36 +365,6 @@
                     "value": "",
                     "min": "-999",
                     "max": "999"
-                },
-                "widget_size_width": {
-                    "string": "Width",
-                    "type": "disabled",
-                    "value": "48"
-                },
-                "widget_size_height": {
-                    "string": "Height",
-                    "type": "disabled",
-                    "value": "48"
-                }
-            },
-            "Appearance": {
-                "widget_alpha": {
-                    "string": "Opacity",
-                    "type": "int",
-                    "value": "255",
-                    "min": "0",
-                    "max": "255"
-                },
-                "widget_visibility_source": {
-                    "string": "Visibility Trigger",
-                    "type": "src",
-                    "value": "",
-                    "visibleOn": [
-                        "xiaomi_color",
-                        "xiaomi_color_sport",
-                        "xiaomi_color_2/s1/s2",
-                        "xiaomi_watch_s1_pro"
-                    ]
                 }
             },
             "Image": {
@@ -435,36 +405,6 @@
                     "value": "",
                     "min": "-999",
                     "max": "999"
-                },
-                "widget_size_width": {
-                    "string": "Width",
-                    "type": "disabled",
-                    "value": "48"
-                },
-                "widget_size_height": {
-                    "string": "Height",
-                    "type": "disabled",
-                    "value": "48"
-                }
-            },
-            "Appearance": {
-                "widget_alpha": {
-                    "string": "Opacity",
-                    "type": "int",
-                    "value": "255",
-                    "min": "0",
-                    "max": "255"
-                },
-                "widget_visibility_source": {
-                    "string": "Visibility Trigger",
-                    "type": "src",
-                    "value": "",
-                    "visibleOn": [
-                        "xiaomi_color",
-                        "xiaomi_color_sport",
-                        "xiaomi_color_2/s1/s2",
-                        "xiaomi_watch_s1_pro"
-                    ]
                 }
             },
             "Data": {
@@ -520,16 +460,6 @@
                     "min": "-999",
                     "max": "999"
                 },
-                "widget_size_width": {
-                    "string": "Width",
-                    "type": "disabled",
-                    "value": ""
-                },
-                "widget_size_height": {
-                    "string": "Height",
-                    "type": "disabled",
-                    "value": ""
-                },
                 "num_alignment": {
                     "string": "Alignment",
                     "type": "list",
@@ -542,24 +472,6 @@
                 }
             },
             "Appearance": {
-                "widget_alpha": {
-                    "string": "Opacity",
-                    "type": "int",
-                    "value": "255",
-                    "min": "0",
-                    "max": "255"
-                },
-                "widget_visibility_source": {
-                    "string": "Visibility Trigger",
-                    "type": "src",
-                    "value": "",
-                    "visibleOn": [
-                        "xiaomi_color",
-                        "xiaomi_color_sport",
-                        "xiaomi_color_2/s1/s2",
-                        "xiaomi_watch_s1_pro"
-                    ]
-                },
                 "num_digits": {
                     "string": "Digits",
                     "type": "int",
@@ -574,8 +486,8 @@
                     "min": "-999",
                     "max": "999"
                 },
-                "num_hide_zeros": {
-                    "string": "Hide Zeroes",
+                "num_toggle_zeros": {
+                    "string": "Show Zeroes",
                     "type": "bool",
                     "value": ""
                 }
@@ -591,6 +503,11 @@
                 "widget_bitmaplist": {
                     "string": "Images",
                     "type": "numlist",
+                    "value": ""
+                },
+                "widget_unit_icon": {
+                    "string": "Unit Icon",
+                    "type": "src",
                     "value": ""
                 }
             }

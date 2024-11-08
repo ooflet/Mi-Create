@@ -57,7 +57,7 @@ from utils.theme import Theme
 from utils.updater import Updater
 from utils.history import History, CommandAddWidget, CommandDeleteWidget, CommandPasteWidget, CommandModifyWidgetLayer, \
     CommandModifyProperty, CommandModifyPosition
-from utils.fprjConverter import FprjConverter
+from utils.exporter import FprjConverter
 from widgets.canvas import Canvas, ObjectIcon
 from widgets.explorer import Explorer
 from widgets.properties import PropertiesWidget
@@ -340,7 +340,7 @@ class WatchfaceEditor(QMainWindow):
         # settings are stored through QSettings, not the settingItems.json file
         # on windows its located at Computer\HKEY_CURRENT_USER\Software\Mi Create
         # on linux its located at /home/user/.config/Mi Create/
-        with open("data/settingItems.json") as file:
+        with open("data/setting_items.json") as file:
             self.settings = json.load(file)
             logging.info("settingItems.json loaded")
             self.settings["General"]["Theme"]["options"] = self.themes.themeNames
@@ -711,11 +711,11 @@ class WatchfaceEditor(QMainWindow):
                         currentItem.setProperty(property, 0)
                     else:
                         for data in self.WatchData.modelSourceData[str(currentProject["project"].getDeviceType())]:
-                            if data["@Name"] == value:
+                            if data["string"] == value:
                                 try:
-                                    currentItem.setProperty(property, int(data["@ID"], 0))
+                                    currentItem.setProperty(property, int(data["id_fprj"], 0))
                                 except:
-                                    currentItem.setProperty(property, int(data["@ID"]))
+                                    currentItem.setProperty(property, int(data["id_fprj"]))
                                 break
                         else:
                             self.showDialog("warning", "Invalid source name!")
@@ -782,20 +782,29 @@ class WatchfaceEditor(QMainWindow):
                 self.ignoreHistoryInvoke = False
 
         # Setup properties widget
-        with open("data/properties.json", encoding="utf8") as raw:
-            propertiesSource = raw.read()
-            self.propertyJson = json.loads(propertiesSource)
-            self.propertiesWidget = PropertiesWidget(self, self.WatchData.modelSourceList,
-                                                     self.WatchData.modelSourceData)
-            self.propertiesWidget.propertyChanged.connect(lambda *args: setProperty(args))
-            self.ui.propertiesWidget.setWidget(self.propertiesWidget)
+        with open("data/fprj/propertiesFprj.json", encoding="utf8") as raw:
+            source = raw.read()
+            self.propertiesFprjJson = json.loads(source)
+        
+        with open("data/gmf/propertiesGMF.json", encoding="utf8") as raw:
+            source = raw.read()
+            self.propertiesGMFJson = json.loads(source)
+
+        self.propertiesWidget = PropertiesWidget(self, self.WatchData.modelSourceList,
+                                                    self.WatchData.modelSourceData)
+        self.propertiesWidget.propertyChanged.connect(lambda *args: setProperty(args))
+        self.ui.propertiesWidget.setWidget(self.propertiesWidget)
 
     def updateProperties(self, item, itemType=None):
         currentProject = self.getCurrentProject()
         if item and currentProject["project"].getWidget(item) != None:
             if self.propertiesWidget.clearOnRefresh:
-                self.propertiesWidget.loadProperties(self.propertyJson[itemType], currentProject["project"], item,
-                                                     self.resourceImages, currentProject["project"].getDeviceType())
+                if isinstance(currentProject["project"], FprjProject):
+                    self.propertiesWidget.loadProperties(self.propertiesFprjJson[itemType], currentProject["project"], item,
+                                                        self.resourceImages, currentProject["project"].getDeviceType())
+                elif isinstance(currentProject["project"], GMFProject):
+                    self.propertiesWidget.loadProperties(self.propertiesGMFJson[itemType], currentProject["project"], item,
+                                                        self.resourceImages, currentProject["project"].getDeviceType())
             else:
                 self.propertiesWidget.clearOnRefresh = True
         else:
@@ -1412,7 +1421,11 @@ class WatchfaceEditor(QMainWindow):
                     recentProjectList = []
 
                 path = os.path.normpath(projectLocation)
-                projectListing = [os.path.basename(path), path]
+
+                if isinstance(project, FprjProject):
+                    projectListing = [os.path.basename(path), path]
+                elif isinstance(project, GMFProject):
+                    projectListing = [project.getTitle(), path]
 
                 if projectListing in recentProjectList:
                     recentProjectList.pop(recentProjectList.index(projectListing))
@@ -1478,7 +1491,7 @@ class WatchfaceEditor(QMainWindow):
         exportDialog = MultiFieldDialog(self, _("Export project"), _("Export project"))
 
         def exportFprj():
-            exportDialog.close()
+            exportDialog.deleteLater()
             if exportDialog.exportFormat.currentText() == "GMFProject (wfDef.json)":
                 result = FprjConverter(currentProject["project"].directory, exportDialog.exportLocation.text(), currentProject["project"].getDeviceType()).make()
                 if not result:
@@ -1495,7 +1508,7 @@ class WatchfaceEditor(QMainWindow):
             exportDialog.exportLocation = exportDialog.addFolderField(_("Export to"), mandatory=True)
             buttonBox = exportDialog.addButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
             buttonBox.accepted.connect(exportFprj)
-            buttonBox.rejected.connect(exportDialog.close)
+            buttonBox.rejected.connect(exportDialog.deleteLater)
         else:
             return
 

@@ -18,7 +18,7 @@ from PyQt6.QtWidgets import (QDialog, QLabel, QLineEdit, QComboBox, QToolButton,
                              QHBoxLayout, QSizePolicy, QWidget, QDialogButtonBox, QFileDialog, QFrame,
                              QPushButton, QCheckBox, QListWidget, QListWidgetItem, QMenu)
 from PyQt6.QtMultimedia import QSoundEffect
-from widgets.stackedWidget import QStackedWidget, loadJsonStyle
+from widgets.stackedwidget import QStackedWidget, loadJsonStyle
 
 from translate import Translator
 

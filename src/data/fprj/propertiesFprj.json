@@ -1,0 +1,599 @@
+{
+    "widget_analog": {
+        "Shape": "AnalogDisplay",
+        "properties": {
+            "General": {
+                "WidgetType": {
+                    "string": "Widget Type",
+                    "type": "disabled",
+                    "value": "AnalogDisplay"
+                },
+                "widget_name": {
+                    "string": "Name",
+                    "type": "str",
+                    "value": ""
+                }
+            },
+            "Position": {
+                "widget_pos_x": {
+                    "string": "X",
+                    "type": "int",
+                    "value": "",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "widget_pos_y": {
+                    "string": "Y",
+                    "type": "int",
+                    "value": "",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "widget_size_width": {
+                    "string": "Width",
+                    "type": "int",
+                    "value": "48",
+                    "min": "0",
+                    "max": "999"
+                },
+                "widget_size_height": {
+                    "string": "Height",
+                    "type": "int",
+                    "value": "48",
+                    "min": "0",
+                    "max": "999"
+                }
+            },
+            "Appearance": {
+                "widget_alpha": {
+                    "string": "Opacity",
+                    "type": "int",
+                    "value": "255",
+                    "min": "0",
+                    "max": "255"
+                },
+                "widget_visibility_source": {
+                    "string": "Visibility Trigger",
+                    "type": "src",
+                    "value": "",
+                    "visibleOn": [
+                        "xiaomi_color",
+                        "xiaomi_color_sport",
+                        "xiaomi_color_2/s1/s2",
+                        "xiaomi_watch_s1_pro"
+                    ]
+                },
+                "analog_hour_smooth_motion": {
+                    "string": "Hour Hand Smooth",
+                    "type": "bool",
+                    "value": "0"
+                },
+                "analog_minute_smooth_motion": {
+                    "string": "Minute Hand Smooth",
+                    "type": "bool",
+                    "value": "0"
+                }
+            },
+            "Analog Properties": {
+                "Background": {
+                    "widget_background_bitmap": {
+                        "string": "Image",
+                        "type": "img",
+                        "value": ""
+                    },
+                    "Anchor Point": {
+                        "analog_bg_anchor_x": {
+                            "string": "X",
+                            "type": "int",
+                            "value": "",
+                            "min": "0",
+                            "max": "999"
+                        },
+                        "analog_bg_anchor_y": {
+                            "string": "Y",
+                            "type": "int",
+                            "value": "",
+                            "min": "0",
+                            "max": "999"
+                        }
+                    }
+                },
+                "Hour Hand": {
+                    "analog_hour_image": {
+                        "string": "Image",
+                        "type": "img",
+                        "value": ""
+                    },
+                    "Anchor Point": {
+                        "analog_hour_anchor_x": {
+                            "string": "X",
+                            "type": "int",
+                            "value": "",
+                            "min": "0",
+                            "max": "999"
+                        },
+                        "analog_hour_anchor_y": {
+                            "string": "Y",
+                            "type": "int",
+                            "value": "",
+                            "min": "0",
+                            "max": "999"
+                        }
+                    }
+                },
+                "Minute Hand": {
+                    "analog_minute_image": {
+                        "string": "Image",
+                        "type": "img",
+                        "value": ""
+                    },
+                    "Anchor Point": {
+                        "analog_minute_anchor_x": {
+                            "string": "X",
+                            "type": "int",
+                            "value": "",
+                            "min": "0",
+                            "max": "999"
+                        },
+                        "analog_minute_anchor_y": {
+                            "string": "Y",
+                            "type": "int",
+                            "value": "",
+                            "min": "0",
+                            "max": "999"
+                        }
+                    }
+                },
+                "Second Hand": {
+                    "analog_second_image": {
+                        "string": "Image",
+                        "type": "img",
+                        "value": ""
+                    },
+                    "Anchor Point": {
+                        "analog_second_anchor_x": {
+                            "string": "X",
+                            "type": "int",
+                            "value": "",
+                            "min": "0",
+                            "max": "999"
+                        },
+                        "analog_second_anchor_y": {
+                            "string": "Y",
+                            "type": "int",
+                            "value": "",
+                            "min": "0",
+                            "max": "999"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "widget_arc": {
+        "Shape": "CircleProgress",
+        "properties": {
+            "General": {
+                "WidgetType": {
+                    "string": "Widget Type",
+                    "type": "disabled",
+                    "value": "CircleProgress"
+                },
+                "widget_name": {
+                    "string": "Name",
+                    "type": "str",
+                    "value": ""
+                }
+            },
+            "Position": {
+                "widget_pos_x": {
+                    "string": "X",
+                    "type": "int",
+                    "value": "",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "widget_pos_y": {
+                    "string": "Y",
+                    "type": "int",
+                    "value": "",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "widget_size_width": {
+                    "string": "Width",
+                    "type": "disabled",
+                    "value": "48"
+                },
+                "widget_size_height": {
+                    "string": "Height",
+                    "type": "disabled",
+                    "value": "48"
+                }
+            },
+            "Appearance": {
+                "widget_alpha": {
+                    "string": "Opacity",
+                    "type": "int",
+                    "value": "255",
+                    "min": "0",
+                    "max": "255"
+                },
+                "widget_visibility_source": {
+                    "string": "Visibility Trigger",
+                    "type": "src",
+                    "value": "",
+                    "visibleOn": [
+                        "xiaomi_color",
+                        "xiaomi_color_sport",
+                        "xiaomi_color_2/s1/s2",
+                        "xiaomi_watch_s1_pro"
+                    ]
+                }
+            },
+            "Progress Bar": {
+                "arc_pos_x": {
+                    "string": "X",
+                    "type": "int",
+                    "value": "0",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "arc_pos_y": {
+                    "string": "Y",
+                    "type": "int",
+                    "value": "0",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "arc_radius": {
+                    "string": "Radius",
+                    "type": "int",
+                    "value": "0",
+                    "min": "0",
+                    "max": "999"
+                },
+                "arc_thickness": {
+                    "string": "Thickness",
+                    "type": "int",
+                    "value": "0",
+                    "min": "0",
+                    "max": "999"
+                },
+                "arc_start_angle": {
+                    "string": "Start Angle",
+                    "type": "int",
+                    "value": "0",
+                    "min": "-360",
+                    "max": "360"
+                },
+                "arc_end_angle": {
+                    "string": "End Angle",
+                    "type": "int",
+                    "value": "0",
+                    "min": "-360",
+                    "max": "360"
+                },
+                "arc_flat_caps": {
+                    "string": "Flat Ends",
+                    "type": "bool",
+                    "value": "0"
+                }
+            },
+            "Range": {
+                "arc_min_value": {
+                    "string": "Minimum Value",
+                    "type": "int",
+                    "value": "0",
+                    "min": "0",
+                    "max": "100"
+                },
+                "arc_max_value": {
+                    "string": "Maximum Value",
+                    "type": "int",
+                    "value": "0",
+                    "min": "0",
+                    "max": "100"
+                },
+                "arc_min_step_value": {
+                    "string": "Minimum Step Value",
+                    "type": "int",
+                    "value": "0",
+                    "min": "0",
+                    "max": "100"
+                },
+                "arc_step_value": {
+                    "string": "Step Value",
+                    "type": "int",
+                    "value": "0",
+                    "min": "0",
+                    "max": "100"
+                }
+            },
+            "Data": {
+                "arc_source": {
+                    "string": "Data Source",
+                    "type": "src",
+                    "value": ""
+                },
+                "arc_max_value_source": {
+                    "string": "Max Value Source",
+                    "type": "src",
+                    "value": ""
+                }
+            },
+            "Images": {
+                "widget_background_bitmap": {
+                    "string": "Background",
+                    "type": "img",
+                    "value": ""
+                },
+                "arc_image": {
+                    "string": "Progress Bar",
+                    "type": "img",
+                    "value": ""
+                }
+            }
+        }
+    },
+    "widget": {
+        "Shape": "Image",
+        "properties": {
+            "General": {
+                "WidgetType": {
+                    "string": "Widget Type",
+                    "type": "disabled",
+                    "value": "Image"
+                },
+                "widget_name": {
+                    "string": "Name",
+                    "type": "str",
+                    "value": ""
+                }
+            },
+            "Position": {
+                "widget_pos_x": {
+                    "string": "X",
+                    "type": "int",
+                    "value": "",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "widget_pos_y": {
+                    "string": "Y",
+                    "type": "int",
+                    "value": "",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "widget_size_width": {
+                    "string": "Width",
+                    "type": "disabled",
+                    "value": "48"
+                },
+                "widget_size_height": {
+                    "string": "Height",
+                    "type": "disabled",
+                    "value": "48"
+                }
+            },
+            "Appearance": {
+                "widget_alpha": {
+                    "string": "Opacity",
+                    "type": "int",
+                    "value": "255",
+                    "min": "0",
+                    "max": "255"
+                },
+                "widget_visibility_source": {
+                    "string": "Visibility Trigger",
+                    "type": "src",
+                    "value": "",
+                    "visibleOn": [
+                        "xiaomi_color",
+                        "xiaomi_color_sport",
+                        "xiaomi_color_2/s1/s2",
+                        "xiaomi_watch_s1_pro"
+                    ]
+                }
+            },
+            "Image": {
+                "widget_bitmap": {
+                    "string": "Image",
+                    "type": "img",
+                    "value": ""
+                }
+            }
+        }
+    },
+    "widget_imagelist": {
+        "Shape": "ImageList",
+        "properties": {
+            "General": {
+                "WidgetType": {
+                    "string": "Widget Type",
+                    "type": "disabled",
+                    "value": "ImageList"
+                },
+                "widget_name": {
+                    "string": "Name",
+                    "type": "str",
+                    "value": ""
+                }
+            },
+            "Position": {
+                "widget_pos_x": {
+                    "string": "X",
+                    "type": "int",
+                    "value": "",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "widget_pos_y": {
+                    "string": "Y",
+                    "type": "int",
+                    "value": "",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "widget_size_width": {
+                    "string": "Width",
+                    "type": "disabled",
+                    "value": "48"
+                },
+                "widget_size_height": {
+                    "string": "Height",
+                    "type": "disabled",
+                    "value": "48"
+                }
+            },
+            "Appearance": {
+                "widget_alpha": {
+                    "string": "Opacity",
+                    "type": "int",
+                    "value": "255",
+                    "min": "0",
+                    "max": "255"
+                },
+                "widget_visibility_source": {
+                    "string": "Visibility Trigger",
+                    "type": "src",
+                    "value": "",
+                    "visibleOn": [
+                        "xiaomi_color",
+                        "xiaomi_color_sport",
+                        "xiaomi_color_2/s1/s2",
+                        "xiaomi_watch_s1_pro"
+                    ]
+                }
+            },
+            "Data": {
+                "imagelist_source": {
+                    "string": "Data Source",
+                    "type": "src",
+                    "value": ""
+                }
+            },
+            "Image List": {
+                "imagelist_default_index": {
+                    "string": "Default Index",
+                    "type": "int",
+                    "value": "0",
+                    "min": "none",
+                    "max": "none"
+                },
+                "widget_bitmaplist": {
+                    "string": "Images",
+                    "type": "imglist",
+                    "value": ""
+                }
+            }
+        }
+    },
+    "widget_num": {
+        "Shape": "DigitalNumber",
+        "properties": {
+            "General": {
+                "WidgetType": {
+                    "string": "Widget Type",
+                    "type": "disabled",
+                    "value": "DigitalNumber"
+                },
+                "widget_name": {
+                    "string": "Name",
+                    "type": "str",
+                    "value": ""
+                }
+            },
+            "Position": {
+                "widget_pos_x": {
+                    "string": "X",
+                    "type": "int",
+                    "value": "",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "widget_pos_y": {
+                    "string": "Y",
+                    "type": "int",
+                    "value": "",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "widget_size_width": {
+                    "string": "Width",
+                    "type": "disabled",
+                    "value": ""
+                },
+                "widget_size_height": {
+                    "string": "Height",
+                    "type": "disabled",
+                    "value": ""
+                },
+                "num_alignment": {
+                    "string": "Alignment",
+                    "type": "list",
+                    "value": "",
+                    "options": [
+                        "Left",
+                        "Center",
+                        "Right"
+                    ]
+                }
+            },
+            "Appearance": {
+                "widget_alpha": {
+                    "string": "Opacity",
+                    "type": "int",
+                    "value": "255",
+                    "min": "0",
+                    "max": "255"
+                },
+                "widget_visibility_source": {
+                    "string": "Visibility Trigger",
+                    "type": "src",
+                    "value": "",
+                    "visibleOn": [
+                        "xiaomi_color",
+                        "xiaomi_color_sport",
+                        "xiaomi_color_2/s1/s2",
+                        "xiaomi_watch_s1_pro"
+                    ]
+                },
+                "num_digits": {
+                    "string": "Digits",
+                    "type": "int",
+                    "value": "1",
+                    "min": "1",
+                    "max": "20"
+                },
+                "num_spacing": {
+                    "string": "Spacing",
+                    "type": "int",
+                    "value": "0",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "num_toggle_zeros": {
+                    "string": "Hide Zeroes",
+                    "type": "bool",
+                    "value": ""
+                }
+            },
+            "Data": {
+                "num_source": {
+                    "string": "Data Source",
+                    "type": "src",
+                    "value": ""
+                }
+            },
+            "Images": {
+                "widget_bitmaplist": {
+                    "string": "Images",
+                    "type": "numlist",
+                    "value": ""
+                }
+            }
+        }
+    }
+}

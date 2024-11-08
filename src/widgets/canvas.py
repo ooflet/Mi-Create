@@ -13,18 +13,19 @@ from pprint import pprint
 sys.path.append("..")
 from utils.project import WatchData
 
-from PyQt6.QtCore import pyqtSignal, QPointF, QSize, QRect, QRectF, QLineF, Qt
+from PyQt6.QtCore import pyqtSignal, QPointF, QSize, QRect, QTimer, Qt
 from PyQt6.QtGui import QPainter, QPainterPath, QPen, QColor, QPixmap, QIcon, QBrush
 from PyQt6.QtWidgets import (QApplication, QGraphicsPathItem, QGraphicsScene, QGraphicsSceneMouseEvent, QGraphicsView, QGraphicsItem, QGraphicsRectItem, 
                             QToolButton, QGraphicsPixmapItem, QGraphicsEllipseItem, QMessageBox, QRubberBand, QGraphicsOpacityEffect, QHBoxLayout, QVBoxLayout)
 
-from utils.contextMenu import ContextMenu
+from utils.menu import ContextMenu
 
 class ObjectIcon:
     def __init__(self):
         super().__init__()
         self.icon = {
             "widget_analog" : "widget-analogdisplay",
+            "widget_pointer" : "widget-pointer",
             "widget" : "widget-image",
             "widget_imagelist" : "widget-imagelist",
             "widget_num" : "widget-digitalnumber",
@@ -361,6 +362,21 @@ class Canvas(QGraphicsView):
             widget.color = QColor(255, 0, 0, 100)
 
         return widget
+    
+    def createPointer(self, transparency, name, rect, zValue, pointer, pointerAnchorX, pointerAnchorY, snap, interpolationStyle):
+        # Create widget
+        widget = PointerWidget(int(rect.x()), int(rect.y()), int(rect.width()), int(rect.height()), self.frame, self, QColor(255,255,255,0), transparency, name)
+        widget.setZValue(zValue)
+        widget.setData(1, "widget") # Item ID
+        widget.snap = snap
+
+        # Add image
+        pixmap = QPixmap()
+        pixmap.load(os.path.join(self.imageFolder, pointer))
+
+        widget.addPointer(pixmap, pointerAnchorX, pointerAnchorY, interpolationStyle)
+
+        return widget
 
     def createImage(self, transparency, name, rect, zValue, image, snap, interpolationStyle):
         # Create widget
@@ -384,6 +400,16 @@ class Canvas(QGraphicsView):
         widget.setData(1, "widget_imagelist") # Item ID 
         widget.snap = snap
 
+        # check if animation
+
+        animationName = name.split("_")
+
+        if animationName[0] == "anim":
+            framesec = animationName[1].strip("[]").split("@")[1]
+            animImageList = [QPixmap(os.path.join(self.imageFolder, image[1])) for image in bitmapList]
+            widget.addAnimatedImage(animImageList, interpolationStyle)
+            widget.playAnimation(framesec)
+            return widget
 
         # displayImage is a list with 2 values, image index & image
 
@@ -494,6 +520,24 @@ class Canvas(QGraphicsView):
                             "y": item.getProperty("analog_second_anchor_y"),
                         },
                     },
+                    snap,
+                    interpolation
+                )
+            
+            elif item.getProperty("widget_type") == "widget_pointer":
+                widget = self.createPointer(
+                    item.getProperty("widget_alpha"),
+                    item.getProperty("widget_name"),
+                    QRect(
+                        int(item.getProperty("widget_pos_x")),
+                        int(item.getProperty("widget_pos_y")),
+                        int(item.getProperty("widget_size_width")),
+                        int(item.getProperty("widget_size_height"))
+                    ),
+                    index,
+                    item.getProperty("widget_bitmap"),
+                    item.getProperty("pointer_anchor_x"),
+                    item.getProperty("pointer_anchor_y"),
                     snap,
                     interpolation
                 )
@@ -798,6 +842,33 @@ class ImageWidget(BaseWidget):
         width = ( qPixmap.width() * len(self.imageItems) ) + ( spacing * len(self.imageItems) )
         self.setRect(0, 0, width, qPixmap.height())
 
+    def addAnimatedImage(self, imagelist, isAntialiased):
+        initialFrame = imagelist[0]
+
+        self.animatedImageList = imagelist
+        self.animatedImageItem = QGraphicsPixmapItem(initialFrame, self)
+        self.setRect(0, 0, initialFrame.width(), initialFrame.height())
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.advanceFrame)
+        if isAntialiased:
+            self.animatedImageItem.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
+
+    def advanceFrame(self):
+        self.currentFrame = (self.currentFrame + 1) % len(self.animatedImageList)
+        self.animatedImageItem.setPixmap(self.animatedImageList[self.currentFrame])
+
+    def playAnimation(self, framesec):
+        if self.animatedImageItem == None:
+            return
+        
+        self.currentFrame = 0
+        interval = int(framesec)
+        self.timer.start(interval)
+
+    def stopAnimation(self):
+        self.timer.stop()
+        self.animatedImageItem.setPixmap(self.animatedImageList[0])
+
     def clearImages(self):
         for x in self.imageItems:
             self.scene().removeItem(x)
@@ -843,6 +914,19 @@ class AnalogWidget(BaseWidget):
         self.hrHand.setPos(self.rect().width()/2, self.rect().height()/2)
         if antialiasing:
             self.hrHand.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
+
+class PointerWidget(BaseWidget):
+    def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name):
+        super().__init__(posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name)
+        self.setPos(posX, posY)
+
+    def addPointer(self, image, anchorX, anchorY, antialiasing):
+        self.pointer = QGraphicsPixmapItem(image, self)
+        self.pointer.setOffset(-int(anchorX), -int(anchorY))
+        self.pointer.setPos(image.width()/2, image.height()/2)
+        self.setRect(0, 0, image.width(), image.height())
+        if antialiasing:
+            self.pointer.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
 
 class ProgressArc(QGraphicsEllipseItem):
     def __init__(self, posX, posY, width, height, parent, thickness, startAngle, endAngle, isFlat, pathImage):

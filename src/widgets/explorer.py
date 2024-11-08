@@ -5,7 +5,7 @@ from PyQt6.QtWidgets import QTreeWidget, QTreeWidgetItem, QFrame, QMessageBox, Q
 from PyQt6.QtGui import QContextMenuEvent, QIcon, QStandardItemModel
 from PyQt6.QtCore import Qt, QSize, pyqtSignal, QModelIndex, QPoint
 
-from utils.contextMenu import ContextMenu
+from utils.menu import ContextMenu
 
 class Explorer(QTreeWidget):
     itemReordered = pyqtSignal(int)

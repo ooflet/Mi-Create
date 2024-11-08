@@ -17,7 +17,7 @@ from translate import Translator
 # Context menu items allow for "inheritance" from the main window, basically
 # reusing already created menu items
 
-with open("data/contextMenus.json") as file:
+with open("data/context_menus.json") as file:
     contextMenus = json.load(file)
 
 class ContextMenu(QMenu):

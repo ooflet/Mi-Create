@@ -264,7 +264,7 @@ class PropertiesWidget(QWidget):
             comboBox.setCursor(Qt.CursorShape.PointingHandCursor)
             
         if selected:
-            if selected.isnumeric():
+            if isinstance(selected, int) or selected.isnumeric():
                 comboBox.setCurrentIndex(int(selected))
             else:
                 if selected in items:
@@ -386,6 +386,7 @@ class PropertiesWidget(QWidget):
                             if len(imageList) > index:
                                 image = imageList[index]
                                 if image != None and len(image) > 1 and isinstance(image, list):
+                                    print(image)
                                     indexInput.setValue(int(image[0])) 
                                     imageInput.setCurrentText(image[1])             
                                 imageInput.currentTextChanged.connect(lambda event, indexInput=self.imageCategories[index][2], imageInput=self.imageCategories[index][1], index=index: imagesChanged(indexInput.text(), imageInput.currentText(), index))
@@ -485,14 +486,15 @@ class PropertiesWidget(QWidget):
                     for x in self.sourceData[str(device)]:
                         if propertyValue != '':
                             if isinstance(propertyValue, int) or propertyValue.isnumeric():
-                                if int(x["@ID"]) == int(propertyValue):
-                                    inputWidget = self.createComboBox(self.sourceList[str(device)], x["@Name"], key, True)
+                                if int(x["id_fprj"]) == int(propertyValue):
+                                    inputWidget = self.createComboBox(self.sourceList[str(device)], x["string"], key, True)
                                     break
                             else:
-                                if x["@ID"] == propertyValue:
-                                    inputWidget = self.createComboBox(self.sourceList[str(device)], x["@Name"], key, True)
+                                if x["id_fprj"] == propertyValue:
+                                    inputWidget = self.createComboBox(self.sourceList[str(device)], x["string"], key, True)
                                     break
                         else:
+                            print(self.sourceList)
                             inputWidget = self.createComboBox(self.sourceList[str(device)], False, key, True)
                             break   
 

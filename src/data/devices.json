@@ -1,0 +1,178 @@
+{
+    "xiaomi_color": {
+        "string": "Xiaomi Watch Color",
+        "width": 454,
+        "height": 454,
+        "radius": 227,
+        "preview": {
+            "width": 0,
+            "height": 0,
+            "radius": 0
+        }
+    },
+    "xiaomi_color_sport": {
+        "string": "Xiaomi Watch Color Sport",
+        "width": 454,
+        "height": 454,
+        "radius": 227,
+        "preview": {
+            "width": 0,
+            "height": 0,
+            "radius": 0
+        }
+    },
+    "xiaomi_color_2/s1/s2": {
+        "string": "Xiaomi Watch S1/S2/Color 2",
+        "width": 466,
+        "height": 466,
+        "radius": 233,
+        "preview": {
+            "width": 0,
+            "height": 0,
+            "radius": 0
+        }
+    },
+    "xiaomi_watch_s1_pro": {
+        "string": "Xiaomi Watch S1 Pro",
+        "width": 480,
+        "height": 480,
+        "radius": 240,
+        "preview": {
+            "width": 0,
+            "height": 0,
+            "radius": 0
+        }
+    },
+    "xiaomi_watch_s3": {
+        "string": "Xiaomi Watch S3",
+        "width": 466,
+        "height": 466,
+        "radius": 233,
+        "preview": {
+            "width": 0,
+            "height": 0,
+            "radius": 0
+        }
+    },
+    "redmi/poco_watch": {
+        "string": "Redmi/Poco Watch",
+        "width": 320,
+        "height": 360,
+        "radius": 60,
+        "preview": {
+            "width": 0,
+            "height": 0,
+            "radius": 0
+        }
+    },
+    "redmi_watch_2_lite": {
+        "string": "Redmi Watch 2 Lite",
+        "width": 320,
+        "height": 360,
+        "radius": 60,
+        "preview": {
+            "width": 0,
+            "height": 0,
+            "radius": 0
+        }
+    },
+    "redmi_watch_3": {
+        "string": "Redmi Watch 3",
+        "width": 390,
+        "height": 450,
+        "radius": 80,
+        "preview": {
+            "width": 0,
+            "height": 0,
+            "radius": 0
+        }
+    },
+    "redmi_watch_3_active": {
+        "string": "Redmi Watch 3 Active",
+        "width": 240,
+        "height": 280,
+        "radius": 55,
+        "preview": {
+            "width": 0,
+            "height": 0,
+            "radius": 0
+        }
+    },
+    "redmi_watch_4": {
+        "string": "Redmi Watch 4",
+        "width": 390,
+        "height": 450,
+        "radius": 80,
+        "preview": {
+            "width": 0,
+            "height": 0,
+            "radius": 0
+        }
+    },
+    "redmi_band_pro": {
+        "string": "Redmi Band Pro",
+        "width": 194,
+        "height": 368,
+        "radius": 28,
+        "preview": {
+            "width": 0,
+            "height": 0,
+            "radius": 0
+        }
+    },
+    "xiaomi_band_7_pro": {
+        "string": "Xiaomi Band 7 Pro",
+        "width": 280,
+        "height": 456,
+        "radius": 28,
+        "preview": {
+            "width": 0,
+            "height": 0,
+            "radius": 0
+        }
+    },
+    "xiaomi_band_8": {
+        "string": "Xiaomi Band 8",
+        "width": 192,
+        "height": 490,
+        "radius": 90,
+        "preview": {
+            "width": 0,
+            "height": 0,
+            "radius": 0
+        }
+    },
+    "xiaomi_band_8_pro": {
+        "string": "Xiaomi Band 8 Pro",
+        "width": 336,
+        "height": 480,
+        "radius": 28,
+        "preview": {
+            "width": 0,
+            "height": 0,
+            "radius": 0
+        }
+    },
+    "xiaomi_band_9": {
+        "string": "Xiaomi Band 9",
+        "width": 192,
+        "height": 490,
+        "radius": 90,
+        "preview": {
+            "width": 0,
+            "height": 0,
+            "radius": 0
+        }
+    },
+    "70mai_saphir": {
+        "string": "70mai Saphir",
+        "width": 368,
+        "height": 448,
+        "radius": 60,
+        "preview": {
+            "width": 0,
+            "height": 0,
+            "radius": 0
+        }
+    }
+}
