@@ -455,6 +455,13 @@
    <addaction name="actionPaste"/>
    <addaction name="actionDelete"/>
    <addaction name="separator"/>
+   <addaction name="actionAlignLeft"/>
+   <addaction name="actionAlignTop"/>
+   <addaction name="actionAlignRight"/>
+   <addaction name="actionAlignBottom"/>
+   <addaction name="actionAlignHorizontal"/>
+   <addaction name="actionAlignVertical"/>
+   <addaction name="separator"/>
    <addaction name="actionZoom_In"/>
    <addaction name="actionZoom_Out"/>
    <addaction name="separator"/>
@@ -879,6 +886,72 @@
   <action name="actionExport">
    <property name="text">
     <string>Export...</string>
+   </property>
+  </action>
+  <action name="actionAlignLeft">
+   <property name="icon">
+    <iconset theme="align-horizontal-left"/>
+   </property>
+   <property name="text">
+    <string>AlignLeft</string>
+   </property>
+   <property name="toolTip">
+    <string>Align Left</string>
+   </property>
+  </action>
+  <action name="actionAlignTop">
+   <property name="icon">
+    <iconset theme="align-vertical-top"/>
+   </property>
+   <property name="text">
+    <string>AlignTop</string>
+   </property>
+   <property name="toolTip">
+    <string>Align Top</string>
+   </property>
+  </action>
+  <action name="actionAlignRight">
+   <property name="icon">
+    <iconset theme="align-horizontal-right"/>
+   </property>
+   <property name="text">
+    <string>AlignRight</string>
+   </property>
+   <property name="toolTip">
+    <string>Align Right</string>
+   </property>
+  </action>
+  <action name="actionAlignBottom">
+   <property name="icon">
+    <iconset theme="align-vertical-bottom"/>
+   </property>
+   <property name="text">
+    <string>AlignBottom</string>
+   </property>
+   <property name="toolTip">
+    <string>Align Bottom</string>
+   </property>
+  </action>
+  <action name="actionAlignVertical">
+   <property name="icon">
+    <iconset theme="align-vertical-center"/>
+   </property>
+   <property name="text">
+    <string>AlignVertical</string>
+   </property>
+   <property name="toolTip">
+    <string>Align Vertical</string>
+   </property>
+  </action>
+  <action name="actionAlignHorizontal">
+   <property name="icon">
+    <iconset theme="align-horizontal-center"/>
+   </property>
+   <property name="text">
+    <string>AlignHorizontal</string>
+   </property>
+   <property name="toolTip">
+    <string>Align Horizontal</string>
    </property>
   </action>
  </widget>

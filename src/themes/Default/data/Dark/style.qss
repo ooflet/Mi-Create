@@ -245,7 +245,7 @@ QToolButton:pressed#canvasDecoration-button {
     background-color: palette(highlight)
 }
 
-QToolButton:checked {
+QToolButton:checked#canvasDecoration-button {
     background-color: palette(highlight)   
 }
 

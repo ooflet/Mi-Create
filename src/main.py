@@ -1,10 +1,6 @@
 # Mi Create
 # ooflet <ooflet@proton.me>
 
-# TODO
-# Put documentation on code, its a wasteland out there
-# In-line AOD editing (through a toggle)
-
 import logging
 import traceback
 import os
@@ -33,7 +29,7 @@ import gettext
 
 from PyQt6.QtWidgets import (QInputDialog, QMessageBox, QApplication, QProgressBar,
                              QDialogButtonBox, QFileDialog, QWidget, QVBoxLayout,
-                             QFrame, QColorDialog, QFontDialog, QLabel, QListWidgetItem,
+                             QFrame, QColorDialog, QFontDialog, QLabel, QListWidgetItem, QToolButton,
                              QAbstractItemView, QSplashScreen, QDialog, QUndoView, QCheckBox, QHBoxLayout)
 from PyQt6.QtGui import QIcon, QPixmap, QDesktopServices, QDrag, QImage, QPainter, QFontDatabase, QFont
 from PyQt6.QtCore import Qt, QSettings, QSize, QUrl, pyqtSignal
@@ -56,7 +52,7 @@ from utils.dialog import CoreDialog, MultiFieldDialog
 from utils.theme import Theme
 from utils.updater import Updater
 from utils.history import History, CommandAddWidget, CommandDeleteWidget, CommandPasteWidget, CommandModifyWidgetLayer, \
-    CommandModifyProperty, CommandModifyPosition
+    CommandModifyProperty, CommandModifyPosition, CommandChangeTheme
 from utils.exporter import FprjConverter
 from widgets.canvas import Canvas, ObjectIcon
 from widgets.explorer import Explorer
@@ -569,18 +565,17 @@ class WatchfaceEditor(QMainWindow):
                     project["canvas"].clearSelected()
 
             self.updateProperties(False)
+
             if currentProject is None or tabName == "Project XML":
                 self.setIconState(False)
                 self.clearExplorer()
                 self.reloadImages(None)
-                return
-
-            if currentProject.get("canvas") is not None:
+            elif currentProject.get("canvas") is not None:
                 self.setIconState(False)
                 self.selectionDebounce = False
                 self.Explorer.updateExplorer(currentProject["project"])
                 logging.info("Explorer updated")
-                thread = threading.Thread(target=lambda: self.reloadImages(currentProject["project"].imageFolder))
+                thread = threading.Thread(target=lambda: self.reloadImages(currentProject["project"].getImageFolder()))
                 thread.start()
             else:
                 self.setIconState(True)
@@ -625,7 +620,7 @@ class WatchfaceEditor(QMainWindow):
             if currentProject == None or not currentProject.get("project"):
                 return
 
-            self.openFolder(currentProject["project"].imageFolder)
+            self.openFolder(currentProject["project"].getImageFolder())
 
         def addResource():
             currentProject = self.getCurrentProject()
@@ -639,15 +634,10 @@ class WatchfaceEditor(QMainWindow):
             if not files[0]:
                 return
 
-            for file in files[0]:
-                destFile = os.path.join(currentProject["project"].imageFolder, os.path.basename(file))
-                if os.path.isfile(destFile):
-                    self.showDialog("info", f"File {destFile} already exists!")
-                else:
-                    shutil.copyfile(file, destFile)
+            currentProject["project"].addResource(files[0])
 
             currentProject["canvas"].clearSelected()
-            self.reloadImages(currentProject["project"].imageFolder)
+            self.reloadImages(currentProject["project"].getImageFolder())
 
         def reloadResource():
             currentProject = self.getCurrentProject()
@@ -655,7 +645,7 @@ class WatchfaceEditor(QMainWindow):
             if currentProject == None or not currentProject.get("project"):
                 return
 
-            self.reloadImages(currentProject["project"].imageFolder)
+            self.reloadImages(currentProject["project"].getImageFolder())
 
         self.statusBar().setContentsMargins(4, 4, 4, 4)
 
@@ -734,7 +724,7 @@ class WatchfaceEditor(QMainWindow):
 
                 elif property == "widget_bitmap":
                     pixmap = QPixmap()
-                    pixmap.load(os.path.join(currentProject["project"].imageFolder, value))
+                    pixmap.load(os.path.join(currentProject["project"].getImageFolder(), value))
 
                     # set widget size to image size
                     currentItem.setProperty("widget_size_width", pixmap.width())
@@ -764,6 +754,7 @@ class WatchfaceEditor(QMainWindow):
                     currentProject["canvas"].selectObject(value)
                 else:
                     self.propertiesWidget.clearOnRefresh = False
+                    currentProject["canvas"].imageFolder = currentProject["project"].getImageFolder()
                     success, userFacingReason, debugReason = currentProject["canvas"].reloadObject(widgetName, currentItem)
 
                     if success:
@@ -893,8 +884,6 @@ class WatchfaceEditor(QMainWindow):
                                         self.settings["Canvas"]["ShowDeviceOutline"]["value"])
                 self.Explorer.updateExplorer(currentProject["project"])
 
-                print(currentProject["project"].data)
-
                 if not success:
                     self.showDialog("error", userFacingMessage, debugMessage)
                     return
@@ -986,7 +975,7 @@ class WatchfaceEditor(QMainWindow):
 
             widgetList = []
             for item in itemList:
-                widgetList.append([currentProject["project"].getWidget(item.data(0)), int(item.zValue())])
+                widgetList.append([currentProject["project"].getWidget(item.data(0))])
 
             command = CommandDeleteWidget(widgetList, commandFunc, f"Delete objects through ModifyProjectData command")
             self.History.undoStack.push(command)
@@ -1126,8 +1115,8 @@ class WatchfaceEditor(QMainWindow):
     def createNewWorkspace(self, project):
         # projects are technically "tabs"
         self.previousSelected = None
-        if self.projects.get(project.directory):
-            self.ui.workspace.setCurrentIndex(self.ui.workspace.indexOf(self.projects[project.directory]['canvas']))
+        if self.projects.get(project.getDirectory()):
+            self.ui.workspace.setCurrentIndex(self.ui.workspace.indexOf(self.projects[project.getDirectory()]['canvas']))
             return
 
         def propertyChange(objectName, propertyName, propertyValue):
@@ -1204,6 +1193,85 @@ class WatchfaceEditor(QMainWindow):
         canvas.onObjectChange.connect(propertyChange)
         canvas.onObjectPosChange.connect(posChange)
 
+        canvasLayout = QVBoxLayout(canvas)
+        canvasLayout.setContentsMargins(20, 20, 20, 20)
+
+        toolButtonLayout = QHBoxLayout()
+        toolButtonLayout.setContentsMargins(0, 0, 0, 0)
+
+        insertButton = QToolButton(self)
+        insertButton.setObjectName("canvasDecoration-button")
+        insertButton.setFixedSize(40, 25)
+        insertButton.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
+        insertButton.setMenu(self.ui.menuInsert)
+        insertButton.setIcon(QIcon().fromTheme("insert-object"))
+        insertButton.setIconSize(QSize(18, 18))
+        insertButton.setToolTip("Create Widget")
+
+        def changeTheme(theme):
+            currentProject = self.getCurrentProject()
+            currentProject["project"].setTheme(theme)
+            
+            self.updateProperties(False)
+            self.selectionDebounce = False
+            self.Explorer.updateExplorer(currentProject["project"])
+            logging.info("Explorer updated")
+            currentProject["canvas"].loadObjects(currentProject["project"],
+                                        self.settings["Canvas"]["Snap"]["value"],
+                                        self.settings["Canvas"]["Interpolation"]["value"],
+                                        self.settings["Canvas"]["ClipDeviceShape"]["value"],
+                                        self.settings["Canvas"]["ShowDeviceOutline"]["value"])
+            thread = threading.Thread(target=lambda: self.reloadImages(currentProject["project"].getImageFolder()))
+            thread.start()
+
+            if theme == "aod":
+                aodButton.setChecked(True)
+            else:
+                aodButton.setChecked(False)
+
+        def aodToggle():
+            if aodButton.isChecked():
+                command = CommandChangeTheme("default", "aod", changeTheme, f"Change theme to aod")
+            else:
+                command = CommandChangeTheme("aod", "default", changeTheme, f"Change theme to aod")
+            
+            self.History.undoStack.push(command)
+            
+        aodButton = QToolButton(self)
+        aodButton.setObjectName("canvasDecoration-button")
+        aodButton.setCheckable(True)
+        aodButton.setFixedSize(25, 25)
+        aodButton.setIcon(QIcon().fromTheme("watchface-aod"))
+        aodButton.clicked.connect(aodToggle)
+
+        def previewToggle():
+            if previewButton.isChecked():
+                previewButton.setIcon(QIcon().fromTheme("media-playback-pause"))
+            else:
+                previewButton.setIcon(QIcon().fromTheme("media-playback-start"))
+
+        previewButton = QToolButton(self)
+        previewButton.setObjectName("canvasDecoration-button")
+        previewButton.setCheckable(True)
+        previewButton.setFixedSize(25, 25)
+        previewButton.setIcon(QIcon().fromTheme("media-playback-start"))
+        previewButton.clicked.connect(previewToggle)
+
+        menuButton = QToolButton(self)
+        menuButton.setObjectName("canvasDecoration-button")
+        menuButton.setCheckable(True)
+        menuButton.setFixedSize(25, 25)
+        menuButton.setIcon(QIcon().fromTheme("view-more"))
+
+        canvasLayout.addLayout(toolButtonLayout)
+        canvasLayout.addStretch()
+
+        toolButtonLayout.addWidget(insertButton)
+        toolButtonLayout.addWidget(aodButton)
+        toolButtonLayout.addStretch()
+        toolButtonLayout.addWidget(previewButton)
+        toolButtonLayout.addWidget(menuButton)
+
         # Add Icons
         icon = QIcon().fromTheme("project-icon")
 
@@ -1216,7 +1284,7 @@ class WatchfaceEditor(QMainWindow):
                                          self.settings["Canvas"]["ShowDeviceOutline"]["value"])
 
         if success[0]:
-            self.projects[project.directory] = {
+            self.projects[project.getDirectory()] = {
                 "type": "workspace",
                 "canvas": canvas,
                 "project": project,
@@ -1233,7 +1301,7 @@ class WatchfaceEditor(QMainWindow):
             name = os.path.basename(project.name)
 
             index = self.ui.workspace.addTab(widget, icon, name)
-            self.ui.workspace.setTabToolTip(index, project.directory)
+            self.ui.workspace.setTabToolTip(index, project.getDirectory())
             self.ui.workspace.setCurrentIndex(index)
             canvas.setFrameShape(QFrame.Shape.NoFrame)
 
@@ -1242,7 +1310,7 @@ class WatchfaceEditor(QMainWindow):
                 self.selectionDebounce = False
                 self.Explorer.updateExplorer(project)
                 logging.info("Explorer updated")
-                thread = threading.Thread(target=lambda: self.reloadImages(project.imageFolder))
+                thread = threading.Thread(target=lambda: self.reloadImages(project.getImageFolder()))
                 thread.start()
                 self.show()
 
@@ -1365,7 +1433,7 @@ class WatchfaceEditor(QMainWindow):
         # Check if file was selected
         if file:
             newProject = FprjProject()
-            create = newProject.fromBlank(file, self.WatchData.modelID[str(watchModel)], projectName)
+            create = newProject.createBlank(file, self.WatchData.modelID[str(watchModel)], projectName)
             if create[0]:
                 try:
                     self.createNewWorkspace(newProject)
@@ -1374,13 +1442,13 @@ class WatchfaceEditor(QMainWindow):
                     if recentProjectList == None:
                         recentProjectList = []
 
-                    path = os.path.normpath(newProject.dataPath)
+                    path = os.path.normpath(newProject.getPath())
 
                     if [os.path.basename(path), path] in recentProjectList:
                         recentProjectList.pop(recentProjectList.index([os.path.basename(path), path]))
 
                     recentProjectList.append(
-                        [os.path.basename(newProject.dataPath), os.path.normpath(newProject.dataPath)])
+                        [os.path.basename(path), path])
 
                     storedSettings.setValue("recentProjects", recentProjectList)
                 except Exception as e:
@@ -1411,7 +1479,7 @@ class WatchfaceEditor(QMainWindow):
             logging.debug(f"openProject failed to open project {projectLocation}: isfile failed!")
             return False
 
-        load = project.fromExisting(projectLocation)
+        load = project.load(projectLocation)
         if load[0]:
             try:
                 self.createNewWorkspace(project)
@@ -1469,7 +1537,7 @@ class WatchfaceEditor(QMainWindow):
             if currentProject.get("project"):
                 success, message = currentProject["project"].save()
                 if success:
-                    self.statusBar().showMessage(_("Project saved at ") + currentProject["project"].dataPath, 2000)
+                    self.statusBar().showMessage(_("Project saved at ") + currentProject["project"].getPath(), 2000)
                     self.fileChanged = False
                     currentProject["hasFileChanged"] = False
                 else:
@@ -1493,7 +1561,7 @@ class WatchfaceEditor(QMainWindow):
         def exportFprj():
             exportDialog.deleteLater()
             if exportDialog.exportFormat.currentText() == "GMFProject (wfDef.json)":
-                result = FprjConverter(currentProject["project"].directory, exportDialog.exportLocation.text(), currentProject["project"].getDeviceType()).make()
+                result = FprjConverter(currentProject["project"].getDirectory(), exportDialog.exportLocation.text(), currentProject["project"].getDeviceType()).make()
                 if not result:
                     return
 
@@ -1572,7 +1640,7 @@ class WatchfaceEditor(QMainWindow):
                 self.showDialog("error", _("Failed to build watchface! ") + extracted_error)
                 return
 
-            fileLocation = str.split(os.path.basename(currentProject["project"].dataPath), ".")[0] + ".face"
+            fileLocation = str.split(os.path.basename(currentProject["project"].getPath()), ".")[0] + ".face"
             self.statusBar().showMessage(_("Watchface built successfully at ") + f"{compileDirectory}\\{fileLocation}",
                                          3000)
 
@@ -1582,10 +1650,10 @@ class WatchfaceEditor(QMainWindow):
         self.statusBar().addPermanentWidget(text, 0)
         self.statusBar().addPermanentWidget(progressBar, 1)
 
-        compileDirectory = os.path.join(os.path.dirname(currentProject["project"].dataPath), "output")
+        compileDirectory = os.path.join(os.path.dirname(currentProject["project"].getPath()), "output")
         output = []
 
-        process = currentProject["project"].compile(currentProject["project"].dataPath, compileDirectory,
+        process = currentProject["project"].compile(currentProject["project"].getPath(), compileDirectory,
                                                     "compiler/compile.exe")
         process.readyReadStandardOutput.connect(lambda: output.append(bytearray(process.readAll()).decode('utf-8', 'backslashreplace')))
         process.finished.connect(success)
@@ -1613,11 +1681,11 @@ class WatchfaceEditor(QMainWindow):
             return
 
         projectString = currentProject["project"].toString()
-        if self.projects.get(currentProject["project"].dataPath):
+        if self.projects.get(currentProject["project"].getPath()):
             self.ui.workspace.setCurrentIndex(
                 self.ui.workspace.indexOf(self.projects[currentProject["path"]]["editor"]))
             return
-        self.createNewCodespace("Project XML", currentProject["project"].dataPath, projectString, XMLLexer)
+        self.createNewCodespace("Project XML", currentProject["project"].getPath(), projectString, XMLLexer)
 
     def showColorDialog(self):
         color = QColorDialog.getColor(Qt.white, self, "Select Color")

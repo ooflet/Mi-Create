@@ -102,3 +102,16 @@ class CommandModifyPosition(QUndoCommand):
 
     def undo(self):
         self.commandFunc(self.prevPos)
+
+class CommandChangeTheme(QUndoCommand):
+    def __init__(self, previousTheme, currentTheme, commandFunc, description):
+        super(CommandChangeTheme, self).__init__(description)
+        self.previousTheme = previousTheme
+        self.currentTheme = currentTheme
+        self.commandFunc = commandFunc
+
+    def redo(self):
+        self.commandFunc(self.currentTheme)
+
+    def undo(self):
+        self.commandFunc(self.previousTheme)

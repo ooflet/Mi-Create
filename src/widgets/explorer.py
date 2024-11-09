@@ -79,5 +79,6 @@ class Explorer(QTreeWidget):
         if project.getAllWidgets() != None:
             for x in project.getAllWidgets():
                 createItem(x) 
+        
             
         self.expandAll()

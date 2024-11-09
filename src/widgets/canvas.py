@@ -208,35 +208,11 @@ class Canvas(QGraphicsView):
         self.graphicsScene = Scene()
         self.graphicsScene.setSceneRect(0,0,self.deviceSize[0],self.deviceSize[1])
 
-        self.drawDecorations()
-
         self.setScene(self.graphicsScene)
 
     def fireObjectPositionChanged(self):
         self.scene().updatePosMap()
         self.onObjectPosChange.emit()
-
-    def drawDecorations(self):
-        mainLayout = QVBoxLayout(self)
-        mainLayout.setContentsMargins(20, 20, 20, 20)
-
-        toolButtonLayout = QHBoxLayout()
-        toolButtonLayout.setContentsMargins(0, 0, 0, 0)
-
-        insertButton = QToolButton(self)
-        insertButton.setObjectName("canvasDecoration-button")
-        insertButton.setFixedSize(40, 25)
-        insertButton.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
-        insertButton.setMenu(self.mainWindowUI.menuInsert)
-        insertButton.setIcon(QIcon().fromTheme("insert-object"))
-        insertButton.setIconSize(QSize(18, 18))
-        insertButton.setToolTip("Create Widget")
-
-        mainLayout.addLayout(toolButtonLayout)
-        mainLayout.addStretch()
-
-        toolButtonLayout.addWidget(insertButton)
-        toolButtonLayout.addStretch()
 
     def mousePressEvent(self, event):
         if not any(isinstance(item, BaseWidget) for item in self.items(event.pos())):
@@ -651,7 +627,7 @@ class Canvas(QGraphicsView):
             # status, user facing message, debug info
             return False, f"Widget '{item.getProperty('widget_name')}' has malformed data or is corrupt", f"Canvas failed to create object {item.getProperty('widget_name')}:\n {traceback.format_exc()}"
 
-    def loadObjects(self, project, snap=None, interpolation=None, clip=True, outline=False):
+    def loadObjects(self, project, snap=None, interpolation=None, clip=True, outline=False, loadAod=False):
         self.frame = DeviceFrame(self.deviceSize, clip)
         
         if interpolation == None:
@@ -667,35 +643,34 @@ class Canvas(QGraphicsView):
         # device representation shows the device as an image behind the watchface
         # why? no reason
         #self.deviceRep = DeviceRepresentation(project.getDeviceType(), interpolation)
-        if project.widgets != None:
-            self.scene().clear()
-            self.widgets.clear()
-            #self.scene().addItem(self.deviceRep)
-            self.scene().addItem(self.frame)
 
-            if outline:
-                self.deviceOutline = DeviceOutline(self.deviceSize)
-                self.scene().addItem(self.deviceOutline)
- 
-            self.imageFolder = project.imageFolder
+        self.scene().clear()
+        self.widgets.clear()
+        #self.scene().addItem(self.deviceRep)
+        self.scene().addItem(self.frame)
 
-            self.scene().originPositons = {}
-
-            widgets = project.getAllWidgets()
-            if type(widgets) == list:
-                for index, widget in enumerate(widgets):    
-                    result, userFacingReason, debugReason = self.createWidgetFromData(index, widget, snap, interpolation)
-                    self.scene().originPositions[widget.getProperty("widget_name")] = [int(widget.getProperty("widget_pos_x")), int(widget.getProperty("widget_pos_y"))]
-                    if not result:
-                        return False, userFacingReason, debugReason
-                self.scene().updatePosMap()
-                return True, "Success", ""
-            else:
-                return False, "Widgets not in list!", ""
-            
-        else:
-            self.scene().addItem(self.frame)
+        if project.getAllWidgets() == []:
             return True, "Success", ""
+
+        if outline:
+            self.deviceOutline = DeviceOutline(self.deviceSize)
+            self.scene().addItem(self.deviceOutline)
+
+        self.imageFolder = project.getImageFolder()
+
+        self.scene().originPositons = {}
+
+        widgets = project.getAllWidgets()
+        if type(widgets) == list:
+            for index, widget in enumerate(widgets):    
+                result, userFacingReason, debugReason = self.createWidgetFromData(index, widget, snap, interpolation)
+                self.scene().originPositions[widget.getProperty("widget_name")] = [int(widget.getProperty("widget_pos_x")), int(widget.getProperty("widget_pos_y"))]
+                if not result:
+                    return False, userFacingReason, debugReason
+            self.scene().updatePosMap()
+            return True, "Success", ""
+        else:
+            return False, "Widgets not in list!", ""
         
     def reloadObject(self, objectName, widget):
         # loads a single object without reloading every object in the canvas
@@ -826,6 +801,8 @@ class ImageWidget(BaseWidget):
     def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name):
         super().__init__(posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name)
         self.imageItems = []
+        self.isNumeric = False
+        self.isAnimatable = False
         self.setPos(posX, posY)
 
     def addImage(self, qPixmap, posX, posY, spacing, isAntialiased):
@@ -843,6 +820,7 @@ class ImageWidget(BaseWidget):
         self.setRect(0, 0, width, qPixmap.height())
 
     def addAnimatedImage(self, imagelist, isAntialiased):
+        self.isAnimatable = True
         initialFrame = imagelist[0]
 
         self.animatedImageList = imagelist

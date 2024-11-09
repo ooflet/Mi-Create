@@ -36,14 +36,11 @@ class ProjectTools:
 
 class FprjProject:  
     def __init__(self):
-        self.data = None
-        self.widgets = None
         self.watchData = WatchData()
 
         self.name = None
-        self.directory = None
-        self.dataPath = None
-        self.imageFolder = None
+        self.currentTheme = "default"
+        self.themes = {}
 
         self.deviceIds = {
             "0": "xiaomi_color",
@@ -228,7 +225,7 @@ class FprjProject:
             }
         }
 
-    def fromBlank(self, path, device, name):
+    def createBlank(self, path, device, name, theme="default"):
         try:
             template = self.watchFileBlank
             template["FaceProject"]["@DeviceType"] = str(device)
@@ -239,60 +236,112 @@ class FprjProject:
                 xml_string = xmltodict.unparse(template, pretty=True)
                 fprj.write(xml_string)
 
-            self.data = template
-            self.widgets = template["FaceProject"]["Screen"].get("Widget")
-
             self.name = f"{name}.fprj"
-            self.directory = os.path.dirname(path)
-            self.dataPath = os.path.join(folder, f"{name}.fprj")
-            self.imageFolder = os.path.join(folder, "images")
+
+            self.themes[theme] = {
+                "directory": os.path.dirname(path),
+                "path": os.path.join(folder, f"{name}.fprj"),
+                "data": template,
+                "widgets": template["FaceProject"]["Screen"].get("Widget"),
+                "imageFolder": os.path.join(folder, "images")
+            }
 
             return True, os.path.join(folder, f"{name}.fprj")
         except Exception as e:
             return False, str(e), traceback.format_exc()
         
-    def fromExisting(self, path):
+    def createAod(self):
+        data = deepcopy(self.themes["aod"]["data"])
+
+        self.createBlank(self.themes["default"]["directory"], self.deviceIds.get(str(self.themes[self.currentTheme]["data"]["FaceProject"]["@DeviceType"])), "AOD", "aod")
+        
+        # restore data
+        self.themes["aod"]["data"] = data
+        self.themes["aod"]["widgets"] = self.themes["aod"]["data"]["FaceProject"]["Screen"]["Widget"]
+
+    def load(self, path):
         projectDir = os.path.dirname(path)
+        
+        def processFprj(file):
+            source = file.read()
+            parse = xmltodict.parse(source)
+            if parse.get("FaceProject"):
+                # set widget to a list
+                if not parse["FaceProject"]["Screen"].get("Widget"):
+                    parse["FaceProject"]["Screen"]["Widget"] = []
+                if type(parse["FaceProject"]["Screen"]["Widget"]) == dict:
+                    parse["FaceProject"]["Screen"]["Widget"] = [parse["FaceProject"]["Screen"]["Widget"]]
+
+                # get rid of duplicate items
+                seen = set()
+                duplicatesRemoved = []
+                
+                for widget in parse["FaceProject"]["Screen"]["Widget"]:
+                    # convert shape
+                    if widget["@Shape"] == "29": # legacy circle progress
+                        widget["@Shape"] = "42" # circle progress plus 
+
+                    name = widget.get("@Name")
+                    if name not in seen:
+                        seen.add(name)
+                        duplicatesRemoved.append(widget)
+
+                parse["FaceProject"]["Screen"]["Widget"] = duplicatesRemoved
+                return parse
+            else:
+                return False
+
         try:
-            with open(path, "r", encoding="utf8") as project:
-                xmlsource = project.read()
-                parse = xmltodict.parse(xmlsource)
-                if parse.get("FaceProject"):
-                    imagesDir = os.path.join(projectDir, "images")
+            imagesDir = os.path.join(projectDir, "images")
+            
+            with open(path, "r", encoding="utf8") as file:
+                parse = processFprj(file)
 
-                    # set widget to a list
-                    if not parse["FaceProject"]["Screen"].get("Widget"):
-                        parse["FaceProject"]["Screen"]["Widget"] = []
-                    if type(parse["FaceProject"]["Screen"]["Widget"]) == dict:
-                        parse["FaceProject"]["Screen"]["Widget"] = [parse["FaceProject"]["Screen"]["Widget"]]
+            if not parse:
+                return False, "Invalid/corrupted fprj project!", "FaceProject root not found"
+            
+            self.name = os.path.basename(path)
+            self.themes["default"] = {
+                "directory": projectDir,
+                "path": path,
+                "data": parse,
+                "widgets": parse["FaceProject"]["Screen"]["Widget"],
+                "imageFolder": imagesDir
+            }
 
-                    # get rid of duplicate items
-                    seen = set()
-                    duplicatesRemoved = []
-                    
-                    for widget in parse["FaceProject"]["Screen"]["Widget"]:
-                        name = widget.get("@Name")
-                        if name not in seen:
-                            seen.add(name)
-                            duplicatesRemoved.append(widget)
+            aodDir = os.path.join(projectDir, "AOD")
 
-                    parse["FaceProject"]["Screen"]["Widget"] = duplicatesRemoved
-
-                    self.data = parse
-                    self.widgets = parse["FaceProject"]["Screen"]["Widget"]
-
-                    for widget in self.widgets:
-                        if widget["@Shape"] == "29": # legacy circle progress
-                            widget["@Shape"] = "42" # circle progress plus 
-                    
-                    self.name = os.path.basename(path)
-                    self.directory = projectDir
-                    self.dataPath = path
-                    self.imageFolder = imagesDir
-
-                    return True, "Success"
+            if os.path.isdir(aodDir):
+                for file in os.listdir(aodDir):
+                    if file.endswith(".fprj"):
+                        aodFile = file
+                        break
                 else:
-                    return False, "Invalid/corrupted fprj project!", "FaceProject root not found"
+                    return False, "no AOD project found!", ""
+                    
+                with open(os.path.join(aodDir, aodFile), "r", encoding="utf8") as file:
+                    aodParse = processFprj(file)
+
+                self.themes["aod"] = {
+                    "directory": aodDir,
+                    "path": os.path.join(aodDir, aodFile),
+                    "data": aodParse,
+                    "widgets": aodParse["FaceProject"]["Screen"]["Widget"],
+                    "imageFolder": os.path.join(aodDir, "images")
+                }
+            else:
+                template = self.watchFileBlank
+                template["FaceProject"]["@DeviceType"] = str(self.themes["default"]["data"]["FaceProject"]["@DeviceType"])
+                self.themes["aod"] = {
+                    "directory": "",
+                    "path": "",
+                    "data": template,
+                    "widgets": template["FaceProject"]["Screen"].get("Widget"),
+                    "imageFolder": ""
+                }
+                
+            return True, "Success"
+        
         except Exception as e:
             return False, str(e), traceback.format_exc()
         
@@ -305,18 +354,30 @@ class FprjProject:
         process.start()
         process.waitForFinished()
         print(process.readAllStandardOutput())
-        
+
+    def getDirectory(self):
+        return self.themes[self.currentTheme]["directory"]
+    
+    def getImageFolder(self):
+        return self.themes[self.currentTheme]["imageFolder"]
+    
+    def getPath(self):
+        return self.themes[self.currentTheme]["path"]
+
     def getDeviceType(self):
-        return self.deviceIds.get(str(self.data["FaceProject"]["@DeviceType"]))
+        return self.deviceIds.get(str(self.themes[self.currentTheme]["data"]["FaceProject"]["@DeviceType"]))
         
-    def getAllWidgets(self, type=None, theme=None): # type and theme are for theme support someday over the rainbow
+    def getAllWidgets(self):
         widgetList = []
-        for widget in self.widgets:
+
+        for widget in self.themes[self.currentTheme]["widgets"]:
             widgetList.append(FprjWidget(self, widget))
+        
         return widgetList
 
     def getWidget(self, name):
-        widget = list(filter(lambda widget: widget["@Name"] == name, self.widgets))
+        widget = list(filter(lambda widget: widget["@Name"] == name, self.themes[self.currentTheme]["widgets"]))
+        
         if len(widget) == 0:
             return None
         else:
@@ -335,34 +396,50 @@ class FprjProject:
         else:
             widget["@Y"] = posY
 
-        self.widgets.append(widget)
+        self.themes[self.currentTheme]["widgets"].append(widget)
         
     def deleteWidget(self, widget):
-        for index, item in enumerate(self.widgets):
+        for index, item in enumerate(self.themes[self.currentTheme]["widgets"]):
             if item["@Name"] == widget.getProperty("widget_name"):
-                self.widgets.pop(index) 
+                self.themes[self.currentTheme]["widgets"].pop(index) 
+        
 
     def restoreWidget(self, widget, index):
-        self.widgets.insert(index, widget.data)
+        self.themes[self.currentTheme]["widgets"].insert(index, widget.data)
 
     def appendWidget(self, widget):
-        self.widgets.append(widget.data)
+        self.themes[self.currentTheme]["widgets"].append(widget.data)
+
+    def addResource(self, files):
+        if self.currentTheme == "aod" and self.themes["aod"]["imageFolder"] == "" or os.path.isdir(self.themes["aod"]["imageFolder"]) is not True:
+            self.createAod()
+
+        for file in files:
+            destFile = os.path.join(self.themes[self.currentTheme]["imageFolder"], os.path.basename(file))
+            if os.path.isfile(destFile):
+                QMessageBox.information(None, "Resource Importer", f"File {destFile} already exists!")
+            else:
+                shutil.copyfile(file, destFile)
+
+    def setTheme(self, theme):
+        self.currentTheme = theme
 
     def setWidgetLayer(self, widget, layerIndex):        
-        self.widgets.pop(self.widgets.index(widget.data))
+        self.themes[self.currentTheme]["widgets"].pop(self.themes[self.currentTheme]["widgets"].index(widget.data))
         if layerIndex == "top":
-            self.widgets.append(widget.data)
+            self.themes[self.currentTheme]["widgets"].append(widget.data)
         else:
-            self.widgets.insert(layerIndex, widget.data)
+            self.themes[self.currentTheme]["widgets"].insert(layerIndex, widget.data)
     
     def getTitle(self):
-        return self.data["FaceProject"]["Screen"]["@Title"]
+        return self.themes[self.currentTheme]["data"]["FaceProject"]["Screen"]["@Title"]
     
     def getThumbnail(self):
-        return self.data["FaceProject"]["Screen"]["@Bitmap"]
+        return self.themes[self.currentTheme]["data"]["FaceProject"]["Screen"]["@Bitmap"]
 
     def setWidgetPos(self, name, posX, posY):
-        widget = list(filter(lambda widget: widget["@Name"] == name, self.widgets))
+        widget = list(filter(lambda widget: widget["@Name"] == name, self.themes[self.currentTheme]["widgets"]))
+
         if len(widget) == 0:
             return "Widget does not exist!"
         else:
@@ -370,21 +447,30 @@ class FprjProject:
             widget[0]["@Y"] = posY
         
     def setTitle(self, value):
-        self.data["FaceProject"]["Screen"]["@Title"] = value
+        self.themes[self.currentTheme]["data"]["FaceProject"]["Screen"]["@Title"] = value
 
     def setThumbnail(self, value):
-        self.data["FaceProject"]["Screen"]["@Bitmap"] = value
+        self.themes[self.currentTheme]["data"]["FaceProject"]["Screen"]["@Bitmap"] = value
 
     def toString(self):
-        xml_string = xmltodict.unparse(self.data, pretty=True)
+        xml_string = xmltodict.unparse(self.themes[self.currentTheme]["data"], pretty=True)
         return xml_string
 
     def save(self):
-        xml_string = xmltodict.unparse(self.data, pretty=True)
+        xml_string = xmltodict.unparse(self.themes[self.currentTheme]["data"], pretty=True)
 
         try:
-            with open(self.dataPath, "w", encoding="utf8") as file:
+            with open(self.themes[self.currentTheme]["path"], "w", encoding="utf8") as file:
                 file.write(xml_string)
+
+            if self.themes["aod"]["directory"] == "" or os.path.isfile(self.themes["aod"]["path"]) is not True:
+                self.createAod()
+
+            if self.themes.get("aod"):
+                aod_xml_string = xmltodict.unparse(self.themes["aod"]["data"], pretty=True)
+                with open(self.themes["aod"]["path"], "w", encoding="utf8") as file:
+                    file.write(aod_xml_string)
+            
             return True, "success"
             
         except Exception as e:
@@ -497,7 +583,7 @@ class XiaomiProject:
         <Watchface width="" height="" editable="false" id="" _recolorEnable="" recolorTable="" compressMethod="" name="">
             <Resources>
             </Resources>
-            <Theme type="normal" name="default" bg="" isPhotoAlbumWatchface="false" preview="">
+            <Theme type="default" name="default" bg="" isPhotoAlbumWatchface="false" preview="">
             </Theme>
         </Watchface>
         """
@@ -547,7 +633,7 @@ class XiaomiProject:
 
 class GMFProject:
     def __init__(self):
-        self.data = None
+        self.themes[self.currentTheme]["data"] = None
         self.widgets = None
         self.widgetsAOD = None
         self.watchData = WatchData()
@@ -595,7 +681,7 @@ class GMFProject:
             widget["name"] = f"{widget['type']}-{str(nameList.count(widget['type']))}"
             nameList.append(widget["type"])
 
-    def fromExisting(self, location):
+    def load(self, location):
         projectDir = os.path.dirname(location)
         try:
             with open(location, "r", encoding="utf8") as project:
@@ -615,7 +701,7 @@ class GMFProject:
                     self.dataPath = location
                     self.imageFolder = imagesDir
 
-                    self.data = projectJson
+                    self.themes[self.currentTheme]["data"] = projectJson
                     self.widgets = projectJson["elementsNormal"]
                     self.widgetsAOD = projectJson["elementsAod"]
 
@@ -627,7 +713,7 @@ class GMFProject:
             return False, str(e), traceback.format_exc()
         
     def getDeviceType(self):
-        return self.data["deviceType"]
+        return self.themes[self.currentTheme]["data"]["deviceType"]
     
     def getWidget(self, name):
         widget = list(filter(lambda widget: widget["name"] == name, self.widgets))
@@ -643,21 +729,21 @@ class GMFProject:
         return widgetList
     
     def getTitle(self):
-        return self.data["name"]
+        return self.themes[self.currentTheme]["data"]["name"]
     
     def getThumbnail(self):
-        return self.data["previewImg"]
+        return self.themes[self.currentTheme]["data"]["previewImg"]
 
 class GMFWidget:
     def __init__(self, project, data):
         self.project = project
-        self.data = data
+        self.themes[self.currentTheme]["data"] = data
     
     def removeAssociation(self):
         # by default, the data that is passed through in the data argument is linked to the source data list/dict
         # removing association means that the data is instead independent as a seperate list
         # so modifications to the widget wont get applied over to the original data list
-        self.data = deepcopy(self.data)
+        self.themes[self.currentTheme]["data"] = deepcopy(self.themes[self.currentTheme]["data"])
 
     def getProperty(self, property):
         property = [k for k, v in self.project.propertyIds.items() if v == property]
@@ -671,7 +757,7 @@ class GMFWidget:
             return
 
         if property == "type":
-            return self.project.widgetIds.get(self.data.get(property))
+            return self.project.widgetIds.get(self.themes[self.currentTheme]["data"].get(property))
         
         elif property == "width":
             return "50"
@@ -686,13 +772,13 @@ class GMFWidget:
             return "0"
 
         elif property == "imageList":
-            bitmapList = self.data[property]
-            bitmapListCopy = deepcopy(self.data[property])
+            bitmapList = self.themes[self.currentTheme]["data"][property]
+            bitmapListCopy = deepcopy(self.themes[self.currentTheme]["data"][property])
 
-            if self.data["type"] == "widge_imagelist":
-                if self.data.get("imageIndexList"):   
+            if self.themes[self.currentTheme]["data"]["type"] == "widge_imagelist":
+                if self.themes[self.currentTheme]["data"].get("imageIndexList"):   
                     for index, item in enumerate(bitmapList):
-                        merge = [self.data["imageIndexList"][index], item]
+                        merge = [self.themes[self.currentTheme]["data"]["imageIndexList"][index], item]
                         bitmapListCopy[index] = merge
                 else:
                     for index, item in enumerate(bitmapList):
@@ -700,7 +786,7 @@ class GMFWidget:
             
             return bitmapListCopy
         else:
-            return self.data.get(property)
+            return self.themes[self.currentTheme]["data"].get(property)
 
     def setProperty(self, property, value):
         property = [k for k, v in self.project.propertyIds.items() if v == property][0]
@@ -710,6 +796,6 @@ class GMFWidget:
                     item[0] = f"({item[0]})" # add brackets
                     value[index] = ":".join(item)
             value = "|".join(value)
-        self.data[property] = value
+        self.themes[self.currentTheme]["data"][property] = value
 
     
