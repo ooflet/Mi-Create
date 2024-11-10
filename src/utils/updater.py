@@ -58,9 +58,7 @@ class Updater(QObject):
 
     def startInstall(self):
         self.progressBar.setRange(0, 0)
-        self.text.setText("Installing...")
-        subprocess.run([self.temp_file, "/verysilent"])
         self.installComplete = True
         self.progressBar.deleteLater()
         self.text.deleteLater()
-        self.statusBar.showMessage("Update complete! Please reopen the app to launch the new version.", 1000) 
+        subprocess.run(self.temp_file)

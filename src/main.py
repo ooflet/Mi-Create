@@ -1194,7 +1194,7 @@ class WatchfaceEditor(QMainWindow):
         canvas.onObjectPosChange.connect(posChange)
 
         canvasLayout = QVBoxLayout(canvas)
-        canvasLayout.setContentsMargins(20, 20, 20, 20)
+        canvasLayout.setContentsMargins(20, 18, 20, 20)
 
         toolButtonLayout = QHBoxLayout()
         toolButtonLayout.setContentsMargins(0, 0, 0, 0)
@@ -1778,6 +1778,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('filename', nargs='?', default=False)
     parser.add_argument('--reset', action='store_true')
+    parser.add_argument('--setWindowSizePreview', action='store_true')
     args = parser.parse_args()
 
     app = QApplication(sys.argv)
@@ -1809,6 +1810,11 @@ if __name__ == "__main__":
             splash.close()
             if result == False:
                 editor.showWelcome()
+        elif args.setWindowSizePreview:
+            splash.close()
+            
+            editor.showWelcome()
+            editor.resize(1280, 720)
         else:
             splash.close()
             editor.showWelcome()
