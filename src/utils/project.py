@@ -228,7 +228,7 @@ class FprjProject:
     def createBlank(self, path, device, name, theme="default"):
         try:
             template = self.watchFileBlank
-            template["FaceProject"]["@DeviceType"] = str(device)
+            template["FaceProject"]["@DeviceType"] = list(self.deviceIds.keys())[list(self.deviceIds.values()).index(device)]
             folder = os.path.join(path, name)
             os.makedirs(os.path.join(folder, "images"))
             os.makedirs(os.path.join(folder, "output"))
