@@ -107,7 +107,6 @@ class PropertiesWidget(QWidget):
             self.ignorePropertyChange = False
 
     def addProperty(self, srcProperty, name, valueWidget, parent=None, inputSinker=None) -> QTreeWidgetItem:
-        print(srcProperty)
         if parent != None:
             item = QTreeWidgetItem(parent, [_(name), ""])
 
@@ -289,7 +288,7 @@ class PropertiesWidget(QWidget):
         comboBox.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         comboBox.addItems(items)
         if selected:
-            comboBox.setCurrentIndex(int(selected))
+            comboBox.setItemText(selected)
         comboBox.wheelEvent = wheelEvent
         comboBox.currentTextChanged.connect(onChanged)
         return comboBox
@@ -386,7 +385,6 @@ class PropertiesWidget(QWidget):
                             if len(imageList) > index:
                                 image = imageList[index]
                                 if image != None and len(image) > 1 and isinstance(image, list):
-                                    print(image)
                                     indexInput.setValue(int(image[0])) 
                                     imageInput.setCurrentText(image[1])             
                                 imageInput.currentTextChanged.connect(lambda event, indexInput=self.imageCategories[index][2], imageInput=self.imageCategories[index][1], index=index: imagesChanged(indexInput.text(), imageInput.currentText(), index))
@@ -494,7 +492,6 @@ class PropertiesWidget(QWidget):
                                     inputWidget = self.createComboBox(self.sourceList[str(device)], x["string"], key, True)
                                     break
                         else:
-                            print(self.sourceList)
                             inputWidget = self.createComboBox(self.sourceList[str(device)], False, key, True)
                             break   
 

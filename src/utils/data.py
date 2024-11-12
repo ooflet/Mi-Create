@@ -236,8 +236,6 @@ class WatchData:
         for deviceId, sources in sources.items():
             self.modelSourceData[deviceId] = sources
             self.modelSourceList[deviceId] = [source["string"] for source in sources]
-
-        print(self.modelSourceList)
             
 
     def updateDataFiles(self, compiler, deviceInfo):

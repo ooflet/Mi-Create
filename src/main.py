@@ -636,8 +636,12 @@ class WatchfaceEditor(QMainWindow):
 
             currentProject["project"].addResource(files[0])
 
-            currentProject["canvas"].clearSelected()
             self.reloadImages(currentProject["project"].getImageFolder())
+            currentProject["canvas"].loadObjects(currentProject["project"],
+                                                         self.settings["Canvas"]["Snap"]["value"],
+                                                        self.settings["Canvas"]["Interpolation"]["value"],
+                                                        self.settings["Canvas"]["ClipDeviceShape"]["value"],
+                                                        self.settings["Canvas"]["ShowDeviceOutline"]["value"])
 
         def reloadResource():
             currentProject = self.getCurrentProject()
@@ -695,7 +699,7 @@ class WatchfaceEditor(QMainWindow):
             def updateProperty(widgetName, property, value):
                 if currentProject["canvas"].getObject(widgetName).isSelected() is not True:
                     currentProject["canvas"].selectObject(widgetName)
-                    
+
                 if property == "num_source" or property == "imagelist_source" or property == "widget_visibility_source":
                     if value == "None":
                         currentItem.setProperty(property, 0)
@@ -710,9 +714,6 @@ class WatchfaceEditor(QMainWindow):
                         else:
                             self.showDialog("warning", "Invalid source name!")
                             return
-                elif property == "num_alignment":
-                    alignmentList = ["Left", "Center", "Right"]
-                    currentItem.setProperty(property, str(alignmentList.index(value)))
                 elif property == "widget_name":
                     if value == widgetName:
                         return
@@ -790,6 +791,7 @@ class WatchfaceEditor(QMainWindow):
         currentProject = self.getCurrentProject()
         if item and currentProject["project"].getWidget(item) != None:
             if self.propertiesWidget.clearOnRefresh:
+                print("clear", item)
                 if isinstance(currentProject["project"], FprjProject):
                     self.propertiesWidget.loadProperties(self.propertiesFprjJson[itemType], currentProject["project"], item,
                                                         self.resourceImages, currentProject["project"].getDeviceType())
@@ -797,9 +799,11 @@ class WatchfaceEditor(QMainWindow):
                     self.propertiesWidget.loadProperties(self.propertiesGMFJson[itemType], currentProject["project"], item,
                                                         self.resourceImages, currentProject["project"].getDeviceType())
             else:
+                print("no clear")
                 self.propertiesWidget.clearOnRefresh = True
         else:
             if self.propertiesWidget.clearOnRefresh:
+                print("clear")
                 self.propertiesWidget.clearProperties()
 
     def setupDialogs(self):
@@ -975,7 +979,7 @@ class WatchfaceEditor(QMainWindow):
 
             widgetList = []
             for item in itemList:
-                widgetList.append([currentProject["project"].getWidget(item.data(0))])
+                widgetList.append([currentProject["project"].getWidget(item.data(0)), int(item.zValue())])
 
             command = CommandDeleteWidget(widgetList, commandFunc, f"Delete objects through ModifyProjectData command")
             self.History.undoStack.push(command)
@@ -1786,6 +1790,8 @@ if __name__ == "__main__":
     splash = QSplashScreen(QPixmap(":/Images/splash.png"))
     splash.show()
     
+    QFontDatabase.addApplicationFont(":/Fonts/Inter.ttf")
+
     def onException(exc_type, exc_value, exc_traceback):
         exception = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
         errString = "Internal error! Please report as a bug.\n\n"+exception

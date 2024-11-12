@@ -228,7 +228,7 @@ class FprjProject:
     def createBlank(self, path, device, name, theme="default"):
         try:
             template = self.watchFileBlank
-            template["FaceProject"]["@DeviceType"] = list(self.deviceIds.keys())[list(self.deviceIds.values()).index(device)]
+            template["FaceProject"]["@DeviceType"] = list(self.deviceIds.keys())[list(self.deviceIds.values()).index(str(device))]
             folder = os.path.join(path, name)
             os.makedirs(os.path.join(folder, "images"))
             os.makedirs(os.path.join(folder, "output"))
@@ -244,6 +244,14 @@ class FprjProject:
                 "data": template,
                 "widgets": template["FaceProject"]["Screen"].get("Widget"),
                 "imageFolder": os.path.join(folder, "images")
+            }
+
+            self.themes["aod"] = {
+                "directory": "",
+                "path": "",
+                "data": template,
+                "widgets": template["FaceProject"]["Screen"].get("Widget"),
+                "imageFolder": ""
             }
 
             return True, os.path.join(folder, f"{name}.fprj")
@@ -299,7 +307,7 @@ class FprjProject:
 
             if not parse:
                 return False, "Invalid/corrupted fprj project!", "FaceProject root not found"
-            
+
             self.name = os.path.basename(path)
             self.themes["default"] = {
                 "directory": projectDir,
@@ -495,14 +503,45 @@ class FprjProject:
     
 class FprjWidget:
     def __init__(self, project, data):
-        self.project = project
+        self.project: FprjProject = project
         self.data = data
+        self.previewData = {
+            "Hour": "10",
+            "Hour High": "1",
+            "Hour Low": "0",
+            "Minute": "08",
+            "Minute High": "0",
+            "Minute Low": "8",
+            "Second": "56",
+            "Second High": "5",
+            "Second Low": "6",
+            "Day": "18",
+            "Month": "10",
+            "Heart rate": "68",
+            "Weather temp": "24", # celcius
+            "Weather temp (C)": "24",
+            "Weather temp (F)": "75",
+            "Current step count": "7645",
+            "Active Calorie": "465",
+            "Battery percent": "80",
+            "Battery percente": "80"
+        }
     
     def removeAssociation(self):
         # by default, the data that is passed through in the data argument is linked to the source data list/dict
         # removing association means that the data is instead independent as a seperate list
         # so modifications to the widget wont get applied over to the original data list
         self.data = deepcopy(self.data)
+
+    def getPreviewNumber(self):
+        dataSource = self.getProperty("num_source")
+        sourceData = self.project.watchData.modelSourceData[self.project.getDeviceType()]
+        dataSourceName = [source["string"] for source in sourceData if int(source["id_fprj"]) == int(dataSource)]
+
+        if dataSourceName == []:
+            return
+
+        return self.previewData[dataSourceName[0]]
 
     def getProperty(self, property):
         property = [k for k, v in self.project.propertyIds.items() if v == property]
@@ -533,6 +572,9 @@ class FprjWidget:
                         bitmapList[index] = split
 
             return bitmapList
+        elif property == "@Alignment":
+            alignment = ["Left", "Center", "Right"]
+            return alignment[int(self.data.get(property))]
         else:
             return self.data.get(property)
 
@@ -544,6 +586,9 @@ class FprjWidget:
                     item[0] = f"({item[0]})" # add brackets
                     value[index] = ":".join(item)
             value = "|".join(value)
+        elif property == "@Alignment":
+            alignment = ["Left", "Center", "Right"]
+            value = alignment.index(value)
         self.data[property] = value
 
     
