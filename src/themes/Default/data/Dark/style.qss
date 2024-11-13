@@ -5,10 +5,6 @@
 
  */
 
-* {
-    font: 10pt, Inter
-}
-
 QWidget#windowTitleBar {
     background-color: palette(base);
 }
