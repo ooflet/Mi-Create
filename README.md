@@ -10,9 +10,8 @@
 ![window](images/window.png)
 
 ## Features:
-- Shockingly simple & good looking user interface
+- Simple & good looking user interface
 - Easy to learn (especially for EasyFace users)
-- Uses native libraries, meaning its really fast
 - Multilingual
 
 ## Installation:

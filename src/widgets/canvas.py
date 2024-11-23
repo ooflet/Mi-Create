@@ -9,6 +9,7 @@ import sys
 import traceback
 import logging
 from pprint import pprint
+from datetime import datetime
 
 sys.path.append("..")
 from utils.project import WatchData
@@ -16,7 +17,7 @@ from utils.project import WatchData
 from PyQt6.QtCore import pyqtSignal, QPointF, QSize, QRect, QTimer, Qt
 from PyQt6.QtGui import QPainter, QPainterPath, QPen, QColor, QPixmap, QIcon, QBrush
 from PyQt6.QtWidgets import (QApplication, QGraphicsPathItem, QGraphicsScene, QGraphicsSceneMouseEvent, QGraphicsView, QGraphicsItem, QGraphicsRectItem, 
-                            QToolButton, QGraphicsPixmapItem, QGraphicsEllipseItem, QMessageBox, QRubberBand, QGraphicsOpacityEffect, QHBoxLayout, QVBoxLayout)
+                            QToolButton, QGraphicsPixmapItem, QGraphicsEllipseItem, QMessageBox, QRubberBand, QGraphicsDropShadowEffect, QHBoxLayout, QVBoxLayout)
 
 from utils.menu import ContextMenu
 
@@ -303,9 +304,9 @@ class Canvas(QGraphicsView):
     def onObjectDeleted(self, name, widget):
         self.objectDeleted.emit(name)
 
-    def createAnalogDisplay(self, transparency, name, pos, zValue, backgroundImage, hourHandImage, minuteHandImage, secondHandImage, itemAnchors, snap, interpolationStyle):
+    def createAnalogDisplay(self, transparency, name, pos, zValue, backgroundImage, hourHandImage, minuteHandImage, secondHandImage, itemAnchors, smoothHr, smoothMin, snap, interpolationStyle):
         # Create widget
-        widget = AnalogWidget(int(pos.x()), int(pos.y()), int(pos.width()), int(pos.height()), self.frame, self, QColor(255,255,255,0), transparency, name)
+        widget = AnalogWidget(int(pos.x()), int(pos.y()), int(pos.width()), int(pos.height()), self.frame, self, QColor(255,255,255,0), transparency, name, smoothHr, smoothMin)
         widget.setZValue(zValue)
         widget.setData(1, "widget_analog") # Item ID
         widget.snap = snap
@@ -364,7 +365,7 @@ class Canvas(QGraphicsView):
         pixmap = QPixmap()
         pixmap.load(os.path.join(self.imageFolder, image))
 
-        widget.addImage(pixmap, 0, 0, 0, interpolationStyle)
+        widget.addImage(pixmap, 0, 0, interpolationStyle)
         
         return widget
 
@@ -380,10 +381,8 @@ class Canvas(QGraphicsView):
         animationName = name.split("_")
 
         if animationName[0] == "anim":
-            framesec = animationName[1].strip("[]").split("@")[1]
             animImageList = [QPixmap(os.path.join(self.imageFolder, image[1])) for image in bitmapList]
             widget.addAnimatedImage(animImageList, interpolationStyle)
-            widget.playAnimation(framesec)
             return widget
 
         # displayImage is a list with 2 values, image index & image
@@ -401,56 +400,25 @@ class Canvas(QGraphicsView):
             if len(displayImage) >= 2:
                 image = QPixmap()
                 image.load(os.path.join(self.imageFolder, displayImage[1]))
-                widget.addImage(image, 0, 0, 0, interpolationStyle)
+                widget.addImage(image, 0, 0, interpolationStyle)
             else:
                 widget.representNoImage()
         else:
-            widget.addImage(QPixmap(), 0, 0, 0, interpolationStyle)
+            widget.addImage(QPixmap(), 0, 0, interpolationStyle)
             
         return widget
 
-    def createDigitalNumber(self, transparency, name, rect, zValue, numList, digits, spacing, alignment, hideZeros, snap, interpolationStyle, previewNumber=None):
-        widget = ImageWidget(rect.x(), rect.y(), rect.width(), rect.height(), self.frame, self, QColor(255,255,255,0), transparency, name)
+    def createDigitalNumber(self, transparency, name, rect, zValue, source, numList, digits, spacing, alignment, hideZeros, snap, interpolationStyle, previewNumber=None):
+        widget = NumberWidget(rect.x(), rect.y(), rect.width(), rect.height(), self.frame, self, QColor(255,255,255,0), transparency, name)
         widget.setZValue(zValue)
         widget.setData(1, "widget_imagelist") # Item ID
         widget.snap = snap
 
-        if previewNumber != None:
-            previewNumber = str(previewNumber)
-            cropped = previewNumber[-int(digits):] # crop number
-            padded = cropped.zfill(int(digits)) # pad number with zeroes
-
-        for x in range(int(digits)):
-            # Get QPixmap from file string
-            if len(numList) >= 10:
-                image = QPixmap()
-                if previewNumber != None:
-                    image.load(os.path.join(self.imageFolder, numList[int(padded[x])]))
-                else:
-                    image.load(os.path.join(self.imageFolder, numList[x % len(numList)]))
-
-                if hideZeros and previewNumber != None and int(padded[x]) == 0:
-                    widget.addBlankImage()
-                else:
-                    if hideZeros:
-                        hideZeros = False
-                    
-                    if alignment == "Left":
-                        num = len([item for item in widget.imageItems if item != ""])
-                        widget.addImage(image, (image.size().width() * num) + (int(spacing) * num), 0, int(spacing), interpolationStyle)
-                    elif alignment == "Center":
-                        # check if this is the first item by checking if there are no other items
-                        items = [item for item in widget.imageItems if item != ""]
-                        # get pos x by multiplying all empty items by width and dividing by 2
-                        initialItemPosX = (len([item for item in widget.imageItems if item == ""]) * image.size().width()) / 2
-                        if items == []:
-                            widget.addImage(image, initialItemPosX, 0, int(spacing), interpolationStyle)
-                        else:
-                            widget.addImage(image, initialItemPosX + (image.size().width() * len(items)), 0, int(spacing), interpolationStyle)
-                    elif alignment == "Right":
-                        widget.addImage(image, (image.size().width() * x) + (int(spacing) * x), 0, int(spacing), interpolationStyle)
-            else:
-                widget.representNoImage()
+        # Get QPixmap from file string
+        if len(numList) >= 10:
+            widget.addNumbers(previewNumber, self.imageFolder, source, numList, digits, spacing, alignment, hideZeros, interpolationStyle)
+        else:
+            widget.representNoImage()
                 
         return widget
 
@@ -476,7 +444,7 @@ class Canvas(QGraphicsView):
     def createWidgetFromData(self, index, item, snap, interpolation):
         widget = None
 
-        # qt calls this "smooth transformation" (????)
+        # qt calls this "smooth transformation"
         if interpolation == "Bilinear":
             interpolation = True
         else:
@@ -522,6 +490,8 @@ class Canvas(QGraphicsView):
                             "y": item.getProperty("analog_second_anchor_y"),
                         },
                     },
+                    item.getProperty("analog_hour_smooth_motion"),
+                    item.getProperty("analog_minute_smooth_motion"),
                     snap,
                     interpolation
                 )
@@ -602,7 +572,7 @@ class Canvas(QGraphicsView):
                 )
 
             elif item.getProperty("widget_type") == "widget_num":
-                    widget = self.createDigitalNumber(
+                widget = self.createDigitalNumber(
                     item.getProperty("widget_alpha"),
                     item.getProperty("widget_name"),
                     QRect(
@@ -612,6 +582,7 @@ class Canvas(QGraphicsView):
                         int(item.getProperty("widget_size_height"))
                     ),
                     index,
+                    item.getSourceName(),
                     item.getProperty("widget_bitmaplist"),
                     item.getProperty("num_digits"),
                     item.getProperty("num_spacing"),
@@ -827,8 +798,75 @@ class ImageWidget(BaseWidget):
     def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name):
         super().__init__(posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name)
         self.imageItems = []
-        self.isNumeric = False
         self.isAnimatable = False
+        self.animatedImageItem = None
+        self.animRepeats = 0
+        self.totalRepeats = 0
+        self.setPos(posX, posY)
+
+    def addImage(self, qPixmap, posX, posY, isAntialiased):
+        if qPixmap.isNull():
+            self.representNoImage()
+            return
+        
+        item = QGraphicsPixmapItem(qPixmap, self)
+        item.setPos(posX, posY)
+        if isAntialiased:
+            item.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
+
+        self.setRect(0, 0, qPixmap.width(), qPixmap.height())
+
+    def addAnimatedImage(self, imagelist, isAntialiased):
+        self.isAnimatable = True
+        initialFrame = imagelist[0]
+
+        self.animatedImageList = imagelist
+        self.animatedImageItem = QGraphicsPixmapItem(initialFrame, self)
+        self.setRect(0, 0, initialFrame.width(), initialFrame.height())
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.advanceFrame)
+        if isAntialiased:
+            self.animatedImageItem.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
+
+    def advanceFrame(self):
+        if self.totalRepeats != 0:
+            if self.currentFrame + 1 > len(self.animatedImageList) - 1:
+                self.animRepeats += 1
+
+            if self.animRepeats >= self.totalRepeats:
+                self.stopPreview()
+        
+        self.currentFrame = (self.currentFrame + 1) % len(self.animatedImageList)
+        self.animatedImageItem.setPixmap(self.animatedImageList[self.currentFrame])
+
+    def startPreview(self, framesec, repeatAmounts):
+        if self.animatedImageItem == None:
+            return
+        
+        self.animRepeats = 0
+        self.totalRepeats = int(repeatAmounts)
+        self.currentFrame = 0
+        interval = int(framesec)
+        self.timer.start(interval)
+
+    def stopPreview(self):
+        if self.animatedImageItem == None:
+            return
+        
+        self.timer.stop()
+        self.animatedImageItem.setPixmap(self.animatedImageList[0])
+
+    def representNoImage(self):
+        self.color = QColor(255, 0, 0, 100)
+
+class NumberWidget(BaseWidget):
+    def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name):
+        super().__init__(posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name)
+        self.imageItems = []
+        self.numList = []
+        self.timer = QTimer()
+        self.timer.setInterval(100)
+        self.timer.timeout.connect(self.updatePreviewNumber)
         self.setPos(posX, posY)
 
     def addBlankImage(self):
@@ -848,37 +886,90 @@ class ImageWidget(BaseWidget):
         width = ( qPixmap.width() * len(self.imageItems) ) + ( spacing * len(self.imageItems) )
         self.setRect(0, 0, width, qPixmap.height())
 
-    def addAnimatedImage(self, imagelist, isAntialiased):
-        self.isAnimatable = True
-        initialFrame = imagelist[0]
-
-        self.animatedImageList = imagelist
-        self.animatedImageItem = QGraphicsPixmapItem(initialFrame, self)
-        self.setRect(0, 0, initialFrame.width(), initialFrame.height())
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.advanceFrame)
-        if isAntialiased:
-            self.animatedImageItem.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
-
-    def advanceFrame(self):
-        self.currentFrame = (self.currentFrame + 1) % len(self.animatedImageList)
-        self.animatedImageItem.setPixmap(self.animatedImageList[self.currentFrame])
-
-    def playAnimation(self, framesec):
-        if self.animatedImageItem == None:
-            return
+    def addNumbers(self, previewNumber, imageFolder, source, numList, digits, spacing, alignment, hideZeros, interpolationStyle, previewFromSource=False):
+        # store arguments for later
+        if not previewFromSource:
+            self.previewNumber = previewNumber
+        self.imageFolder = imageFolder
+        self.source = source
+        self.numList = numList
+        self.digits = digits
+        self.spacing = spacing
+        self.alignment = alignment
+        self.hideZeros = hideZeros
+        self.interpolationStyle = interpolationStyle
         
-        self.currentFrame = 0
-        interval = int(framesec)
-        self.timer.start(interval)
+        self.clearImages()
 
-    def stopAnimation(self):
+        for x in range(int(digits)):
+            # Get QPixmap from file string
+            if len(numList) >= 10:
+                image = QPixmap()
+                if previewNumber != None:
+                    previewNumber = str(previewNumber)
+                    cropped = previewNumber[-int(digits):] # crop number
+                    previewNumber = cropped.zfill(int(digits)) # pad number with zeroes
+                    image.load(os.path.join(imageFolder, numList[int(previewNumber[x])]))
+                else:
+                    image.load(os.path.join(imageFolder, numList[x % len(numList)]))
+
+                if hideZeros and previewNumber != None and int(previewNumber[x]) == 0:
+                    self.addBlankImage()
+                else:
+                    if hideZeros:
+                        hideZeros = False
+                    
+                    if alignment == "Left":
+                        num = len([item for item in self.imageItems if item != ""])
+                        self.addImage(image, (image.size().width() * num) + (int(spacing) * num), 0, int(spacing), interpolationStyle)
+                    elif alignment == "Center":
+                        # check if this is the first item by checking if there are no other items
+                        items = [item for item in self.imageItems if item != ""]
+                        # get pos x by multiplying all empty items by width and dividing by 2
+                        initialItemPosX = (len([item for item in self.imageItems if item == ""]) * image.size().width()) / 2
+                        if items == []:
+                            self.addImage(image, initialItemPosX, 0, int(spacing), interpolationStyle)
+                        else:
+                            self.addImage(image, (image.size().width() + int(spacing)) * len(items) + initialItemPosX , 0, int(spacing), interpolationStyle)
+                    elif alignment == "Right":
+                        self.addImage(image, (image.size().width() * x) + (int(spacing) * x), 0, int(spacing), interpolationStyle)
+            else:
+                self.representNoImage()
+
+    def updatePreviewNumber(self):
+        now = datetime.now()
+        if self.source == "Hour":
+            self.addNumbers(now.strftime("%I"), self.imageFolder, self.source, self.numList, self.digits, self.spacing, self.alignment, self.hideZeros, self.interpolationStyle, True)
+        elif self.source == "Hour High":
+            self.addNumbers(now.strftime("%I")[0], self.imageFolder, self.source, self.numList, self.digits, self.spacing, self.alignment, self.hideZeros, self.interpolationStyle, True)
+        elif self.source == "Hour Low":
+            self.addNumbers(now.strftime("%I")[1], self.imageFolder, self.source, self.numList, self.digits, self.spacing, self.alignment, self.hideZeros, self.interpolationStyle, True)
+        elif self.source == "Minute":
+            self.addNumbers(now.strftime("%M"), self.imageFolder, self.source, self.numList, self.digits, self.spacing, self.alignment, self.hideZeros, self.interpolationStyle, True)
+        elif self.source == "Minute High":
+            self.addNumbers(now.strftime("%M")[0], self.imageFolder, self.source, self.numList, self.digits, self.spacing, self.alignment, self.hideZeros, self.interpolationStyle, True)
+        elif self.source == "Minute Low":
+            self.addNumbers(now.strftime("%M")[1], self.imageFolder, self.source, self.numList, self.digits, self.spacing, self.alignment, self.hideZeros, self.interpolationStyle, True)
+        elif self.source == "Second":
+            self.addNumbers(now.strftime("%S"), self.imageFolder, self.source, self.numList, self.digits, self.spacing, self.alignment, self.hideZeros, self.interpolationStyle, True)
+        elif self.source == "Day":
+            self.addNumbers(now.strftime("%d"), self.imageFolder, self.source, self.numList, self.digits, self.spacing, self.alignment, self.hideZeros, self.interpolationStyle, True)
+        elif self.source == "Month":
+            self.addNumbers(now.strftime("%m"), self.imageFolder, self.source, self.numList, self.digits, self.spacing, self.alignment, self.hideZeros, self.interpolationStyle, True)
+
+
+    def startPreview(self):
+        self.updatePreviewNumber()
+        self.timer.start()
+
+    def stopPreview(self):
         self.timer.stop()
-        self.animatedImageItem.setPixmap(self.animatedImageList[0])
+        self.addNumbers(self.previewNumber, self.imageFolder, self.source, self.numList, self.digits, self.spacing, self.alignment, self.hideZeros, self.interpolationStyle)
 
     def clearImages(self):
         for x in self.imageItems:
-            self.scene().removeItem(x)
+            if isinstance(x, str) is not True:
+                self.scene().removeItem(x)
         self.imageItems.clear()
 
     def representNoImage(self):
@@ -887,8 +978,14 @@ class ImageWidget(BaseWidget):
 class AnalogWidget(BaseWidget):
     # Widget for handling AnalogDisplays
     
-    def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name):
+    def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name, smoothHr, smoothMin):
         super().__init__(posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name)
+        self.smoothHr = smoothHr 
+        self.smoothMin = smoothMin 
+        self.smoothSec = False
+        self.timer = QTimer()
+        self.timer.setInterval(50)
+        self.timer.timeout.connect(self.updatePreviewHands)
         self.setPos(posX, posY)
 
     def addBackground(self, backgroundImage, bgX, bgY, antialiasing):
@@ -909,7 +1006,7 @@ class AnalogWidget(BaseWidget):
     def addMinuteHand(self, minHandImage, minHandX, minHandY, antialiasing):
         self.minHand = QGraphicsPixmapItem(minHandImage, self)
         self.minHand.setOffset(-int(minHandX), -int(minHandY))
-        self.minHand.setRotation(60)
+        self.minHand.setRotation(48)
         self.minHand.setPos(self.rect().width()/2, self.rect().height()/2)
         if antialiasing:
             self.minHand.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
@@ -917,10 +1014,50 @@ class AnalogWidget(BaseWidget):
     def addHourHand(self, hourHandImage, hrHandX, hrHandY, antialiasing):
         self.hrHand = QGraphicsPixmapItem(hourHandImage, self)
         self.hrHand.setOffset(-int(hrHandX), -int(hrHandY))
-        self.hrHand.setRotation(-60)
+        self.hrHand.setRotation(300)
         self.hrHand.setPos(self.rect().width()/2, self.rect().height()/2)
         if antialiasing:
             self.hrHand.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
+
+    def updatePreviewHands(self):
+        now = datetime.now()
+        if self.hrHand != None:
+            if self.smoothHr:
+                min = int(now.strftime("%M")) / 60
+                angle = (int(now.strftime("%I")) + min) / 12 * 360
+            else:
+                angle = int(now.strftime("%I")) / 12 * 360
+            self.hrHand.setRotation(angle)
+
+        if self.minHand != None:
+            if self.smoothMin:
+                sec = int(now.strftime("%S")) / 60
+                angle = (int(now.strftime("%M")) + sec) / 60 * 360
+            else:
+                angle = int(now.strftime("%M")) / 60 * 360
+
+            self.minHand.setRotation(angle)
+
+        if self.secHand != None:
+            if self.smoothSec:
+                msec = int(now.strftime("%f")) / 1000000
+                angle = (int(now.strftime("%S")) + msec)  / 60 * 360
+            else:
+                angle = int(now.strftime("%S")) / 60 * 360
+            self.secHand.setRotation(angle)
+
+    def startPreview(self):
+        self.timer.start()
+        self.updatePreviewHands()
+
+    def stopPreview(self):
+        self.timer.stop()
+        if self.hrHand != None:
+            self.hrHand.setRotation(300)
+        if self.minHand != None:
+            self.minHand.setRotation(48)
+        if self.secHand != None:
+            self.secHand.setRotation(0)
 
 class PointerWidget(BaseWidget):
     def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name):
@@ -940,7 +1077,6 @@ class ProgressArc(QGraphicsEllipseItem):
         super().__init__(posX, posY, width, height, parent)
         pen = QPen()
         pen.setWidth(thickness)
-        QPixmap.isNull
         if pathImage.isNull():
             pen.setColor(QColor(255, 0, 0, 100))    
         else:

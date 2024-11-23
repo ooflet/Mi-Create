@@ -18,6 +18,7 @@ import json
 import shutil
 import xmltodict
 
+from typing import List, Optional
 from pathlib import Path
 from pprint import pprint
 from copy import deepcopy
@@ -225,7 +226,12 @@ class FprjProject:
             }
         }
 
-    def createBlank(self, path, device, name, theme="default"):
+    def createBlank(self, path, device, name, theme="default") -> tuple[bool, str, Optional[str]]:
+        """
+        Creates a blank project in the specified path.
+
+        :return: True and path of the .fprj project if successful, otherwise False, short error message and traceback.
+        """
         try:
             template = self.watchFileBlank
             template["FaceProject"]["@DeviceType"] = list(self.deviceIds.keys())[list(self.deviceIds.values()).index(str(device))]
@@ -258,52 +264,75 @@ class FprjProject:
         except Exception as e:
             return False, str(e), traceback.format_exc()
         
-    def createAod(self):
+    def createAod(self) -> None:
+        """
+        Creates an AOD project. Will only work when a project is loaded.
+
+        The compiler handles AODs with a seperate project created in the current one.
+        """
+
+        # Before proper creation of an AOD, the project creates a temporary AOD theme
+        # Copy the data before applying the default template project
         data = deepcopy(self.themes["aod"]["data"])
 
+        # Create blank project in AOD location
         self.createBlank(self.themes["default"]["directory"], self.deviceIds.get(str(self.themes[self.currentTheme]["data"]["FaceProject"]["@DeviceType"])), "AOD", "aod")
         
-        # restore data
+        # Restore data
         self.themes["aod"]["data"] = data
         self.themes["aod"]["widgets"] = self.themes["aod"]["data"]["FaceProject"]["Screen"]["Widget"]
 
-    def load(self, path):
+    def processFprj(self, file) -> dict:
+        """
+        Process an Fprj project and parse it to a Python dict object.
+
+        :return: dict if success, otherwise False.
+        """
+        source = file.read()
+        parse = xmltodict.parse(source)
+        if parse.get("FaceProject"):
+            # set widget to a list
+            if not parse["FaceProject"]["Screen"].get("Widget"):
+                parse["FaceProject"]["Screen"]["Widget"] = []
+            if type(parse["FaceProject"]["Screen"]["Widget"]) == dict:
+                parse["FaceProject"]["Screen"]["Widget"] = [parse["FaceProject"]["Screen"]["Widget"]]
+
+            # get rid of duplicate items
+            seen = set()
+            duplicatesRemoved = []
+            
+            for widget in parse["FaceProject"]["Screen"]["Widget"]:
+                # convert shape
+                if widget["@Shape"] == "29": # legacy circle progress
+                    widget["@Shape"] = "42" # circle progress plus 
+
+                name = widget.get("@Name")
+                if name not in seen:
+                    seen.add(name)
+                    duplicatesRemoved.append(widget)
+
+            parse["FaceProject"]["Screen"]["Widget"] = duplicatesRemoved
+            return parse
+        else:
+            return False
+
+    def load(self, path) -> tuple[bool, str, Optional[str]]:
+        """
+        Loads an Fprj file and adds it to the project's theme list
+
+        The theme list contains the default (normal) theme and AOD.
+        This will eventually also contain other color themes.
+
+        :return: True and the success message, otherwise False, short error message and traceback.
+        """
+
         projectDir = os.path.dirname(path)
-        
-        def processFprj(file):
-            source = file.read()
-            parse = xmltodict.parse(source)
-            if parse.get("FaceProject"):
-                # set widget to a list
-                if not parse["FaceProject"]["Screen"].get("Widget"):
-                    parse["FaceProject"]["Screen"]["Widget"] = []
-                if type(parse["FaceProject"]["Screen"]["Widget"]) == dict:
-                    parse["FaceProject"]["Screen"]["Widget"] = [parse["FaceProject"]["Screen"]["Widget"]]
-
-                # get rid of duplicate items
-                seen = set()
-                duplicatesRemoved = []
-                
-                for widget in parse["FaceProject"]["Screen"]["Widget"]:
-                    # convert shape
-                    if widget["@Shape"] == "29": # legacy circle progress
-                        widget["@Shape"] = "42" # circle progress plus 
-
-                    name = widget.get("@Name")
-                    if name not in seen:
-                        seen.add(name)
-                        duplicatesRemoved.append(widget)
-
-                parse["FaceProject"]["Screen"]["Widget"] = duplicatesRemoved
-                return parse
-            else:
-                return False
 
         try:
             imagesDir = os.path.join(projectDir, "images")
             
             with open(path, "r", encoding="utf8") as file:
-                parse = processFprj(file)
+                parse = self.processFprj(file)
 
             if not parse:
                 return False, "Invalid/corrupted fprj project!", "FaceProject root not found"
@@ -328,7 +357,7 @@ class FprjProject:
                     return False, "no AOD project found!", ""
                     
                 with open(os.path.join(aodDir, aodFile), "r", encoding="utf8") as file:
-                    aodParse = processFprj(file)
+                    aodParse = self.processFprj(file)
 
                 self.themes["aod"] = {
                     "directory": aodDir,
@@ -354,6 +383,8 @@ class FprjProject:
             return False, str(e), traceback.format_exc()
         
     def fromBinary(self, outputDir, path, decompilerPath):
+        raise NotImplementedError
+
         logging.info("Decompiling project "+path)
         process = QProcess()
         process.setWorkingDirectory(outputDir)
@@ -363,19 +394,61 @@ class FprjProject:
         process.waitForFinished()
         print(process.readAllStandardOutput())
 
-    def getDirectory(self):
+    def getDirectory(self) -> str:
+        """
+        Returns a path to the containing folder/directory of the project.
+        
+        :return: The path to the directory as a string.
+        """
         return self.themes[self.currentTheme]["directory"]
     
-    def getImageFolder(self):
+    def getImageFolder(self) -> str:
+        """
+        Returns a path to the folder where images are stored.
+        
+        :return: The path to the directory as a string.
+        """
         return self.themes[self.currentTheme]["imageFolder"]
     
-    def getPath(self):
+    def getPath(self) -> str:
+        """
+        Returns a path to the fprj file.
+        
+        :return: The path to the file as a string.
+        """
         return self.themes[self.currentTheme]["path"]
 
-    def getDeviceType(self):
+    def getDeviceType(self) -> str:
+        """
+        Returns the device the project was made for out of:
+
+        "xiaomi_color"
+        "70mai_saphir"
+        "xiaomi_color_sport"
+        "xiaomi_color_2/s1/s2"
+        "xiaomi_watch_s1_pro"
+        "redmi/poco_watch"
+        "xiaomi_band_7_pro"
+        "redmi_watch_3"
+        "redmi_band_pro"
+        "xiaomi_band_8"
+        "redmi_watch_2_lite"
+        "xiaomi_band_8_pro"
+        "redmi_watch_3_active"
+        "xiaomi_watch_s3"
+        "redmi_watch_4"
+        "xiaomi_band_9"
+        
+        :return: The DeviceId.
+        """
         return self.deviceIds.get(str(self.themes[self.currentTheme]["data"]["FaceProject"]["@DeviceType"]))
         
-    def getAllWidgets(self):
+    def getAllWidgets(self) -> list:
+        """
+        Returns a list of FprjWidgets
+        
+        :return: A list of FprjWidgets
+        """
         widgetList = []
 
         for widget in self.themes[self.currentTheme]["widgets"]:
@@ -384,6 +457,11 @@ class FprjProject:
         return widgetList
 
     def getWidget(self, name):
+        """
+        Returns an FprjWidget from the name of the widget
+        
+        :return: An FprjWidget
+        """
         widget = list(filter(lambda widget: widget["@Name"] == name, self.themes[self.currentTheme]["widgets"]))
         
         if len(widget) == 0:
@@ -474,7 +552,7 @@ class FprjProject:
             if self.themes["aod"]["directory"] == "" or os.path.isfile(self.themes["aod"]["path"]) is not True:
                 self.createAod()
 
-            if self.themes.get("aod"):
+            if self.themes.get("aod") and self.themes["aod"]["path"] != "":
                 aod_xml_string = xmltodict.unparse(self.themes["aod"]["data"], pretty=True)
                 with open(self.themes["aod"]["path"], "w", encoding="utf8") as file:
                     file.write(aod_xml_string)
@@ -492,15 +570,6 @@ class FprjProject:
         process.start()
         return process
     
-    def decompile(self, path, location, compilerLocation):
-        logging.info("Decompiling project "+path)
-        process = QProcess()
-        process.setWorkingDirectory(location)
-        process.setProgram(compilerLocation)
-        process.setArguments(path)
-        process.start()
-        return process
-    
 class FprjWidget:
     def __init__(self, project, data):
         self.project: FprjProject = project
@@ -515,10 +584,14 @@ class FprjWidget:
             "Second": "56",
             "Second High": "5",
             "Second Low": "6",
-            "Day": "18",
-            "Month": "10",
+            "Day": "21",
+            "Day High": "2",
+            "Day Low": "1",
+            "Month": "05",
+            "Month High": "0",
+            "Month Low": "5",
             "Heart rate": "68",
-            "Weather temp": "24", # celcius
+            "Weather temp": "24", # celsius
             "Weather temp (C)": "24",
             "Weather temp (F)": "75",
             "Current step count": "7645",
@@ -533,16 +606,19 @@ class FprjWidget:
         # so modifications to the widget wont get applied over to the original data list
         self.data = deepcopy(self.data)
 
-    def getPreviewNumber(self):
+    def getSourceName(self):
         dataSource = self.getProperty("num_source")
-        sourceData = self.project.watchData.modelSourceData[self.project.getDeviceType()]
-        dataSourceName = [source["string"] for source in sourceData if int(source["id_fprj"]) == int(dataSource)]
+        modelSources = self.project.watchData.modelSourceData[self.project.getDeviceType()]
+        dataSourceName = [source["string"] for source in modelSources if int(source["id_fprj"]) == int(dataSource)]
 
         if dataSourceName == []:
             return
 
-        return self.previewData[dataSourceName[0]]
-
+        return dataSourceName[0]
+    
+    def getPreviewNumber(self):
+        return self.previewData.get(self.getSourceName())
+    
     def getProperty(self, property):
         property = [k for k, v in self.project.propertyIds.items() if v == property]
         

@@ -54,7 +54,7 @@ from utils.updater import Updater
 from utils.history import History, CommandAddWidget, CommandDeleteWidget, CommandPasteWidget, CommandModifyWidgetLayer, \
     CommandModifyProperty, CommandModifyPosition, CommandChangeTheme
 from utils.exporter import FprjConverter
-from widgets.canvas import Canvas, ObjectIcon
+from widgets.canvas import Canvas, ObjectIcon, ImageWidget, NumberWidget, AnalogWidget
 from widgets.explorer import Explorer
 from widgets.properties import PropertiesWidget
 from widgets.editor import Editor, XMLLexer
@@ -652,6 +652,7 @@ class WatchfaceEditor(QMainWindow):
             self.reloadImages(currentProject["project"].getImageFolder())
 
         self.statusBar().setContentsMargins(4, 4, 4, 4)
+        
 
         self.ui.resourceList.startDrag = startDrag
         self.ui.resourceSearch.textChanged.connect(search)
@@ -1116,7 +1117,7 @@ class WatchfaceEditor(QMainWindow):
 
             self.selectionDebounce = False
 
-    def createNewWorkspace(self, project):
+    def createNewWorkspace(self, project: FprjProject):
         # projects are technically "tabs"
         self.previousSelected = None
         if self.projects.get(project.getDirectory()):
@@ -1240,19 +1241,37 @@ class WatchfaceEditor(QMainWindow):
                 command = CommandChangeTheme("aod", "default", changeTheme, f"Change theme to aod")
             
             self.History.undoStack.push(command)
-            
+
+        def playAllPreviews():
+            for itemName, item in canvas.widgets.items():
+                if isinstance(item, ImageWidget):
+                    animationName = itemName.split("_")
+
+                    if animationName[0] == "anim":
+                        repeats = animationName[1].strip("[]").split("@")[0]
+                        framesec = animationName[1].strip("[]").split("@")[1]
+                        item.startPreview(framesec, repeats)
+
+                elif isinstance(item, NumberWidget) or isinstance(item, AnalogWidget):
+                    item.startPreview()
+
+        def previewToggle():
+            if previewButton.isChecked():
+                previewButton.setIcon(QIcon().fromTheme("media-playback-pause"))
+                playAllPreviews()
+            else:
+                previewButton.setIcon(QIcon().fromTheme("media-playback-start"))
+                for item in canvas.widgets.values():
+                    if isinstance(item, ImageWidget) or isinstance(item, NumberWidget) or isinstance(item, AnalogWidget):
+                        item.stopPreview()
+                    
+
         aodButton = QToolButton(self)
         aodButton.setObjectName("canvasDecoration-button")
         aodButton.setCheckable(True)
         aodButton.setFixedSize(25, 25)
         aodButton.setIcon(QIcon().fromTheme("watchface-aod"))
         aodButton.clicked.connect(aodToggle)
-
-        def previewToggle():
-            if previewButton.isChecked():
-                previewButton.setIcon(QIcon().fromTheme("media-playback-pause"))
-            else:
-                previewButton.setIcon(QIcon().fromTheme("media-playback-start"))
 
         previewButton = QToolButton(self)
         previewButton.setObjectName("canvasDecoration-button")
