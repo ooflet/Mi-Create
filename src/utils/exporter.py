@@ -114,7 +114,7 @@ class FprjConverter:
                     pointer_props = {
                         "Hour":   {"image": "HourHand_ImageName", "dataSrc": "0811", "maxValue": 24, "allAngle": 7200},
                         "Minute": {"image": "MinuteHand_Image",   "dataSrc": "1011", "maxValue": 60, "allAngle": 3600},
-                        "Second": {"image": "SecondHand_Image",   "dataSrc": "1811", "maxValue": 60, "allAngle": 3600},
+                        "Second": {"image": "SecondHand_Image",   "dataSrc": "1811", "maxValue": 60, "allAngle": 3600,  "interval": 16},
                     }
                     if bg_hand_image := widget.get("Background_ImageName"):
                         QMessageBox.warning(None, "fprjConverter", "Warning: Does not support rotatable background image: " + bg_hand_image)
@@ -127,17 +127,28 @@ class FprjConverter:
                         with Image.open(pointer_hand_image_path) as img:
                             pointer_hand_image_width = img.width
                             pointer_hand_image_height = img.height
+
+                        img_rx = int(widget.get(pointer + "Image_rotate_xc", 0))
+                        img_ry = int(widget.get(pointer + "Image_rotate_yc", 0))
                         elements.append({
                             "type": "widge_pointer",
-                            "x": 192 // 2 - pointer_hand_image_width // 2,
-                            "y": 490 // 2 - pointer_hand_image_height // 2,
+                            "x": int(widget.get("X", 0)) + int(widget.get("Height", 0)) // 2 - img_rx, 
+                            "y": int(widget.get("Y", 0)) + int(widget.get("Width", 0)) // 2 - img_ry,
                             "dataSrc": pointer_props[pointer]["dataSrc"],
                             "image": self.rm_subfix(pointer_hand_image),
                             "maxValue": pointer_props[pointer]["maxValue"],
                             "allAngle": pointer_props[pointer]["allAngle"],
-                            "imageRotateX": int(widget.get(pointer + "Image_rotate_xc", 0)),
-                            "imageRotateY": int(widget.get(pointer + "Image_rotate_yc", 0)),
+                            "imageRotateX": img_rx,
+                            "imageRotateY": img_ry,
+                            "pointerUnknow25" : 0,
+                            "pointerUnknow26" : 0,
                         })
+                        print(elements) 
+                        if "1811" in elements[-1].values():
+                           elements[-1].update({
+                               "interval" : pointer_props[pointer]["interval"],
+                           })
+
                     QMessageBox.warning(None, "fprjConverter", 
                     """Warning: EasyFace always assumes that the pointer is in the exact center of the screen.
                     You may need to adjust the pointer component's coordinates after this."""
@@ -216,7 +227,7 @@ class FprjConverter:
 
         info_dic["elementsNormal"] = _parse_elements(fprj_conf_file, bs_obj)
 
-        info_dic["elementsAod"] = {}
+        info_dic["elementsAod"] = []
 
         if self.fprj_info["aod"]:
             fprj_conf_file = self.fprj_info["aod"]["conf_file"]
