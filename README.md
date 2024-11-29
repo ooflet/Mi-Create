@@ -10,8 +10,12 @@
 ![window](images/window.png)
 
 ## Features:
-- Simple & good looking user interface
+- Simple & good looking 
 - Easy to learn (especially for EasyFace users)
+- Support for .fprj projects
+- Experimental support for Chinese GMF (wfDef.json) projects
+- Quick AOD creation
+- Live watchface preview
 - Multilingual
 
 ## Installation:

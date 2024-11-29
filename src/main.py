@@ -40,6 +40,7 @@ if platform.system() == "Windows":
 else:
     from PyQt6.QtWidgets import QMainWindow
 
+from shutil import which
 from pprint import pprint, pformat
 import xml.dom.minidom
 import configparser
@@ -191,7 +192,7 @@ class WatchfaceEditor(QMainWindow):
             logging.info("Saving Window State")
             self.saveWindowState()
             logging.info("Quitting")
-            event.accept()
+            sys.exit()
 
         fileChanged = False
 
@@ -701,7 +702,7 @@ class WatchfaceEditor(QMainWindow):
                 if currentProject["canvas"].getObject(widgetName).isSelected() is not True:
                     currentProject["canvas"].selectObject(widgetName)
 
-                if property == "num_source" or property == "imagelist_source" or property == "widget_visibility_source":
+                if property == "num_source" or property == "imagelist_source" or property == "widget_visibility_source" or property == "arc_source" or property == "arc_max_value_source":
                     if value == "None":
                         currentItem.setProperty(property, 0)
                     else:
@@ -1629,10 +1630,15 @@ class WatchfaceEditor(QMainWindow):
         if self.compiling:
             return
 
-        if platform.system() != "Windows":
-            self.showDialog("info", "The compiler only supports Windows. Linux support will be added soon.")
+        if platform.system() == "Darwin":
+            self.showDialog("info", "macOS compiler support will be added soon.")
             return
         
+        # check if wine exists if we're compiling on Linux
+        if platform.system() == "Linux" and which("wine") == None:
+            self.showDialog("error", _("Failed to compile project: Wine was not found."))
+            return
+
         result = self.showDialog("question", _("Save project before building?"), buttons=QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, defaultButton=QMessageBox.StandardButton.Yes)
 
         currentProject = self.getCurrentProject()
@@ -1649,18 +1655,22 @@ class WatchfaceEditor(QMainWindow):
 
         self.compiling = True
 
-        def success():
+        def success(output):
+            logging.debug(output)
             self.compiling = False
             progressBar.deleteLater()
             text.deleteLater()
 
-            if "Error:" in output[1]:
-                parts = output[1].split('\r\n')
-                # The desired error message is the first part
+            errors = [line for line in output if "Error:" in line]
 
-                extracted_error = parts[0]
+            if len(errors) >= 1:
+                for error in errors:
+                    parts = error.split('\r\n')
+                    # The desired error message is the first part
 
-                self.showDialog("error", _("Failed to build watchface! ") + extracted_error)
+                    extracted_error = parts[0]
+
+                    self.showDialog("error", _("Failed to build watchface! ") + extracted_error)
                 return
 
             fileLocation = str.split(os.path.basename(currentProject["project"].getPath()), ".")[0] + ".face"
@@ -1676,10 +1686,10 @@ class WatchfaceEditor(QMainWindow):
         compileDirectory = os.path.join(os.path.dirname(currentProject["project"].getPath()), "output")
         output = []
 
-        process = currentProject["project"].compile(currentProject["project"].getPath(), compileDirectory,
+        process = currentProject["project"].compile(platform.system(), currentProject["project"].getPath(), compileDirectory,
                                                     "compiler/compile.exe")
         process.readyReadStandardOutput.connect(lambda: output.append(bytearray(process.readAll()).decode('utf-8', 'backslashreplace')))
-        process.finished.connect(success)
+        process.finished.connect(lambda: success(output))
 
     def decompileProject(self):
         self.showDialog("warning", _("Please note that unpacking is not perfect, some parts of the watchface may be glitched."))
@@ -1815,9 +1825,7 @@ if __name__ == "__main__":
         exception = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
         errString = "Internal error! Please report as a bug.\n\n"+exception
         logging.error(errString)
-        if "C++" not in traceback.format_exception(exc_type, exc_value, exc_traceback): # prevent C++ class already deleted message from appearing on app close
-                                                                                        # i will fix (soon)
-            QMessageBox.critical(None, 'Error', errString, QMessageBox.StandardButton.Ok)
+        QMessageBox.critical(None, 'Error', errString, QMessageBox.StandardButton.Ok)
 
     sys.excepthook = onException
 

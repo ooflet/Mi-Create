@@ -202,13 +202,17 @@
                 },
                 "widget_size_width": {
                     "string": "Width",
-                    "type": "disabled",
-                    "value": "48"
+                    "type": "int",
+                    "value": "48",
+                    "min": "0",
+                    "max": "none"
                 },
                 "widget_size_height": {
                     "string": "Height",
-                    "type": "disabled",
-                    "value": "48"
+                    "type": "int",
+                    "value": "48",
+                    "min": "0",
+                    "max": "none"
                 }
             },
             "Appearance": {

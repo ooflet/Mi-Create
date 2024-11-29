@@ -864,6 +864,7 @@ class NumberWidget(BaseWidget):
         super().__init__(posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name)
         self.imageItems = []
         self.numList = []
+        self.source = None
         self.timer = QTimer()
         self.timer.setInterval(100)
         self.timer.timeout.connect(self.updatePreviewNumber)
@@ -959,12 +960,14 @@ class NumberWidget(BaseWidget):
 
 
     def startPreview(self):
-        self.updatePreviewNumber()
-        self.timer.start()
+        if self.source != None:
+            self.updatePreviewNumber()
+            self.timer.start()
 
     def stopPreview(self):
-        self.timer.stop()
-        self.addNumbers(self.previewNumber, self.imageFolder, self.source, self.numList, self.digits, self.spacing, self.alignment, self.hideZeros, self.interpolationStyle)
+        if self.source != None:
+            self.timer.stop()
+            self.addNumbers(self.previewNumber, self.imageFolder, self.source, self.numList, self.digits, self.spacing, self.alignment, self.hideZeros, self.interpolationStyle)
 
     def clearImages(self):
         for x in self.imageItems:
@@ -989,8 +992,6 @@ class AnalogWidget(BaseWidget):
         self.setPos(posX, posY)
 
     def addBackground(self, backgroundImage, bgX, bgY, antialiasing):
-        if backgroundImage != "":
-            self.background = QGraphicsPixmapItem(backgroundImage, self)
         self.bgImage = QGraphicsPixmapItem(backgroundImage, self)
         self.bgImage.setPos(int(bgX), int(bgY))
         if antialiasing:

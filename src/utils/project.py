@@ -18,6 +18,7 @@ import json
 import shutil
 import xmltodict
 
+from shutil import which
 from typing import List, Optional
 from pathlib import Path
 from pprint import pprint
@@ -562,11 +563,19 @@ class FprjProject:
         except Exception as e:
             return False, e        
 
-    def compile(self, path, location, compilerLocation):
+    def compile(self, platform, path, location, compilerLocation):
         logging.info("Compiling project "+path)
         process = QProcess()
-        process.setProgram(compilerLocation)
-        process.setArguments(["compile", path, location, str.split(os.path.basename(path), ".")[0]+".face", "0"])
+
+        if platform == "Windows":
+            process.setProgram(compilerLocation)
+            process.setArguments(["-b", path, location, str.split(os.path.basename(path), ".")[0]+".face", "0"])
+        elif platform == "Linux":
+            process.setProgram(which("wine"))
+            process.setArguments([compilerLocation, "-b", path, location, str.split(os.path.basename(path), ".")[0]+".face", "0"])
+        else:
+            raise NotImplementedError("Platform not implemented.")
+
         process.start()
         return process
     
