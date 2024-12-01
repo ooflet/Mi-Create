@@ -365,6 +365,9 @@ class WatchfaceEditor(QMainWindow):
                                                 self.settings["Canvas"]["Interpolation"]["value"],
                                                 self.settings["Canvas"]["ClipDeviceShape"]["value"],
                                                 self.settings["Canvas"]["ShowDeviceOutline"]["value"])
+                if project["canvas"].isPreviewPlaying:
+                    self.playAllPreviews(project["canvas"])
+                
 
     def loadLanguage(self, retranslate):
         selectedLanguage = None
@@ -643,6 +646,8 @@ class WatchfaceEditor(QMainWindow):
                                                         self.settings["Canvas"]["Interpolation"]["value"],
                                                         self.settings["Canvas"]["ClipDeviceShape"]["value"],
                                                         self.settings["Canvas"]["ShowDeviceOutline"]["value"])
+            if currentProject["canvas"].isPreviewPlaying:
+                self.playAllPreviews(currentProject["canvas"])
 
         def reloadResource():
             currentProject = self.getCurrentProject()
@@ -755,6 +760,8 @@ class WatchfaceEditor(QMainWindow):
                                                         self.settings["Canvas"]["ClipDeviceShape"]["value"],
                                                         self.settings["Canvas"]["ShowDeviceOutline"]["value"])
                     currentProject["canvas"].selectObject(value)
+                    if currentProject["canvas"].isPreviewPlaying:
+                        self.playAllPreviews(currentProject["canvas"])
                 else:
                     self.propertiesWidget.clearOnRefresh = False
                     currentProject["canvas"].imageFolder = currentProject["project"].getImageFolder()
@@ -762,6 +769,8 @@ class WatchfaceEditor(QMainWindow):
 
                     if success:
                         currentProject["canvas"].selectObject(widgetName)
+                        if currentProject["canvas"].isPreviewPlaying:
+                            self.playWidgetPreview(currentProject["canvas"], widgetName)
                     else:
                         self.showDialog("error", userFacingReason, debugReason)
 
@@ -888,6 +897,10 @@ class WatchfaceEditor(QMainWindow):
                                         self.settings["Canvas"]["Interpolation"]["value"],
                                         self.settings["Canvas"]["ClipDeviceShape"]["value"],
                                         self.settings["Canvas"]["ShowDeviceOutline"]["value"])
+                
+                if currentProject["canvas"].isPreviewPlaying:
+                        self.playAllPreviews(currentProject["canvas"])
+
                 self.Explorer.updateExplorer(currentProject["project"])
 
                 if not success:
@@ -943,6 +956,10 @@ class WatchfaceEditor(QMainWindow):
                                                 self.settings["Canvas"]["Interpolation"]["value"],
                                                 self.settings["Canvas"]["ClipDeviceShape"]["value"],
                                                 self.settings["Canvas"]["ShowDeviceOutline"]["value"])
+            
+            if currentProject["canvas"].isPreviewPlaying:
+                self.playAllPreviews(currentProject["canvas"])
+
             self.Explorer.updateExplorer(currentProject["project"])
             for widget in widgets:
                 currentProject["canvas"].selectObject(widget[0].getProperty("widget_name"), False)
@@ -977,6 +994,10 @@ class WatchfaceEditor(QMainWindow):
                                                     self.settings["Canvas"]["Interpolation"]["value"],
                                                     self.settings["Canvas"]["ClipDeviceShape"]["value"],
                                                     self.settings["Canvas"]["ShowDeviceOutline"]["value"])
+                
+                if currentProject["canvas"].isPreviewPlaying:
+                    self.playAllPreviews(currentProject["canvas"])
+
                 self.Explorer.updateExplorer(currentProject["project"])
 
             widgetList = []
@@ -1037,6 +1058,10 @@ class WatchfaceEditor(QMainWindow):
                                                 self.settings["Canvas"]["Interpolation"]["value"],
                                                 self.settings["Canvas"]["ClipDeviceShape"]["value"],
                                                 self.settings["Canvas"]["ShowDeviceOutline"]["value"])
+            
+            if currentProject["canvas"].isPreviewPlaying:
+                self.playAllPreviews(currentProject["canvas"])
+
             self.Explorer.updateExplorer(currentProject["project"])
 
             # select objects pasted in
@@ -1118,6 +1143,33 @@ class WatchfaceEditor(QMainWindow):
 
             self.selectionDebounce = False
 
+    def playAllPreviews(self, canvas):
+        for itemName, item in canvas.widgets.items():
+            if isinstance(item, ImageWidget):
+                animationName = itemName.split("_")
+
+                if animationName[0] == "anim":
+                    repeats = animationName[1].strip("[]").split("@")[0]
+                    framesec = animationName[1].strip("[]").split("@")[1]
+                    item.startPreview(framesec, repeats)
+
+            elif isinstance(item, NumberWidget) or isinstance(item, AnalogWidget):
+                item.startPreview()
+
+    def playWidgetPreview(self, canvas, widgetName):
+        for itemName, item in canvas.widgets.items():
+            if item.data(0) == widgetName:
+                if isinstance(item, ImageWidget):
+                    animationName = itemName.split("_")
+
+                    if animationName[0] == "anim":
+                        repeats = animationName[1].strip("[]").split("@")[0]
+                        framesec = animationName[1].strip("[]").split("@")[1]
+                        item.startPreview(framesec, repeats)
+
+                elif isinstance(item, NumberWidget) or isinstance(item, AnalogWidget):
+                    item.startPreview()
+
     def createNewWorkspace(self, project: FprjProject):
         # projects are technically "tabs"
         self.previousSelected = None
@@ -1182,6 +1234,9 @@ class WatchfaceEditor(QMainWindow):
                                                      self.settings["Canvas"]["ShowDeviceOutline"]["value"])
                 currentProject["canvas"].selectObjectsFromPropertyList(objects)
 
+                if currentProject["canvas"].isPreviewPlaying:
+                    self.playAllPreviews(currentProject["canvas"])
+
             command = CommandModifyPosition(prevPos, currentPos, commandFunc, f"Change object pos")
             self.History.undoStack.push(command)
 
@@ -1227,6 +1282,10 @@ class WatchfaceEditor(QMainWindow):
                                         self.settings["Canvas"]["Interpolation"]["value"],
                                         self.settings["Canvas"]["ClipDeviceShape"]["value"],
                                         self.settings["Canvas"]["ShowDeviceOutline"]["value"])
+            
+            if currentProject["canvas"].isPreviewPlaying:
+                self.playAllPreviews(currentProject["canvas"])
+
             thread = threading.Thread(target=lambda: self.reloadImages(currentProject["project"].getImageFolder()))
             thread.start()
 
@@ -1243,25 +1302,14 @@ class WatchfaceEditor(QMainWindow):
             
             self.History.undoStack.push(command)
 
-        def playAllPreviews():
-            for itemName, item in canvas.widgets.items():
-                if isinstance(item, ImageWidget):
-                    animationName = itemName.split("_")
-
-                    if animationName[0] == "anim":
-                        repeats = animationName[1].strip("[]").split("@")[0]
-                        framesec = animationName[1].strip("[]").split("@")[1]
-                        item.startPreview(framesec, repeats)
-
-                elif isinstance(item, NumberWidget) or isinstance(item, AnalogWidget):
-                    item.startPreview()
-
         def previewToggle():
             if previewButton.isChecked():
                 previewButton.setIcon(QIcon().fromTheme("media-playback-pause"))
-                playAllPreviews()
+                canvas.isPreviewPlaying = True
+                self.playAllPreviews(canvas)
             else:
                 previewButton.setIcon(QIcon().fromTheme("media-playback-start"))
+                canvas.isPreviewPlaying = False
                 for item in canvas.widgets.values():
                     if isinstance(item, ImageWidget) or isinstance(item, NumberWidget) or isinstance(item, AnalogWidget):
                         item.stopPreview()

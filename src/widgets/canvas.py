@@ -209,6 +209,8 @@ class Canvas(QGraphicsView):
         self.graphicsScene = Scene()
         self.graphicsScene.setSceneRect(0,0,self.deviceSize[0],self.deviceSize[1])
 
+        self.isPreviewPlaying = False
+
         self.setScene(self.graphicsScene)
 
     def fireObjectPositionChanged(self):
@@ -958,7 +960,6 @@ class NumberWidget(BaseWidget):
         elif self.source == "Month":
             self.addNumbers(now.strftime("%m"), self.imageFolder, self.source, self.numList, self.digits, self.spacing, self.alignment, self.hideZeros, self.interpolationStyle, True)
 
-
     def startPreview(self):
         if self.source != None:
             self.updatePreviewNumber()
@@ -983,9 +984,10 @@ class AnalogWidget(BaseWidget):
     
     def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name, smoothHr, smoothMin):
         super().__init__(posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name)
+        print(smoothHr, smoothMin)
         self.smoothHr = smoothHr 
         self.smoothMin = smoothMin 
-        self.smoothSec = False
+        self.smoothSec = "0"
         self.timer = QTimer()
         self.timer.setInterval(50)
         self.timer.timeout.connect(self.updatePreviewHands)
@@ -1023,7 +1025,7 @@ class AnalogWidget(BaseWidget):
     def updatePreviewHands(self):
         now = datetime.now()
         if self.hrHand != None:
-            if self.smoothHr:
+            if self.smoothHr == "1":
                 min = int(now.strftime("%M")) / 60
                 angle = (int(now.strftime("%I")) + min) / 12 * 360
             else:
@@ -1031,7 +1033,7 @@ class AnalogWidget(BaseWidget):
             self.hrHand.setRotation(angle)
 
         if self.minHand != None:
-            if self.smoothMin:
+            if self.smoothMin == "1":
                 sec = int(now.strftime("%S")) / 60
                 angle = (int(now.strftime("%M")) + sec) / 60 * 360
             else:
@@ -1040,7 +1042,7 @@ class AnalogWidget(BaseWidget):
             self.minHand.setRotation(angle)
 
         if self.secHand != None:
-            if self.smoothSec:
+            if self.smoothSec == "1":
                 msec = int(now.strftime("%f")) / 1000000
                 angle = (int(now.strftime("%S")) + msec)  / 60 * 360
             else:
