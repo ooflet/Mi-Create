@@ -39,6 +39,7 @@ class WatchData:
             "widget"
             "widget_analog"
             "widget_arc"
+            "widget_container"
             "widget_imagelist"
             "widget_num"
         ]

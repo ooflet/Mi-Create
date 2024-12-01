@@ -28,6 +28,7 @@ class ObjectIcon:
             "widget_analog" : "widget-analogdisplay",
             "widget_pointer" : "widget-pointer",
             "widget" : "widget-image",
+            "widget_container" : "widget-container",
             "widget_imagelist" : "widget-imagelist",
             "widget_num" : "widget-digitalnumber",
             "widget_arc" : "widget-arcprogress"
@@ -409,6 +410,12 @@ class Canvas(QGraphicsView):
             widget.addImage(QPixmap(), 0, 0, interpolationStyle)
             
         return widget
+    
+    def createContainer(self, transparency, name, rect, zValue):
+        # no use for it so far, just bare bones implementation
+        widget = BaseWidget(rect.x(), rect.y(), rect.width(), rect.height(), self.frame, self, QColor(255,255,255,0), transparency, name)
+        widget.setZValue(zValue)
+        return widget
 
     def createDigitalNumber(self, transparency, name, rect, zValue, source, numList, digits, spacing, alignment, hideZeros, snap, interpolationStyle, previewNumber=None):
         widget = NumberWidget(rect.x(), rect.y(), rect.width(), rect.height(), self.frame, self, QColor(255,255,255,0), transparency, name)
@@ -573,6 +580,19 @@ class Canvas(QGraphicsView):
                     interpolation
                 )
 
+            elif item.getProperty("widget_type") == "widget_container":
+                widget = self.createContainer(
+                    item.getProperty("widget_alpha"),
+                    item.getProperty("widget_name"),
+                    QRect(
+                        int(item.getProperty("widget_pos_x")),
+                        int(item.getProperty("widget_pos_y")),
+                        int(item.getProperty("widget_size_width")),
+                        int(item.getProperty("widget_size_height"))
+                    ),
+                    index
+                )
+
             elif item.getProperty("widget_type") == "widget_num":
                 widget = self.createDigitalNumber(
                     item.getProperty("widget_alpha"),
@@ -624,6 +644,7 @@ class Canvas(QGraphicsView):
 
             # add widget into widget list
             self.widgets[item.getProperty("widget_name")] = widget
+            print(self.widgets)
             return True, "Success", ""
         except Exception:
             # status, user facing message, debug info
@@ -698,6 +719,7 @@ class BaseWidget(QGraphicsRectItem):
         # Initialize the shape.
         super().__init__(posX, posY, sizeX, sizeY, parent)
         self.setRect(0, 0, sizeX, sizeY)
+        self.setPos(posX, posY)
         self.setPen(QPen(QColor(0,0,0,0)))
         self.origPos = None
         self.size = QPointF(sizeX, sizeY)

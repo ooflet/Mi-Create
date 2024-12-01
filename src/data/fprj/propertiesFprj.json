@@ -494,6 +494,58 @@
             }
         }
     },
+    "widget_container": {
+        "Shape": "Container",
+        "properties": {
+            "General": {
+                "WidgetType": {
+                    "string": "Widget Type",
+                    "type": "disabled",
+                    "value": "Container"
+                },
+                "widget_name": {
+                    "string": "Name",
+                    "type": "str",
+                    "value": ""
+                }
+            },
+            "Position": {
+                "widget_pos_x": {
+                    "string": "X",
+                    "type": "int",
+                    "value": "",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "widget_pos_y": {
+                    "string": "Y",
+                    "type": "int",
+                    "value": "",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "widget_size_width": {
+                    "string": "Width",
+                    "type": "disabled",
+                    "value": "48"
+                },
+                "widget_size_height": {
+                    "string": "Height",
+                    "type": "disabled",
+                    "value": "48"
+                }
+            },
+            "Appearance": {
+                "widget_alpha": {
+                    "string": "Opacity",
+                    "type": "int",
+                    "value": "255",
+                    "min": "0",
+                    "max": "255"
+                }
+            }
+        }
+    },
     "widget_num": {
         "Shape": "DigitalNumber",
         "properties": {

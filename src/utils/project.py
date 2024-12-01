@@ -69,6 +69,7 @@ class FprjProject:
             "30": "widget",
             "31": "widget_imagelist",
             "32": "widget_num",
+            "34": "widget_container",
             "42": "widget_arc" # progress arc plus, prefer using this
         }
 
