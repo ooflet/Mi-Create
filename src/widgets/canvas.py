@@ -417,8 +417,8 @@ class Canvas(QGraphicsView):
         widget.setZValue(zValue)
         return widget
 
-    def createDigitalNumber(self, transparency, name, rect, zValue, source, numList, digits, spacing, alignment, hideZeros, snap, interpolationStyle, previewNumber=None):
-        widget = NumberWidget(rect.x(), rect.y(), rect.width(), rect.height(), self.frame, self, QColor(255,255,255,0), transparency, name)
+    def createDigitalNumber(self, transparency, name, rect, zValue, angle, source, numList, digits, spacing, alignment, hideZeros, snap, interpolationStyle, previewNumber=None):
+        widget = NumberWidget(rect.x(), rect.y(), rect.width(), rect.height(), self.frame, self, QColor(255,255,255,0), transparency, name, angle)
         widget.setZValue(zValue)
         widget.setData(1, "widget_imagelist") # Item ID
         widget.snap = snap
@@ -594,6 +594,16 @@ class Canvas(QGraphicsView):
                 )
 
             elif item.getProperty("widget_type") == "widget_num":
+                name = item.getProperty("widget_name").split("_")
+                if len(name) == 2:
+                    nameAngle = name[1].split("[")
+                    if nameAngle[0] == "angle":
+                        angle = int(nameAngle[1].strip("[]")) / 10
+                    else:
+                        angle = 0
+                else:
+                    angle = 0
+
                 widget = self.createDigitalNumber(
                     item.getProperty("widget_alpha"),
                     item.getProperty("widget_name"),
@@ -604,6 +614,7 @@ class Canvas(QGraphicsView):
                         int(item.getProperty("widget_size_height"))
                     ),
                     index,
+                    angle,
                     item.getSourceName(),
                     item.getProperty("widget_bitmaplist"),
                     item.getProperty("num_digits"),
@@ -709,7 +720,7 @@ class Canvas(QGraphicsView):
                 object.selectionPath.prepareGeometryChange()
                 object.delete()
                 return True, "Success", ""
-        
+
 class BaseWidget(QGraphicsRectItem):
     # Basic widget with draggable and selectable controls
     # Allows for snap to guides
@@ -745,8 +756,9 @@ class BaseWidget(QGraphicsRectItem):
         # Create outline
         if self.selectionPos == None or self.pos().x() != self.selectionPos.x() or self.pos().y() != self.selectionPos.y():
             self.selectionPos = self.pos()
+            self.selectionPath.setPos(self.pos())
             self.selectionPainterPath.clear()
-            self.selectionPainterPath.addRoundedRect(self.pos().x(), self.pos().y(), self.rect().width(), self.rect().height(), self.highlightRadius, self.highlightRadius)
+            self.selectionPainterPath.addRoundedRect(0, 0, self.rect().width(), self.rect().height(), self.highlightRadius, self.highlightRadius)
             self.selectionPath.setPath(self.selectionPainterPath)
             pen = QPen(self.scene().palette().highlight(), 2, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin)
             self.selectionPath.setPen(pen)
@@ -884,11 +896,12 @@ class ImageWidget(BaseWidget):
         self.color = QColor(255, 0, 0, 100)
 
 class NumberWidget(BaseWidget):
-    def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name):
+    def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name, angle):
         super().__init__(posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name)
         self.imageItems = []
         self.numList = []
         self.source = None
+        self.angle = angle
         self.timer = QTimer()
         self.timer.setInterval(100)
         self.timer.timeout.connect(self.updatePreviewNumber)
@@ -896,6 +909,25 @@ class NumberWidget(BaseWidget):
 
     def addBlankImage(self):
         self.imageItems.append("") # append blank to imageitems
+
+    def updateAngle(self):
+        # calculate pivot point of the widget
+        rect = self.rect()
+        if self.alignment != None:
+            if self.alignment == "Left":
+                pivot = rect.topLeft()
+            elif self.alignment == "Center":
+                pivot = rect.center() - QPointF(0, rect.height() / 2)
+            elif self.alignment == "Right":
+                pivot = rect.topRight()
+        
+        # set angle to widget
+        self.setTransformOriginPoint(pivot)
+        self.setRotation(self.angle)
+
+        # set angle to selection box
+        self.selectionPath.setTransformOriginPoint(pivot)
+        self.selectionPath.setRotation(self.angle)
 
     def addImage(self, qPixmap, posX, posY, spacing, isAntialiased):
         if qPixmap.isNull():
@@ -910,6 +942,7 @@ class NumberWidget(BaseWidget):
 
         width = ( qPixmap.width() * len(self.imageItems) ) + ( spacing * len(self.imageItems) )
         self.setRect(0, 0, width, qPixmap.height())
+        
 
     def addNumbers(self, previewNumber, imageFolder, source, numList, digits, spacing, alignment, hideZeros, interpolationStyle, previewFromSource=False):
         # store arguments for later
@@ -960,6 +993,8 @@ class NumberWidget(BaseWidget):
                         self.addImage(image, (image.size().width() * x) + (int(spacing) * x), 0, int(spacing), interpolationStyle)
             else:
                 self.representNoImage()
+
+            self.updateAngle()
 
     def updatePreviewNumber(self):
         now = datetime.now()
