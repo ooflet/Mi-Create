@@ -462,8 +462,9 @@ class Canvas(QGraphicsView):
 
         if len(split) >= 2:
             nameAngle = split[-1].split("[")
-            if nameAngle[0] == "angle":
-                angle = int(nameAngle[1].strip("[]")) / 10
+            angleString = nameAngle[1].strip("[]")
+            if nameAngle[0] == "angle" and angleString != "":
+                angle = int(angleString) / 10
         
         widget = NumberWidget(rect.x(), rect.y(), rect.width(), rect.height(), self.frame, self, QColor(255,255,255,0), transparency, name, angle)
         widget.setZValue(zValue)
