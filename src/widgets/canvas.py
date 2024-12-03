@@ -10,8 +10,10 @@ import traceback
 import logging
 from pprint import pprint
 from datetime import datetime
+from math import cos, sin, radians
 
 sys.path.append("..")
+
 from utils.project import WatchData
 
 from PyQt6.QtCore import pyqtSignal, QPointF, QSize, QRect, QTimer, Qt
@@ -94,9 +96,34 @@ class Scene(QGraphicsScene):
         self.posLines = []
 
     def updatePosMap(self):
-        self.positionMap = {"X":[], "Y":[]}
+        self.positionMap = {"X": [], "Y": []}
         for item in self.items():
+            # if isinstance(item, NumberWidget) and hasattr(item, "angle") and item.angle != 0:
+            #     # calculate points when widget is rotated
+            #     angle_rad = radians(item.angle)
+            #     origin = item.pos() + item.transformOriginPoint()
+            #     rotated_points = []
+
+            #     # translate
+            #     x1 = item.pos().x() + origin.x()
+            #     y1 = item.pos().y() + origin.y()
+
+            #     x2 = item.rect().bottomRight().x() + origin.x()
+            #     y2 = item.rect().bottomRight().y() + origin.y()
+
+            #     rotated_x1 = cos(angle_rad) * x1 - sin(angle_rad) * y1
+            #     rotated_y1 = sin(angle_rad) * x1 + cos(angle_rad) * y1
+
+            #     rotated_x2 = cos(angle_rad) * x2 - sin(angle_rad) * y2
+            #     rotated_y2 = sin(angle_rad) * x2 + cos(angle_rad) * y2
+
+            #     self.positionMap["X"].append(rotated_x1)
+            #     self.positionMap["X"].append(rotated_x2)
+            #     self.positionMap["Y"].append(rotated_y1)
+            #     self.positionMap["Y"].append(rotated_y2)
+
             if isinstance(item, BaseWidget):
+                # get points
                 self.positionMap["X"].append(item.pos().x())
                 self.positionMap["X"].append(item.pos().x() + item.rect().width())
                 self.positionMap["Y"].append(item.pos().y())
@@ -308,8 +335,20 @@ class Canvas(QGraphicsView):
         self.objectDeleted.emit(name)
 
     def createAnalogDisplay(self, transparency, name, pos, zValue, backgroundImage, hourHandImage, minuteHandImage, secondHandImage, itemAnchors, smoothHr, smoothMin, snap, interpolationStyle):
+        suffix = name.split("_")
+        smoothSec = "0" # false
+        updateInterval = 30 # update interval in miliseconds
+        if len(suffix) >= 2:
+            interval = suffix[-1].split("[")
+            
+            if interval[0] == "smooth":
+                smoothSec = "1" # true
+
+            if len(interval) == 2 and interval[1].strip("[]") != "":
+                updateInterval = int(interval[1].strip("[]"))
+
         # Create widget
-        widget = AnalogWidget(int(pos.x()), int(pos.y()), int(pos.width()), int(pos.height()), self.frame, self, QColor(255,255,255,0), transparency, name, smoothHr, smoothMin)
+        widget = AnalogWidget(int(pos.x()), int(pos.y()), int(pos.width()), int(pos.height()), self.frame, self, QColor(255,255,255,0), transparency, name, smoothHr, smoothMin, smoothSec, updateInterval)
         widget.setZValue(zValue)
         widget.setData(1, "widget_analog") # Item ID
         widget.snap = snap
@@ -417,7 +456,15 @@ class Canvas(QGraphicsView):
         widget.setZValue(zValue)
         return widget
 
-    def createDigitalNumber(self, transparency, name, rect, zValue, angle, source, numList, digits, spacing, alignment, hideZeros, snap, interpolationStyle, previewNumber=None):
+    def createDigitalNumber(self, transparency, name, rect, zValue, source, numList, digits, spacing, alignment, hideZeros, snap, interpolationStyle, previewNumber=None):
+        split = name.split("_")
+        angle = 0
+
+        if len(split) >= 2:
+            nameAngle = split[-1].split("[")
+            if nameAngle[0] == "angle":
+                angle = int(nameAngle[1].strip("[]")) / 10
+        
         widget = NumberWidget(rect.x(), rect.y(), rect.width(), rect.height(), self.frame, self, QColor(255,255,255,0), transparency, name, angle)
         widget.setZValue(zValue)
         widget.setData(1, "widget_imagelist") # Item ID
@@ -594,16 +641,6 @@ class Canvas(QGraphicsView):
                 )
 
             elif item.getProperty("widget_type") == "widget_num":
-                name = item.getProperty("widget_name").split("_")
-                if len(name) == 2:
-                    nameAngle = name[1].split("[")
-                    if nameAngle[0] == "angle":
-                        angle = int(nameAngle[1].strip("[]")) / 10
-                    else:
-                        angle = 0
-                else:
-                    angle = 0
-
                 widget = self.createDigitalNumber(
                     item.getProperty("widget_alpha"),
                     item.getProperty("widget_name"),
@@ -614,7 +651,6 @@ class Canvas(QGraphicsView):
                         int(item.getProperty("widget_size_height"))
                     ),
                     index,
-                    angle,
                     item.getSourceName(),
                     item.getProperty("widget_bitmaplist"),
                     item.getProperty("num_digits"),
@@ -699,6 +735,7 @@ class Canvas(QGraphicsView):
             result, userFacingReason, debugReason = self.createWidgetFromData(index, widget, snap, interpolation)
             self.scene().originPositions[widget.getProperty("widget_name")] = [int(widget.getProperty("widget_pos_x")), int(widget.getProperty("widget_pos_y"))]
             if not result:
+                print(debugReason)
                 return False, userFacingReason, debugReason
         self.scene().updatePosMap()
         return True, "Success", ""
@@ -1039,14 +1076,14 @@ class NumberWidget(BaseWidget):
 class AnalogWidget(BaseWidget):
     # Widget for handling AnalogDisplays
     
-    def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name, smoothHr, smoothMin):
+    def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name, smoothHr, smoothMin, smoothSec, updateInterval):
         super().__init__(posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name)
         print(smoothHr, smoothMin)
         self.smoothHr = smoothHr 
         self.smoothMin = smoothMin 
-        self.smoothSec = "0"
+        self.smoothSec = smoothSec
         self.timer = QTimer()
-        self.timer.setInterval(50)
+        self.timer.setInterval(updateInterval)
         self.timer.timeout.connect(self.updatePreviewHands)
         self.setPos(posX, posY)
 
