@@ -184,6 +184,33 @@ class Scene(QGraphicsScene):
 
         return pos
     
+    def getPreviewNumber(self, source):
+        now = datetime.now()
+        if source == "Hour":
+            return now.strftime("%I")
+        elif source == "Hour High":
+            return now.strftime("%I")[0]
+        elif source == "Hour Low":
+            return now.strftime("%I")[1]
+        elif source == "Minute":
+            return now.strftime("%M")
+        elif source == "Minute High":
+            return now.strftime("%M")[0]
+        elif source == "Minute Low":
+            return now.strftime("%M")[1]
+        elif source == "Second":
+            return now.strftime("%S")
+        elif source == "Second High":
+            return now.strftime("%S")[0]
+        elif source == "Second Low":
+            return now.strftime("%S")[1]
+        elif source == "Day":
+            return now.strftime("%d")
+        elif source == "Month":
+            return now.strftime("%m")
+        elif source == "Week":
+            return now.strftime("%w")
+
     def drawSnapLines(self, pos):
         for line in self.posLines:
             self.removeItem(line)
@@ -426,13 +453,13 @@ class Canvas(QGraphicsView):
         pixmap = QPixmap()
         pixmap.load(os.path.join(self.imageFolder, image))
 
-        widget.addImage(pixmap, 0, 0, interpolationStyle)
+        widget.setImage(pixmap, interpolationStyle)
         
         return widget
 
-    def createImageList(self, transparency, name, rect, zValue, defaultValue, bitmapList, snap, interpolationStyle):
+    def createImageList(self, transparency, name, rect, zValue, defaultValue, source, bitmapList, snap, interpolationStyle, previewIndex=None):
         # Create widget
-        widget = ImageWidget(int(rect.x()), int(rect.y()), int(rect.width()), int(rect.height()), self.frame, self, QColor(255,255,255,0), transparency, name)
+        widget = ImagelistWidget(int(rect.x()), int(rect.y()), int(rect.width()), int(rect.height()), self.frame, self, QColor(255,255,255,0), transparency, name)
         widget.setZValue(zValue)
         widget.setData(1, "widget_imagelist") # Item ID 
         widget.snap = snap
@@ -443,30 +470,18 @@ class Canvas(QGraphicsView):
 
         if animationName[0] == "anim":
             animImageList = [QPixmap(os.path.join(self.imageFolder, image[1])) for image in bitmapList]
-            widget.addAnimatedImage(animImageList, interpolationStyle)
-            return widget
-
-        # displayImage is a list with 2 values, image index & image
-
-        if bitmapList != []:
-            values = [int(x[0]) for x in bitmapList]
-
-            # Get default image if available
-            if defaultValue in values:
-                displayImage = bitmapList[values.index(defaultValue)]
-            else:
-                displayImage = bitmapList[0]
-
-            # Get Image
-            if len(displayImage) >= 2:
-                image = QPixmap()
-                image.load(os.path.join(self.imageFolder, displayImage[1]))
-                widget.addImage(image, 0, 0, interpolationStyle)
-            else:
-                widget.representNoImage()
+            widget.addAnimatedImagelist(animImageList, interpolationStyle)
         else:
-            widget.addImage(QPixmap(), 0, 0, interpolationStyle)
-            
+            imageList = []
+            for image in bitmapList:
+                if len(image) >= 2:
+                    imageList.insert(int(image[0]), QPixmap(os.path.join(self.imageFolder, image[1])))
+                else:
+                    widget.representNoImage()
+                    break
+
+            widget.addImagelist(imageList, source, previewIndex, defaultValue, interpolationStyle)
+
         return widget
     
     def createContainer(self, transparency, name, rect, zValue):
@@ -643,9 +658,11 @@ class Canvas(QGraphicsView):
                     ),
                     index,
                     int(item.getProperty("imagelist_default_index")),
+                    item.getSourceName(),
                     item.getProperty("widget_bitmaplist"),
                     snap,
-                    interpolation
+                    interpolation,
+                    item.getPreviewNumber(),
                 )
 
             elif item.getProperty("widget_type") == "widget_container":
@@ -885,78 +902,140 @@ class BaseWidget(QGraphicsRectItem):
         painter.drawRect(self.rect())
 
 class ImageWidget(BaseWidget):
-    # Widget for basic images and handling for DigitalNumber
-    # All ImageList related things are handled in the addImage function
-    # Live previews of animations are planned with this widget
+    # Widget for basic images
 
     def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name):
         super().__init__(posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name)
-        self.imageItems = []
-        self.isAnimatable = False
-        self.animatedImageItem = None
-        self.animRepeats = 0
-        self.totalRepeats = 0
+        self.pixmapItem = QGraphicsPixmapItem(self)
         self.setPos(posX, posY)
 
-    def addImage(self, qPixmap, posX, posY, isAntialiased):
+    def setImage(self, qPixmap, isAntialiased):
         if qPixmap.isNull():
             self.representNoImage()
             return
         
-        item = QGraphicsPixmapItem(qPixmap, self)
-        item.setPos(posX, posY)
-        if isAntialiased:
-            item.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
-
+        self.pixmapItem.setPixmap(qPixmap)
         self.setRect(0, 0, qPixmap.width(), qPixmap.height())
 
-    def addAnimatedImage(self, imagelist, isAntialiased):
-        self.isAnimatable = True
-        initialFrame = imagelist[0]
-
-        self.animatedImageList = imagelist
-        self.animatedImageItem = QGraphicsPixmapItem(initialFrame, self)
-        self.setRect(0, 0, initialFrame.width(), initialFrame.height())
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.advanceFrame)
         if isAntialiased:
-            self.animatedImageItem.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
-
-    def advanceFrame(self):
-        self.currentFrame = (self.currentFrame + 1) % len(self.animatedImageList)
-        self.animatedImageItem.setPixmap(self.animatedImageList[self.currentFrame])
-
-        if self.totalRepeats != 0:
-            print(self.currentFrame + 1, len(self.animatedImageList) - 1, self.animRepeats, self.totalRepeats)
-            if self.currentFrame + 1 > len(self.animatedImageList) - 1:
-                self.animRepeats += 1
-
-            if self.animRepeats >= self.totalRepeats:
-                self.stopPreview(False)
-
-    def startPreview(self, framesec, repeatAmounts):
-        if self.animatedImageItem == None:
-            return
-        
-        self.animRepeats = 0
-        self.totalRepeats = int(repeatAmounts)
-        self.currentFrame = 0
-        interval = int(framesec)
-        self.timer.start(interval)
-
-    def stopPreview(self, endPreview=True):
-        if self.animatedImageItem == None:
-            return
-        
-        self.timer.stop()
-
-        if endPreview:
-            self.animatedImageItem.setPixmap(self.animatedImageList[0])
+            self.pixmapItem.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
 
     def representNoImage(self):
         self.color = QColor(255, 0, 0, 100)
 
+class ImagelistWidget(ImageWidget):
+    # Widget for imagelists and animated images
+
+    def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name):
+        super().__init__(posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name)
+        self.imagelist = None
+        self.isAnimation = False
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.updateImage)
+        self.source = None
+
+    def getLastValidListIndex(list, index):
+        if 0 <= index < len(list) and list[index] is not None:
+            return list[index]
+
+        for i in range(index - 1, -1, -1):
+            if list[i] is not None:
+                return list[i]
+
+        return None
+
+    def addImagelist(self, imagelist, source, previewIndex, defaultValue, isAntialiased):
+        if imagelist == []:
+            self.representNoImage()
+            return
+
+        previewIndex = int(previewIndex)
+        
+        self.previewIndex = previewIndex
+        self.defaultValue = defaultValue
+        self.antialiased = isAntialiased
+
+        self.source = source
+        self.imagelist = imagelist
+
+        if previewIndex != None:
+            previewImage = imagelist[previewIndex]
+        elif previewIndex == None and defaultValue != None:
+            previewImage = imagelist[defaultValue]
+        else:
+            previewImage = imagelist[0]
+
+        self.pixmapItem.setPixmap(previewImage)
+        self.setRect(0, 0, previewImage.width(), previewImage.height())
+        
+        if isAntialiased:
+            self.pixmapItem.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
+
+    def addAnimatedImagelist(self, imagelist, isAntialiased):
+        self.isAnimation = True
+        self.imagelist = imagelist
+        initialFrame = imagelist[0]
+
+        self.animatedImageList = imagelist
+        self.pixmapItem.setPixmap(initialFrame)
+        self.setRect(0, 0, initialFrame.width(), initialFrame.height())
+        
+        if isAntialiased:
+            self.pixmapItem.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
+
+    def updateImage(self):
+        if self.isAnimation:
+            self.currentFrame = (self.currentFrame + 1) % len(self.animatedImageList)
+            self.pixmapItem.setPixmap(self.animatedImageList[self.currentFrame])
+
+            if self.totalRepeats != 0:
+                print(self.currentFrame + 1, len(self.animatedImageList) - 1, self.animRepeats, self.totalRepeats)
+                if self.currentFrame + 1 > len(self.animatedImageList) - 1:
+                    self.animRepeats += 1
+
+                if self.animRepeats >= self.totalRepeats:
+                    self.stopPreview(False)
+        else:
+            livePreviewIndex = int(self.scene().getPreviewNumber(self.source))
+            if livePreviewIndex != None:
+                self.pixmapItem.setPixmap(self.imagelist[livePreviewIndex])
+            elif self.previewIndex != None:
+                self.pixmapItem.setPixmap(self.imagelist[self.previewIndex])
+            elif self.previewIndex == None and self.defaultValue != None:
+                self.pixmapItem.setPixmap(self.imagelist[self.defaultValue])
+            else:
+                self.pixmapItem.setPixmap(self.imagelist[0])
+            
+
+    def startPreview(self, framesec=None, repeatAmounts=None):
+        if self.isAnimation:    
+            self.animRepeats = 0
+            self.totalRepeats = int(repeatAmounts)
+            self.currentFrame = 0
+            interval = int(framesec)
+        else:
+            interval = 100
+            
+        self.updateImage()
+        self.timer.start(interval)
+
+    def stopPreview(self, endPreview=True):
+        self.timer.stop()
+
+        if self.isAnimation:
+            self.pixmapItem.setPixmap(self.imagelist[0])    
+        else:
+            if self.previewIndex != None:
+                self.pixmapItem.setPixmap(self.imagelist[self.previewIndex])
+            elif self.previewIndex == None and self.defaultValue != None:
+                self.pixmapItem.setPixmap(self.imagelist[self.defaultValue])
+            else:
+                self.pixmapItem.setPixmap(self.imagelist[0])
+            
+
 class NumberWidget(BaseWidget):
+    # Displays numbers
+
     def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name, angle):
         super().__init__(posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name)
         self.imageItems = []
@@ -1058,29 +1137,10 @@ class NumberWidget(BaseWidget):
             self.updateAngle()
 
     def updatePreviewNumber(self):
-        now = datetime.now()
-        if self.source == "Hour":
-            self.addNumbers(now.strftime("%I"), self.imageFolder, self.source, self.numList, self.digits, self.spacing, self.alignment, self.hideZeros, self.interpolationStyle, True)
-        elif self.source == "Hour High":
-            self.addNumbers(now.strftime("%I")[0], self.imageFolder, self.source, self.numList, self.digits, self.spacing, self.alignment, self.hideZeros, self.interpolationStyle, True)
-        elif self.source == "Hour Low":
-            self.addNumbers(now.strftime("%I")[1], self.imageFolder, self.source, self.numList, self.digits, self.spacing, self.alignment, self.hideZeros, self.interpolationStyle, True)
-        elif self.source == "Minute":
-            self.addNumbers(now.strftime("%M"), self.imageFolder, self.source, self.numList, self.digits, self.spacing, self.alignment, self.hideZeros, self.interpolationStyle, True)
-        elif self.source == "Minute High":
-            self.addNumbers(now.strftime("%M")[0], self.imageFolder, self.source, self.numList, self.digits, self.spacing, self.alignment, self.hideZeros, self.interpolationStyle, True)
-        elif self.source == "Minute Low":
-            self.addNumbers(now.strftime("%M")[1], self.imageFolder, self.source, self.numList, self.digits, self.spacing, self.alignment, self.hideZeros, self.interpolationStyle, True)
-        elif self.source == "Second":
-            self.addNumbers(now.strftime("%S"), self.imageFolder, self.source, self.numList, self.digits, self.spacing, self.alignment, self.hideZeros, self.interpolationStyle, True)
-        elif self.source == "Second High":
-            self.addNumbers(now.strftime("%S")[0], self.imageFolder, self.source, self.numList, self.digits, self.spacing, self.alignment, self.hideZeros, self.interpolationStyle, True)
-        elif self.source == "Second Low":
-            self.addNumbers(now.strftime("%S")[1], self.imageFolder, self.source, self.numList, self.digits, self.spacing, self.alignment, self.hideZeros, self.interpolationStyle, True)
-        elif self.source == "Day":
-            self.addNumbers(now.strftime("%d"), self.imageFolder, self.source, self.numList, self.digits, self.spacing, self.alignment, self.hideZeros, self.interpolationStyle, True)
-        elif self.source == "Month":
-            self.addNumbers(now.strftime("%m"), self.imageFolder, self.source, self.numList, self.digits, self.spacing, self.alignment, self.hideZeros, self.interpolationStyle, True)
+        previewNumber = self.scene().getPreviewNumber(self.source)
+        
+        if previewNumber is not None:
+            self.addNumbers(previewNumber, self.imageFolder, self.source, self.numList, self.digits, self.spacing, self.alignment, self.hideZeros, self.interpolationStyle, True)
 
     def startPreview(self):
         if self.source != None:

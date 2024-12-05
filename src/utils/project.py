@@ -607,7 +607,8 @@ class FprjWidget:
             "Current step count": "7645",
             "Active Calorie": "465",
             "Battery percent": "80",
-            "Battery percente": "80"
+            "Battery percente": "80",
+            "Week": "2"
         }
     
     def removeAssociation(self):
@@ -617,7 +618,13 @@ class FprjWidget:
         self.data = deepcopy(self.data)
 
     def getSourceName(self):
-        dataSource = self.getProperty("num_source")
+        if self.data.get("@Shape") == "31":
+            dataSource = self.getProperty("imagelist_source")
+        elif self.data.get("@Shape") == "32":
+            dataSource = self.getProperty("num_source")
+        else:
+            return
+
         modelSources = self.project.watchData.modelSourceData[self.project.getDeviceType()]
         dataSourceName = [source["string"] for source in modelSources if int(source["id_fprj"]) == int(dataSource)]
 

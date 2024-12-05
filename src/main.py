@@ -55,7 +55,7 @@ from utils.updater import Updater
 from utils.history import History, CommandAddWidget, CommandDeleteWidget, CommandPasteWidget, CommandModifyWidgetLayer, \
     CommandModifyProperty, CommandModifyPosition, CommandChangeTheme
 from utils.exporter import FprjConverter
-from widgets.canvas import Canvas, ObjectIcon, ImageWidget, NumberWidget, AnalogWidget
+from widgets.canvas import Canvas, ObjectIcon, ImageWidget, NumberWidget, AnalogWidget, ImagelistWidget
 from widgets.explorer import Explorer
 from widgets.properties import PropertiesWidget
 from widgets.editor import Editor, XMLLexer
@@ -1146,13 +1146,15 @@ class WatchfaceEditor(QMainWindow):
 
     def playAllPreviews(self, canvas):
         for itemName, item in canvas.widgets.items():
-            if isinstance(item, ImageWidget):
+            if isinstance(item, ImagelistWidget):
                 animationName = itemName.split("_")
 
                 if animationName[0] == "anim":
                     repeats = animationName[1].strip("[]").split("@")[0]
                     framesec = animationName[1].strip("[]").split("@")[1]
                     item.startPreview(framesec, repeats)
+                else:
+                    item.startPreview()
 
             elif isinstance(item, NumberWidget) or isinstance(item, AnalogWidget):
                 item.startPreview()
@@ -1312,7 +1314,7 @@ class WatchfaceEditor(QMainWindow):
                 previewButton.setIcon(QIcon().fromTheme("media-playback-start"))
                 canvas.isPreviewPlaying = False
                 for item in canvas.widgets.values():
-                    if isinstance(item, ImageWidget) or isinstance(item, NumberWidget) or isinstance(item, AnalogWidget):
+                    if isinstance(item, ImagelistWidget) or isinstance(item, NumberWidget) or isinstance(item, AnalogWidget):
                         item.stopPreview()
                     
 
