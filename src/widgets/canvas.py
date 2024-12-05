@@ -757,12 +757,12 @@ class Canvas(QGraphicsView):
         #self.scene().addItem(self.deviceRep)
         self.scene().addItem(self.frame)
 
-        if project.getAllWidgets() == []:
-            return True, "Success", ""
-
         if outline:
             self.deviceOutline = DeviceOutline(self.deviceSize)
             self.scene().addItem(self.deviceOutline)
+            
+        if project.getAllWidgets() == []:
+            return True, "Success", ""
 
         self.imageFolder = project.getImageFolder()
 
@@ -928,6 +928,8 @@ class ImagelistWidget(ImageWidget):
 
     def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name):
         super().__init__(posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name)
+        self.previewIndex = None
+        self.defaultValue = None
         self.imagelist = None
         self.isAnimation = False
         self.timer = QTimer()
@@ -1013,6 +1015,9 @@ class ImagelistWidget(ImageWidget):
             
 
     def startPreview(self, framesec=None, repeatAmounts=None):
+        if self.imagelist == None:
+            return
+        
         if self.isAnimation:    
             self.animRepeats = 0
             self.totalRepeats = int(repeatAmounts)
@@ -1025,6 +1030,9 @@ class ImagelistWidget(ImageWidget):
         self.timer.start(interval)
 
     def stopPreview(self, endPreview=True):
+        if self.imagelist == None:
+            return
+        
         self.timer.stop()
 
         if self.isAnimation:

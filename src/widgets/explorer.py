@@ -67,7 +67,10 @@ class Explorer(QTreeWidget):
         
         icon = QIcon().fromTheme("device-watch")
         name = None
-        if project.getTitle() == "":
+        print(project.currentTheme, project.currentTheme == "aod")
+        if project.currentTheme == "aod":
+            name = "AOD"
+        elif project.getTitle() == "":
             name = "Watchface"
         else:
             name = project.getTitle()
