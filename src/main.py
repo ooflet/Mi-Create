@@ -271,6 +271,7 @@ class WatchfaceEditor(QMainWindow):
                     print(f"Project {name, location} not found")
                     projectList.pop(projectList.index([name, location]))
             
+            projectList.reverse()
             storedSettings.setValue("recentProjects", projectList)
 
         self.coreDialog.showWelcomePage()

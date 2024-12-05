@@ -17,7 +17,7 @@ sys.path.append("..")
 from utils.project import WatchData
 
 from PyQt6.QtCore import pyqtSignal, QPointF, QSize, QRect, QTimer, Qt
-from PyQt6.QtGui import QPainter, QPainterPath, QPen, QColor, QPixmap, QIcon, QBrush
+from PyQt6.QtGui import QPainter, QPainterPath, QPen, QColor, QPixmap, QIcon, QBrush, QImage
 from PyQt6.QtWidgets import (QApplication, QGraphicsPathItem, QGraphicsScene, QGraphicsSceneMouseEvent, QGraphicsView, QGraphicsItem, QGraphicsRectItem, 
                             QToolButton, QGraphicsPixmapItem, QGraphicsEllipseItem, QMessageBox, QRubberBand, QGraphicsDropShadowEffect, QHBoxLayout, QVBoxLayout)
 
@@ -333,6 +333,25 @@ class Canvas(QGraphicsView):
 
     def onObjectDeleted(self, name, widget):
         self.objectDeleted.emit(name)
+
+    def createPreview(self):
+        large_preview_path = os.path.join(self.imageFolder, "preview_large.png")
+        area = self.scene().sceneRect()
+
+        if os.path.exists(large_preview_path):
+            if QMessageBox.question(None, "previewGenerator", f"{large_preview_path} already exists. Overwrite?") == QMessageBox.StandardButton.Yes:
+                os.remove(large_preview_path)
+            else:
+                return
+            
+        image = QImage(area.size(), QImage.Format_ARGB32_Premultiplied)
+        painter = QPainter(image)
+
+        self.scene().render(painter, image.rect(), area)
+        painter.end()
+
+        # Save the image to a file.
+        image.save()
 
     def createAnalogDisplay(self, transparency, name, pos, zValue, backgroundImage, hourHandImage, minuteHandImage, secondHandImage, itemAnchors, smoothHr, smoothMin, snap, interpolationStyle):
         suffix = name.split("_")
@@ -699,7 +718,7 @@ class Canvas(QGraphicsView):
             # status, user facing message, debug info
             return False, f"Widget '{item.getProperty('widget_name')}' has malformed data or is corrupt", f"Canvas failed to create object {item.getProperty('widget_name')}:\n {traceback.format_exc()}"
 
-    def loadObjects(self, project, snap=None, interpolation=None, clip=True, outline=False, loadAod=False):
+    def loadObjects(self, project, snap=None, interpolation=None, clip=True, outline=False):
         self.frame = DeviceFrame(self.deviceSize, clip)
         
         if interpolation == None:
@@ -904,15 +923,16 @@ class ImageWidget(BaseWidget):
             self.animatedImageItem.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
 
     def advanceFrame(self):
+        self.currentFrame = (self.currentFrame + 1) % len(self.animatedImageList)
+        self.animatedImageItem.setPixmap(self.animatedImageList[self.currentFrame])
+
         if self.totalRepeats != 0:
+            print(self.currentFrame + 1, len(self.animatedImageList) - 1, self.animRepeats, self.totalRepeats)
             if self.currentFrame + 1 > len(self.animatedImageList) - 1:
                 self.animRepeats += 1
 
             if self.animRepeats >= self.totalRepeats:
-                self.stopPreview()
-        
-        self.currentFrame = (self.currentFrame + 1) % len(self.animatedImageList)
-        self.animatedImageItem.setPixmap(self.animatedImageList[self.currentFrame])
+                self.stopPreview(False)
 
     def startPreview(self, framesec, repeatAmounts):
         if self.animatedImageItem == None:
@@ -924,12 +944,14 @@ class ImageWidget(BaseWidget):
         interval = int(framesec)
         self.timer.start(interval)
 
-    def stopPreview(self):
+    def stopPreview(self, endPreview=True):
         if self.animatedImageItem == None:
             return
         
         self.timer.stop()
-        self.animatedImageItem.setPixmap(self.animatedImageList[0])
+
+        if endPreview:
+            self.animatedImageItem.setPixmap(self.animatedImageList[0])
 
     def representNoImage(self):
         self.color = QColor(255, 0, 0, 100)
@@ -1051,6 +1073,10 @@ class NumberWidget(BaseWidget):
             self.addNumbers(now.strftime("%M")[1], self.imageFolder, self.source, self.numList, self.digits, self.spacing, self.alignment, self.hideZeros, self.interpolationStyle, True)
         elif self.source == "Second":
             self.addNumbers(now.strftime("%S"), self.imageFolder, self.source, self.numList, self.digits, self.spacing, self.alignment, self.hideZeros, self.interpolationStyle, True)
+        elif self.source == "Second High":
+            self.addNumbers(now.strftime("%S")[0], self.imageFolder, self.source, self.numList, self.digits, self.spacing, self.alignment, self.hideZeros, self.interpolationStyle, True)
+        elif self.source == "Second Low":
+            self.addNumbers(now.strftime("%S")[1], self.imageFolder, self.source, self.numList, self.digits, self.spacing, self.alignment, self.hideZeros, self.interpolationStyle, True)
         elif self.source == "Day":
             self.addNumbers(now.strftime("%d"), self.imageFolder, self.source, self.numList, self.digits, self.spacing, self.alignment, self.hideZeros, self.interpolationStyle, True)
         elif self.source == "Month":
