@@ -624,6 +624,9 @@ class FprjWidget:
             dataSource = self.getProperty("num_source")
         else:
             return
+        
+        if dataSource == None:
+            return
 
         modelSources = self.project.watchData.modelSourceData[self.project.getDeviceType()]
         dataSourceName = [source["string"] for source in modelSources if int(source["id_fprj"]) == int(dataSource)]

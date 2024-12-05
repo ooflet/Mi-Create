@@ -934,13 +934,13 @@ class ImagelistWidget(ImageWidget):
         self.timer.timeout.connect(self.updateImage)
         self.source = None
 
-    def getLastValidListIndex(list, index):
-        if 0 <= index < len(list) and list[index] is not None:
-            return list[index]
+    def getLastValidListIndex(self, index):
+        if 0 <= index < len(self.imagelist) and self.imagelist[index] is not None:
+            return index
 
         for i in range(index - 1, -1, -1):
-            if list[i] is not None:
-                return list[i]
+            if 0 <= i < len(self.imagelist):
+                return i
 
         return None
 
@@ -949,7 +949,8 @@ class ImagelistWidget(ImageWidget):
             self.representNoImage()
             return
 
-        previewIndex = int(previewIndex)
+        if previewIndex != None:
+            previewIndex = int(previewIndex)
         
         self.previewIndex = previewIndex
         self.defaultValue = defaultValue
@@ -959,9 +960,9 @@ class ImagelistWidget(ImageWidget):
         self.imagelist = imagelist
 
         if previewIndex != None:
-            previewImage = imagelist[previewIndex]
+            previewImage = imagelist[self.getLastValidListIndex(previewIndex)]
         elif previewIndex == None and defaultValue != None:
-            previewImage = imagelist[defaultValue]
+            previewImage = imagelist[self.getLastValidListIndex(defaultValue)]
         else:
             previewImage = imagelist[0]
 
@@ -996,13 +997,17 @@ class ImagelistWidget(ImageWidget):
                 if self.animRepeats >= self.totalRepeats:
                     self.stopPreview(False)
         else:
-            livePreviewIndex = int(self.scene().getPreviewNumber(self.source))
+            livePreviewIndex = None
+            
+            if self.scene().getPreviewNumber(self.source) != None:
+                livePreviewIndex = int(self.scene().getPreviewNumber(self.source))
+            
             if livePreviewIndex != None:
-                self.pixmapItem.setPixmap(self.imagelist[livePreviewIndex])
+                self.pixmapItem.setPixmap(self.imagelist[self.getLastValidListIndex(livePreviewIndex)])
             elif self.previewIndex != None:
-                self.pixmapItem.setPixmap(self.imagelist[self.previewIndex])
+                self.pixmapItem.setPixmap(self.imagelist[self.getLastValidListIndex(self.previewIndex)])
             elif self.previewIndex == None and self.defaultValue != None:
-                self.pixmapItem.setPixmap(self.imagelist[self.defaultValue])
+                self.pixmapItem.setPixmap(self.imagelist[self.getLastValidListIndex(self.defaultValue)])
             else:
                 self.pixmapItem.setPixmap(self.imagelist[0])
             
@@ -1023,12 +1028,13 @@ class ImagelistWidget(ImageWidget):
         self.timer.stop()
 
         if self.isAnimation:
-            self.pixmapItem.setPixmap(self.imagelist[0])    
+            if endPreview:
+                self.pixmapItem.setPixmap(self.imagelist[0])    
         else:
             if self.previewIndex != None:
-                self.pixmapItem.setPixmap(self.imagelist[self.previewIndex])
+                self.pixmapItem.setPixmap(self.imagelist[self.getLastValidListIndex(self.previewIndex)])
             elif self.previewIndex == None and self.defaultValue != None:
-                self.pixmapItem.setPixmap(self.imagelist[self.defaultValue])
+                self.pixmapItem.setPixmap(self.imagelist[self.getLastValidListIndex(self.defaultValue)])
             else:
                 self.pixmapItem.setPixmap(self.imagelist[0])
             
