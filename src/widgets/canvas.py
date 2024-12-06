@@ -14,7 +14,8 @@ from math import cos, sin, radians
 
 sys.path.append("..")
 
-from utils.project import WatchData
+from utils.data import WatchData
+from utils.project import FprjWidget, GMFWidget
 
 from PyQt6.QtCore import pyqtSignal, QPointF, QSize, QRect, QTimer, Qt
 from PyQt6.QtGui import QPainter, QPainterPath, QPen, QColor, QPixmap, QIcon, QBrush, QImage
@@ -490,7 +491,7 @@ class Canvas(QGraphicsView):
         widget.setZValue(zValue)
         return widget
 
-    def createDigitalNumber(self, transparency, name, rect, zValue, source, numList, digits, spacing, alignment, hideZeros, snap, interpolationStyle, previewNumber=None):
+    def createDigitalNumber(self, transparency, name, rect, zValue, source, numList, digits, spacing, alignment, hideZeros, snap, interpolationStyle, posRelativeToAlign, previewNumber=None):
         split = name.split("_")
         angle = 0
 
@@ -501,7 +502,7 @@ class Canvas(QGraphicsView):
                 if nameAngle[0] == "angle" and angleString != "":
                     angle = int(angleString) / 10
         
-        widget = NumberWidget(rect.x(), rect.y(), rect.width(), rect.height(), self.frame, self, QColor(255,255,255,0), transparency, name, angle)
+        widget = NumberWidget(rect.x(), rect.y(), rect.width(), rect.height(), self.frame, self, QColor(255,255,255,0), transparency, name, angle, posRelativeToAlign)
         widget.setZValue(zValue)
         widget.setData(1, "widget_imagelist") # Item ID
         widget.snap = snap
@@ -679,6 +680,13 @@ class Canvas(QGraphicsView):
                 )
 
             elif item.getProperty("widget_type") == "widget_num":
+                if isinstance(item, GMFWidget):
+                    posRelativeToAlign = True
+                elif isinstance(item, FprjWidget):
+                    posRelativeToAlign = False
+                else:
+                    posRelativeToAlign = False
+
                 widget = self.createDigitalNumber(
                     item.getProperty("widget_alpha"),
                     item.getProperty("widget_name"),
@@ -697,6 +705,7 @@ class Canvas(QGraphicsView):
                     bool(int(item.getProperty("num_toggle_zeros"))),
                     snap,
                     interpolation,
+                    posRelativeToAlign,
                     item.getPreviewNumber()
                 )
 
@@ -1050,15 +1059,17 @@ class ImagelistWidget(ImageWidget):
 class NumberWidget(BaseWidget):
     # Displays numbers
 
-    def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name, angle):
+    def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name, angle, isPosRelativeToAlignment=False):
         super().__init__(posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name)
         self.imageItems = []
         self.numList = []
         self.source = None
         self.angle = angle
+        self.relativeToAlign = isPosRelativeToAlignment
         self.timer = QTimer()
         self.timer.setInterval(100)
         self.timer.timeout.connect(self.updatePreviewNumber)
+        self.posX = posX
         self.setPos(posX, posY)
 
     def addBlankImage(self):
@@ -1067,6 +1078,7 @@ class NumberWidget(BaseWidget):
     def updateAngle(self):
         # calculate pivot point of the widget
         rect = self.rect()
+        print(self.alignment)
         if self.alignment != None:
             if self.alignment == "Left":
                 pivot = rect.topLeft()
@@ -1147,6 +1159,12 @@ class NumberWidget(BaseWidget):
                         self.addImage(image, (image.size().width() * x) + (int(spacing) * x), 0, int(spacing), interpolationStyle)
             else:
                 self.representNoImage()
+
+            if self.relativeToAlign:
+                if alignment == "Center":
+                    self.setX(self.posX - (self.rect().width() / 2))
+                elif alignment == "Right":
+                    self.setX(self.posX - self.rect().width())
 
             self.updateAngle()
 

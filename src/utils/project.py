@@ -584,32 +584,7 @@ class FprjWidget:
     def __init__(self, project, data):
         self.project: FprjProject = project
         self.data = data
-        self.previewData = {
-            "Hour": "10",
-            "Hour High": "1",
-            "Hour Low": "0",
-            "Minute": "08",
-            "Minute High": "0",
-            "Minute Low": "8",
-            "Second": "56",
-            "Second High": "5",
-            "Second Low": "6",
-            "Day": "21",
-            "Day High": "2",
-            "Day Low": "1",
-            "Month": "05",
-            "Month High": "0",
-            "Month Low": "5",
-            "Heart rate": "68",
-            "Weather temp": "24", # celsius
-            "Weather temp (C)": "24",
-            "Weather temp (F)": "75",
-            "Current step count": "7645",
-            "Active Calorie": "465",
-            "Battery percent": "80",
-            "Battery percente": "80",
-            "Week": "2"
-        }
+        self.previewData = project.watchData.previewData
     
     def removeAssociation(self):
         # by default, the data that is passed through in the data argument is linked to the source data list/dict
@@ -774,7 +749,8 @@ class XiaomiProject:
 
 class GMFProject:
     def __init__(self):
-        self.themes[self.currentTheme]["data"] = None
+        self.currentTheme = "default"
+        self.themes = {}
         self.widgets = None
         self.widgetsAOD = None
         self.watchData = WatchData()
@@ -793,7 +769,7 @@ class GMFProject:
 
         self.propertyIds = {
             "align": "num_alignment",
-            "dataSrc": "num_source",
+            "dataSrc": "widget_source",
             "image": "widget_bitmap",
             "imageList": "widget_bitmaplist",
             "maxValue": "pointer_max_value",
@@ -828,6 +804,7 @@ class GMFProject:
             with open(location, "r", encoding="utf8") as project:
                 projectJson = dict(json.load(project))
                 imagesDir = os.path.join(projectDir, "images")
+                aodImagesDir = os.path.join(projectDir, "images_aod")
                 if projectJson.get("elementsNormal"):
                     if not projectJson.get("deviceType"):
                         item, accepted = QInputDialog().getItem(None, "GMFProject", Translator.translate("Project", "Select the device the watchface was made for:"), self.watchData.deviceId, 0, False)
@@ -838,13 +815,22 @@ class GMFProject:
                     self.setNameToWidgetList(projectJson["elementsAod"])
 
                     self.name = os.path.basename(location)
-                    self.directory = projectDir
-                    self.dataPath = location
-                    self.imageFolder = imagesDir
 
-                    self.themes[self.currentTheme]["data"] = projectJson
-                    self.widgets = projectJson["elementsNormal"]
-                    self.widgetsAOD = projectJson["elementsAod"]
+                    self.themes["default"] = {
+                        "directory": projectDir,
+                        "path": location,
+                        "data": projectJson,
+                        "widgets": projectJson["elementsNormal"],
+                        "imageFolder": imagesDir
+                    }
+
+                    self.themes["aod"] = {
+                        "directory": projectDir,
+                        "path": location,
+                        "data": projectJson,
+                        "widgets": projectJson["elementsAod"],
+                        "imageFolder": aodImagesDir
+                    }
 
                     return True, "Success"
                 else:
@@ -853,11 +839,57 @@ class GMFProject:
         except Exception as e:
             return False, str(e), traceback.format_exc()
         
-    def getDeviceType(self):
-        return self.themes[self.currentTheme]["data"]["deviceType"]
+    def getDirectory(self) -> str:
+        """
+        Returns a path to the containing folder/directory of the project.
+        
+        :return: The path to the directory as a string.
+        """
+        return self.themes[self.currentTheme]["directory"]
     
+    def getImageFolder(self) -> str:
+        """
+        Returns a path to the folder where images are stored.
+        
+        :return: The path to the directory as a string.
+        """
+        return self.themes[self.currentTheme]["imageFolder"]
+    
+    def getPath(self) -> str:
+        """
+        Returns a path to the fprj file.
+        
+        :return: The path to the file as a string.
+        """
+        return self.themes[self.currentTheme]["path"]
+
+    def getDeviceType(self) -> str:
+        """
+        Returns the device the project was made for out of:
+
+        "xiaomi_color"
+        "70mai_saphir"
+        "xiaomi_color_sport"
+        "xiaomi_color_2/s1/s2"
+        "xiaomi_watch_s1_pro"
+        "redmi/poco_watch"
+        "xiaomi_band_7_pro"
+        "redmi_watch_3"
+        "redmi_band_pro"
+        "xiaomi_band_8"
+        "redmi_watch_2_lite"
+        "xiaomi_band_8_pro"
+        "redmi_watch_3_active"
+        "xiaomi_watch_s3"
+        "redmi_watch_4"
+        "xiaomi_band_9"
+        
+        :return: The DeviceId.
+        """
+        return self.themes[self.currentTheme]["data"]["deviceType"]
+        
     def getWidget(self, name):
-        widget = list(filter(lambda widget: widget["name"] == name, self.widgets))
+        widget = list(filter(lambda widget: widget["name"] == name, self.themes[self.currentTheme]["widgets"]))
         if len(widget) == 0:
             return None
         else:
@@ -865,7 +897,7 @@ class GMFProject:
 
     def getAllWidgets(self, type=None, theme=None):
         widgetList = []
-        for widget in self.widgets:
+        for widget in self.themes[self.currentTheme]["widgets"]:
             widgetList.append(GMFWidget(self, widget))
         return widgetList
     
@@ -874,17 +906,21 @@ class GMFProject:
     
     def getThumbnail(self):
         return self.themes[self.currentTheme]["data"]["previewImg"]
+    
+    def setTheme(self, theme):
+        self.currentTheme = theme
 
 class GMFWidget:
     def __init__(self, project, data):
         self.project = project
-        self.themes[self.currentTheme]["data"] = data
+        self.data = data
+        self.previewData = project.watchData.previewData
     
     def removeAssociation(self):
         # by default, the data that is passed through in the data argument is linked to the source data list/dict
         # removing association means that the data is instead independent as a seperate list
         # so modifications to the widget wont get applied over to the original data list
-        self.themes[self.currentTheme]["data"] = deepcopy(self.themes[self.currentTheme]["data"])
+        self.data = deepcopy(self.themes[self.currentTheme]["data"])
 
     def getProperty(self, property):
         property = [k for k, v in self.project.propertyIds.items() if v == property]
@@ -898,7 +934,7 @@ class GMFWidget:
             return
 
         if property == "type":
-            return self.project.widgetIds.get(self.themes[self.currentTheme]["data"].get(property))
+            return self.project.widgetIds.get(self.data.get(property))
         
         elif property == "width":
             return "50"
@@ -911,15 +947,25 @@ class GMFWidget:
 
         elif property == "defaultIndex":
             return "0"
+        
+        elif property == "align":
+            alignment = ["Right", "Left", "Center"]
+            return alignment[int(self.data.get(property))]
+        
+        elif property == "showZero":
+            if self.data.get("showZero") == False:
+                return "1"
+            else:
+                return "0"
 
         elif property == "imageList":
-            bitmapList = self.themes[self.currentTheme]["data"][property]
-            bitmapListCopy = deepcopy(self.themes[self.currentTheme]["data"][property])
+            bitmapList = self.data[property]
+            bitmapListCopy = deepcopy(self.data[property])
 
-            if self.themes[self.currentTheme]["data"]["type"] == "widge_imagelist":
-                if self.themes[self.currentTheme]["data"].get("imageIndexList"):   
+            if self.data["type"] == "widge_imagelist":
+                if self.data.get("imageIndexList"):   
                     for index, item in enumerate(bitmapList):
-                        merge = [self.themes[self.currentTheme]["data"]["imageIndexList"][index], item]
+                        merge = [self.data["imageIndexList"][index], item]
                         bitmapListCopy[index] = merge
                 else:
                     for index, item in enumerate(bitmapList):
@@ -927,16 +973,53 @@ class GMFWidget:
             
             return bitmapListCopy
         else:
-            return self.themes[self.currentTheme]["data"].get(property)
+            return self.data.get(property)
 
     def setProperty(self, property, value):
         property = [k for k, v in self.project.propertyIds.items() if v == property][0]
+        print(property, value)
+
         if property == "@BitmapList":
             for index, item in enumerate(value):
                 if isinstance(item, list): # contains index info
                     item[0] = f"({item[0]})" # add brackets
                     value[index] = ":".join(item)
             value = "|".join(value)
-        self.themes[self.currentTheme]["data"][property] = value
+
+        elif property == "showZero":
+            if value == "0":
+                value = True
+            elif value == "1":
+                value = False
+
+        elif property == "align":
+            alignment = ["Right", "Left", "Center"]
+            value = alignment.index(value)
+
+        self.data[property] = value
+
+    def getPreviewNumber(self):
+        return self.previewData.get(self.getSourceName())
+
+    def getSourceName(self):
+        dataSource = self.getProperty("widget_source")
+        
+        if dataSource == None:
+            return
+
+        modelSources = self.project.watchData.modelSourceData[self.project.getDeviceType()]
+        dataSourceName = None
+
+        for source in modelSources:
+            if source["id_gmf"] == "":
+                if source["id_fprj"] == dataSource:
+                    dataSourceName = source["string"]
+                    break
+            else:
+                if source["id_gmf"] == dataSource:
+                    dataSourceName = source["string"]
+                    break
+
+        return dataSourceName
 
     

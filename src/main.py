@@ -1207,6 +1207,15 @@ class WatchfaceEditor(QMainWindow):
                 if int(widget.getProperty("widget_pos_x")) == round(object.pos().x()) and int(
                         widget.getProperty("widget_pos_y")) == round(object.pos().y()):
                     return
+                
+                objectX = object.pos().x()
+
+                if isinstance(object, NumberWidget) and object.relativeToAlign:
+                    alignment = widget.getProperty("num_alignment")
+                    if alignment == "Center":
+                        objectX = objectX + (self.rect().width() / 2)
+                    elif alignment == "Right":
+                        objectX = objectX + self.rect().width()
 
                 prevPosObject = {
                     "Name": widget.getProperty("widget_name"),
@@ -1873,6 +1882,9 @@ if __name__ == "__main__":
     QFontDatabase.addApplicationFont(":/Fonts/Inter.ttf")
 
     def onException(exc_type, exc_value, exc_traceback):
+        if exc_type == KeyboardInterrupt:
+            sys.exit(1)
+
         exception = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
         errString = "Internal error! Please report as a bug.\n\n"+exception
         logging.error(errString)

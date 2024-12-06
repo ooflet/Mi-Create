@@ -2779,7 +2779,7 @@
         {
             "string": "Hour High",
             "id_fprj": "1000911",
-            "id_gmf": "",
+            "id_gmf": "0A11",
             "tip": "Hour value of time, high digit, value range 0..2"
         },
         {
@@ -2815,7 +2815,7 @@
         {
             "string": "Second High",
             "id_fprj": "1001911",
-            "id_gmf": "",
+            "id_gmf": "1A11",
             "tip": "Time second value, value range 0..5"
         },
         {
@@ -2833,7 +2833,7 @@
         {
             "string": "Day High",
             "id_fprj": "1001912",
-            "id_gmf": "",
+            "id_gmf": "1A12",
             "tip": "Day, high digit"
         },
         {

@@ -85,6 +85,7 @@ class WatchData:
             "arc_start_angle",
             "num_source",
             "widget_visiblity_source",
+            "widget_source",
             "widget_size_width",
             "widget_pos_x",
             "widget_pos_y"
@@ -210,6 +211,32 @@ class WatchData:
             'app_alarm_hour',
             'app_alarm_minute'
         ]
+        self.previewData = {
+            "Hour": "10",
+            "Hour High": "1",
+            "Hour Low": "0",
+            "Minute": "08",
+            "Minute High": "0",
+            "Minute Low": "8",
+            "Second": "56",
+            "Second High": "5",
+            "Second Low": "6",
+            "Day": "21",
+            "Day High": "2",
+            "Day Low": "1",
+            "Month": "05",
+            "Month High": "0",
+            "Month Low": "5",
+            "Heart rate": "68",
+            "Weather temp": "24", # celsius
+            "Weather temp (C)": "24",
+            "Weather temp (F)": "75",
+            "Current step count": "7645",
+            "Active Calorie": "465",
+            "Battery percent": "80",
+            "Battery percente": "80",
+            "Week": "2"
+        }
 
         self.update()
 
