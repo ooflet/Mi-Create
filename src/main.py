@@ -714,7 +714,7 @@ class WatchfaceEditor(QMainWindow):
                         for data in self.WatchData.modelSourceData[str(currentProject["project"].getDeviceType())]:
                             if data["string"] == value:
                                 if isinstance(currentProject["project"], FprjProject):
-                                    currentItem.setProperty(property, int(data["id_fprj"], 0))
+                                    currentItem.setProperty(property, int(data["id_fprj"]))
                                 elif isinstance(currentProject["project"], GMFProject):
                                     if data["id_gmf"] != "":
                                         currentItem.setProperty(property, data["id_gmf"])
