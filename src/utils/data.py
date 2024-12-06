@@ -273,8 +273,70 @@ class WatchData:
     def updateDataFiles(self, compiler, deviceInfo):
         try:
             settings = QSettings("Mi Create", "Workspace")
+
+            xml = []
+
+            fprjDeviceIds = {
+                "0": "xiaomi_color",
+                "1": "xiaomi_color_sport",
+                "2": "70mai_saphir",
+                "3": "xiaomi_color_2/s1/s2",
+                "4": "xiaomi_watch_s1_pro",
+                "5": "redmi/poco_watch",
+                "6": "xiaomi_band_7_pro",
+                "7": "redmi_watch_3",
+                "8": "redmi_band_pro",
+                "9": "xiaomi_band_8",
+                "10": "redmi_watch_2_lite",
+                "11": "xiaomi_band_8_pro",
+                "12": "redmi_watch_3_active",
+                "362": "xiaomi_watch_s3",
+                "365": "redmi_watch_4",
+                "366": "xiaomi_band_9",
+            }
+
+            gmfSourceIDs = {
+                "1000911": "0A11",
+                "1001911": "1A11",
+                "1001912": "1A12",
+            }
+
+            source_list = {}
+            size_list = {}
+
+            with open(deviceInfo, "r") as device_info:
+                xml = xmltodict.parse(device_info.read())    
+
+            for device in xml["DeviceList"]["DeviceInfo"]:
+                device_size_listing = {
+                    "width": int(device["@Width"]),
+                    "height": int(device["@Height"]),
+                    "radius": int(device["@Radius"]),
+                    "preview": {
+                        "width": 0,
+                        "height": 0,
+                        "radius": 0
+                    }
+                }
+                size_list[fprjDeviceIds[device["@Type"]]] = device_size_listing
+
+                source_list[fprjDeviceIds[device["@Type"]]] = []
+                for source in device["SourceDataList"]["SRC"]:
+                    source_listing = {
+                        "string": source["@Name"],
+                        "id_fprj": source["@ID"],
+                        "id_gmf": gmfSourceIDs["@ID"] or "",
+                        "tip": source["@Tip"]
+                    }
+                    source_list[fprjDeviceIds[device["@Type"]]].append(source_listing)
+
+            with open("data/sources.json", "w") as source_list_file:
+                source_list_file.write(json.dumps(source_list, indent=4))
+
+            with open("data/devices.json", "w") as watch_sizes_file:
+                watch_sizes_file.write(json.dumps(size_list, indent=4))
+
             shutil.copyfile(compiler, os.path.join(os.getcwd(), "compiler/compile.exe"))
-            shutil.copyfile(deviceInfo, os.path.join(os.getcwd(), "data/DeviceInfo.db"))
             self.update()
             settings.setValue("compilerVersion", "custom")
             QMessageBox.information(None, "Data File Update", "Compiler updated successfully. Please restart the program.")
