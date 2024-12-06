@@ -514,9 +514,11 @@ class Canvas(QGraphicsView):
         widget.setData(1, "widget_imagelist") # Item ID
         widget.snap = snap
 
+        numList = [QPixmap(os.path.join(self.imageFolder, image)) for image in numList]
+
         # Get QPixmap from file string
         if len(numList) >= 10:
-            widget.addNumbers(previewNumber, self.imageFolder, source, numList, digits, spacing, alignment, hideZeros, interpolationStyle)
+            widget.addNumbers(previewNumber, source, numList, digits, spacing, alignment, hideZeros, interpolationStyle)
         else:
             widget.representNoImage()
                 
@@ -639,6 +641,34 @@ class Canvas(QGraphicsView):
                 )
 
             elif item.getProperty("widget_type") == "widget":
+                if isinstance(item, GMFWidget):
+                    unitImageFromWidget = False
+                elif isinstance(item, FprjWidget):
+                    unitImageFromWidget = True
+                else:
+                    posRelativeToAlign = False
+
+                split = item.getProperty("widget_name").split("[")
+                if len(split) >= 2:
+                    nameRef = split[0].split("_")
+                    if len(nameRef) >= 2 and nameRef[-1] == "ref":
+                        numWidget = self.getObject(split[-1].strip("[]"))
+
+                        if numWidget != None:
+                            numWidget.addUnitImage(
+                                QPixmap(os.path.join(self.imageFolder, item.getProperty("widget_bitmap"))),
+                                unitImageFromWidget,
+                                item.getProperty("widget_name"),
+                                interpolation,
+                                numWidget.alignment
+                            )
+                        else:
+                            print(item.getProperty("widget_name"))
+                            self.unitImages.append(item)
+                            print(self.unitImages)
+
+                        return True, "Success", ""
+
                 widget = self.createImage(
                     item.getProperty("widget_alpha"),
                     item.getProperty("widget_name"),
@@ -689,10 +719,23 @@ class Canvas(QGraphicsView):
             elif item.getProperty("widget_type") == "widget_num":
                 if isinstance(item, GMFWidget):
                     posRelativeToAlign = True
+                    unitImageFromWidget = False
                 elif isinstance(item, FprjWidget):
                     posRelativeToAlign = False
+                    unitImageFromWidget = True
                 else:
                     posRelativeToAlign = False
+
+                unitImage = None
+                
+                for widget in self.unitImages:
+                    split = widget.getProperty("widget_name").split("[")
+                    if len(split) >= 2:
+                        nameRef = split[0].split("_")
+                        if len(nameRef) >= 2 and nameRef[-1] == "ref":
+                            if split[-1].strip("[]") == item.getProperty("widget_name"):
+                                print(widget, widget.getProperty("widget_name"))
+                                unitImage = widget
 
                 widget = self.createDigitalNumber(
                     item.getProperty("widget_alpha"),
@@ -715,6 +758,15 @@ class Canvas(QGraphicsView):
                     posRelativeToAlign,
                     item.getPreviewNumber()
                 )
+
+                if unitImage != None:
+                    widget.addUnitImage(
+                        QPixmap(os.path.join(self.imageFolder, unitImage.getProperty("widget_bitmap"))),
+                        unitImageFromWidget,
+                        unitImage.getProperty("widget_name"),
+                        interpolation,
+                        item.getProperty("num_alignment")
+                    )
 
             elif item.getProperty("widget_type") == "widget_arc":
                 widget = self.createProgressArc(
@@ -745,7 +797,6 @@ class Canvas(QGraphicsView):
 
             # add widget into widget list
             self.widgets[item.getProperty("widget_name")] = widget
-            print(self.widgets)
             return True, "Success", ""
         except Exception:
             # status, user facing message, debug info
@@ -768,6 +819,7 @@ class Canvas(QGraphicsView):
         # why? no reason
         #self.deviceRep = DeviceRepresentation(project.getDeviceType(), interpolation)
 
+        self.unitImages = []
         self.scene().clear()
         self.widgets.clear()
         #self.scene().addItem(self.deviceRep)
@@ -825,6 +877,8 @@ class BaseWidget(QGraphicsRectItem):
         self.setPen(QPen(QColor(0,0,0,0)))
         self.origPos = None
         self.size = QPointF(sizeX, sizeY)
+        self.boundingPosOverride = False
+        self.boundingPos = QPointF(0, 0)
         self.color = color
         self.canvas = canvas
         self.selectionPos = None
@@ -841,13 +895,18 @@ class BaseWidget(QGraphicsRectItem):
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsSelectable, True)
         #self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemSendsGeometryChanges, True)
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsFocusable, True)
-        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemClipsChildrenToShape, True)
+        #self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemClipsChildrenToShape, True)
 
     def boundingRect(self):
         # Create outline
         if self.selectionPos == None or self.pos().x() != self.selectionPos.x() or self.pos().y() != self.selectionPos.y():
             self.selectionPos = self.pos()
-            self.selectionPath.setPos(self.pos())
+
+            if self.boundingPosOverride:
+                self.selectionPath.setPos(self.boundingPos)
+            else:
+                self.selectionPath.setPos(self.pos())
+                
             self.selectionPainterPath.clear()
             self.selectionPainterPath.addRoundedRect(0, 0, self.rect().width(), self.rect().height(), self.highlightRadius, self.highlightRadius)
             self.selectionPath.setPath(self.selectionPainterPath)
@@ -1112,16 +1171,12 @@ class NumberWidget(BaseWidget):
         self.imageItems.append(item)
         if isAntialiased:
             item.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
-
-        width = ( qPixmap.width() * len(self.imageItems) ) + ( spacing * len(self.imageItems) )
-        self.setRect(0, 0, width, qPixmap.height())
         
-
-    def addNumbers(self, previewNumber, imageFolder, source, numList, digits, spacing, alignment, hideZeros, interpolationStyle, previewFromSource=False):
+    def addNumbers(self, previewNumber, source, numList, digits, spacing, alignment, hideZeros, interpolationStyle, previewFromSource=False):
         # store arguments for later
         if not previewFromSource:
             self.previewNumber = previewNumber
-        self.imageFolder = imageFolder
+        self.initialImage = numList[0]
         self.source = source
         self.numList = numList
         self.digits = digits
@@ -1135,14 +1190,13 @@ class NumberWidget(BaseWidget):
         for x in range(int(digits)):
             # Get QPixmap from file string
             if len(numList) >= 10:
-                image = QPixmap()
                 if previewNumber != None:
                     previewNumber = str(previewNumber)
                     cropped = previewNumber[-int(digits):] # crop number
                     previewNumber = cropped.zfill(int(digits)) # pad number with zeroes
-                    image.load(os.path.join(imageFolder, numList[int(previewNumber[x])]))
+                    image = numList[int(previewNumber[x])]
                 else:
-                    image.load(os.path.join(imageFolder, numList[x % len(numList)]))
+                    image = numList[x % len(numList)]
 
                 if hideZeros and previewNumber != None and int(previewNumber[x]) == 0:
                     self.addBlankImage()
@@ -1167,6 +1221,10 @@ class NumberWidget(BaseWidget):
             else:
                 self.representNoImage()
 
+            print(self.initialImage.width())
+            width = ( self.initialImage.width() * len(self.imageItems) ) + ( int(spacing) * len(self.imageItems) )
+            self.setRect(0, 0, width, self.initialImage.height())
+
             if self.relativeToAlign:
                 if alignment == "Center":
                     self.setX(self.posX - (self.rect().width() / 2))
@@ -1175,11 +1233,50 @@ class NumberWidget(BaseWidget):
 
             self.updateAngle()
 
+    def addUnitImage(self, unitImage, unitImageFromWidget, unitImageName, interpolationStyle, alignment=None):
+        if alignment != None:
+            if alignment == "Left":
+                num = len([item for item in self.imageItems if item != ""])
+                unitImagePosX = (self.initialImage.size().width() * num) + (int(self.spacing) * num) 
+            elif alignment == "Center":
+                # check if this is the first item by checking if there are no other items
+                items = [item for item in self.imageItems if item != ""]
+                # get pos x by multiplying all empty items by width and dividing by 2
+                initialItemPosX = (len([item for item in self.imageItems if item == ""]) * self.initialImage.size().width()) / 2
+                if items == []:
+                    unitImagePosX = initialItemPosX
+                else:
+                    unitImagePosX = (self.initialImage.size().width() + int(self.spacing)) * len(items) + initialItemPosX
+            elif alignment == "Right":
+                unitImagePosX = (self.initialImage.size().width() * len(self.imageItems)) + (int(self.spacing) * len(self.imageItems))
+
+        else:
+            unitImagePosX = self.rect().width()
+
+        if unitImageFromWidget:
+            unitImageWidget = ImageWidget(unitImagePosX, 0, 10, 10, self, self.canvas, QColor(255, 255, 255, 0), 255, unitImageName)
+            unitImageWidget.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsMovable, False)
+            unitImageWidget.setImage(unitImage, interpolationStyle)
+            unitImageWidget.snap = False
+            unitImageWidget.boundingPosOverride = True
+            unitImageWidget.boundingPos = QPointF(self.pos().x() + unitImagePosX, self.pos().y())
+            self.canvas.widgets[unitImageName] = unitImageWidget
+        else:
+            unitImageWidget = QGraphicsPixmapItem(self)
+            unitImageWidget.setPixmap(unitImage)
+            unitImageWidget.setX(unitImagePosX)
+
+            if interpolationStyle:
+                unitImageWidget.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
+        
+        print("rect", self.initialImage, len(self.imageItems), self.rect().width(), self.initialImage.height())
+        self.setRect(0, 0, self.rect().width() + unitImage.width(), self.initialImage.height())
+
     def updatePreviewNumber(self):
         previewNumber = self.scene().getPreviewNumber(self.source)
         
         if previewNumber is not None:
-            self.addNumbers(previewNumber, self.imageFolder, self.source, self.numList, self.digits, self.spacing, self.alignment, self.hideZeros, self.interpolationStyle, True)
+            self.addNumbers(previewNumber, self.source, self.numList, self.digits, self.spacing, self.alignment, self.hideZeros, self.interpolationStyle, previewFromSource=True)
 
     def startPreview(self):
         if self.source != None:
@@ -1189,7 +1286,7 @@ class NumberWidget(BaseWidget):
     def stopPreview(self):
         if self.source != None:
             self.timer.stop()
-            self.addNumbers(self.previewNumber, self.imageFolder, self.source, self.numList, self.digits, self.spacing, self.alignment, self.hideZeros, self.interpolationStyle)
+            self.addNumbers(self.previewNumber, self.source, self.numList, self.digits, self.spacing, self.alignment, self.hideZeros, self.interpolationStyle)
 
     def clearImages(self):
         for x in self.imageItems:
