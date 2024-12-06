@@ -232,7 +232,11 @@ class WatchData:
             "Weather temp (C)": "24",
             "Weather temp (F)": "75",
             "Current step count": "7645",
+            "Current step (percent)": "95",
             "Active Calorie": "465",
+            "Active Calorie (percent)": "77",
+            "Stand Up value": "11",
+            "Stand Up percent": "65",
             "Battery percent": "80",
             "Battery percente": "80",
             "Week": "2"

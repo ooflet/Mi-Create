@@ -708,16 +708,19 @@ class WatchfaceEditor(QMainWindow):
                 if currentProject["canvas"].getObject(widgetName).isSelected() is not True:
                     currentProject["canvas"].selectObject(widgetName)
 
-                if property == "num_source" or property == "imagelist_source" or property == "widget_visibility_source" or property == "arc_source" or property == "arc_max_value_source":
+                if property == "widget_source" or property == "num_source" or property == "imagelist_source" or property == "widget_visibility_source" or property == "arc_source" or property == "arc_max_value_source":
                     if value == "None":
                         currentItem.setProperty(property, 0)
                     else:
                         for data in self.WatchData.modelSourceData[str(currentProject["project"].getDeviceType())]:
                             if data["string"] == value:
-                                try:
+                                if isinstance(currentProject["project"], FprjProject):
                                     currentItem.setProperty(property, int(data["id_fprj"], 0))
-                                except:
-                                    currentItem.setProperty(property, int(data["id_fprj"]))
+                                elif isinstance(currentProject["project"], GMFProject):
+                                    if data["id_gmf"] != "":
+                                        currentItem.setProperty(property, data["id_gmf"])
+                                    else:
+                                        currentItem.setProperty(property, data["id_fprj"])
                                 break
                         else:
                             self.showDialog("warning", "Invalid source name!")
@@ -1213,9 +1216,9 @@ class WatchfaceEditor(QMainWindow):
                 if isinstance(object, NumberWidget) and object.relativeToAlign:
                     alignment = widget.getProperty("num_alignment")
                     if alignment == "Center":
-                        objectX = objectX + (self.rect().width() / 2)
+                        objectX = object.pos().x() + (object.rect().width() / 2)
                     elif alignment == "Right":
-                        objectX = objectX + self.rect().width()
+                        objectX = object.pos().x() + object.rect().width()
 
                 prevPosObject = {
                     "Name": widget.getProperty("widget_name"),
@@ -1226,7 +1229,7 @@ class WatchfaceEditor(QMainWindow):
                 currentPosObject = {
                     "Name": widget.getProperty("widget_name"),
                     "Widget": widget,
-                    "X": round(object.pos().x()),
+                    "X": objectX,
                     "Y": round(object.pos().y())
                 }
                 prevPos.append(prevPosObject)
@@ -1235,10 +1238,10 @@ class WatchfaceEditor(QMainWindow):
             self.markCurrentProjectChanged(True)
 
             def commandFunc(objects):
-                if isinstance(currentProject["project"], FprjProject):
-                    for object in objects:
-                        object["Widget"].setProperty("widget_pos_x", int(object["X"]))
-                        object["Widget"].setProperty("widget_pos_y", int(object["Y"]))
+                for object in objects:
+                    object["Widget"].setProperty("widget_pos_x", int(object["X"]))
+                    object["Widget"].setProperty("widget_pos_y", int(object["Y"]))
+                    
                 currentProject["canvas"].loadObjects(currentProject["project"],
                                                      self.settings["Canvas"]["Snap"]["value"],
                                                      self.settings["Canvas"]["Interpolation"]["value"],

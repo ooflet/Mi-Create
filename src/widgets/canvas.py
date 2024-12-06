@@ -211,6 +211,13 @@ class Scene(QGraphicsScene):
             return now.strftime("%m")
         elif source == "Week":
             return now.strftime("%w")
+        elif source == "AM/PM":
+            am_pm = now.strftime("%p")
+            print(am_pm)
+            if am_pm == "AM" or am_pm == "am":
+                return "0"
+            elif am_pm == "PM" or am_pm == "pm":
+                return "1"
 
     def drawSnapLines(self, pos):
         for line in self.posLines:
@@ -473,10 +480,10 @@ class Canvas(QGraphicsView):
             animImageList = [QPixmap(os.path.join(self.imageFolder, image[1])) for image in bitmapList]
             widget.addAnimatedImagelist(animImageList, interpolationStyle)
         else:
-            imageList = []
+            imageList = {}
             for image in bitmapList:
                 if len(image) >= 2:
-                    imageList.insert(int(image[0]), QPixmap(os.path.join(self.imageFolder, image[1])))
+                    imageList[int(image[0])] = QPixmap(os.path.join(self.imageFolder, image[1]))
                 else:
                     widget.representNoImage()
                     break
@@ -946,11 +953,11 @@ class ImagelistWidget(ImageWidget):
         self.source = None
 
     def getLastValidListIndex(self, index):
-        if 0 <= index < len(self.imagelist) and self.imagelist[index] is not None:
+        if self.imagelist.get(index):
             return index
 
-        for i in range(index - 1, -1, -1):
-            if 0 <= i < len(self.imagelist):
+        for i in range(index, -1, -1):
+            if self.imagelist.get(int(i)) != None:
                 return i
 
         return None
@@ -975,7 +982,7 @@ class ImagelistWidget(ImageWidget):
         elif previewIndex == None and defaultValue != None:
             previewImage = imagelist[self.getLastValidListIndex(defaultValue)]
         else:
-            previewImage = imagelist[0]
+            previewImage = imagelist[next(iter(imagelist))] # get first item
 
         self.pixmapItem.setPixmap(previewImage)
         self.setRect(0, 0, previewImage.width(), previewImage.height())
@@ -1020,7 +1027,7 @@ class ImagelistWidget(ImageWidget):
             elif self.previewIndex == None and self.defaultValue != None:
                 self.pixmapItem.setPixmap(self.imagelist[self.getLastValidListIndex(self.defaultValue)])
             else:
-                self.pixmapItem.setPixmap(self.imagelist[0])
+                self.pixmapItem.setPixmap(self.imagelist[next(iter(self.imagelist))])
             
 
     def startPreview(self, framesec=None, repeatAmounts=None):
@@ -1053,7 +1060,7 @@ class ImagelistWidget(ImageWidget):
             elif self.previewIndex == None and self.defaultValue != None:
                 self.pixmapItem.setPixmap(self.imagelist[self.getLastValidListIndex(self.defaultValue)])
             else:
-                self.pixmapItem.setPixmap(self.imagelist[0])
+                self.pixmapItem.setPixmap(self.imagelist[next(iter(self.imagelist))])
             
 
 class NumberWidget(BaseWidget):
