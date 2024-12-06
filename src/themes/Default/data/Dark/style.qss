@@ -475,6 +475,7 @@ QListView {
 QListView::item[floating="true"] {
     border: 1px solid transparent;
     border-radius: 4px;
+    margin-bottom: 6px;
 }
 
 QListView::item:hover:!selected {

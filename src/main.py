@@ -155,7 +155,6 @@ class WatchfaceEditor(QMainWindow):
                     self.setSetting("Language", item)
 
         self.loadLanguage(True)
-        self.settingsWidget.loadProperties(self.settings)
 
         # Setup History System
         self.History = History()
@@ -322,7 +321,7 @@ class WatchfaceEditor(QMainWindow):
                 self.loadTheme()
             if setting == "Language":
                 self.loadLanguage(True)
-                self.settingsWidget.loadProperties(self.settings)
+                self.settingsWidget.loadProperties(self.settings["General"])
 
     def saveSettings(self, retranslate, loadSettings=True):
         for property, value in self.stagedChanges:
@@ -840,12 +839,11 @@ class WatchfaceEditor(QMainWindow):
                 self.loadSettings()
                 self.loadTheme()
                 self.loadLanguage(True)
-                self.settingsWidget.loadProperties(self.settings)
+                self.settingsWidget.loadProperties(self.settings["General"])
 
-        self.coreDialog = CoreDialog(None, self.settingsWidget, f"{programVersion} • compiler {self.WatchData.getCompilerVersion()}",
+        self.coreDialog = CoreDialog(None, self.settings, self.settingsWidget, f"{programVersion} • compiler {self.WatchData.getCompilerVersion()}",
                                      self.WatchData.models)
         self.coreDialog.welcomeSidebarOpenProject.clicked.connect(self.openProject)
-        self.coreDialog.reloadSettings.connect(lambda: self.settingsWidget.loadProperties(self.settings))
         self.coreDialog.updateCompiler.connect(lambda compiler, db: self.WatchData.updateDataFiles(compiler, db))
         self.coreDialog.resetSettings.connect(resetSettings)
         self.coreDialog.projectConfigSaved.connect(saveConfig)

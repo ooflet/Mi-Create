@@ -839,6 +839,19 @@ class GMFProject:
         except Exception as e:
             return False, str(e), traceback.format_exc()
         
+    def save(self):
+        json_string = json.dumps(self.themes["default"]["data"], indent=4, ensure_ascii=False)
+        
+        try:
+            with open(self.themes["default"]["path"], "w", encoding="utf8") as file:
+                file.write(json_string)
+            
+            return True, "success"
+            
+        except Exception as e:
+            return False, e
+
+
     def getDirectory(self) -> str:
         """
         Returns a path to the containing folder/directory of the project.

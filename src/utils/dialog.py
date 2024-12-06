@@ -34,10 +34,13 @@ class CoreDialog(QDialog):
 
     projectConfigSaved = pyqtSignal()
 
-    def __init__(self, parent, settingsWidget, versionString, deviceList):
+    def __init__(self, parent, settings, settingsWidget, versionString, deviceList):
         super().__init__(parent)
 
         self.dialogButtonCallback = None
+
+        self.settingsWidget = settingsWidget
+        self.settings = settings
 
         self.setWindowTitle(Translator.translate("", "Welcome"))
         self.setWindowIcon(QIcon(":Images/MiCreate48x48.png"))      
@@ -78,7 +81,7 @@ class CoreDialog(QDialog):
         self.setupWelcomePage(versionString)
         self.setupNewProjectPage(deviceList)
         self.setupManageProjectPage()
-        self.setupSettingsPage(settingsWidget)
+        self.setupSettingsPage()
 
     def translate(self):
         self.welcomeSidebarNewProject.setText(Translator.translate("", "New Project"))
@@ -237,7 +240,7 @@ class CoreDialog(QDialog):
         self.newProjectSidebarList.setFrameShape(QFrame.Shape.NoFrame)
         self.newProjectSidebarList.setProperty("floating", True)
         self.watchfaceCategory = QListWidgetItem(self.newProjectSidebarList)
-        self.watchfaceCategory.setSizeHint(QSize(25, 35))
+        self.watchfaceCategory.setSizeHint(QSize(25, 40))
         self.watchfaceCategory.setIcon(QIcon().fromTheme("device-watch"))
         
         self.newProjectSidebarLayout.addLayout(self.newProjectSidebarHeader, 0)
@@ -351,7 +354,7 @@ class CoreDialog(QDialog):
         self.manageProjectSidebarList.setFrameShape(QFrame.Shape.NoFrame)
         self.manageProjectSidebarList.setProperty("floating", True)
         self.configureProjectCategory = QListWidgetItem(self.manageProjectSidebarList)
-        self.configureProjectCategory.setSizeHint(QSize(25, 35))
+        self.configureProjectCategory.setSizeHint(QSize(25, 40))
         self.configureProjectCategory.setIcon(QIcon().fromTheme("project-config"))
 
         self.manageProjectSidebarLayout.addLayout(self.manageProjectSidebarHeader, 0)
@@ -402,7 +405,7 @@ class CoreDialog(QDialog):
         self.sidebar.addWidget(self.manageProjectSidebar)
         self.contentPanel.addWidget(self.manageProjectPage)
 
-    def setupSettingsPage(self, settingsWidget):
+    def setupSettingsPage(self):
         self.settingsSidebar = QFrame()
         self.settingsSidebarLayout = QVBoxLayout()
         self.settingsSidebarLayout.setContentsMargins(0,0,0,0)
@@ -416,6 +419,9 @@ class CoreDialog(QDialog):
             print(folder)
             if folder:
                 self.updateCompiler.emit(os.path.join(folder, "Compiler.exe"), os.path.join(folder, "DeviceInfo.db"))
+
+        def loadCategory():
+            self.settingsWidget.loadProperties(self.settings[self.settingsSidebarList.currentItem().data(100)])
 
         updateAction.triggered.connect(update)
         resetAction.triggered.connect(self.resetSettings.emit)
@@ -439,12 +445,38 @@ class CoreDialog(QDialog):
         self.settingsSidebarHeaderLine.setFrameShape(QFrame.Shape.HLine)
         self.settingsSidebarHeaderLine.setFrameShadow(QFrame.Shadow.Sunken)
 
-        self.settingsPage = settingsWidget
-        settingsWidget.setStyleSheet("background-color: transparent;")
+        self.settingsSidebarList = QListWidget()
+        self.settingsSidebarList.setFrameShape(QFrame.Shape.NoFrame)
+        self.settingsSidebarList.setProperty("floating", True)
+
+        icons = {
+            "General": "preferences-desktop",
+            "Canvas": "widget-image"
+        }
+
+        for category in self.settings:
+            print(category)
+            item = QListWidgetItem(self.settingsSidebarList)
+            item.setSizeHint(QSize(25, 40))
+            item.setData(100, category)
+            item.setText(category)
+
+            if icons.get(category):
+                item.setIcon(QIcon().fromTheme(icons[category]))
+            else:
+                item.setIcon(QIcon().fromTheme("preferences-desktop"))
+
+
+        self.settingsSidebarList.setCurrentRow(0)
+        self.settingsSidebarList.currentItemChanged.connect(loadCategory)
+
+        self.settingsPage = self.settingsWidget
+        self.settingsWidget.setStyleSheet("background-color: transparent;")
 
         self.settingsSidebarLayout.addLayout(self.settingsSidebarHeader, 0)
         self.settingsSidebarLayout.addWidget(self.settingsSidebarHeaderLine, 0)
         self.settingsSidebarLayout.addStretch()
+        self.settingsSidebarLayout.addWidget(self.settingsSidebarList, 1)
 
         self.settingsSidebar.setLayout(self.settingsSidebarLayout)
 
@@ -504,11 +536,11 @@ class CoreDialog(QDialog):
     def showSettingsPage(self, prevPageFunc=None, animate=False):
         self.setWindowTitle(Translator.translate("", "Settings"))
         self.hertaGif.stop()
-        self.reloadSettings.emit()
+
 
         self.sidebar.setSlideTransition(animate)
         self.sidebar.setCurrentWidget(self.settingsSidebar)
-        
+        self.settingsWidget.loadProperties(self.settings[self.settingsSidebarList.currentItem().data(100)])
         self.contentPanel.setCurrentWidget(self.settingsPage)
         
         if prevPageFunc:
