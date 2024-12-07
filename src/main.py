@@ -842,10 +842,14 @@ class WatchfaceEditor(QMainWindow):
                 self.loadLanguage(True)
                 self.settingsWidget.loadProperties(self.settings["General"])
 
+        def updateSettings():
+            self.coreDialog.settings = self.settings
+
         self.coreDialog = CoreDialog(None, self.settings, self.settingsWidget, f"{programVersion} • compiler {self.WatchData.getCompilerVersion()}",
                                      self.WatchData.models)
         self.coreDialog.welcomeSidebarOpenProject.clicked.connect(self.openProject)
         self.coreDialog.updateCompiler.connect(lambda compiler, db: self.WatchData.updateDataFiles(compiler, db))
+        self.coreDialog.reloadSettings.connect(updateSettings)
         self.coreDialog.resetSettings.connect(resetSettings)
         self.coreDialog.projectConfigSaved.connect(saveConfig)
         self.coreDialog.rejected.connect(closeEvent)

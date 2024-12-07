@@ -537,6 +537,7 @@ class CoreDialog(QDialog):
         self.setWindowTitle(Translator.translate("", "Settings"))
         self.hertaGif.stop()
 
+        self.reloadSettings.emit()
 
         self.sidebar.setSlideTransition(animate)
         self.sidebar.setCurrentWidget(self.settingsSidebar)

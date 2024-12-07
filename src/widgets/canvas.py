@@ -1260,9 +1260,9 @@ class NumberWidget(BaseWidget):
             else:
                 self.representNoImage()
 
-            print(self.initialImage.width())
-            width = ( self.initialImage.width() * len(self.imageItems) ) + ( int(spacing) * len(self.imageItems) )
-            self.setRect(0, 0, width, self.initialImage.height())
+            if not previewFromSource:
+                width = ( self.initialImage.width() * len(self.imageItems) ) + ( int(spacing) * len(self.imageItems) )
+                self.setRect(0, 0, width, self.initialImage.height())
 
             if self.relativeToAlign:
                 if alignment == "Center":
@@ -1324,7 +1324,7 @@ class NumberWidget(BaseWidget):
     def stopPreview(self):
         if self.source != None:
             self.timer.stop()
-            self.addNumbers(self.previewNumber, self.source, self.numList, self.digits, self.spacing, self.alignment, self.hideZeros, self.interpolationStyle)
+            self.addNumbers(self.previewNumber, self.source, self.numList, self.digits, self.spacing, self.alignment, self.hideZeros, self.interpolationStyle, True)
 
     def clearImages(self):
         for x in self.imageItems:
