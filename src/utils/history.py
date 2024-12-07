@@ -12,16 +12,19 @@ class History:
         self.undoStack = QUndoStack()
 
 class CommandAddWidget(QUndoCommand):
-    def __init__(self, widget, commandFunc, description):
+    def __init__(self, widget, commandFunc, posX, posY, properties, description):
         super(CommandAddWidget, self).__init__(description)
         self.widget = widget
         self.commandFunc = commandFunc
+        self.posX = posX
+        self.posY = posY
+        self.properties = properties
 
     def redo(self):
-        self.commandFunc("redo", self.widget)
+        self.commandFunc("redo", self.widget, self.posX, self.posY, self.properties)
 
     def undo(self):
-        self.commandFunc("undo", self.widget)
+        self.commandFunc("undo", self.widget, self.posX, self.posY, self.properties)
 
 class CommandDeleteWidget(QUndoCommand):
     def __init__(self, widget, commandFunc, description):

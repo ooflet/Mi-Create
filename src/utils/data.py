@@ -17,6 +17,8 @@ class WatchData:
         self.modelSize = {}
         self.modelSourceList = {}
         self.modelSourceData = {}
+        self.previewSizes = {}
+        self.previewData = {}
         self.deviceId = [
             "xiaomi_color",
             "70mai_saphir",
@@ -211,42 +213,14 @@ class WatchData:
             'app_alarm_hour',
             'app_alarm_minute'
         ]
-        self.previewData = {
-            "Hour": "10",
-            "Hour High": "1",
-            "Hour Low": "0",
-            "Minute": "08",
-            "Minute High": "0",
-            "Minute Low": "8",
-            "Second": "56",
-            "Second High": "5",
-            "Second Low": "6",
-            "Day": "21",
-            "Day High": "2",
-            "Day Low": "1",
-            "Month": "05",
-            "Month High": "0",
-            "Month Low": "5",
-            "Heart rate": "68",
-            "Weather temp": "24", # celsius
-            "Weather temp (C)": "24",
-            "Weather temp (F)": "75",
-            "Current step count": "7645",
-            "Current step (percent)": "95",
-            "Active Calorie": "465",
-            "Active Calorie (percent)": "77",
-            "Stand Up value": "11",
-            "Stand Up percent": "65",
-            "Battery percent": "80",
-            "Battery percente": "80",
-            "Week": "2"
-        }
 
         self.update()
 
     def update(self):
         devicesPath = "data/devices.json"
         sourceListPath = "data/sources.json"
+        previewSizesPath = "data/preview_sizes.json"
+        previewDataPath = "data/preview_data.json"
         
         self.models.clear()
         self.modelID.clear()
@@ -259,6 +233,12 @@ class WatchData:
 
         with open(sourceListPath, "r") as sourceListFile:
             sources = json.load(sourceListFile)
+
+        with open(previewSizesPath, "r") as previewSizesFile:
+            self.previewSizes = json.load(previewSizesFile)
+            
+        with open(previewDataPath, "r") as previewDataFile:
+            self.previewData = json.load(previewDataFile)
 
         for deviceId, device in devices.items():
             self.models.append(device["string"])

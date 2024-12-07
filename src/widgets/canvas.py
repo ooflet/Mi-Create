@@ -17,8 +17,8 @@ sys.path.append("..")
 from utils.data import WatchData
 from utils.project import FprjWidget, GMFWidget
 
-from PyQt6.QtCore import pyqtSignal, QPointF, QSize, QRect, QTimer, Qt
-from PyQt6.QtGui import QPainter, QPainterPath, QPen, QColor, QPixmap, QIcon, QBrush, QImage
+from PyQt6.QtCore import pyqtSignal, QPoint, QPointF, QSize, QRect, QTimer, Qt, QModelIndex
+from PyQt6.QtGui import QPainter, QPainterPath, QPen, QColor, QPixmap, QIcon, QBrush, QImage, QStandardItemModel
 from PyQt6.QtWidgets import (QApplication, QGraphicsPathItem, QGraphicsScene, QGraphicsSceneMouseEvent, QGraphicsView, QGraphicsItem, QGraphicsRectItem, 
                             QToolButton, QGraphicsPixmapItem, QGraphicsEllipseItem, QMessageBox, QRubberBand, QGraphicsDropShadowEffect, QHBoxLayout, QVBoxLayout)
 
@@ -244,7 +244,7 @@ class Scene(QGraphicsScene):
         self.posLines.clear()
 
 class Canvas(QGraphicsView):
-    onObjectAdded = pyqtSignal(QPointF, str)
+    onObjectAdded = pyqtSignal(str, int, int)
     onObjectChange = pyqtSignal(str, str, object) # hate hacky workarounds, just support any type already Qt
     onObjectPosChange = pyqtSignal()
 
@@ -256,6 +256,8 @@ class Canvas(QGraphicsView):
 
         self.mainWindowUI = ui # used for ContextMenu, it needs window UI to access QActions
         self.widgets = {}
+
+        self.itemDragPreview = None
 
         self.rubberBand = QRubberBand(QRubberBand.Shape.Rectangle, self)
 
@@ -300,6 +302,45 @@ class Canvas(QGraphicsView):
                 item.setSelected(True)
         self.rubberBand.setGeometry(QRect(0,0,0,0))
         return super().mouseReleaseEvent(event)
+
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
+            event.acceptProposedAction()
+
+            model = QStandardItemModel()
+            model.dropMimeData(event.mimeData(), Qt.DropAction.CopyAction, 0, 0, QModelIndex())
+
+            self.itemDragPreview = QGraphicsPixmapItem()
+            self.scene().addItem(self.itemDragPreview)
+            self.itemDragPreview.setOpacity(0.5)
+            self.itemDragPreview.setPixmap(QPixmap(os.path.join(self.imageFolder, model.item(0, 0).data(0))))
+
+    def dragMoveEvent(self, event):
+        if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
+            event.acceptProposedAction()
+
+            if self.itemDragPreview != None:
+                self.itemDragPreview.setPos(self.mapToScene(int(event.position().x()), int(event.position().y())))
+
+    def dragLeaveEvent(self, event):
+        if self.itemDragPreview != None:
+            self.scene().removeItem(self.itemDragPreview)
+            self.itemDragPreview = None
+
+    def dropEvent(self, event):
+        event.acceptProposedAction()
+
+        model = QStandardItemModel()
+        model.dropMimeData(event.mimeData(), Qt.DropAction.CopyAction, 0, 0, QModelIndex())
+
+        if self.itemDragPreview != None:
+            self.scene().removeItem(self.itemDragPreview)
+            self.itemDragPreview = None
+
+        if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
+            position = self.mapToScene(int(event.position().x()), int(event.position().y()))
+            self.onObjectAdded.emit(model.item(0, 0).data(0), int(position.x()), int(position.y()))
+
 
     def contextMenuEvent(self, event):
         scenePos = self.mapToScene(event.pos())
@@ -893,7 +934,7 @@ class BaseWidget(QGraphicsRectItem):
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsSelectable, True)
         #self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemSendsGeometryChanges, True)
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsFocusable, True)
-        #self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemClipsChildrenToShape, True)
+        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemClipsChildrenToShape, True)
 
     def boundingRect(self):
         # Create outline
@@ -1381,6 +1422,7 @@ class PointerWidget(BaseWidget):
     def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name):
         super().__init__(posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name)
         self.setPos(posX, posY)
+        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemClipsChildrenToShape, False)
 
     def addPointer(self, image, anchorX, anchorY, antialiasing):
         self.pointer = QGraphicsPixmapItem(image, self)

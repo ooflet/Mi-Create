@@ -871,28 +871,29 @@ class WatchfaceEditor(QMainWindow):
             for item in name:
                 self.Explorer.items[name].setSelected(True)
 
-    def createWatchfaceWidget(self, id):
+    def createWatchfaceWidget(self, id, name=None, posX="center", posY="center", properties=None):
         currentProject = self.getCurrentProject()
 
         if not currentProject.get("project"):
             return
 
-        count = 0
-        for widget in currentProject["project"].getAllWidgets():
-            if "widget-" in widget.getProperty("widget_name"):
-                count += 1
+        if name == None:
+            count = 0
+            for widget in currentProject["project"].getAllWidgets():
+                if "widget-" in widget.getProperty("widget_name"):
+                    count += 1
 
-        name = "widget-" + str(count)
+            name = "widget-" + str(count)
     
         if self.ignoreHistoryInvoke:
             self.ignoreHistoryInvoke = False
         else:
-            def commandFunc(type, name):
+            def commandFunc(type, name, posX, posY, properties):
                 self.markCurrentProjectChanged(True)
                 if type == "undo":
                     currentProject["project"].deleteWidget(currentProject["project"].getWidget(name))
                 elif type == "redo":
-                    currentProject["project"].createWidget(id, name, "center", "center")
+                    currentProject["project"].createWidget(id, name, posX, posY, properties)
 
                 success, userFacingMessage, debugMessage = currentProject["canvas"].loadObjects(currentProject["project"],
                                         self.settings["Canvas"]["Snap"]["value"],
@@ -912,7 +913,7 @@ class WatchfaceEditor(QMainWindow):
                 if type == "redo":
                     currentProject["canvas"].selectObject(name)
 
-            command = CommandAddWidget(name, commandFunc, f"Add object {name}")
+            command = CommandAddWidget(name, commandFunc, posX, posY, properties, f"Add object {name}")
             self.History.undoStack.push(command)
 
     def changeSelectedWatchfaceWidgetLayer(self, changeType):
@@ -1180,6 +1181,9 @@ class WatchfaceEditor(QMainWindow):
         if self.projects.get(project.getDirectory()):
             self.ui.workspace.setCurrentIndex(self.ui.workspace.indexOf(self.projects[project.getDirectory()]['canvas']))
             return
+        
+        def objectAdd(bitmap, x, y):
+            self.createWatchfaceWidget("widget", None, x, y, {"widget_bitmap": bitmap})
 
         def propertyChange(objectName, propertyName, propertyValue):
             propertyField = self.propertiesWidget.propertyItems.get(propertyName)
@@ -1264,6 +1268,7 @@ class WatchfaceEditor(QMainWindow):
         # Create the project
         canvas.setAcceptDrops(True)
         canvas.scene().selectionChanged.connect(lambda: self.updateProjectSelections("canvas"))
+        canvas.onObjectAdded.connect(objectAdd)
         canvas.onObjectChange.connect(propertyChange)
         canvas.onObjectPosChange.connect(posChange)
 
