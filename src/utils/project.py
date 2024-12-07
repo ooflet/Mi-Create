@@ -475,12 +475,13 @@ class FprjProject:
         widget = self.defaultItems[id].copy()
         widget["@Name"] = name
         
-        for property, value in properties.items():
-            property = [k for k, v in self.propertyIds.items() if v == property]
-        
-            if len(property) > 0:
-                property = property[0]
-                widget[property] = value
+        if properties != None:
+            for property, value in properties.items():
+                property = [k for k, v in self.propertyIds.items() if v == property]
+            
+                if len(property) > 0:
+                    property = property[0]
+                    widget[property] = value
 
         if posX == "center":
             widget["@X"] = int(self.watchData.modelSize[self.getDeviceType()][0] / 2 - int(widget["@Width"]) / 2)

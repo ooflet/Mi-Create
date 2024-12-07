@@ -58,6 +58,7 @@ from utils.exporter import FprjConverter
 from widgets.canvas import Canvas, ObjectIcon, ImageWidget, NumberWidget, AnalogWidget, ImagelistWidget
 from widgets.explorer import Explorer
 from widgets.properties import PropertiesWidget
+from widgets.delegates import ResourcesDelegate
 from widgets.editor import Editor, XMLLexer
 from translate import Translator
 
@@ -659,7 +660,7 @@ class WatchfaceEditor(QMainWindow):
 
         self.statusBar().setContentsMargins(4, 4, 4, 4)
         
-
+        #self.ui.resourceList.setItemDelegate(ResourcesDelegate(self.ui.resourceList))
         self.ui.resourceList.startDrag = startDrag
         self.ui.resourceSearch.textChanged.connect(search)
         self.ui.reloadResource.clicked.connect(reloadResource)
