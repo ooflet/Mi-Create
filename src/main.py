@@ -48,6 +48,7 @@ import threading
 import json
 import traceback
 
+from utils.binary import WatchfaceBinary
 from utils.project import WatchData, XiaomiProject, FprjProject, GMFProject
 from utils.dialog import CoreDialog, MultiFieldDialog
 from utils.theme import Theme
@@ -660,6 +661,11 @@ class WatchfaceEditor(QMainWindow):
 
         self.statusBar().setContentsMargins(4, 4, 4, 4)
         
+        self.ui.workspace.tabBar().setMinimumWidth(99999) # hack to not get tab bars clipped
+                                                    # i dont know the consequences of my actions and i dont want to know
+                                                    # (this is a joke if you know please tell me thx)
+        self.ui.workspace.tabBar().setExpanding(False)
+        
         #self.ui.resourceList.setItemDelegate(ResourcesDelegate(self.ui.resourceList))
         self.ui.resourceList.startDrag = startDrag
         self.ui.resourceSearch.textChanged.connect(search)
@@ -692,17 +698,17 @@ class WatchfaceEditor(QMainWindow):
             currentProject = self.getCurrentProject()
             if currentProject == None or not currentProject.get("project"):
                 return
-            currentSelected = self.Explorer.currentItem()
+            currentSelected = currentProject["canvas"].getSelectedObjects()[0]
 
             # search for item by name, and if available set as currentItem
-            currentItem = currentProject["project"].getWidget(currentSelected.data(0, 101))
+            currentItem = currentProject["project"].getWidget(currentSelected.data(0))
 
             if currentItem == None:
                 return
 
             self.markCurrentProjectChanged(True)
 
-            logging.info(f"Set property {args[0]}, {args[1]} for widget {currentSelected.data(0, 101)}")
+            logging.info(f"Set property {args[0]}, {args[1]} for widget {currentSelected.data(0)}")
 
             def updateProperty(widgetName, property, value):
                 if currentProject["canvas"].getObject(widgetName).isSelected() is not True:
@@ -806,7 +812,6 @@ class WatchfaceEditor(QMainWindow):
         currentProject = self.getCurrentProject()
         if item and currentProject["project"].getWidget(item) != None:
             if self.propertiesWidget.clearOnRefresh:
-                print("clear", item)
                 if isinstance(currentProject["project"], FprjProject):
                     self.propertiesWidget.loadProperties(self.propertiesFprjJson[itemType], currentProject["project"], item,
                                                         self.resourceImages, currentProject["project"].getDeviceType())
@@ -814,11 +819,9 @@ class WatchfaceEditor(QMainWindow):
                     self.propertiesWidget.loadProperties(self.propertiesGMFJson[itemType], currentProject["project"], item,
                                                         self.resourceImages, currentProject["project"].getDeviceType())
             else:
-                print("no clear")
                 self.propertiesWidget.clearOnRefresh = True
         else:
             if self.propertiesWidget.clearOnRefresh:
-                print("clear")
                 self.propertiesWidget.clearProperties()
 
     def setupDialogs(self):
@@ -1094,11 +1097,13 @@ class WatchfaceEditor(QMainWindow):
             currentProject["canvas"].scale(zoom_factor, zoom_factor)
 
     def updateProjectSelections(self, subject):
+        print(subject)
         currentProject = self.getCurrentProject()
         currentCanvasSelected = []
         currentExplorerSelected = []
 
         if currentProject == None or not currentProject.get("canvas") or self.selectionDebounce:
+            print("return")
             return
 
         for item in currentProject["canvas"].scene().selectedItems():
@@ -1107,8 +1112,9 @@ class WatchfaceEditor(QMainWindow):
         for item in self.Explorer.selectedItems():
             currentExplorerSelected.append(item.data(0, 101))
 
-        if set(currentCanvasSelected) == set(currentExplorerSelected):
-            return
+        # if set(currentCanvasSelected) == set(currentExplorerSelected):
+        #     print("same set")
+        #     return
 
         if subject == "canvas":
             self.selectionDebounce = True
@@ -1120,15 +1126,22 @@ class WatchfaceEditor(QMainWindow):
                     else:
                         self.Explorer.items[key].setSelected(False)
             elif len(currentCanvasSelected) == 1:
-                self.Explorer.setCurrentItem(self.Explorer.items[currentCanvasSelected[0]])
+                print("== 1")
+                print(self.Explorer.items[currentCanvasSelected[0]])
+                self.Explorer.setCurrentItem(None)
+                self.Explorer.items[currentCanvasSelected[0]].setSelected(True) # setCurrentItem stramgely toggles in this situation
             else:
+                print("***** 1", currentCanvasSelected)
                 self.Explorer.setCurrentItem(None)
 
             if len(currentCanvasSelected) == 1:
                 self.updateProperties(currentCanvasSelected[0],
                                       self.Explorer.items[currentCanvasSelected[0]].data(0, 100))
             else:
+                print("!!!!! 1", currentCanvasSelected)
                 self.updateProperties(False)
+
+            print(self.Explorer.currentItem())
 
             self.selectionDebounce = False
         elif subject == "explorer":
@@ -1139,6 +1152,7 @@ class WatchfaceEditor(QMainWindow):
                 currentProject["canvas"].selectObject(item, False)
 
             if currentExplorerSelected == [] or currentExplorerSelected[0] == None:
+                print("!!!!! 2")
                 self.selectionDebounce = False
                 self.updateProperties(False)
                 return
@@ -1147,6 +1161,7 @@ class WatchfaceEditor(QMainWindow):
                 self.updateProperties(currentExplorerSelected[0],
                                       self.Explorer.items[currentExplorerSelected[0]].data(0, 100))
             else:
+                print("!!!!! 3")
                 self.updateProperties(False)
 
             self.selectionDebounce = False
@@ -1205,6 +1220,7 @@ class WatchfaceEditor(QMainWindow):
                 propertyField.setText(propertyValue)
 
         def posChange():
+            print("poschange")
             currentProject = self.getCurrentProject()
             selectedObjects = currentProject["canvas"].getSelectedObjects()
 
@@ -1242,6 +1258,9 @@ class WatchfaceEditor(QMainWindow):
                 prevPos.append(prevPosObject)
                 currentPos.append(currentPosObject)
 
+            print(prevPosObject)
+            print(currentPos)
+
             self.markCurrentProjectChanged(True)
 
             def commandFunc(objects):
@@ -1249,12 +1268,15 @@ class WatchfaceEditor(QMainWindow):
                     object["Widget"].setProperty("widget_pos_x", int(object["X"]))
                     object["Widget"].setProperty("widget_pos_y", int(object["Y"]))
                     
+                print("before load")
                 currentProject["canvas"].loadObjects(currentProject["project"],
                                                      self.settings["Canvas"]["Snap"]["value"],
                                                      self.settings["Canvas"]["Interpolation"]["value"],
                                                      self.settings["Canvas"]["ClipDeviceShape"]["value"],
                                                      self.settings["Canvas"]["ShowDeviceOutline"]["value"])
+                print("before selection")
                 currentProject["canvas"].selectObjectsFromPropertyList(objects)
+                print("after selection")
 
                 if currentProject["canvas"].isPreviewPlaying:
                     self.playAllPreviews(currentProject["canvas"])
@@ -1624,6 +1646,8 @@ class WatchfaceEditor(QMainWindow):
                     success, message = project["project"].save()
                     if not success:
                         self.showDialog("error", _("Failed to save project: ") + str(message))
+                    else:
+                        project["canvas"].createPreview()
 
         elif projectsToSave == "current":
             currentIndex = self.ui.workspace.currentIndex()
@@ -1635,6 +1659,7 @@ class WatchfaceEditor(QMainWindow):
                     self.statusBar().showMessage(_("Project saved at ") + currentProject["project"].getPath(), 2000)
                     self.fileChanged = False
                     currentProject["hasFileChanged"] = False
+                    currentProject["canvas"].createPreview()
                 else:
                     self.statusBar().showMessage(_("Failed to save: ") + str(message), 10000)
                     self.showDialog("error", _("Failed to save project: ") + str(message))
@@ -1745,6 +1770,10 @@ class WatchfaceEditor(QMainWindow):
                 return
 
             fileLocation = str.split(os.path.basename(currentProject["project"].getPath()), ".")[0] + ".face"
+
+            # binary = WatchfaceBinary(os.path.join(compileDirectory, fileLocation))
+            # binary.setId("123456789")
+            
             self.statusBar().showMessage(_("Watchface built successfully at ") + f"{compileDirectory}\\{fileLocation}",
                                          3000)
 

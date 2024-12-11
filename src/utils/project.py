@@ -12,6 +12,7 @@
 # IDs are in the WatchData class
 
 import os
+import mmap
 import traceback
 import logging
 import json
@@ -27,6 +28,7 @@ from PyQt6.QtCore import QProcess, QSettings
 from PyQt6.QtWidgets import QMessageBox, QInputDialog
 
 from utils.data import WatchData
+from utils.binary import WatchfaceBinary
 from translate import Translator
 
 supportedOneFileVersion = "1.0"
@@ -573,9 +575,12 @@ class FprjProject:
         except Exception as e:
             return False, e        
 
-    def compile(self, platform, path, location, compilerLocation):
+    def compile(self, platform, path, location, compilerLocation, id=None):
         logging.info("Compiling project "+path)
         process = QProcess()
+
+        if not os.path.isdir(os.path.join(self.getDirectory(), "output")):
+            os.makedirs(os.path.join(self.getDirectory(), "output"))
 
         if platform == "Windows":
             process.setProgram(compilerLocation)

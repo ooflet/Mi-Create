@@ -17,7 +17,7 @@ sys.path.append("..")
 from utils.data import WatchData
 from utils.project import FprjWidget, GMFWidget
 
-from PyQt6.QtCore import pyqtSignal, QPoint, QPointF, QSize, QRect, QTimer, Qt, QModelIndex
+from PyQt6.QtCore import pyqtSignal, QPoint, QPointF, QSize, QRect, QRectF, QTimer, Qt, QModelIndex
 from PyQt6.QtGui import QPainter, QPainterPath, QPen, QColor, QPixmap, QIcon, QBrush, QImage, QStandardItemModel
 from PyQt6.QtWidgets import (QApplication, QGraphicsPathItem, QGraphicsScene, QGraphicsSceneMouseEvent, QGraphicsView, QGraphicsItem, QGraphicsRectItem, 
                             QToolButton, QGraphicsPixmapItem, QGraphicsEllipseItem, QMessageBox, QRubberBand, QGraphicsDropShadowEffect, QHBoxLayout, QVBoxLayout)
@@ -213,7 +213,6 @@ class Scene(QGraphicsScene):
             return now.strftime("%w")
         elif source == "AM/PM":
             am_pm = now.strftime("%p")
-            print(am_pm)
             if am_pm == "AM" or am_pm == "am":
                 return "0"
             elif am_pm == "PM" or am_pm == "pm":
@@ -401,33 +400,52 @@ class Canvas(QGraphicsView):
         self.widgets[name].setSelected(True)
 
     def selectObjectsFromPropertyList(self, items: list):
+        self.clearSelected()
         for item in items:
             self.widgets[item["Name"]].setSelected(True)
 
     def getSelectedObjects(self):
+        print(self.scene().selectedItems())
         return self.scene().selectedItems()
 
     def onObjectDeleted(self, name, widget):
         self.objectDeleted.emit(name)
 
     def createPreview(self):
-        large_preview_path = os.path.join(self.imageFolder, "preview_large.png")
+        preview_path = os.path.join(self.projectDirectory, "preview.png")
+        large_preview_path = os.path.join(self.projectDirectory, "preview_large.png")
         area = self.scene().sceneRect()
 
-        if os.path.exists(large_preview_path):
-            if QMessageBox.question(None, "previewGenerator", f"{large_preview_path} already exists. Overwrite?") == QMessageBox.StandardButton.Yes:
-                os.remove(large_preview_path)
-            else:
-                return
-            
-        image = QImage(area.size(), QImage.Format_ARGB32_Premultiplied)
-        painter = QPainter(image)
+        # if os.path.exists(large_preview_path):
+        #     os.remove(large_preview_path)
 
-        self.scene().render(painter, image.rect(), area)
-        painter.end()
+        preview_size = WatchData().previewSizes[self.project.getDeviceType()]
+            
+        preview = QImage(QSize(preview_size[0], preview_size[1]), QImage.Format.Format_ARGB32)
+        preview.fill(Qt.GlobalColor.transparent)
+
+        large_preview = QImage(area.size().toSize(), QImage.Format.Format_ARGB32)
+        large_preview.fill(Qt.GlobalColor.transparent)
+
+        preview_painter = QPainter(preview)
+        preview_painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        large_preview_painter = QPainter(large_preview)
+        large_preview_painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        self.loadObjects(self.project, self.snap, self.interpolation, True, False, True)
+
+        self.scene().render(preview_painter, QRectF(0, 0, preview_size[0], preview_size[1]), area)
+        self.scene().render(large_preview_painter, self.scene().sceneRect(), area)
+
+        preview_painter.end()
+        large_preview_painter.end()
+
+        self.loadObjects(self.project, self.snap, self.interpolation, self.clip, self.outline)
 
         # Save the image to a file.
-        image.save()
+        preview.save(preview_path)
+        large_preview.save(large_preview_path)
 
     def createAnalogDisplay(self, transparency, name, pos, zValue, backgroundImage, hourHandImage, minuteHandImage, secondHandImage, itemAnchors, smoothHr, smoothMin, snap, interpolationStyle):
         suffix = name.split("_")
@@ -810,8 +828,15 @@ class Canvas(QGraphicsView):
             # status, user facing message, debug info
             return False, f"Widget '{item.getProperty('widget_name')}' has malformed data or is corrupt", f"Canvas failed to create object {item.getProperty('widget_name')}:\n {traceback.format_exc()}"
 
-    def loadObjects(self, project, snap=None, interpolation=None, clip=True, outline=False):
+    def loadObjects(self, project, snap=None, interpolation=None, clip=True, outline=False, previewReload=False):
         self.frame = DeviceFrame(self.deviceSize, clip)
+
+        if not previewReload:
+            self.project = project
+            self.snap = snap
+            self.interpolation = interpolation
+            self.clip = clip
+            self.outline = outline
         
         if interpolation == None:
             interpolation = self.interpolation
@@ -840,6 +865,7 @@ class Canvas(QGraphicsView):
         if project.getAllWidgets() == []:
             return True, "Success", ""
 
+        self.projectDirectory = project.getDirectory()
         self.imageFolder = project.getImageFolder()
 
         self.scene().originPositons = {}
@@ -890,7 +916,7 @@ class Canvas(QGraphicsView):
                 object.delete()
                 for unitWidget in self.unitImages.values():
                     split = unitWidget[0].getProperty("widget_name").split("[")
-                    numWidget = self.widgets[split[-1].strip("[]")]
+                    numWidget = self.getObject(split[-1].strip("[]"))
                     if numWidget and isinstance(numWidget, NumberWidget):
                         numWidget.addUnitImage(
                             True,
@@ -1106,7 +1132,6 @@ class ImagelistWidget(ImageWidget):
             self.pixmapItem.setPixmap(self.animatedImageList[self.currentFrame])
 
             if self.totalRepeats != 0:
-                print(self.currentFrame + 1, len(self.animatedImageList) - 1, self.animRepeats, self.totalRepeats)
                 if self.currentFrame + 1 > len(self.animatedImageList) - 1:
                     self.animRepeats += 1
 
@@ -1183,7 +1208,6 @@ class NumberWidget(BaseWidget):
     def updateAngle(self):
         # calculate pivot point of the widget
         rect = self.rect()
-        print(self.alignment)
         if self.alignment != None:
             if self.alignment == "Left":
                 pivot = rect.topLeft()
