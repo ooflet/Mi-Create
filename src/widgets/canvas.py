@@ -1101,16 +1101,23 @@ class ImagelistWidget(ImageWidget):
         self.source = source
         self.imagelist = imagelist
 
+        print(defaultValue)
+
         if previewIndex != None:
             previewImage = imagelist[self.getLastValidListIndex(previewIndex)]
-        elif previewIndex == None and defaultValue != None:
+        elif previewIndex == None and defaultValue != None and defaultValue != 0:
             previewImage = imagelist[self.getLastValidListIndex(defaultValue)]
-        else:
+        elif imagelist != {}:
             previewImage = imagelist[next(iter(imagelist))] # get first item
+        else:
+            previewImage = QPixmap()
 
-        self.pixmapItem.setPixmap(previewImage)
-        self.setRect(0, 0, previewImage.width(), previewImage.height())
-        
+        if previewImage.isNull():
+            self.representNoImage()
+        else:
+            self.pixmapItem.setPixmap(previewImage)
+            self.setRect(0, 0, previewImage.width(), previewImage.height())
+            
         if isAntialiased:
             self.pixmapItem.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
 
@@ -1184,6 +1191,9 @@ class ImagelistWidget(ImageWidget):
                 self.pixmapItem.setPixmap(self.imagelist[self.getLastValidListIndex(self.defaultValue)])
             else:
                 self.pixmapItem.setPixmap(self.imagelist[next(iter(self.imagelist))])
+
+    def representNoImage(self):
+        self.color = QColor(255, 0, 0, 100)
             
 
 class NumberWidget(BaseWidget):
