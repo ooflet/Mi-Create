@@ -268,12 +268,15 @@ class FprjProject:
         except Exception as e:
             return False, str(e), traceback.format_exc()
         
-    def createAod(self) -> None:
+    def createAod(self, ignoreAodCheck=False) -> None:
         """
         Creates an AOD project. Will only work when a project is loaded.
 
         The compiler handles AODs with a seperate project created in the current one.
         """
+
+        if not ignoreAodCheck and self.themes["aod"]["widgets"] == []:
+            return
 
         # Before proper creation of an AOD, the project creates a temporary AOD theme
         # Copy the data before applying the default template project
@@ -502,7 +505,6 @@ class FprjProject:
             if item["@Name"] == widget.getProperty("widget_name"):
                 self.themes[self.currentTheme]["widgets"].pop(index) 
         
-
     def restoreWidget(self, widget, index):
         self.themes[self.currentTheme]["widgets"].insert(index, widget.data)
 
@@ -545,6 +547,10 @@ class FprjProject:
             widget[0]["@X"] = posX
             widget[0]["@Y"] = posY
         
+    def setDevice(self, value):
+        for theme in self.themes.values():
+            theme["data"]["FaceProject"]["@DeviceType"] = list(self.deviceIds.keys())[list(self.deviceIds.values()).index(value)]
+    
     def setTitle(self, value):
         self.themes[self.currentTheme]["data"]["FaceProject"]["Screen"]["@Title"] = value
 
@@ -570,10 +576,10 @@ class FprjProject:
                 with open(self.themes["aod"]["path"], "w", encoding="utf8") as file:
                     file.write(aod_xml_string)
             
-            return True, "success"
+            return True, "success", ""
             
         except Exception as e:
-            return False, e        
+            return False, e, traceback.format_exc()
 
     def compile(self, platform, path, location, compilerLocation, id=None):
         logging.info("Compiling project "+path)

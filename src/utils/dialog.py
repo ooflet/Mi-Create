@@ -91,6 +91,7 @@ class CoreDialog(QDialog):
         self.watchfaceCategory.setText(Translator.translate("", "Watchface"))
         self.manageProjectSidebarTitle.setText(Translator.translate("", "Manage Project"))
         self.configureProjectCategory.setText(Translator.translate("", "Configure"))
+        self.configurePageDeviceTitle.setText(Translator.translate("", "Device type"))
         self.configurePageNameTitle.setText(Translator.translate("", "Watchface name"))
         self.configurePagePreviewText.setText(Translator.translate("", "Watchface thumbnail"))
         self.settingsSidebarTitle.setText(Translator.translate("", "Settings"))
@@ -371,6 +372,12 @@ class CoreDialog(QDialog):
         self.configurePage.setContentsMargins(9,6,9,9)
         self.configurePageLayout = QVBoxLayout(self.configurePage)
 
+        self.configurePageDevice = QHBoxLayout()
+        self.configurePageDeviceTitle = QLabel()
+        
+        self.configurePageDeviceField = QComboBox()
+        self.configurePageDeviceField.setFixedWidth(175)
+
         self.configurePageName = QHBoxLayout()
         self.configurePageNameTitle = QLabel()
         
@@ -387,12 +394,16 @@ class CoreDialog(QDialog):
         
         #self.configurePageAutoThumbnail = QCheckBox("Auto-generate watchface preview")
 
+        self.configurePageDevice.addWidget(self.configurePageDeviceTitle)
+        self.configurePageDevice.addWidget(self.configurePageDeviceField)
+
         self.configurePageName.addWidget(self.configurePageNameTitle)
         self.configurePageName.addWidget(self.configurePageNameField)
 
         self.configurePagePreview.addWidget(self.configurePagePreviewText)
         self.configurePagePreview.addWidget(self.configurePagePreviewField)
 
+        self.configurePageLayout.addLayout(self.configurePageDevice)
         self.configurePageLayout.addLayout(self.configurePageName)
         self.configurePageLayout.addLayout(self.configurePagePreview)
         self.configurePageLayout.addStretch()

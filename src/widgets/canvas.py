@@ -247,7 +247,7 @@ class Canvas(QGraphicsView):
     onObjectChange = pyqtSignal(str, str, object) # hate hacky workarounds, just support any type already Qt
     onObjectPosChange = pyqtSignal()
 
-    def __init__(self, device, antialiasingEnabled: bool, deviceOutlineVisible: bool, ui: object, parent=None):
+    def __init__(self, antialiasingEnabled: bool, deviceOutlineVisible: bool, ui: object, parent=None):
         super().__init__(parent)
 
         if antialiasingEnabled:
@@ -268,10 +268,7 @@ class Canvas(QGraphicsView):
 
         self.zoomValue = 0
 
-        self.deviceSize = WatchData().modelSize[str(device)]
-
         self.graphicsScene = Scene()
-        self.graphicsScene.setSceneRect(0,0,self.deviceSize[0],self.deviceSize[1])
 
         self.isPreviewPlaying = False
 
@@ -412,7 +409,6 @@ class Canvas(QGraphicsView):
         self.objectDeleted.emit(name)
 
     def createPreview(self):
-        preview_path = os.path.join(self.projectDirectory, "preview.png")
         large_preview_path = os.path.join(self.projectDirectory, "preview_large.png")
         area = self.scene().sceneRect()
 
@@ -421,31 +417,41 @@ class Canvas(QGraphicsView):
 
         preview_size = WatchData().previewSizes[self.project.getDeviceType()]
             
-        preview = QImage(QSize(preview_size[0], preview_size[1]), QImage.Format.Format_ARGB32)
-        preview.fill(Qt.GlobalColor.transparent)
+        prev_theme = self.project.currentTheme
 
-        large_preview = QImage(area.size().toSize(), QImage.Format.Format_ARGB32)
-        large_preview.fill(Qt.GlobalColor.transparent)
+        for theme in self.project.themes:
+            print(theme)
+            self.project.setTheme(theme)
 
-        preview_painter = QPainter(preview)
-        preview_painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+            if self.project.getAllWidgets() != [] or theme == "default":
+                preview_path = os.path.join(self.projectDirectory, f"preview_{theme}.png")
+                preview_path_large = os.path.join(self.projectDirectory, f"preview_{theme}_large.png")
 
-        large_preview_painter = QPainter(large_preview)
-        large_preview_painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+                preview = QImage(QSize(preview_size[0], preview_size[1]), QImage.Format.Format_ARGB32)
+                preview.fill(Qt.GlobalColor.transparent)
+                preview_painter = QPainter(preview)
+                preview_painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+                
+                preview_large = QImage(area.size().toSize(), QImage.Format.Format_ARGB32)
+                preview_large.fill(Qt.GlobalColor.transparent)
+                preview_painter_large = QPainter(preview_large)
+                preview_painter_large.setRenderHint(QPainter.RenderHint.Antialiasing)
 
-        self.loadObjects(self.project, self.snap, self.interpolation, True, False, True)
+                self.loadObjects(self.project, self.snap, self.interpolation, True, False, True)
+                self.scene().render(preview_painter, QRectF(0, 0, preview_size[0], preview_size[1]), area)
+                self.scene().render(preview_painter_large, self.scene().sceneRect(), area)
 
-        self.scene().render(preview_painter, QRectF(0, 0, preview_size[0], preview_size[1]), area)
-        self.scene().render(large_preview_painter, self.scene().sceneRect(), area)
+                preview_painter.end()
+                preview_painter_large.end()
 
-        preview_painter.end()
-        large_preview_painter.end()
+                preview.save(preview_path)
+                preview_large.save(preview_path_large)
+
+
+        self.project.setTheme(prev_theme)
 
         self.loadObjects(self.project, self.snap, self.interpolation, self.clip, self.outline)
 
-        # Save the image to a file.
-        preview.save(preview_path)
-        large_preview.save(large_preview_path)
 
     def createAnalogDisplay(self, transparency, name, pos, zValue, backgroundImage, hourHandImage, minuteHandImage, secondHandImage, itemAnchors, smoothHr, smoothMin, snap, interpolationStyle):
         suffix = name.split("_")
@@ -829,6 +835,9 @@ class Canvas(QGraphicsView):
             return False, f"Widget '{item.getProperty('widget_name')}' has malformed data or is corrupt", f"Canvas failed to create object {item.getProperty('widget_name')}:\n {traceback.format_exc()}"
 
     def loadObjects(self, project, snap=None, interpolation=None, clip=True, outline=False, previewReload=False):
+        self.deviceSize = WatchData().modelSize[project.getDeviceType()]
+        self.scene().setSceneRect(0,0,self.deviceSize[0],self.deviceSize[1])
+        
         self.frame = DeviceFrame(self.deviceSize, clip)
 
         if not previewReload:

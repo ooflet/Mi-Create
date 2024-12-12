@@ -830,9 +830,16 @@ class WatchfaceEditor(QMainWindow):
                 sys.exit()
 
         def saveConfig():
-            currentProject: FprjProject = self.getCurrentProject()["project"]
-            currentProject.setTitle(self.coreDialog.configurePageNameField.text())
-            currentProject.setThumbnail(self.coreDialog.configurePagePreviewField.currentText())
+            currentProject = self.getCurrentProject()
+            currentProject["project"].setDevice(self.WatchData.modelID[self.coreDialog.configurePageDeviceField.currentText()])
+            currentProject["project"].setTitle(self.coreDialog.configurePageNameField.text())
+            currentProject["project"].setThumbnail(self.coreDialog.configurePagePreviewField.currentText())
+            print(currentProject["project"].getDeviceType())
+            success, userFacingMessage, debugMessage = currentProject["canvas"].loadObjects(currentProject["project"],
+                                    self.settings["Canvas"]["Snap"]["value"],
+                                    self.settings["Canvas"]["Interpolation"]["value"],
+                                    self.settings["Canvas"]["ClipDeviceShape"]["value"],
+                                    self.settings["Canvas"]["ShowDeviceOutline"]["value"])
             self.coreDialog.close()
 
         def resetSettings():
@@ -850,6 +857,7 @@ class WatchfaceEditor(QMainWindow):
 
         self.coreDialog = CoreDialog(None, self.settings, self.settingsWidget, f"{programVersion} • compiler {self.WatchData.getCompilerVersion()}",
                                      self.WatchData.models)
+        self.coreDialog.configurePageDeviceField.addItems(self.WatchData.models)
         self.coreDialog.welcomeSidebarOpenProject.clicked.connect(self.openProject)
         self.coreDialog.updateCompiler.connect(lambda compiler, db: self.WatchData.updateDataFiles(compiler, db))
         self.coreDialog.reloadSettings.connect(updateSettings)
@@ -1289,7 +1297,7 @@ class WatchfaceEditor(QMainWindow):
         self.Explorer.clear()
 
         # Create a Canvas (QGraphicsScene & QGraphicsView)
-        canvas = Canvas(project.getDeviceType(), self.settings["Canvas"]["Antialiasing"]["value"],
+        canvas = Canvas(self.settings["Canvas"]["Antialiasing"]["value"],
                         self.settings["Canvas"]["ClipDeviceShape"]["value"], self.ui, self)
 
         # Create the project
@@ -1628,9 +1636,9 @@ class WatchfaceEditor(QMainWindow):
     def showManageProjectDialog(self):
         currentProject: FprjProject = self.getCurrentProject()["project"]
 
-        self.coreDialog.configurePagePreviewField.addItems(self.resourceImages)
-
         self.coreDialog.configurePageNameField.setText(currentProject.getTitle())
+        self.coreDialog.configurePageNameField.setText(currentProject.getTitle())
+        self.coreDialog.configurePageDeviceField.setCurrentText(list(self.WatchData.modelID.keys())[list(self.WatchData.modelID.values()).index(currentProject.getDeviceType())])
         self.coreDialog.configurePagePreviewField.setCurrentText(currentProject.getThumbnail())
 
         self.coreDialog.showManageProjectPage()
@@ -1654,7 +1662,7 @@ class WatchfaceEditor(QMainWindow):
             currentProject = self.getCurrentProject()
 
             if currentProject.get("project"):
-                success, message = currentProject["project"].save()
+                success, message, debugMessage = currentProject["project"].save()
                 if success:
                     self.statusBar().showMessage(_("Project saved at ") + currentProject["project"].getPath(), 2000)
                     self.fileChanged = False
@@ -1662,7 +1670,7 @@ class WatchfaceEditor(QMainWindow):
                     currentProject["canvas"].createPreview()
                 else:
                     self.statusBar().showMessage(_("Failed to save: ") + str(message), 10000)
-                    self.showDialog("error", _("Failed to save project: ") + str(message))
+                    self.showDialog("error", _("Failed to save project: ") + str(message), debugMessage)
             elif currentProject.get("editor"):
                 try:
                     with open(currentProject["path"], "w", encoding="utf8") as file:
@@ -1670,7 +1678,7 @@ class WatchfaceEditor(QMainWindow):
                     self.statusBar().showMessage(_("Project saved at ") + currentProject["path"], 2000)
                 except Exception as e:
                     self.statusBar().showMessage(_("Failed to save: ") + str(e), 10000)
-                    self.showDialog("error", _("Failed to save project: ") + str(e))
+                    self.showDialog("error", _("Failed to save project: ") + str(e), debugMessage)
 
             self.markCurrentProjectChanged(False)
 
