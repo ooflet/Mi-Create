@@ -437,6 +437,7 @@ class PropertiesWidget(QWidget):
                             decimalList.clear()
 
                     def updateNumberList(index, text):
+                        print(propertyValue)
                         if index >= len(propertyValue):
                             propertyValue.insert(index, text)
                         else:

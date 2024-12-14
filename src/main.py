@@ -49,9 +49,10 @@ import json
 import traceback
 
 from utils.binary import WatchfaceBinary
-from utils.project import WatchData, XiaomiProject, FprjProject, GMFProject
+from utils.project import WatchData, XiaomiProject, FprjProject, GMFProject, FprjWidget
 from utils.dialog import CoreDialog, MultiFieldDialog
 from utils.theme import Theme
+from utils.menu import ContextMenu
 from utils.updater import Updater
 from utils.history import History, CommandAddWidget, CommandDeleteWidget, CommandPasteWidget, CommandModifyWidgetLayer, \
     CommandModifyProperty, CommandModifyPosition, CommandChangeTheme
@@ -60,7 +61,7 @@ from widgets.canvas import Canvas, ObjectIcon, ImageWidget, NumberWidget, Analog
 from widgets.explorer import Explorer
 from widgets.properties import PropertiesWidget
 from widgets.delegates import ResourcesDelegate
-from widgets.editor import Editor, XMLLexer
+from widgets.editor import Editor, XMLLexer, JsonLexer
 from translate import Translator
 
 import resources.resources_rc  # resource import required because it sets up the icons
@@ -673,13 +674,6 @@ class WatchfaceEditor(QMainWindow):
         self.ui.addResource.clicked.connect(addResource)
         self.ui.openResourceFolder.clicked.connect(openResourceFolder)
 
-        # Connect objects in the Insert menu to actions
-        self.ui.actionImage.triggered.connect(lambda: self.createWatchfaceWidget("widget"))
-        self.ui.actionImage_List.triggered.connect(lambda: self.createWatchfaceWidget("widget_imagelist"))
-        self.ui.actionDigital_Number.triggered.connect(lambda: self.createWatchfaceWidget("widget_num"))
-        self.ui.actionAnalog_Display.triggered.connect(lambda: self.createWatchfaceWidget("widget_analog"))
-        self.ui.actionArc_Progress.triggered.connect(lambda: self.createWatchfaceWidget("widget_arc"))
-
         # Connect tab changes
         self.ui.workspace.tabCloseRequested.connect(self.closeTab)
         self.ui.workspace.currentChanged.connect(handleTabChange)
@@ -696,7 +690,7 @@ class WatchfaceEditor(QMainWindow):
     def setupProperties(self):
         def setProperty(args):
             currentProject = self.getCurrentProject()
-            if currentProject == None or not currentProject.get("project"):
+            if currentProject == None or not currentProject.get("project") or currentProject["canvas"].getSelectedObjects() == []:
                 return
             currentSelected = currentProject["canvas"].getSelectedObjects()[0]
 
@@ -745,10 +739,11 @@ class WatchfaceEditor(QMainWindow):
                     pixmap.load(os.path.join(currentProject["project"].getImageFolder(), value))
 
                     # set widget size to image size
-                    currentItem.setProperty("widget_size_width", pixmap.width())
-                    self.propertiesWidget.propertyItems["widget_size_width"].setText(str(pixmap.width()))
-                    currentItem.setProperty("widget_size_height", pixmap.height())
-                    self.propertiesWidget.propertyItems["widget_size_height"].setText(str(pixmap.width()))
+                    if isinstance(currentItem, FprjWidget):
+                        currentItem.setProperty("widget_size_width", pixmap.width())
+                        self.propertiesWidget.propertyItems["widget_size_width"].setText(str(pixmap.width()))
+                        currentItem.setProperty("widget_size_height", pixmap.height())
+                        self.propertiesWidget.propertyItems["widget_size_height"].setText(str(pixmap.width()))
 
                     currentItem.setProperty(property, value)
 
@@ -1312,12 +1307,19 @@ class WatchfaceEditor(QMainWindow):
 
         toolButtonLayout = QHBoxLayout()
         toolButtonLayout.setContentsMargins(0, 0, 0, 0)
+             
+        if isinstance(project, FprjProject):
+            contextMenu = ContextMenu("fprj", self.ui)
+        elif isinstance(project, GMFProject):
+            contextMenu = ContextMenu("gmf", self.ui)
+
+        contextMenu.triggered.connect(lambda action: self.createWatchfaceWidget(contextMenu.ids[action]))
 
         insertButton = QToolButton(self)
         insertButton.setObjectName("canvasDecoration-button")
         insertButton.setFixedSize(40, 25)
         insertButton.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
-        insertButton.setMenu(self.ui.menuInsert)
+        insertButton.setMenu(contextMenu)
         insertButton.setIcon(QIcon().fromTheme("insert-object"))
         insertButton.setIconSize(QSize(18, 18))
         insertButton.setToolTip("Create Widget")
@@ -1382,11 +1384,11 @@ class WatchfaceEditor(QMainWindow):
         previewButton.setIcon(QIcon().fromTheme("media-playback-start"))
         previewButton.clicked.connect(previewToggle)
 
-        menuButton = QToolButton(self)
-        menuButton.setObjectName("canvasDecoration-button")
-        menuButton.setCheckable(True)
-        menuButton.setFixedSize(25, 25)
-        menuButton.setIcon(QIcon().fromTheme("view-more"))
+        # menuButton = QToolButton(self)
+        # menuButton.setObjectName("canvasDecoration-button")
+        # menuButton.setCheckable(True)
+        # menuButton.setFixedSize(25, 25)
+        # menuButton.setIcon(QIcon().fromTheme("view-more"))
 
         canvasLayout.addLayout(toolButtonLayout)
         canvasLayout.addStretch()
@@ -1395,7 +1397,7 @@ class WatchfaceEditor(QMainWindow):
         toolButtonLayout.addWidget(aodButton)
         toolButtonLayout.addStretch()
         toolButtonLayout.addWidget(previewButton)
-        toolButtonLayout.addWidget(menuButton)
+        #toolButtonLayout.addWidget(menuButton)
 
         # Add Icons
         icon = QIcon().fromTheme("project-icon")
@@ -1584,7 +1586,7 @@ class WatchfaceEditor(QMainWindow):
     def openProject(self, event=None, projectLocation=None):
         # Get where to open the project from
         if projectLocation == None:
-            projectLocation = QFileDialog.getOpenFileName(self, _('Open Project...'), "%userprofile%/")
+            projectLocation = QFileDialog.getOpenFileName(self, _('Open Project...'), "%userprofile%/", "Watchface Project (*.fprj wfDef.json)")
 
         if not isinstance(projectLocation, str):
             projectLocation = projectLocation[0].replace("\\", "/")
@@ -1594,7 +1596,7 @@ class WatchfaceEditor(QMainWindow):
             if extension == '.fprj':
                 project = FprjProject()
             elif extension == ".json":
-                self.showDialog("warning", "GMFProjects are experimental! Most (if not all) editing features have not been implemented. Mi Create can currently only preview GMFProjects")
+                self.showDialog("warning", "GMFProjects are experimental! Bugs may occur.")
                 project = GMFProject()
             else:
                 self.showDialog("error", "Invalid project!")
@@ -1668,6 +1670,8 @@ class WatchfaceEditor(QMainWindow):
                     self.fileChanged = False
                     currentProject["hasFileChanged"] = False
                     currentProject["canvas"].createPreview()
+                    if currentProject["canvas"].isPreviewPlaying:
+                        self.playAllPreviews(currentProject["canvas"])
                 else:
                     self.statusBar().showMessage(_("Failed to save: ") + str(message), 10000)
                     self.showDialog("error", _("Failed to save project: ") + str(message), debugMessage)
@@ -1794,8 +1798,12 @@ class WatchfaceEditor(QMainWindow):
         compileDirectory = os.path.join(os.path.dirname(currentProject["project"].getPath()), "output")
         output = []
 
-        process = currentProject["project"].compile(platform.system(), currentProject["project"].getPath(), compileDirectory,
+        process, message = currentProject["project"].compile(platform.system(), currentProject["project"].getPath("default"), compileDirectory,
                                                     "compiler/compile.exe")
+        if process == False:
+            success([f"Error: {message}"])
+            return
+
         process.readyReadStandardOutput.connect(lambda: output.append(bytearray(process.readAll()).decode('utf-8', 'backslashreplace')))
         process.finished.connect(lambda: success(output))
 
@@ -1826,7 +1834,12 @@ class WatchfaceEditor(QMainWindow):
             self.ui.workspace.setCurrentIndex(
                 self.ui.workspace.indexOf(self.projects[currentProject["path"]]["editor"]))
             return
-        self.createNewCodespace("Project XML", currentProject["project"].getPath(), projectString, XMLLexer)
+        
+        if isinstance(currentProject["project"], FprjProject):
+            self.createNewCodespace("Project XML", currentProject["project"].getPath(), projectString, XMLLexer)
+        elif isinstance(currentProject["project"], GMFProject):
+            self.createNewCodespace("Project Json", currentProject["project"].getPath(), projectString, JsonLexer)
+
 
     def showColorDialog(self):
         color = QColorDialog.getColor(Qt.white, self, "Select Color")

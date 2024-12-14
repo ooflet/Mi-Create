@@ -22,6 +22,7 @@ with open("data/context_menus.json") as file:
 
 class ContextMenu(QMenu):
     def __init__(self, type, ui):
+        self.ids = {}
         super().__init__()
         def createContextMenu(menu, actions):
             for actionName, properties in actions.items():
@@ -40,5 +41,9 @@ class ContextMenu(QMenu):
                     if properties.get("icon"):
                         icon = QIcon().fromTheme(properties["icon"])
                         action.setIcon(icon)
+                
+                if properties.get("id"):
+                    print(properties["id"])
+                    self.ids[action] = properties["id"]
 
         createContextMenu(self, contextMenus[type])

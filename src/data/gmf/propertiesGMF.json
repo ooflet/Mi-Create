@@ -28,20 +28,6 @@
                     "value": "",
                     "min": "-999",
                     "max": "999"
-                },
-                "widget_size_width": {
-                    "string": "Width",
-                    "type": "int",
-                    "value": "48",
-                    "min": "0",
-                    "max": "999"
-                },
-                "widget_size_height": {
-                    "string": "Height",
-                    "type": "int",
-                    "value": "48",
-                    "min": "0",
-                    "max": "999"
                 }
             },
             "Appearance": {

@@ -394,7 +394,11 @@ class Canvas(QGraphicsView):
             return
         if clearSelection:
             self.scene().clearSelection()
-        self.widgets[name].setSelected(True)
+
+        if self.widgets.get(name):
+            self.widgets[name].setSelected(True)
+        else:
+            logging.warning(f"Widget {name} was not found in canvas")
 
     def selectObjectsFromPropertyList(self, items: list):
         self.clearSelected()

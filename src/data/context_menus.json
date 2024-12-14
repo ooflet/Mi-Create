@@ -50,5 +50,51 @@
         "Delete": {
             "inherit": "actionDelete"
         }
+    },
+    "fprj": {
+        "Image": {
+            "icon": "widget-image",
+            "id": "widget"
+        },
+        "Image List": {
+            "icon": "widget-imagelist",
+            "id": "widget_imagelist"
+        },
+        "sep1": {
+            "specialType": "seperator"
+        },
+        "Digital Number": {
+            "icon": "widget-digitalnumber",
+            "id": "widget_num"
+        },
+        "Analog Display": {
+            "icon": "widget-analogdisplay",
+            "id": "widget_analog"
+        },
+        "Arc Progress": {
+            "icon": "widget-arcprogress",
+            "id": "widget_arc"
+        }
+    },
+    "gmf": {
+        "Image": {
+            "icon": "widget-image",
+            "id": "widget"
+        },
+        "Image List": {
+            "icon": "widget-imagelist",
+            "id": "widget_imagelist"
+        },
+        "sep1": {
+            "specialType": "seperator"
+        },
+        "Digital Number": {
+            "icon": "widget-digitalnumber",
+            "id": "widget_num"
+        },
+        "Pointer": {
+            "icon": "widget-pointer",
+            "id": "widget_pointer"
+        }
     }
 }

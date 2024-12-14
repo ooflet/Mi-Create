@@ -7,10 +7,10 @@
 
 from PyQt6.QtWidgets import QFrame
 from PyQt6.QtGui import QColor, QFont, QPalette
-from PyQt6.Qsci import QsciScintilla, QsciLexerXML
+from PyQt6.Qsci import QsciScintilla, QsciLexerXML, QsciLexerJSON
 
 class XMLLexer(QsciLexerXML):
-    def __init__(self, parent, palette):
+    def __init__(self, parent):
         super().__init__(parent)
         self.setFont(QFont("Courier New", 10))
         self.setColor(QColor(255,255,255), 0)
@@ -28,13 +28,33 @@ class XMLLexer(QsciLexerXML):
         self.setColor(QColor(170, 170, 170), 12)
         self.setColor(QColor(170, 170, 170), 13)
 
+class JsonLexer(QsciLexerJSON):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.setFont(QFont("Courier New", 10))
+        self.setColor(QColor(255,255,255), 0)
+        self.setColor(QColor(78, 140, 191), 1)
+        self.setColor(QColor(22, 195, 222), 2)
+        self.setColor(QColor(83, 188, 237), 3)
+        self.setColor(QColor(255, 255, 255), 4)
+        self.setColor(QColor(255, 255, 255), 5)
+        self.setColor(QColor(206, 145, 120), 6)
+        self.setColor(QColor(255, 255, 255), 7)
+        self.setColor(QColor(255, 255, 255), 8)
+        self.setColor(QColor(255, 255, 255), 9)
+        self.setColor(QColor(255, 255, 255), 10)
+        self.setColor(QColor(170, 170, 170), 11)
+        self.setColor(QColor(170, 170, 170), 12)
+        self.setColor(QColor(170, 170, 170), 13)
+
+
 class Editor(QsciScintilla):
     def __init__(self, parent, palette, lexer):
         super().__init__(parent)
 
         self.setFrameShape(QFrame.Shape.NoFrame)
 
-        self.setLexer(lexer(self, palette))
+        self.setLexer(lexer(self))
         self.setFont(QFont("Courier New", 10))
 
         # End of Line

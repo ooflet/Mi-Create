@@ -22,11 +22,7 @@ def remove_path(path: str):
         os.remove(path)
 
 def mkdir(path: str):
-    if os.path.exists(path):
-        if QMessageBox.question(None, "fprjConverter", f"{path} already exists. Overwrite?") == QMessageBox.StandardButton.Yes:
-            remove_path(path)
-        else:
-            return
+    remove_path(path)
     os.makedirs(path)
 
 class FprjConverter:

@@ -248,20 +248,20 @@ class FprjProject:
 
             self.name = f"{name}.fprj"
 
-            self.themes[theme] = {
-                "directory": os.path.dirname(path),
-                "path": os.path.join(folder, f"{name}.fprj"),
-                "data": template,
-                "widgets": template["FaceProject"]["Screen"].get("Widget"),
-                "imageFolder": os.path.join(folder, "images")
-            }
-
             self.themes["aod"] = {
                 "directory": "",
                 "path": "",
                 "data": template,
                 "widgets": template["FaceProject"]["Screen"].get("Widget"),
                 "imageFolder": ""
+            }
+
+            self.themes[theme] = {
+                "directory": os.path.dirname(path),
+                "path": os.path.join(folder, f"{name}.fprj"),
+                "data": template,
+                "widgets": template["FaceProject"]["Screen"].get("Widget"),
+                "imageFolder": os.path.join(folder, "images")
             }
 
             return True, os.path.join(folder, f"{name}.fprj")
@@ -417,13 +417,16 @@ class FprjProject:
         """
         return self.themes[self.currentTheme]["imageFolder"]
     
-    def getPath(self) -> str:
+    def getPath(self, theme=None) -> str:
         """
         Returns a path to the fprj file.
         
         :return: The path to the file as a string.
         """
-        return self.themes[self.currentTheme]["path"]
+        if theme == None:
+            return self.themes[self.currentTheme]["path"]
+        else:
+            return self.themes[theme]["path"]
 
     def getDeviceType(self) -> str:
         """
@@ -448,7 +451,7 @@ class FprjProject:
         
         :return: The DeviceId.
         """
-        return self.deviceIds.get(str(self.themes[self.currentTheme]["data"]["FaceProject"]["@DeviceType"]))
+        return self.deviceIds.get(str(self.themes["default"]["data"]["FaceProject"]["@DeviceType"]))
         
     def getAllWidgets(self) -> list:
         """
@@ -509,11 +512,16 @@ class FprjProject:
         self.themes[self.currentTheme]["widgets"].insert(index, widget.data)
 
     def appendWidget(self, widget):
+        if isinstance(widget, GMFWidget):
+            QMessageBox.information(None, "Project", "Cannot paste widgets from another project format. Use the export function to convert one format to another.")
+            return
+        
         self.themes[self.currentTheme]["widgets"].append(widget.data)
 
     def addResource(self, files):
-        if self.currentTheme == "aod" and self.themes["aod"]["imageFolder"] == "" or os.path.isdir(self.themes["aod"]["imageFolder"]) is not True:
-            self.createAod()
+        print("imgFOlder", os.path.isdir(self.themes["aod"]["imageFolder"]))
+        if self.currentTheme == "aod" and os.path.isdir(self.themes["aod"]["imageFolder"]) is not True:
+            self.createAod(True)
 
         for file in files:
             destFile = os.path.join(self.themes[self.currentTheme]["imageFolder"], os.path.basename(file))
@@ -533,10 +541,10 @@ class FprjProject:
             self.themes[self.currentTheme]["widgets"].insert(layerIndex, widget.data)
     
     def getTitle(self):
-        return self.themes[self.currentTheme]["data"]["FaceProject"]["Screen"]["@Title"]
+        return self.themes["default"]["data"]["FaceProject"]["Screen"]["@Title"]
     
     def getThumbnail(self):
-        return self.themes[self.currentTheme]["data"]["FaceProject"]["Screen"]["@Bitmap"]
+        return self.themes["default"]["data"]["FaceProject"]["Screen"]["@Bitmap"]
 
     def setWidgetPos(self, name, posX, posY):
         widget = list(filter(lambda widget: widget["@Name"] == name, self.themes[self.currentTheme]["widgets"]))
@@ -585,8 +593,8 @@ class FprjProject:
         logging.info("Compiling project "+path)
         process = QProcess()
 
-        if not os.path.isdir(os.path.join(self.getDirectory(), "output")):
-            os.makedirs(os.path.join(self.getDirectory(), "output"))
+        if not os.path.isdir(os.path.join(self.themes["default"]["directory"], "output")):
+            os.makedirs(os.path.join(self.themes["default"]["directory"], "output"))
 
         if platform == "Windows":
             process.setProgram(compilerLocation)
@@ -595,10 +603,10 @@ class FprjProject:
             process.setProgram(which("wine"))
             process.setArguments([compilerLocation, "-b", path, location, str.split(os.path.basename(path), ".")[0]+".face", "0"])
         else:
-            raise NotImplementedError("Platform not implemented.")
+            return False, "Platform not implemented"
 
         process.start()
-        return process
+        return process, "Success"
     
 class FprjWidget:
     def __init__(self, project, data):
@@ -796,7 +804,7 @@ class GMFProject:
             "allAngle": "pointer_max_angle",
             "imageRotateX": "pointer_anchor_x",
             "imageRotateY": "pointer_anchor_y",
-            "name": "widget_name",
+            "id": "widget_name",
             "showCount": "num_digits",
             "showZero": "num_toggle_zeros",
             "spacing": "num_spacing",
@@ -809,13 +817,52 @@ class GMFProject:
             "y": "widget_pos_y"
         }
 
+        self.defaultItems = {
+            "widget_pointer": {
+                "type": "widge_pointer",
+                "x": 0,
+                "y": 0,
+                "dataSrc": "0",
+                "image": "image_0001",
+                "maxValue": 0,
+                "allAngle": 0,
+                "imageRotateX": 0,
+                "imageRotateY": 0
+            },
+            "widget": {
+                "type": "element",
+                "x": 0,
+                "y": 0,
+                "image": ""
+            },
+            "widget_imagelist": {
+                "type": "widge_imagelist",
+                "x": 0,
+                "y": 0,
+                "dataSrc": "0",
+                "imageList": [],
+                "imageIndexList": []
+            },
+            "widget_num": {
+                "type": "widge_dignum",
+                "x": 0,
+                "y": 0,
+                "showCount": 1,
+                "align": 1,
+                "spacing": 0,
+                "showZero": False,
+                "dataSrc": "0",
+                "imageList": []
+            }
+        }
+
     def setNameToWidgetList(self, widgetList):
         # applies a Universally Unique identifier for widgets
         # GMF projects dont use names for widgets
         nameList = []
 
         for widget in widgetList:
-            widget["name"] = f"{widget['type']}-{str(nameList.count(widget['type']))}"
+            widget["id"] = f"{widget['type']}-{str(nameList.count(widget['type']))}"
             nameList.append(widget["type"])
 
     def load(self, location):
@@ -825,7 +872,8 @@ class GMFProject:
                 projectJson = dict(json.load(project))
                 imagesDir = os.path.join(projectDir, "images")
                 aodImagesDir = os.path.join(projectDir, "images_aod")
-                if projectJson.get("elementsNormal"):
+                print(projectJson, projectJson.get("elementsNormal"))
+                if projectJson.get("elementsNormal") != None:
                     if not projectJson.get("deviceType"):
                         item, accepted = QInputDialog().getItem(None, "GMFProject", Translator.translate("Project", "Select the device the watchface was made for:"), self.watchData.deviceId, 0, False)
                         if item in self.watchData.deviceId and accepted:
@@ -866,10 +914,17 @@ class GMFProject:
             with open(self.themes["default"]["path"], "w", encoding="utf8") as file:
                 file.write(json_string)
             
-            return True, "success"
+            return True, "success", ""
             
         except Exception as e:
-            return False, e
+            return False, e, traceback.format_exc()
+        
+    def toString(self):
+        json_string = json.dumps(self.themes[self.currentTheme]["data"], indent=4)
+        return json_string
+
+    def compile(self, platform, path, location, compilerLocation, id=None):
+        return False, "Compiler not implemented"
 
 
     def getDirectory(self) -> str:
@@ -888,13 +943,16 @@ class GMFProject:
         """
         return self.themes[self.currentTheme]["imageFolder"]
     
-    def getPath(self) -> str:
+    def getPath(self, theme=None) -> str:
         """
-        Returns a path to the fprj file.
+        Returns a path to the json file.
         
         :return: The path to the file as a string.
         """
-        return self.themes[self.currentTheme]["path"]
+        if theme == None:
+            return self.themes[self.currentTheme]["path"]
+        else:
+            return self.themes[theme]["path"]
 
     def getDeviceType(self) -> str:
         """
@@ -922,7 +980,7 @@ class GMFProject:
         return self.themes[self.currentTheme]["data"]["deviceType"]
         
     def getWidget(self, name):
-        widget = list(filter(lambda widget: widget["name"] == name, self.themes[self.currentTheme]["widgets"]))
+        widget = list(filter(lambda widget: widget["id"] == name, self.themes[self.currentTheme]["widgets"]))
         if len(widget) == 0:
             return None
         else:
@@ -933,12 +991,87 @@ class GMFProject:
         for widget in self.themes[self.currentTheme]["widgets"]:
             widgetList.append(GMFWidget(self, widget))
         return widgetList
+
+    def createWidget(self, id, name, posX, posY, properties):
+        widget = self.defaultItems[id].copy()
+        widget["id"] = name
+        
+        if properties != None:
+            for property, value in properties.items():
+                property = [k for k, v in self.propertyIds.items() if v == property]
+            
+                if len(property) > 0:
+                    property = property[0]
+                    widget[property] = value
+
+        if posX == "center":
+            widget["x"] = int(self.watchData.modelSize[self.getDeviceType()][0] / 2 - 40 / 2)
+        else:
+            widget["x"] = posX
+
+        if posY == "center":
+            widget["y"] = int(self.watchData.modelSize[self.getDeviceType()][1] / 2 - 40 / 2)
+        else:
+            widget["y"] = posY
+
+        self.themes[self.currentTheme]["widgets"].append(widget)
+    
+    def deleteWidget(self, widget):
+        for index, item in enumerate(self.themes[self.currentTheme]["widgets"]):
+            if item["id"] == widget.getProperty("widget_name"):
+                self.themes[self.currentTheme]["widgets"].pop(index) 
+
+    def restoreWidget(self, widget, index):
+        self.themes[self.currentTheme]["widgets"].insert(index, widget.data)
+
+    def appendWidget(self, widget):
+        if isinstance(widget, FprjWidget):
+            QMessageBox.information(None, "Project", "Cannot paste widgets from another project format. Use the export function to convert one format to another.")
+            return
+        
+        self.themes[self.currentTheme]["widgets"].append(widget.data)
+
+    def setWidgetLayer(self, widget, layerIndex):        
+        self.themes[self.currentTheme]["widgets"].pop(self.themes[self.currentTheme]["widgets"].index(widget.data))
+        if layerIndex == "top":
+            self.themes[self.currentTheme]["widgets"].append(widget.data)
+        else:
+            self.themes[self.currentTheme]["widgets"].insert(layerIndex, widget.data)
+
+    def setWidgetPos(self, name, posX, posY):
+        widget = list(filter(lambda widget: widget["id"] == name, self.themes[self.currentTheme]["widgets"]))
+
+        if len(widget) == 0:
+            return "Widget does not exist!"
+        else:
+            widget[0]["x"] = posX
+            widget[0]["y"] = posY
+
+    def addResource(self, files):
+        for file in files:
+            destFile = os.path.join(self.themes[self.currentTheme]["imageFolder"], os.path.basename(file))
+            if os.path.isfile(destFile):
+                QMessageBox.information(None, "Resource Importer", f"File {destFile} already exists!")
+            else:
+                shutil.copyfile(file, destFile)
     
     def getTitle(self):
         return self.themes[self.currentTheme]["data"]["name"]
     
     def getThumbnail(self):
         return self.themes[self.currentTheme]["data"]["previewImg"]
+
+    def setDevice(self, value):
+        self.themes[self.currentTheme]["data"]["deviceType"] = value
+
+    def setTitle(self, value):
+        self.themes[self.currentTheme]["data"]["name"] = value
+
+    def setThumbnail(self, value):
+        self.themes[self.currentTheme]["data"]["previewImg"] = value
+
+    def setId(self, value):
+        self.themes[self.currentTheme]["data"]["id"] = value
     
     def setTheme(self, theme):
         self.currentTheme = theme
@@ -998,6 +1131,7 @@ class GMFWidget:
             if self.data["type"] == "widge_imagelist":
                 if self.data.get("imageIndexList"):   
                     for index, item in enumerate(bitmapList):
+                        print("merge", self.data["id"], self.data["imageIndexList"][index])
                         merge = [self.data["imageIndexList"][index], item]
                         bitmapListCopy[index] = merge
                 else:
@@ -1012,12 +1146,33 @@ class GMFWidget:
         property = [k for k, v in self.project.propertyIds.items() if v == property][0]
         print(property, value)
 
-        if property == "@BitmapList":
-            for index, item in enumerate(value):
-                if isinstance(item, list): # contains index info
-                    item[0] = f"({item[0]})" # add brackets
-                    value[index] = ":".join(item)
-            value = "|".join(value)
+        if property == "imageList":
+            if self.data["type"] == "widge_imagelist":
+                useImageIndexList = False
+                imageList = []
+                imageIndexList = []
+                
+                for index, image in enumerate(value):
+                    if index != int(image[0]):
+                        useImageIndexList = True
+
+                    imageList.append(image[1])
+
+                # If useImageIndexList flagged, make imageIndexList
+                # This must be done so that all images have an entry in imageIndexList
+                # otherwise if the first index uses something like "0" then it skips it
+                # (we dont want that)
+                if useImageIndexList:
+                    for imageIndex, image in value:
+                        imageIndexList.append(int(imageIndex))
+                    print("imageIndexFlag", imageIndexList)
+                    self.data["imageIndexList"] = imageIndexList # we set the property here now
+                else:
+                    if self.data.get("imageIndexList"):
+                        self.data.pop("imageIndexList")
+
+                value = imageList
+                
 
         elif property == "showZero":
             if value == "0":
