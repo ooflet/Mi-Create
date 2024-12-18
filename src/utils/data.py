@@ -6,6 +6,7 @@ import json
 
 import shutil
 import xmltodict
+import traceback
 
 from PyQt6.QtCore import QSettings
 from PyQt6.QtWidgets import QMessageBox
@@ -35,7 +36,12 @@ class WatchData:
             "redmi_watch_3_active",
             "xiaomi_watch_s3",
             "redmi_watch_4",
-            "xiaomi_band_9"
+            "xiaomi_band_9",
+            "xiaomi_band_9_pro",
+            "xiaomi_watch_s4",
+            "redmi_watch_5",
+            "redmi_watch_5_active",
+            "redmi_watch_5_lite"
         ]
         self.widgetId = [
             "widget"
@@ -245,8 +251,9 @@ class WatchData:
             self.modelID[device["string"]] = deviceId
             self.modelSize[deviceId] = [device["width"], device["height"], device["radius"]]
             
+        self.modelSourceData = sources
+
         for deviceId, sources in sources.items():
-            self.modelSourceData[deviceId] = sources
             self.modelSourceList[deviceId] = [source["string"] for source in sources]
             
 
@@ -273,6 +280,11 @@ class WatchData:
                 "362": "xiaomi_watch_s3",
                 "365": "redmi_watch_4",
                 "366": "xiaomi_band_9",
+                "367": "xiaomi_band_9_pro",
+                "462": "xiaomi_watch_s4",
+                "465": "redmi_watch_5",
+                "3651": "redmi_watch_5_active",
+                "3652": "redmi_watch_5_lite"
             }
 
             gmfSourceIDs = {
@@ -281,22 +293,44 @@ class WatchData:
                 "1001912": "1A12",
             }
 
-            source_list = {}
-            size_list = {}
+            friendlyNames = {
+                "xiaomi_color": "Xiaomi Watch Color",
+                "xiaomi_color_sport": "Xiaomi Watch Color Sport",
+                "xiaomi_color_2/s1/s2": "Xiaomi Watch S1/S2/Color 2",
+                "xiaomi_watch_s1_pro": "Xiaomi Watch S1 Pro",
+                "xiaomi_watch_s3": "Xiaomi Watch S3",
+                "xiaomi_watch_s4": "Xiaomi Watch S4",
+                "redmi/poco_watch": "Redmi/Poco Watch",
+                "redmi_watch_2_lite": "Redmi Watch 2 Lite",
+                "redmi_watch_3": "Redmi Watch 3",
+                "redmi_watch_3_active": "Redmi Watch 3 Active",
+                "redmi_watch_4": "Redmi Watch 4",
+                "redmi_watch_5": "Redmi Watch 5",
+                "redmi_watch_5_active": "Redmi Watch 5 Active",
+                "redmi_watch_5_lite": "Redmi Watch 5 Lite",
+                "redmi_band_pro": "Redmi Band Pro",
+                "xiaomi_band_7_pro": "Xiaomi Band 7 Pro",
+                "xiaomi_band_8": "Xiaomi Band 8",
+                "xiaomi_band_8_pro": "Xiaomi Band 8 Pro",
+                "xiaomi_band_9": "Xiaomi Band 9",
+                "xiaomi_band_9_pro": "Xiaomi Band 9 Pro",
+                "70mai_saphir": "70mai Saphir"
+            }
+
+            source_list = self.modelSourceData
+
+            with open("data/devices.json") as size_list_file:
+                size_list = json.load(size_list_file)
 
             with open(deviceInfo, "r") as device_info:
                 xml = xmltodict.parse(device_info.read())    
 
             for device in xml["DeviceList"]["DeviceInfo"]:
                 device_size_listing = {
+                    "string": friendlyNames.get(fprjDeviceIds[device["@Type"]]) or device["@Name"],
                     "width": int(device["@Width"]),
                     "height": int(device["@Height"]),
-                    "radius": int(device["@Radius"]),
-                    "preview": {
-                        "width": 0,
-                        "height": 0,
-                        "radius": 0
-                    }
+                    "radius": int(device["@Radius"])
                 }
                 size_list[fprjDeviceIds[device["@Type"]]] = device_size_listing
 
@@ -305,7 +339,7 @@ class WatchData:
                     source_listing = {
                         "string": source["@Name"],
                         "id_fprj": source["@ID"],
-                        "id_gmf": gmfSourceIDs["@ID"] or "",
+                        "id_gmf": gmfSourceIDs.get(source.get("@ID")) or "",
                         "tip": source["@Tip"]
                     }
                     source_list[fprjDeviceIds[device["@Type"]]].append(source_listing)
@@ -321,12 +355,12 @@ class WatchData:
             settings.setValue("compilerVersion", "custom")
             QMessageBox.information(None, "Data File Update", "Compiler updated successfully. Please restart the program.")
         except Exception as e:
-            QMessageBox.critical(None, "Data File Update", "Failed to update: "+str(e))
+            QMessageBox.critical(None, "Data File Update", "Failed to update: "+traceback.format_exc())
 
     def getCompilerVersion(self):
         settings = QSettings("Mi Create", "Workspace")
         if settings.value("compilerVersion") is None:
-            version = "m0tral-v4.16"
+            version = "m0tral-v4.18"
         else:
             version = settings.value("compilerVersion")
         return version

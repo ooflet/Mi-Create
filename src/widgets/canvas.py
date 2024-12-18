@@ -419,6 +419,9 @@ class Canvas(QGraphicsView):
         # if os.path.exists(large_preview_path):
         #     os.remove(large_preview_path)
 
+        if WatchData().previewSizes.get(self.project.getDeviceType()) == None:
+            return
+
         preview_size = WatchData().previewSizes[self.project.getDeviceType()]
             
         prev_theme = self.project.currentTheme
@@ -875,11 +878,11 @@ class Canvas(QGraphicsView):
             self.deviceOutline = DeviceOutline(self.deviceSize)
             self.scene().addItem(self.deviceOutline)
             
-        if project.getAllWidgets() == []:
-            return True, "Success", ""
-
         self.projectDirectory = project.getDirectory()
         self.imageFolder = project.getImageFolder()
+
+        if project.getAllWidgets() == []:
+            return True, "Success", ""
 
         self.scene().originPositons = {}
 

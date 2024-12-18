@@ -63,6 +63,11 @@ class FprjProject:
             "362": "xiaomi_watch_s3",
             "365": "redmi_watch_4",
             "366": "xiaomi_band_9",
+            "367": "xiaomi_band_9_pro",
+            "462": "xiaomi_watch_s4",
+            "465": "redmi_watch_5",
+            "3651": "redmi_watch_5_active",
+            "3652": "redmi_watch_5_lite"
         }
 
         self.widgetIds = {
