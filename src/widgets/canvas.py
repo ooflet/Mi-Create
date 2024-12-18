@@ -419,6 +419,7 @@ class Canvas(QGraphicsView):
         # if os.path.exists(large_preview_path):
         #     os.remove(large_preview_path)
 
+        print("preview", WatchData().previewSizes.get(self.project.getDeviceType()))
         if WatchData().previewSizes.get(self.project.getDeviceType()) == None:
             return
 

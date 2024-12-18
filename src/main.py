@@ -1368,7 +1368,17 @@ class WatchfaceEditor(QMainWindow):
                 for item in canvas.widgets.values():
                     if isinstance(item, ImagelistWidget) or isinstance(item, NumberWidget) or isinstance(item, AnalogWidget):
                         item.stopPreview()
-                    
+
+        # themeMenu = QFrame(self)
+        # themeMenuLayout = QVBoxLayout()
+        
+
+        # themeButton = QToolButton(self)
+        # themeButton.setObjectName("canvasDecoration-button")
+        # themeButton.setCheckable(True)
+        # themeButton.setFixedSize(25, 25)
+        # themeButton.setIcon(QIcon().fromTheme("watchface-aod"))
+        # themeButton.clicked.connect(aodToggle)
 
         aodButton = QToolButton(self)
         aodButton.setObjectName("canvasDecoration-button")
@@ -1638,7 +1648,8 @@ class WatchfaceEditor(QMainWindow):
     def showManageProjectDialog(self):
         currentProject: FprjProject = self.getCurrentProject()["project"]
 
-        self.coreDialog.configurePageNameField.setText(currentProject.getTitle())
+        self.coreDialog.configurePagePreviewField.addItems(self.resourceImages)
+
         self.coreDialog.configurePageNameField.setText(currentProject.getTitle())
         self.coreDialog.configurePageDeviceField.setCurrentText(list(self.WatchData.modelID.keys())[list(self.WatchData.modelID.values()).index(currentProject.getDeviceType())])
         self.coreDialog.configurePagePreviewField.setCurrentText(currentProject.getThumbnail())
