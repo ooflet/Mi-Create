@@ -236,9 +236,12 @@ class FprjProject:
 
         :return: True and path of the .fprj project if successful, otherwise False, short error message and traceback.
         """
+        print("path", path)
         try:
-            template = self.watchFileBlank
+            template = self.watchFileBlank.copy()
+            aodTemplate = self.watchFileBlank.copy()
             template["FaceProject"]["@DeviceType"] = list(self.deviceIds.keys())[list(self.deviceIds.values()).index(str(device))]
+            aodTemplate["FaceProject"]["@DeviceType"] = list(self.deviceIds.keys())[list(self.deviceIds.values()).index(str(device))]
             folder = os.path.join(path, name)
             os.makedirs(os.path.join(folder, "images"))
             os.makedirs(os.path.join(folder, "output"))
@@ -248,14 +251,6 @@ class FprjProject:
 
             self.name = f"{name}.fprj"
 
-            self.themes["aod"] = {
-                "directory": "",
-                "path": "",
-                "data": template,
-                "widgets": template["FaceProject"]["Screen"].get("Widget"),
-                "imageFolder": ""
-            }
-
             self.themes[theme] = {
                 "directory": os.path.dirname(path),
                 "path": os.path.join(folder, f"{name}.fprj"),
@@ -263,6 +258,15 @@ class FprjProject:
                 "widgets": template["FaceProject"]["Screen"].get("Widget"),
                 "imageFolder": os.path.join(folder, "images")
             }
+
+            if theme != "aod":
+                self.themes["aod"] = {
+                    "directory": "",
+                    "path": "",
+                    "data": aodTemplate,
+                    "widgets": aodTemplate["FaceProject"]["Screen"].get("Widget"),
+                    "imageFolder": ""
+                }
 
             return True, os.path.join(folder, f"{name}.fprj")
         except Exception as e:
@@ -338,7 +342,7 @@ class FprjProject:
         try:
             imagesDir = os.path.join(projectDir, "images")
             
-            with open(path, "r", encoding="utf8") as file:
+            with open(path, "r", encoding="utf8", errors="replace") as file:
                 parse = self.processFprj(file)
 
             if not parse:
@@ -573,18 +577,16 @@ class FprjProject:
         xml_string = xmltodict.unparse(self.themes[self.currentTheme]["data"], pretty=True)
 
         try:
-            with open(self.themes[self.currentTheme]["path"], "w", encoding="utf8") as file:
+            with open(self.themes["default"]["path"], "w", encoding="utf8") as file:
                 file.write(xml_string)
 
-            if self.themes["aod"]["directory"] == "" or os.path.isfile(self.themes["aod"]["path"]) is not True:
+            if self.themes["aod"]["widgets"] != []:
                 self.createAod()
-
-            if self.themes.get("aod") and self.themes["aod"]["path"] != "":
                 aod_xml_string = xmltodict.unparse(self.themes["aod"]["data"], pretty=True)
                 with open(self.themes["aod"]["path"], "w", encoding="utf8") as file:
                     file.write(aod_xml_string)
             
-            return True, "success", ""
+            return True, "success", self.themes["default"]["path"]
             
         except Exception as e:
             return False, e, traceback.format_exc()
