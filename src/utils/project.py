@@ -605,12 +605,14 @@ class FprjProject:
 
         if platform == "Windows":
             process.setProgram(compilerLocation)
-            process.setArguments(["-b", path, location, str.split(os.path.basename(path), ".")[0]+".face", "0"])
+            process.setArguments(["-b", path, location, str.split(os.path.basename(path), ".")[0]+".face", "1461256429"])
         elif platform == "Linux":
             process.setProgram(which("wine"))
-            process.setArguments([compilerLocation, "-b", path, location, str.split(os.path.basename(path), ".")[0]+".face", "0"])
+            process.setArguments([compilerLocation, "-b", path, location, str.split(os.path.basename(path), ".")[0]+".face", "1461256429"])
         else:
             return False, "Platform not implemented"
+
+        print(process.arguments())
 
         process.start()
         return process, "Success"

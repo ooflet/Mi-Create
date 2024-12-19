@@ -557,6 +557,7 @@ class WatchfaceEditor(QMainWindow):
 
         if self.ui.workspace.count() == 0:
             self.setIconState(True)
+            self.hide()
             self.showWelcome()
 
     def setupWorkspace(self):
