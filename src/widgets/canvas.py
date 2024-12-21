@@ -97,7 +97,7 @@ class Scene(QGraphicsScene):
         self.posLines = []
 
     def updatePosMap(self):
-        self.positionMap = {"X": [], "Y": []}
+        self.positionMap = {"X": [0, self.sceneRect().width() / 2, self.sceneRect().width()], "Y": [0, self.sceneRect().height() / 2, self.sceneRect().height()]}
         for item in self.items():
             # if isinstance(item, NumberWidget) and hasattr(item, "angle") and item.angle != 0:
             #     # calculate points when widget is rotated
@@ -126,22 +126,24 @@ class Scene(QGraphicsScene):
             if isinstance(item, BaseWidget):
                 # get points
                 self.positionMap["X"].append(item.pos().x())
+                self.positionMap["X"].append(item.pos().x() + (item.rect().width() / 2))
                 self.positionMap["X"].append(item.pos().x() + item.rect().width())
                 self.positionMap["Y"].append(item.pos().y())
+                self.positionMap["Y"].append(item.pos().y() + (item.rect().height() / 2))
                 self.positionMap["Y"].append(item.pos().y() + item.rect().height())
 
     def getAdjacentPos(self, object: QGraphicsRectItem):
-        catchRange = 3 # pixel offset before the object gets snapped
-        adjacentPosList = []
-        pos = [None, None, None, None] # x1, y1, x2, y2
+        catchRange = 6 # pixel offset before the object gets snapped
+        pos = [None, None, None, None, None, None] # x1, y1, x2, y2, x3, y3
 
         """
-        x1, y1  •───────────┐
-                │           │
-                │           │
-                │           │
-                │           │
-                └───────────• x2, y2
+        x1, y1  •─────────────┐
+                │             │
+                │             │
+                │      •x2, y2│
+                │             │
+                │             │
+                └─────────────• x3, y3
         """
 
         # filter function
@@ -153,7 +155,8 @@ class Scene(QGraphicsScene):
     
         # filter both X & Y pos and place in a list
         adjacentPosList1 = [list(filter(lambda x, objPos=object.pos().x(): posFilter(x, objPos), self.positionMap["X"])), list(filter(lambda x, objPos=object.pos().y(): posFilter(x, objPos), self.positionMap["Y"]))]
-        adjacentPosList2 = [list(filter(lambda x, objPos=object.pos().x()+object.rect().width(): posFilter(x, objPos), self.positionMap["X"])), list(filter(lambda x, objPos=object.pos().y()+object.rect().height(): posFilter(x, objPos), self.positionMap["Y"]))]
+        adjacentPosList2 = [list(filter(lambda x, objPos=object.pos().x()+(object.rect().width() / 2): posFilter(x, objPos), self.positionMap["X"])), list(filter(lambda x, objPos=object.pos().y()+(object.rect().height() / 2): posFilter(x, objPos), self.positionMap["Y"]))]
+        adjacentPosList3 = [list(filter(lambda x, objPos=object.pos().x()+object.rect().width(): posFilter(x, objPos), self.positionMap["X"])), list(filter(lambda x, objPos=object.pos().y()+object.rect().height(): posFilter(x, objPos), self.positionMap["Y"]))]
 
         if adjacentPosList1[0] != []:
             pos[0] = (min(adjacentPosList1[0], key=lambda x:abs(x-object.pos().x())))
@@ -167,21 +170,32 @@ class Scene(QGraphicsScene):
         if adjacentPosList2[1] != []:
             pos[3] = (min(adjacentPosList2[1], key=lambda x:abs(x-object.pos().y()+object.rect().height())))
 
+        if adjacentPosList3[0] != []:
+            pos[4] = (min(adjacentPosList3[0], key=lambda x:abs(x-object.pos().x()+object.rect().width())))
+
+        if adjacentPosList3[1] != []:
+            pos[5] = (min(adjacentPosList3[1], key=lambda x:abs(x-object.pos().y()+object.rect().height())))
+
         # prioritize snap positions
 
-        if pos[0] != None and pos[2] != None:
-            if pos[2] - pos[0] != object.rect().width():
-                if pos[0] - object.pos().x() > pos[2] - (object.pos().x() + object.rect().width()):
-                    pos[0] = None
-                else:
-                    pos[2] = None
+        closest_index = None
+        closest_distance = 0
 
-        if pos[1] != None and pos[3] != None:
-            if pos[1] - pos[3] != object.rect().width():
-                if pos[1] - object.pos().y() > pos[3] - (object.pos().y() + object.rect().height()):
-                    pos[1] = None
-                else:
-                    pos[3] = None
+        for i in range(0, len(pos), 2):
+            x, y = pos[i], pos[i+1]
+            if x == None or y == None:
+                continue
+            if (x, y) == (object.pos().x(), object.pos().y()):
+                continue  # Ignore if the position matches the object
+            distance = ((x - object.pos().x())**2 + (y - object.pos().y())**2)**0.5  # Calculate Euclidean distance
+            if distance < closest_distance:
+                closest_distance = distance
+                closest_index = i
+
+        filtered_positions = [None] * len(pos)
+        if closest_index is not None:
+            filtered_positions[closest_index] = pos[closest_index]
+            filtered_positions[closest_index + 1] = pos[closest_index + 1]
 
         return pos
     
@@ -224,17 +238,29 @@ class Scene(QGraphicsScene):
 
         self.posLines.clear()
 
-        if pos[0] != None:
-            self.posLines.append(self.addRect(pos[0], 0, 1, self.sceneRect().height(), QPen(Qt.PenStyle.NoPen), self.palette().highlight()))
+        print(pos)
 
+        pen = QPen()
+        pen.setWidth(2)
+        pen.setColor(self.palette().highlight().color())
+
+        if pos[0] != None:
+            self.posLines.append(self.addLine(pos[0], 0, pos[0], self.sceneRect().height(), pen))
+           
         if pos[1] != None:
-            self.posLines.append(self.addRect(0, pos[1], self.sceneRect().width(), 1, QPen(Qt.PenStyle.NoPen), self.palette().highlight()))
-        
+            self.posLines.append(self.addLine(0, pos[1], self.sceneRect().height(), pos[1], pen))
+
         if pos[2] != None:
-            self.posLines.append(self.addRect(pos[2], 0, 1, self.sceneRect().height(), QPen(Qt.PenStyle.NoPen), self.palette().highlight()))
+            self.posLines.append(self.addLine(pos[2], 0, pos[2], self.sceneRect().height(), pen))
 
         if pos[3] != None:
-            self.posLines.append(self.addRect(0, pos[3], self.sceneRect().width(), 1, QPen(Qt.PenStyle.NoPen), self.palette().highlight()))
+            self.posLines.append(self.addLine(0, pos[3], self.sceneRect().height(), pos[3], pen))
+        
+        if pos[4] != None:
+            self.posLines.append(self.addLine(pos[4], 0, pos[4], self.sceneRect().height(), pen))
+
+        if pos[5] != None:
+            self.posLines.append(self.addLine(0, pos[5], self.sceneRect().height(), pos[5], pen))
 
     def clearSnapLines(self):
         for line in self.posLines:
@@ -1019,10 +1045,16 @@ class BaseWidget(QGraphicsRectItem):
                 self.setY(snapPos[1])
 
             if snapPos[2] != None:
-                self.setX(snapPos[2] - self.rect().width())
+                self.setX(snapPos[2] - (self.rect().width() / 2))
                 
             if snapPos[3] != None:
-                self.setY(snapPos[3] - self.rect().height())
+                self.setY(snapPos[3] - (self.rect().height() / 2))
+
+            if snapPos[4] != None:
+                self.setX(snapPos[4] - self.rect().width())
+                
+            if snapPos[5] != None:
+                self.setY(snapPos[5] - self.rect().height())
 
         self.setPos(round(self.x()), round(self.y()))
 
