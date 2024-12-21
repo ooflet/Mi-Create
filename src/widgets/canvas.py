@@ -432,8 +432,9 @@ class Canvas(QGraphicsView):
             self.project.setTheme(theme)
 
             if self.project.getAllWidgets() != [] or theme == "default":
-                preview_path = os.path.join(self.projectDirectory, f"preview_{theme}.png")
-                preview_path_large = os.path.join(self.projectDirectory, f"preview_{theme}_large.png")
+                preview_path = os.path.join(self.project.themes["default"]["directory"], f"preview_{theme}.png")
+                preview_path_large = os.path.join(self.project.themes["default"]["directory"], f"preview_{theme}_large.png")
+                print(theme, preview_path, preview_path_large)
 
                 preview = QImage(QSize(preview_size[0], preview_size[1]), QImage.Format.Format_ARGB32)
                 preview.fill(Qt.GlobalColor.transparent)
@@ -1104,7 +1105,7 @@ class ImagelistWidget(ImageWidget):
         return None
 
     def addImagelist(self, imagelist, source, previewIndex, defaultValue, isAntialiased):
-        if imagelist == []:
+        if imagelist == {}:
             self.representNoImage()
             return
 
@@ -1118,9 +1119,9 @@ class ImagelistWidget(ImageWidget):
         self.source = source
         self.imagelist = imagelist
 
-        print(defaultValue)
+        print(defaultValue, previewIndex)
 
-        if previewIndex != None:
+        if previewIndex != None and imagelist.get(self.getLastValidListIndex(previewIndex)):
             previewImage = imagelist[self.getLastValidListIndex(previewIndex)]
         elif previewIndex == None and defaultValue != None and defaultValue != 0:
             previewImage = imagelist[self.getLastValidListIndex(defaultValue)]

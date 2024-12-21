@@ -221,11 +221,6 @@ class WatchfaceEditor(QMainWindow):
         else:
             quitWindow()
 
-    def showEvent(self, event):
-        # update view actions
-        if self.settings["General"]["CheckUpdate"]["value"] == True:
-            threading.Thread(target=self.checkForUpdates).start()
-
     def toggleFullscreen(self):
         if self.isFullScreen():
             self.showNormal()
@@ -405,7 +400,7 @@ class WatchfaceEditor(QMainWindow):
         self.statusBar().addPermanentWidget(text, 0)
         self.statusBar().addPermanentWidget(progressBar, 1)
 
-        Updater(self.statusBar(), progressBar, text)
+        Updater()
 
     def promptUpdate(self, ver):
         reply, dontCheck = self.showDialog("question",
@@ -1754,6 +1749,12 @@ class WatchfaceEditor(QMainWindow):
             self.showDialog("info", "macOS compiler support will be added soon.")
             return
         
+        print(workspaceSettings.value("compilerVersion"))
+        if platform.system() == "Linux" and workspaceSettings.value("compilerVersion") == None: # compiler version none means its using default compiler v4.18
+            result = self.showDialog("question", "Compiler v4.18 has known issues running on Linux. You may downgrade the compiler to an older version using the 'Update Compiler from EasyFace' option in Settings > More menu. Continue using the v4.18 compiler?", buttons=QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, defaultButton=QMessageBox.StandardButton.No)
+            if result == QMessageBox.StandardButton.No:
+                return
+
         # check if wine exists if we're compiling on Linux
         if platform.system() == "Linux" and which("wine") == None:
             self.showDialog("error", _("Failed to compile project: Wine was not found."))
@@ -1943,6 +1944,7 @@ class WatchfaceEditor(QMainWindow):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('filename', nargs='?', default=False)
+    parser.add_argument('--setVersion')
     parser.add_argument('--reset', action='store_true')
     parser.add_argument('--setWindowSizePreview', action='store_true')
     args = parser.parse_args()
@@ -1970,8 +1972,14 @@ if __name__ == "__main__":
         workspaceSettings.clear()
         print("Settings reset.")
 
+    if args.setVersion:
+        programVersion = args.setVersion
+
     try:
         editor = WatchfaceEditor()
+
+        if editor.settings["General"]["CheckUpdate"]["value"] == True:
+            threading.Thread(target=editor.checkForUpdates).start()
 
         if args.filename:
             logging.info("Opening file from argument 1")
@@ -1987,6 +1995,7 @@ if __name__ == "__main__":
         else:
             splash.close()
             editor.showWelcome()
+            
     except Exception as e:
         error_message = "Critical error during initialization: " + traceback.format_exc()
         logging.error(error_message)

@@ -2,28 +2,39 @@
 # tostr 2024
 
 import os
+import sys
 import requests
 import tempfile
 import threading
 import subprocess
 
-from PyQt6.QtCore import QObject, pyqtSignal
+from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtWidgets import QVBoxLayout, QDialog, QProgressBar, QLabel
 
-class Updater(QObject):
+class Updater(QDialog):
     updateProgress = pyqtSignal(int)
-    def __init__(self, statusBar, progressBar, text):
+    def __init__(self):
         super().__init__()
         self.installComplete = False
 
-        self.statusBar = statusBar
-        self.progressBar = progressBar
-        self.text = text
+        self.setFixedSize(400, 75)
+
+        self.text = QLabel(self)
+        self.progressBar = QProgressBar(self)
+
+        self.widgetLayout = QVBoxLayout()
+        self.widgetLayout.addWidget(self.text, 0)
+        self.widgetLayout.addWidget(self.progressBar, 1)
+
+        self.setLayout(self.widgetLayout)
 
         self.updateProgress.connect(lambda progress: self.progressBar.setValue(progress))
 
         self.downloadThread = threading.Thread(target=self.startDownload, args=[self.startInstall])
         self.downloadThread.daemon = True
         self.downloadThread.start()
+
+        self.show()
 
     def startDownload(self, callback):
         url = "https://github.com/ooflet/Mi-Create/releases/latest/download/setup.exe"
@@ -61,4 +72,8 @@ class Updater(QObject):
         self.installComplete = True
         self.progressBar.deleteLater()
         self.text.deleteLater()
-        subprocess.run(self.temp_file)
+        try:
+            subprocess.run(self.temp_file)
+        except:
+            pass
+        sys.exit(0)

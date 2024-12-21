@@ -579,18 +579,19 @@ class FprjProject:
         return xml_string
 
     def save(self):
-        xml_string = xmltodict.unparse(self.themes[self.currentTheme]["data"], pretty=True)
-
         try:
-            with open(self.themes["default"]["path"], "w", encoding="utf8") as file:
-                file.write(xml_string)
-
             if self.themes["aod"]["widgets"] != []:
                 self.createAod()
                 aod_xml_string = xmltodict.unparse(self.themes["aod"]["data"], pretty=True)
                 with open(self.themes["aod"]["path"], "w", encoding="utf8") as file:
                     file.write(aod_xml_string)
-            
+
+            for theme in self.themes:
+                if os.path.isfile(self.themes[theme]["path"]):
+                    xml_string = xmltodict.unparse(self.themes[theme]["data"], pretty=True)
+                    with open(self.themes[theme]["path"], "w", encoding="utf8") as file:
+                        file.write(xml_string)
+                
             return True, "success", self.themes["default"]["path"]
             
         except Exception as e:
