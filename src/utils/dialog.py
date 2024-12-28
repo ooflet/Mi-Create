@@ -13,7 +13,7 @@ from pathlib import Path
 sys.path.append("..")
 
 from PyQt6.QtCore import Qt, QObject, QSize, pyqtSignal, QUrl, QMetaMethod
-from PyQt6.QtGui import QIcon, QPixmap, QMovie
+from PyQt6.QtGui import QIcon, QPixmap, QMovie, QIntValidator
 from PyQt6.QtWidgets import (QDialog, QLabel, QLineEdit, QComboBox, QToolButton, QSpinBox, QVBoxLayout, 
                              QHBoxLayout, QSizePolicy, QWidget, QDialogButtonBox, QFileDialog, QFrame,
                              QPushButton, QCheckBox, QListWidget, QListWidgetItem, QMenu)
@@ -92,6 +92,7 @@ class CoreDialog(QDialog):
         self.manageProjectSidebarTitle.setText(Translator.translate("", "Manage Project"))
         self.configureProjectCategory.setText(Translator.translate("", "Configure"))
         self.configurePageDeviceTitle.setText(Translator.translate("", "Device type"))
+        self.configurePageIdTitle.setText(Translator.translate("", "Watchface ID (9 digits)"))
         self.configurePageNameTitle.setText(Translator.translate("", "Watchface name"))
         self.configurePagePreviewText.setText(Translator.translate("", "Watchface thumbnail"))
         self.settingsSidebarTitle.setText(Translator.translate("", "Settings"))
@@ -378,6 +379,13 @@ class CoreDialog(QDialog):
         self.configurePageDeviceField = QComboBox()
         self.configurePageDeviceField.setFixedWidth(175)
 
+        self.configurePageId = QHBoxLayout()
+        self.configurePageIdTitle = QLabel()
+        
+        self.configurePageIdField = QLineEdit()
+        self.configurePageIdField.setValidator(QIntValidator())
+        self.configurePageIdField.setFixedWidth(175)
+
         self.configurePageName = QHBoxLayout()
         self.configurePageNameTitle = QLabel()
         
@@ -397,6 +405,9 @@ class CoreDialog(QDialog):
         self.configurePageDevice.addWidget(self.configurePageDeviceTitle)
         self.configurePageDevice.addWidget(self.configurePageDeviceField)
 
+        self.configurePageId.addWidget(self.configurePageIdTitle)
+        self.configurePageId.addWidget(self.configurePageIdField)
+
         self.configurePageName.addWidget(self.configurePageNameTitle)
         self.configurePageName.addWidget(self.configurePageNameField)
 
@@ -404,6 +415,7 @@ class CoreDialog(QDialog):
         self.configurePagePreview.addWidget(self.configurePagePreviewField)
 
         self.configurePageLayout.addLayout(self.configurePageDevice)
+        self.configurePageLayout.addLayout(self.configurePageId)
         self.configurePageLayout.addLayout(self.configurePageName)
         self.configurePageLayout.addLayout(self.configurePagePreview)
         self.configurePageLayout.addStretch()

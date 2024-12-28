@@ -227,6 +227,7 @@ class FprjProject:
         self.watchFileBlank = {
             "FaceProject": {
                 "@DeviceType": "",
+                "@Id": "",
                 "Screen": {
                     "@Title": "",
                     "@Bitmap": "",
@@ -549,6 +550,9 @@ class FprjProject:
         else:
             self.themes[self.currentTheme]["widgets"].insert(layerIndex, widget.data)
     
+    def getId(self):
+        return self.themes["default"]["data"]["FaceProject"].get("@Id")
+    
     def getTitle(self):
         return self.themes["default"]["data"]["FaceProject"]["Screen"]["@Title"]
     
@@ -568,6 +572,9 @@ class FprjProject:
         for theme in self.themes.values():
             theme["data"]["FaceProject"]["@DeviceType"] = list(self.deviceIds.keys())[list(self.deviceIds.values()).index(value)]
     
+    def setId(self, value):
+        self.themes[self.currentTheme]["data"]["FaceProject"]["@Id"] = value
+
     def setTitle(self, value):
         self.themes[self.currentTheme]["data"]["FaceProject"]["Screen"]["@Title"] = value
 
