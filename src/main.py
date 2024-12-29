@@ -823,6 +823,7 @@ class WatchfaceEditor(QMainWindow):
         def saveConfig():
             currentProject = self.getCurrentProject()
             currentProject["project"].setDevice(self.WatchData.modelID[self.coreDialog.configurePageDeviceField.currentText()])
+            currentProject["project"].setId(self.coreDialog.configurePageIdField.text())
             currentProject["project"].setTitle(self.coreDialog.configurePageNameField.text())
             currentProject["project"].setThumbnail(self.coreDialog.configurePagePreviewField.currentText())
             print(currentProject["project"].getDeviceType())
@@ -1646,6 +1647,7 @@ class WatchfaceEditor(QMainWindow):
 
         self.coreDialog.configurePagePreviewField.addItems(self.resourceImages)
 
+        self.coreDialog.configurePageIdField.setText(currentProject.getId())
         self.coreDialog.configurePageNameField.setText(currentProject.getTitle())
         self.coreDialog.configurePageDeviceField.setCurrentText(list(self.WatchData.modelID.keys())[list(self.WatchData.modelID.values()).index(currentProject.getDeviceType())])
         self.coreDialog.configurePagePreviewField.setCurrentText(currentProject.getThumbnail())
@@ -1796,8 +1798,8 @@ class WatchfaceEditor(QMainWindow):
 
             fileLocation = str.split(os.path.basename(currentProject["project"].getPath()), ".")[0] + ".face"
 
-            # binary = WatchfaceBinary(os.path.join(compileDirectory, fileLocation))
-            # binary.setId("123456789")
+            binary = WatchfaceBinary(os.path.join(compileDirectory, fileLocation))
+            binary.setId(currentProject["project"].getId())
             
             self.statusBar().showMessage(_("Watchface built successfully at ") + f"{compileDirectory}\\{fileLocation}",
                                          3000)
