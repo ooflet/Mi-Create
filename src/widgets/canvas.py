@@ -919,11 +919,11 @@ class Canvas(QGraphicsView):
                 return False, userFacingReason, debugReason
         
         for unitWidget in self.unitImages.values():
-            split = unitWidget[0].getProperty("widget_name").split("[")
+            split = unitWidget[0].getProperty("widget_name").split("[", 1)
             if len(split) >= 2:
                 nameRef = split[0].split("_")
                 if len(nameRef) >= 2 and nameRef[-1] == "ref":
-                    numWidget = self.getObject(split[-1].strip("[]"))
+                    numWidget = self.getObject(split[-1][:-1])
                     if numWidget and isinstance(numWidget, NumberWidget):
                         numWidget.addUnitImage(
                             True,
@@ -954,8 +954,8 @@ class Canvas(QGraphicsView):
                 object.selectionPath.prepareGeometryChange()
                 object.delete()
                 for unitWidget in self.unitImages.values():
-                    split = unitWidget[0].getProperty("widget_name").split("[")
-                    numWidget = self.getObject(split[-1].strip("[]"))
+                    split = unitWidget[0].getProperty("widget_name").split("[", 1)
+                    numWidget = self.getObject(split[-1][:-1])
                     if numWidget and isinstance(numWidget, NumberWidget):
                         numWidget.addUnitImage(
                             True,
@@ -1249,6 +1249,7 @@ class NumberWidget(BaseWidget):
         self.imageItems = []
         self.numList = []
         self.source = None
+        self.pivot = self.rect().topLeft()
         self.angle = angle
         self.relativeToAlign = isPosRelativeToAlignment
         self.timer = QTimer()
@@ -1265,18 +1266,18 @@ class NumberWidget(BaseWidget):
         rect = self.rect()
         if self.alignment != None:
             if self.alignment == "Left":
-                pivot = rect.topLeft()
+                self.pivot = rect.topLeft()
             elif self.alignment == "Center":
-                pivot = rect.center() - QPointF(0, rect.height() / 2)
+                self.pivot = rect.center() - QPointF(0, rect.height() / 2)
             elif self.alignment == "Right":
-                pivot = rect.topRight()
+                self.pivot = rect.topRight()
         
         # set angle to widget
-        self.setTransformOriginPoint(pivot)
+        self.setTransformOriginPoint(self.pivot)
         self.setRotation(self.angle)
 
         # set angle to selection box
-        self.selectionPath.setTransformOriginPoint(pivot)
+        self.selectionPath.setTransformOriginPoint(self.pivot)
         self.selectionPath.setRotation(self.angle)
 
     def addImage(self, qPixmap, posX, posY, spacing, isAntialiased):
@@ -1380,6 +1381,10 @@ class NumberWidget(BaseWidget):
             unitWidget.boundingPosOverride = True
             unitWidget.boundingPos = QPointF(self.pos().x() + unitImagePosX, self.pos().y())
             self.setRect(0, 0, self.rect().width() + unitWidget.rect().width(), self.initialImage.height())
+            pivot = self.pivot
+            pivot.setX(self.pivot.x() - unitImagePosX)
+            unitWidget.selectionPath.setTransformOriginPoint(pivot)
+            unitWidget.selectionPath.setRotation(self.angle)
         else:
             unitImageWidget = QGraphicsPixmapItem(self)
             unitImageWidget.setPixmap(unitImage)
