@@ -551,7 +551,7 @@ class FprjProject:
             self.themes[self.currentTheme]["widgets"].insert(layerIndex, widget.data)
     
     def getId(self):
-        return self.themes["default"]["data"]["FaceProject"].get("@Id")
+        return self.themes["default"]["data"]["FaceProject"].get("@Id") or "167210065"
     
     def getTitle(self):
         return self.themes["default"]["data"]["FaceProject"]["Screen"]["@Title"]

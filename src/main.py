@@ -28,7 +28,7 @@ import platform
 import gettext
 
 from PyQt6.QtWidgets import (QInputDialog, QMessageBox, QApplication, QProgressBar,
-                             QDialogButtonBox, QFileDialog, QWidget, QVBoxLayout,
+                             QDialogButtonBox, QFileDialog, QWidget, QVBoxLayout, QMenu,
                              QFrame, QColorDialog, QFontDialog, QLabel, QListWidgetItem, QToolButton,
                              QAbstractItemView, QSplashScreen, QDialog, QUndoView, QCheckBox, QHBoxLayout)
 from PyQt6.QtGui import QIcon, QPixmap, QDesktopServices, QDrag, QImage, QPainter, QFontDatabase, QFont
@@ -273,6 +273,17 @@ class WatchfaceEditor(QMainWindow):
 
         self.coreDialog.showWelcomePage()
         self.coreDialog.exec()
+
+    def setupDebug(self):
+        logging.info("Debug")
+        debugMenu = QMenu("Debug", self)
+
+        decompileAction = debugMenu.addAction(QIcon().fromTheme("project-build"), "Show Decompile")
+        setIdAction = debugMenu.addAction(QIcon().fromTheme("project-source"), "Set Project Binary ID")
+
+        decompileAction.triggered.connect(self.decompileProject)
+
+        self.ui.menubar.addMenu(debugMenu)
 
     def getCurrentProject(self) -> dict:
         # tab paths are stored in the tabToolTip string
@@ -1647,7 +1658,7 @@ class WatchfaceEditor(QMainWindow):
 
         self.coreDialog.configurePagePreviewField.addItems(self.resourceImages)
 
-        self.coreDialog.configurePageIdField.setText(currentProject.getId())
+        self.coreDialog.configurePageIdField.setValue(int(currentProject.getId()))
         self.coreDialog.configurePageNameField.setText(currentProject.getTitle())
         self.coreDialog.configurePageDeviceField.setCurrentText(list(self.WatchData.modelID.keys())[list(self.WatchData.modelID.values()).index(currentProject.getDeviceType())])
         self.coreDialog.configurePagePreviewField.setCurrentText(currentProject.getThumbnail())
@@ -1798,8 +1809,11 @@ class WatchfaceEditor(QMainWindow):
 
             fileLocation = str.split(os.path.basename(currentProject["project"].getPath()), ".")[0] + ".face"
 
-            binary = WatchfaceBinary(os.path.join(compileDirectory, fileLocation))
-            binary.setId(currentProject["project"].getId())
+            if currentProject["project"].getDeviceType() == "redmi_watch_3":
+                binary = WatchfaceBinary(os.path.join(compileDirectory, fileLocation))
+                binary.setId(currentProject["project"].getId())
+            else:
+                self.showDialog("info", _("This watch does not support ID assignment, custom IDs will not be applied."))
             
             self.statusBar().showMessage(_("Watchface built successfully at ") + f"{compileDirectory}\\{fileLocation}",
                                          3000)
@@ -1946,6 +1960,7 @@ class WatchfaceEditor(QMainWindow):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('filename', nargs='?', default=False)
+    parser.add_argument('--debug', action='store_true')
     parser.add_argument('--setVersion')
     parser.add_argument('--reset', action='store_true')
     parser.add_argument('--setWindowSizePreview', action='store_true')
@@ -1979,6 +1994,9 @@ if __name__ == "__main__":
 
     try:
         editor = WatchfaceEditor()
+
+        if args.debug:
+            editor.setupDebug()
 
         if editor.settings["General"]["CheckUpdate"]["value"] == True:
             threading.Thread(target=editor.checkForUpdates).start()

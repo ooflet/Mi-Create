@@ -158,6 +158,8 @@ class Scene(QGraphicsScene):
         adjacentPosList2 = [list(filter(lambda x, objPos=object.pos().x()+(object.rect().width() / 2): posFilter(x, objPos), self.positionMap["X"])), list(filter(lambda x, objPos=object.pos().y()+(object.rect().height() / 2): posFilter(x, objPos), self.positionMap["Y"]))]
         adjacentPosList3 = [list(filter(lambda x, objPos=object.pos().x()+object.rect().width(): posFilter(x, objPos), self.positionMap["X"])), list(filter(lambda x, objPos=object.pos().y()+object.rect().height(): posFilter(x, objPos), self.positionMap["Y"]))]
 
+        print("1", adjacentPosList1, "2", adjacentPosList2, "3", adjacentPosList3)
+
         if adjacentPosList1[0] != []:
             pos[0] = (min(adjacentPosList1[0], key=lambda x:abs(x-object.pos().x())))
 
@@ -176,26 +178,15 @@ class Scene(QGraphicsScene):
         if adjacentPosList3[1] != []:
             pos[5] = (min(adjacentPosList3[1], key=lambda x:abs(x-object.pos().y()+object.rect().height())))
 
-        # prioritize snap positions
-
-        closest_index = None
-        closest_distance = 0
-
-        for i in range(0, len(pos), 2):
-            x, y = pos[i], pos[i+1]
-            if x == None or y == None:
-                continue
-            if (x, y) == (object.pos().x(), object.pos().y()):
-                continue  # Ignore if the position matches the object
-            distance = ((x - object.pos().x())**2 + (y - object.pos().y())**2)**0.5  # Calculate Euclidean distance
-            if distance < closest_distance:
-                closest_distance = distance
-                closest_index = i
-
-        filtered_positions = [None] * len(pos)
-        if closest_index is not None:
-            filtered_positions[closest_index] = pos[closest_index]
-            filtered_positions[closest_index + 1] = pos[closest_index + 1]
+        # # compare positions and check which one should be prioritised
+        # catchX = None
+        # catchY = None
+        
+        # for i in range(0, 5, 2):
+        #     x = pos[i]
+        #     y = pos[i + 1]
+        #     if catchX == None or min(myList, key=lambda x:abs(x-myNumber))
+ 
 
         return pos
     
@@ -248,19 +239,19 @@ class Scene(QGraphicsScene):
             self.posLines.append(self.addLine(pos[0], 0, pos[0], self.sceneRect().height(), pen))
            
         if pos[1] != None:
-            self.posLines.append(self.addLine(0, pos[1], self.sceneRect().height(), pos[1], pen))
+            self.posLines.append(self.addLine(0, pos[1], self.sceneRect().width(), pos[1], pen))
 
         if pos[2] != None:
             self.posLines.append(self.addLine(pos[2], 0, pos[2], self.sceneRect().height(), pen))
 
         if pos[3] != None:
-            self.posLines.append(self.addLine(0, pos[3], self.sceneRect().height(), pos[3], pen))
+            self.posLines.append(self.addLine(0, pos[3], self.sceneRect().width(), pos[3], pen))
         
         if pos[4] != None:
             self.posLines.append(self.addLine(pos[4], 0, pos[4], self.sceneRect().height(), pen))
 
         if pos[5] != None:
-            self.posLines.append(self.addLine(0, pos[5], self.sceneRect().height(), pos[5], pen))
+            self.posLines.append(self.addLine(0, pos[5], self.sceneRect().width(), pos[5], pen))
 
     def clearSnapLines(self):
         for line in self.posLines:
@@ -387,6 +378,10 @@ class Canvas(QGraphicsView):
             menu = ContextMenu("default", self.mainWindowUI)
 
         menu.exec(viewPos)
+
+    def keyPressEvent(self, event):
+        # if event
+        return super().keyPressEvent(event)
 
     def wheelEvent(self, event):
         modifiers = QApplication.keyboardModifiers()

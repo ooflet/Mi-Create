@@ -382,8 +382,8 @@ class CoreDialog(QDialog):
         self.configurePageId = QHBoxLayout()
         self.configurePageIdTitle = QLabel()
         
-        self.configurePageIdField = QLineEdit()
-        self.configurePageIdField.setValidator(QIntValidator())
+        self.configurePageIdField = QSpinBox()
+        self.configurePageIdField.setRange(100000000, 999999999) # set to only allow numbers with 9 digits
         self.configurePageIdField.setFixedWidth(175)
 
         self.configurePageName = QHBoxLayout()
