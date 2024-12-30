@@ -1809,7 +1809,7 @@ class WatchfaceEditor(QMainWindow):
 
             fileLocation = str.split(os.path.basename(currentProject["project"].getPath()), ".")[0] + ".face"
 
-            if currentProject["project"].getDeviceType() == "redmi_watch_3":
+            if currentProject["project"].getDeviceType() != "redmi_watch_3":
                 binary = WatchfaceBinary(os.path.join(compileDirectory, fileLocation))
                 binary.setId(currentProject["project"].getId())
             else:
