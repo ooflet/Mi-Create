@@ -306,6 +306,7 @@ class Canvas(QGraphicsView):
     def mouseMoveEvent(self, event):
         if not self.rubberBand.isHidden():
             self.rubberBand.setGeometry(QRect(self.rubberBandOrigin, event.pos()).normalized())
+
         return super().mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event):
@@ -380,8 +381,24 @@ class Canvas(QGraphicsView):
         menu.exec(viewPos)
 
     def keyPressEvent(self, event):
-        # if event
-        return super().keyPressEvent(event)
+        if self.getSelectedObjects() == []:
+            return
+
+        if event.key() == Qt.Key.Key_Left:
+            for object in self.getSelectedObjects():
+                object.setX(object.x() - 1)
+        elif event.key() == Qt.Key.Key_Up:
+            for object in self.getSelectedObjects():
+                object.setY(object.y() - 1)
+        elif event.key() == Qt.Key.Key_Right:
+            for object in self.getSelectedObjects():
+                object.setX(object.x() + 1)
+        elif event.key() == Qt.Key.Key_Down:
+            for object in self.getSelectedObjects():
+                object.setY(object.y() + 1)
+
+        self.fireObjectPositionChanged()
+        # return super().keyPressEvent(event)
 
     def wheelEvent(self, event):
         modifiers = QApplication.keyboardModifiers()
@@ -1024,6 +1041,11 @@ class BaseWidget(QGraphicsRectItem):
     def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent):
         super().mouseMoveEvent(event)
 
+        print(event.button())
+
+        if event.buttons() != Qt.MouseButton.LeftButton:
+            return
+
         # handle snap
         if self.snap:
             snapPos = self.scene().getAdjacentPos(self)
@@ -1061,13 +1083,20 @@ class BaseWidget(QGraphicsRectItem):
 
     def mousePressEvent(self, event):
         super().mousePressEvent(event)
+
+        if event.button() != Qt.MouseButton.LeftButton:
+            return
+        
         self.origPos = self.pos()
 
     def mouseReleaseEvent(self, event):
         super().mouseReleaseEvent(event)
+
+        if event.button() != Qt.MouseButton.LeftButton:
+            return
+        
         self.scene().clearSnapLines()
-        if event.button() != Qt.MouseButton.RightButton:
-            self.canvas.fireObjectPositionChanged()
+        self.canvas.fireObjectPositionChanged()
     
     def delete(self):
         self.scene().removeItem(self.selectionPath)
