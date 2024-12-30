@@ -3,7 +3,7 @@ from mmap import mmap, ACCESS_READ
 class WatchfaceBinary:
     def __init__(self, path):
         with open(path, "+rb") as binary:
-            self.binary = mmap(binary.fileno(), 0, ACCESS_READ)
+            self.binary = mmap(binary.fileno(), 0)
 
     def setId(self, id):
         if len(id) == 9:
