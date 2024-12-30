@@ -68,6 +68,8 @@ import resources.resources_rc  # resource import required because it sets up the
 
 from window_ui import Ui_MainWindow
 
+
+
 storedSettings = QSettings("Mi Create", "Settings")
 workspaceSettings = QSettings("Mi Create", "Workspace")
     
@@ -78,8 +80,11 @@ programVersion = 'v1.1'
 class WatchfaceEditor(QMainWindow):
     updateFound = pyqtSignal(str)
 
-    def __init__(self):
+    def __init__(self, startFunc):
         super().__init__()
+
+        self.startFunc = startFunc
+        self.restart = False
 
         self.fileChanged = False
         self.compiling = False
@@ -104,6 +109,7 @@ class WatchfaceEditor(QMainWindow):
         # Setup WatchData
         logging.info("Initializing WatchData")
         self.WatchData = WatchData()
+        self.WatchData.restart.connect(self.restartWindow)
 
         logging.info("Initializing Application Widgets")
         self.setupWidgets()
@@ -180,6 +186,10 @@ class WatchfaceEditor(QMainWindow):
         self.updateFound.connect(self.promptUpdate)
         logging.info("Launch!!")
 
+    def restartWindow(self):
+        self.restart = True
+        self.close()
+
     def closeEvent(self, event):
         logging.info("Exit requested!")
 
@@ -194,7 +204,16 @@ class WatchfaceEditor(QMainWindow):
             logging.info("Saving Window State")
             self.saveWindowState()
             logging.info("Quitting")
-            sys.exit()
+
+            self.coreDialog.hide()
+            self.hide()
+
+            if self.restart:
+                self.restart = False
+                self.startFunc(self) # pass in main window to close when starting a new instance
+            else:
+                print("nope")
+                sys.exit()
 
         fileChanged = False
 
@@ -850,10 +869,8 @@ class WatchfaceEditor(QMainWindow):
             if result == QMessageBox.StandardButton.Yes:
                 storedSettings.clear()
                 workspaceSettings.clear()
-                self.loadSettings()
-                self.loadTheme()
-                self.loadLanguage(True)
-                self.settingsWidget.loadProperties(self.settings["General"])
+                self.showDialog("info", "The program will now restart.")
+                self.restartWindow()
 
         def updateSettings():
             self.coreDialog.settings = self.settings
@@ -1958,68 +1975,75 @@ class WatchfaceEditor(QMainWindow):
             MessageBox.exec()
 
 if __name__ == "__main__":
+    app = QApplication(sys.argv)
     parser = argparse.ArgumentParser()
     parser.add_argument('filename', nargs='?', default=False)
     parser.add_argument('--debug', action='store_true')
     parser.add_argument('--setVersion')
     parser.add_argument('--reset', action='store_true')
     parser.add_argument('--setWindowSizePreview', action='store_true')
-    args = parser.parse_args()
 
-    app = QApplication(sys.argv)
-    
     splash = QSplashScreen(QPixmap(":/Images/splash.png"))
-    splash.show()
-    
-    QFontDatabase.addApplicationFont(":/Fonts/Inter.ttf")
 
-    def onException(exc_type, exc_value, exc_traceback):
-        if exc_type == KeyboardInterrupt:
+    def start(window=None):  
+        args = parser.parse_args()
+        
+        splash.show()
+        
+        QFontDatabase.addApplicationFont(":/Fonts/Inter.ttf")
+
+        def onException(exc_type, exc_value, exc_traceback):
+            if exc_type == KeyboardInterrupt:
+                sys.exit(1)
+
+            exception = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
+            errString = "Internal error! Please report as a bug.\n\n"+exception
+            logging.error(errString)
+            QMessageBox.critical(None, 'Error', errString, QMessageBox.StandardButton.Ok)
+
+        sys.excepthook = onException
+
+        if args.reset:
+            storedSettings.clear()
+            workspaceSettings.clear()
+            print("Settings reset.")
+
+        if args.setVersion:
+            programVersion = args.setVersion
+
+        try:
+            editor = WatchfaceEditor(start) # pass in start function to call when window wants to close
+
+            if args.debug:
+                editor.setupDebug()
+
+            if editor.settings["General"]["CheckUpdate"]["value"] == True:
+                threading.Thread(target=editor.checkForUpdates).start()
+
+            if args.filename:
+                logging.info("Opening file from argument 1")
+                result = editor.openProject(projectLocation=args.filename)
+                splash.close()
+                if result == False:
+                    editor.showWelcome()
+            elif args.setWindowSizePreview:
+                splash.close()
+                
+                editor.showWelcome()
+                editor.resize(1280, 720)
+            else:
+                splash.close()
+                editor.showWelcome()
+
+            if window != None:
+                window.close()
+                
+        except Exception as e:
+            error_message = "Critical error during initialization: " + traceback.format_exc()
+            logging.error(error_message)
+            QMessageBox.critical(None, 'Error', error_message, QMessageBox.StandardButton.Ok)
             sys.exit(1)
 
-        exception = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
-        errString = "Internal error! Please report as a bug.\n\n"+exception
-        logging.error(errString)
-        QMessageBox.critical(None, 'Error', errString, QMessageBox.StandardButton.Ok)
+        app.exec()  
 
-    sys.excepthook = onException
-
-    if args.reset:
-        storedSettings.clear()
-        workspaceSettings.clear()
-        print("Settings reset.")
-
-    if args.setVersion:
-        programVersion = args.setVersion
-
-    try:
-        editor = WatchfaceEditor()
-
-        if args.debug:
-            editor.setupDebug()
-
-        if editor.settings["General"]["CheckUpdate"]["value"] == True:
-            threading.Thread(target=editor.checkForUpdates).start()
-
-        if args.filename:
-            logging.info("Opening file from argument 1")
-            result = editor.openProject(projectLocation=args.filename)
-            splash.close()
-            if result == False:
-                editor.showWelcome()
-        elif args.setWindowSizePreview:
-            splash.close()
-            
-            editor.showWelcome()
-            editor.resize(1280, 720)
-        else:
-            splash.close()
-            editor.showWelcome()
-            
-    except Exception as e:
-        error_message = "Critical error during initialization: " + traceback.format_exc()
-        logging.error(error_message)
-        QMessageBox.critical(None, 'Error', error_message, QMessageBox.StandardButton.Ok)
-        sys.exit(1)
-
-    sys.exit(app.exec())
+    start()

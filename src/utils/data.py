@@ -8,11 +8,13 @@ import shutil
 import xmltodict
 import traceback
 
-from PyQt6.QtCore import QSettings
+from PyQt6.QtCore import QSettings, QObject, pyqtSignal
 from PyQt6.QtWidgets import QMessageBox
 
-class WatchData:
+class WatchData(QObject):
+    restart = pyqtSignal()
     def __init__(self):
+        super().__init__()
         self.models = []
         self.modelID = {}
         self.modelSize = {}
@@ -353,7 +355,8 @@ class WatchData:
             shutil.copyfile(compiler, os.path.join(os.getcwd(), "compiler/compile.exe"))
             self.update()
             settings.setValue("compilerVersion", "custom")
-            QMessageBox.information(None, "Data File Update", "Compiler updated successfully. Please restart the program.")
+            QMessageBox.information(None, "Data File Update", "Compiler updated successfully. The program will now restart.")
+            self.restart.emit()
         except Exception as e:
             QMessageBox.critical(None, "Data File Update", "Failed to update: "+traceback.format_exc())
 
