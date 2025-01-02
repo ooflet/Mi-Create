@@ -38,8 +38,8 @@ class FprjConverter:
 
     @staticmethod
     def switch_alignment_value(val: int) -> int:
-        # EasyFace: 0: 左对齐, 1: 居中, 2: 右对齐
-        # WatchfacePackTool: 0: 右对齐 1: 左对齐, 2: 居中
+        # EasyFace: 0: left, 1: center, 2: right
+        # WatchfacePackTool: 0: right, 1: left, 2: center
         if val == 0:
             return 1
         if val == 1:
@@ -86,7 +86,7 @@ class FprjConverter:
         with open(fprj_conf_file, 'r', encoding='utf-8') as f:
             bs_obj = BeautifulSoup(f.read(), features="xml")
         info_dic["name"] = bs_obj.FaceProject.Screen["Title"]
-        info_dic["id"] = ""  # None
+        info_dic["id"] = bs_obj.FaceProject.get("Id", "167210065")
         info_dic["deviceType"] = self.device_type
         info_dic["previewImg"] = self.rm_subfix(bs_obj.FaceProject.Screen["Bitmap"])
 
@@ -245,5 +245,4 @@ class FprjConverter:
             mkdir(os.path.join(self.dst_dir, "images_aod"))
         with open(os.path.join(self.dst_dir, "wfDef.json"), 'w', encoding='utf-8') as f:
             json.dump(self.parse_fprj_conf_file(), f, indent=4, ensure_ascii=False)
-        QMessageBox.warning(None, "fprjConverter", "Warning: Edit %s and fill in the id attribute manually." % os.path.join(self.dst_dir, "wfDef.json"))
         return True
