@@ -33,6 +33,7 @@ class QStackedWidget(QtWidgets.QStackedWidget):
         self._currentWidgetPosition = QtCore.QPoint(0, 0)
         # Default boolean for active widget
         self.widgetActive = False
+        self.anim_group = None
                             
 
     def setTransitionDirection(self, direction):
@@ -84,8 +85,9 @@ class QStackedWidget(QtWidgets.QStackedWidget):
 
     def slideToWidget(self, newWidget):
         # If the widget is active, exit the function
-        if self.widgetActive:
-            return
+        if self.anim_group != None:
+            self.anim_group.deleteLater()
+            self.widget(self.nextWidget).hide()
 
         # Update widget active bool
         self.widgetActive = True
@@ -130,7 +132,7 @@ class QStackedWidget(QtWidgets.QStackedWidget):
         self.widget(_nextWidgetIndex).show()
         self.widget(_nextWidgetIndex).raise_()
 
-        anim_group = QtCore.QParallelAnimationGroup(
+        self.anim_group = QtCore.QParallelAnimationGroup(
             self, finished=self.animationDoneSlot
         )
 
@@ -147,13 +149,13 @@ class QStackedWidget(QtWidgets.QStackedWidget):
                 startValue=start,
                 endValue=end,
             )
-            anim_group.addAnimation(animation)
+            self.anim_group.addAnimation(animation)
 
         self.nextWidget = _nextWidgetIndex
         self.currentWidget = _currentWidgetIndex
 
         self.widgetActive = True
-        anim_group.start(QtCore.QAbstractAnimation.DeletionPolicy.DeleteWhenStopped)
+        self.anim_group.start(QtCore.QAbstractAnimation.DeletionPolicy.DeleteWhenStopped)
 
         # Play fade animation
         if self.fadeTransition:
@@ -164,6 +166,7 @@ class QStackedWidget(QtWidgets.QStackedWidget):
         self.widget(self.currentWidget).hide()
         self.widget(self.currentWidget).move(self._currentWidgetPosition)
         self.widgetActive = False
+        self.anim_group = None
 
     def setCurrentWidget(self, widget):
         currentIndex = self.currentIndex()

@@ -57,6 +57,7 @@ from utils.updater import Updater
 from utils.history import History, CommandAddWidget, CommandDeleteWidget, CommandPasteWidget, CommandModifyWidgetLayer, \
     CommandModifyProperty, CommandModifyPosition, CommandChangeTheme
 from utils.exporter import FprjConverter
+from utils.plugin import PluginLoader
 from widgets.canvas import Canvas, ObjectIcon, ImageWidget, NumberWidget, AnalogWidget, ImagelistWidget
 from widgets.explorer import Explorer
 from widgets.properties import PropertiesWidget
@@ -67,8 +68,6 @@ from translate import Translator
 import resources.resources_rc  # resource import required because it sets up the icons
 
 from window_ui import Ui_MainWindow
-
-
 
 storedSettings = QSettings("Mi Create", "Settings")
 workspaceSettings = QSettings("Mi Create", "Workspace")
@@ -152,6 +151,8 @@ class WatchfaceEditor(QMainWindow):
 
         self.settingsWidget.propertyChanged.connect(lambda property, value: self.setSetting(property, value))
 
+        self.pluginLoader = PluginLoader(self)
+
         logging.info("Initializing Dialogs")
         self.setupDialogs()
 
@@ -181,6 +182,9 @@ class WatchfaceEditor(QMainWindow):
         self.project = None
         self.projectXML = None
 
+        logging.info("Initializing Plugins")
+        self.pluginLoader.loadPlugins()
+
         logging.info("Initializing Misc")
         self.loadWindowState()
         self.updateFound.connect(self.promptUpdate)
@@ -207,6 +211,8 @@ class WatchfaceEditor(QMainWindow):
 
             self.coreDialog.hide()
             self.hide()
+
+            self.pluginLoader.stopPlugins()
 
             if self.restart:
                 self.restart = False
@@ -876,7 +882,7 @@ class WatchfaceEditor(QMainWindow):
             self.coreDialog.settings = self.settings
 
         self.coreDialog = CoreDialog(None, self.settings, self.settingsWidget, f"{programVersion} • compiler {self.WatchData.getCompilerVersion()}",
-                                     self.WatchData.models)
+                                     self.WatchData.models, self.pluginLoader)
         self.coreDialog.configurePageDeviceField.addItems(self.WatchData.models)
         self.coreDialog.welcomeSidebarOpenProject.clicked.connect(self.openProject)
         self.coreDialog.updateCompiler.connect(lambda compiler, db: self.WatchData.updateDataFiles(compiler, db))
@@ -1778,12 +1784,6 @@ class WatchfaceEditor(QMainWindow):
         if platform.system() == "Darwin":
             self.showDialog("info", "macOS compiler support will be added soon.")
             return
-        
-        print(workspaceSettings.value("compilerVersion"))
-        if platform.system() == "Linux" and workspaceSettings.value("compilerVersion") == None: # compiler version none means its using default compiler v4.18
-            result = self.showDialog("question", "Compiler v4.18 has known issues running on Linux. You may downgrade the compiler to an older version using the 'Update Compiler from EasyFace' option in Settings > More menu. Continue using the v4.18 compiler?", buttons=QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, defaultButton=QMessageBox.StandardButton.No)
-            if result == QMessageBox.StandardButton.No:
-                return
 
         # check if wine exists if we're compiling on Linux
         if platform.system() == "Linux" and which("wine") == None:
@@ -1826,7 +1826,7 @@ class WatchfaceEditor(QMainWindow):
 
             fileLocation = str.split(os.path.basename(currentProject["project"].getPath()), ".")[0] + ".face"
 
-            if currentProject["project"].getDeviceType() != "redmi_watch_3":
+            if currentProject["project"].getDeviceType() != "redmi_watch_3_active":
                 binary = WatchfaceBinary(os.path.join(compileDirectory, fileLocation))
                 binary.setId(currentProject["project"].getId())
             else:
@@ -1997,7 +1997,7 @@ if __name__ == "__main__":
                 sys.exit(1)
 
             exception = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
-            errString = "Internal error! Please report as a bug.\n\n"+exception
+            errString = "An error has occured! \n\n"+exception+"\nTry disabling plugins before reporting as a bug."
             logging.error(errString)
             QMessageBox.critical(None, 'Error', errString, QMessageBox.StandardButton.Ok)
 
