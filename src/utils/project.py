@@ -1076,6 +1076,9 @@ class GMFProject:
             else:
                 shutil.copyfile(file, destFile)
     
+    def getId(self):
+        return self.themes[self.currentTheme]["data"].get("@Id") or "167210065"
+
     def getTitle(self):
         return self.themes[self.currentTheme]["data"]["name"]
     
@@ -1084,6 +1087,9 @@ class GMFProject:
 
     def setDevice(self, value):
         self.themes[self.currentTheme]["data"]["deviceType"] = value
+
+    def setId(self, value):
+        self.themes[self.currentTheme]["data"]["id"]
 
     def setTitle(self, value):
         self.themes[self.currentTheme]["data"]["name"] = value
