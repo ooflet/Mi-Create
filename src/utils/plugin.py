@@ -92,13 +92,15 @@ class PluginLoader:
         os.mkdir(plugin_folder)
 
         shutil.unpack_archive(plugin_path, plugin_folder, "zip")
-        spec = util.spec_from_file_location("install", os.path.join(plugin_folder, "install.py"))
         
-        if spec and spec.loader:
-            module = util.module_from_spec(spec)
-            spec.loader.exec_module(module)
-            if hasattr(module, "__init__"):
-                module.install()
+        if os.path.isfile(os.path.join(plugin_folder, "install.py")):
+            spec = util.spec_from_file_location("install", os.path.join(plugin_folder, "install.py"))
+            
+            if spec and spec.loader:
+                module = util.module_from_spec(spec)
+                spec.loader.exec_module(module)
+                if hasattr(module, "__init__"):
+                    module.install()
         
     def stopPlugins(self):
         for plugin in self.plugins.values():
