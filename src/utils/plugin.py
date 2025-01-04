@@ -92,7 +92,7 @@ class PluginLoader:
         os.mkdir(plugin_folder)
 
         shutil.unpack_archive(plugin_path, plugin_folder, "zip")
-        
+
         if os.path.isfile(os.path.join(plugin_folder, "install.py")):
             spec = util.spec_from_file_location("install", os.path.join(plugin_folder, "install.py"))
             
@@ -133,13 +133,14 @@ class PluginLoader:
     
     def deletePlugin(self, plugin_name):
         try:
-            spec = util.spec_from_file_location("install", os.path.join(self.plugins[plugin_name]["directory"], "install.py"))
-        
-            if spec and spec.loader:
-                module = util.module_from_spec(spec)
-                spec.loader.exec_module(module)
-                if hasattr(module, "__init__"):
-                    module.uninstall()
+            if os.path.isfile(os.path.join(self.plugins[plugin_name]["directory"], "install.py")):
+                spec = util.spec_from_file_location("install", os.path.join(self.plugins[plugin_name]["directory"], "install.py"))
+            
+                if spec and spec.loader:
+                    module = util.module_from_spec(spec)
+                    spec.loader.exec_module(module)
+                    if hasattr(module, "__init__"):
+                        module.uninstall()
                 
             shutil.rmtree(self.plugins[plugin_name]["directory"])
             return True, "Success"
