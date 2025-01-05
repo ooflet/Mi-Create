@@ -55,7 +55,7 @@ def create_plugin(path, name, author):
 def package_plugin(path, output):
     print(f"Packaging plugin at: {path} to: {output}")
     config = configparser.ConfigParser()
-    config.read_file(open(os.path.join(path, "config.ini")))
+    config.read_file(open(os.path.join(path, "config.ini"), encoding="utf8"))
     name = config.get("config", "name")
     os.chdir(output)
     shutil.make_archive(os.path.join(output, name), "zip", path)
