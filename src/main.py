@@ -802,7 +802,7 @@ class WatchfaceEditor(QMainWindow):
                 else:
                     self.propertiesWidget.clearOnRefresh = False
                     currentProject["canvas"].imageFolder = currentProject["project"].getImageFolder()
-                    success, userFacingReason, debugReason = currentProject["canvas"].reloadObject(widgetName, currentItem)
+                    success, userFacingReason, debugReason = currentProject["canvas"].reloadObject(widgetName, currentItem, property, value)
 
                     if success:
                         currentProject["canvas"].selectObject(widgetName)
@@ -1280,12 +1280,14 @@ class WatchfaceEditor(QMainWindow):
                 prevPosObject = {
                     "Name": widget.getProperty("widget_name"),
                     "Widget": widget,
+                    "CanvasWidget": object,
                     "X": widget.getProperty("widget_pos_x"),
                     "Y": widget.getProperty("widget_pos_y")
                 }
                 currentPosObject = {
                     "Name": widget.getProperty("widget_name"),
                     "Widget": widget,
+                    "CanvasWidget": object,
                     "X": objectX,
                     "Y": round(object.pos().y())
                 }
@@ -1301,16 +1303,16 @@ class WatchfaceEditor(QMainWindow):
                 for object in objects:
                     object["Widget"].setProperty("widget_pos_x", int(object["X"]))
                     object["Widget"].setProperty("widget_pos_y", int(object["Y"]))
-                    
+                    object["CanvasWidget"].quickReloadProperty("widget_pos_x", int(object["X"]))
+                    object["CanvasWidget"].quickReloadProperty("widget_pos_y", int(object["Y"]))
+
                 print("before load")
-                currentProject["canvas"].loadObjects(currentProject["project"],
-                                                     self.settings["Canvas"]["Snap"]["value"],
-                                                     self.settings["Canvas"]["Interpolation"]["value"],
-                                                     self.settings["Canvas"]["ClipDeviceShape"]["value"],
-                                                     self.settings["Canvas"]["ShowDeviceOutline"]["value"])
-                print("before selection")
+                # currentProject["canvas"].loadObjects(currentProject["project"],
+                #                                      self.settings["Canvas"]["Snap"]["value"],
+                #                                      self.settings["Canvas"]["Interpolation"]["value"],
+                #                                      self.settings["Canvas"]["ClipDeviceShape"]["value"],
+                #                                      self.settings["Canvas"]["ShowDeviceOutline"]["value"])
                 currentProject["canvas"].selectObjectsFromPropertyList(objects)
-                print("after selection")
 
                 if currentProject["canvas"].isPreviewPlaying:
                     self.playAllPreviews(currentProject["canvas"])

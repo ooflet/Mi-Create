@@ -954,13 +954,16 @@ class Canvas(QGraphicsView):
         self.scene().updatePosMap()
         return True, "Success", ""
         
-    def reloadObject(self, objectName, widget):
+    def reloadObject(self, objectName, widget, property, value):
         # loads a single object without reloading every object in the canvas
         # if using on a mass set of objects, its usually easier to call the loadobjects function
         object = self.widgets[objectName]
         objectZValue = object.zValue()
 
         if object != None:
+            if object.quickReloadProperty(property, value):
+                print("quick reload")
+                return True, "Quick reloaded object", ""
 
             result, userFacingReason, debugReason = self.createWidgetFromData(objectZValue, widget, self.snap, self.interpolation)
             if not result:
@@ -1101,6 +1104,20 @@ class BaseWidget(QGraphicsRectItem):
     def delete(self):
         self.scene().removeItem(self.selectionPath)
         self.scene().removeItem(self)
+
+    def quickReloadProperty(self, property, value):
+        print("quick reload", property, value)
+        if property == "widget_pos_x":
+            self.setX(int(value))
+        elif property == "widget_pos_y":
+            self.setY(int(value))
+        elif property == "widget_size_width":
+            self.setRect(self.rect().setWidth(int(value)))  
+        elif property == "widget_size_height":
+            self.setRect(self.rect().setHeight(int(value)))
+        else:
+            return False # returns when property cannot be quick reloaded
+        return True # returns when property has ben set successfully
 
     def paint(self, painter, option, widget=None):
         # Paint the node in the graphic view.
