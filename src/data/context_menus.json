@@ -74,6 +74,13 @@
         "Arc Progress": {
             "icon": "widget-arcprogress",
             "id": "widget_arc"
+        },
+        "sep2": {
+            "specialType": "seperator"
+        },
+        "Container": {
+            "icon": "widget-container",
+            "id": "widget_container"
         }
     },
     "gmf": {

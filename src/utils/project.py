@@ -18,6 +18,7 @@ import logging
 import json
 import shutil
 import xmltodict
+import xml
 
 from shutil import which
 from typing import List, Optional
@@ -196,6 +197,16 @@ class FprjProject:
                 "@Value_Src":"0",
                 "@Spacing":"0",
                 "@Blanking":"0"
+            },
+            "widget_container": {
+                "@Shape":"34",
+                "@Name":"",
+                "@X":"0",
+                "@Y":"0",
+                "@Width":"50",
+                "@Height":"50",
+                "@Alpha":"255",
+                "@Visible_Src":"0"
             },
             "widget_arc": {
                 "@Shape":"42",
@@ -589,13 +600,17 @@ class FprjProject:
         try:
             if self.themes["aod"]["widgets"] != []:
                 self.createAod()
-                aod_xml_string = xmltodict.unparse(self.themes["aod"]["data"], pretty=True)
+                raw = xmltodict.unparse(self.themes["aod"]["data"])
+                dom = xml.dom.minidom.parseString(raw)
+                aod_xml_string = dom.toprettyxml()
                 with open(self.themes["aod"]["path"], "w", encoding="utf8") as file:
                     file.write(aod_xml_string)
 
             for theme in self.themes:
                 if os.path.isfile(self.themes[theme]["path"]):
-                    xml_string = xmltodict.unparse(self.themes[theme]["data"], pretty=True)
+                    raw = xmltodict.unparse(self.themes[theme]["data"])
+                    dom = xml.dom.minidom.parseString(raw)
+                    xml_string = dom.toprettyxml()
                     with open(self.themes[theme]["path"], "w", encoding="utf8") as file:
                         file.write(xml_string)
                 
