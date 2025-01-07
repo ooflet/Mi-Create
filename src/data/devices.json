@@ -51,7 +51,7 @@
         "string": "Redmi Watch 3",
         "width": 390,
         "height": 450,
-        "radius": 80
+        "radius": 86
     },
     "redmi_watch_3_active": {
         "string": "Redmi Watch 3 Active",
@@ -63,19 +63,19 @@
         "string": "Redmi Watch 4",
         "width": 390,
         "height": 450,
-        "radius": 80
+        "radius": 90
     },
     "redmi_watch_5": {
         "string": "Redmi Watch 5",
         "width": 432,
         "height": 514,
-        "radius": 80
+        "radius": 103
     },
     "redmi_watch_5_active": {
         "string": "Redmi Watch 5 Active",
         "width": 320,
         "height": 385,
-        "radius": 55
+        "radius": 82
     },
     "redmi_watch_5_lite": {
         "string": "Redmi Watch 5 Lite",
@@ -99,25 +99,25 @@
         "string": "Xiaomi Band 8",
         "width": 192,
         "height": 490,
-        "radius": 90
+        "radius": 100
     },
     "xiaomi_band_8_pro": {
         "string": "Xiaomi Band 8 Pro",
         "width": 336,
         "height": 480,
-        "radius": 28
+        "radius": 48
     },
     "xiaomi_band_9": {
         "string": "Xiaomi Band 9",
         "width": 192,
         "height": 490,
-        "radius": 90
+        "radius": 100
     },
     "xiaomi_band_9_pro": {
         "string": "Xiaomi Band 9 Pro",
         "width": 336,
         "height": 480,
-        "radius": 28
+        "radius": 48
     },
     "70mai_saphir": {
         "string": "70mai Saphir",

@@ -319,6 +319,18 @@ class WatchData(QObject):
                 "70mai_saphir": "70mai Saphir"
             }
 
+            watchRadius = {
+                "redmi_watch_3": 86,
+                "redmi_watch_4": 90,
+                "xiaomi_band_8_pro": 48,
+                "xiaomi_band_9_pro": 48,
+                "redmi_watch_5": 103,
+                "xiaomi_band_8": 100,
+                "xiaomi_band_9": 100,
+                "redmi_watch_5_active": 82,
+                "redmi_watch_5_light": 116,
+            }
+
             source_list = self.modelSourceData
 
             with open("data/devices.json") as size_list_file:
@@ -328,11 +340,16 @@ class WatchData(QObject):
                 xml = xmltodict.parse(device_info.read())    
 
             for device in xml["DeviceList"]["DeviceInfo"]:
+                if watchRadius.get(fprjDeviceIds[device["@Type"]]):
+                    radius = watchRadius[fprjDeviceIds[device["@Type"]]]
+                else:
+                    radius = int(device["@Radius"])
+
                 device_size_listing = {
                     "string": friendlyNames.get(fprjDeviceIds[device["@Type"]]) or device["@Name"],
                     "width": int(device["@Width"]),
                     "height": int(device["@Height"]),
-                    "radius": int(device["@Radius"])
+                    "radius": radius
                 }
                 size_list[fprjDeviceIds[device["@Type"]]] = device_size_listing
 
