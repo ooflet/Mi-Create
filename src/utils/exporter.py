@@ -103,7 +103,10 @@ class FprjConverter:
                 if widget["Shape"] == "30":
                     element_type = "element"
                 elif widget["Shape"] == "31":
-                    element_type = "widge_imagelist"
+                    if widget_name[:5] == "anim_":
+                        element_type = "element_anim"
+                    else:
+                        element_type = "widge_imagelist"
                 elif widget["Shape"] == "32":
                     element_type = "widge_dignum"
                 elif widget["Shape"] == "27":
@@ -178,6 +181,9 @@ class FprjConverter:
                     widget_info["showZero"] = not bool(int(widget["Blanking"]))
                     widget_info["dataSrc"] = widget["Value_Src"]
                     widget_info["spacing"] = int(widget["Spacing"])
+                elif element_type == "element_anim":
+                    widget_info["animInterval"] = widget_name.split("[")[1].split("@")[0]
+                    widget_info["animRepeat"] = widget_name.split("@")[1][:-1]
 
                 # Images
                 if element_type == "element":
@@ -191,6 +197,10 @@ class FprjConverter:
                     image_list = self.split_bitmap_list(widget.get("BitmapList"))
                     assert image_list and isinstance(image_list[0], str)
                     widget_info["imageList"] = [self.rm_subfix(f_) for f_ in image_list]
+                elif element_type == "element_anim":
+                    image_list = self.split_bitmap_list(widget.get("BitmapList"))
+                    assert image_list and isinstance(image_list[0], tuple)
+                    widget_info["imageList"] = [self.rm_subfix(f_[1]) for f_ in image_list]
 
                 # Correct X coordinate
                 if element_type == "widge_dignum":
