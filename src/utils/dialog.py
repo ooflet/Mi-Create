@@ -462,7 +462,7 @@ class CoreDialog(QDialog):
         resetAction = self.settingsMenu.addAction("Reset Settings")
 
         def install():
-            file = QFileDialog.getOpenFileName(self, "*.plg")
+            file = QFileDialog.getOpenFileName(self, "Install plugin...", "%userprofile%/", "Plugin File (*.plg)")
             if file[0]:
                 pluginLoader.installPlugin(file[0])
                 pluginLoader.loadPlugins()
