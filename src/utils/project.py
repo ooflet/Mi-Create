@@ -539,17 +539,29 @@ class FprjProject:
         
         self.themes[self.currentTheme]["widgets"].append(widget.data)
 
-    def addResource(self, files):
-        print("imgFOlder", os.path.isdir(self.themes["aod"]["imageFolder"]))
+    def addResource(self, file):
+        if self.currentTheme == "aod" and os.path.isdir(self.themes["aod"]["imageFolder"]) is not True:
+            self.createAod(True)
+
+        destFile = os.path.join(self.themes[self.currentTheme]["imageFolder"], os.path.basename(file))
+        if os.path.isfile(destFile):
+            QMessageBox.information(None, "Resource Importer", f"File {destFile} already exists!")
+        else:
+            shutil.copyfile(file, destFile)
+
+    def addResources(self, files):
         if self.currentTheme == "aod" and os.path.isdir(self.themes["aod"]["imageFolder"]) is not True:
             self.createAod(True)
 
         for file in files:
-            destFile = os.path.join(self.themes[self.currentTheme]["imageFolder"], os.path.basename(file))
-            if os.path.isfile(destFile):
-                QMessageBox.information(None, "Resource Importer", f"File {destFile} already exists!")
-            else:
-                shutil.copyfile(file, destFile)
+            self.addResource(file)
+
+    def removeResource(self, file):
+        destFile = os.path.join(self.themes[self.currentTheme]["imageFolder"], os.path.basename(file))
+        if os.path.isfile(destFile) is not True:
+            QMessageBox.information(None, "Resource Importer", f"File {destFile} does not exist!")
+        else:
+            os.remove(destFile)
 
     def setTheme(self, theme):
         self.currentTheme = theme

@@ -673,7 +673,7 @@ class WatchfaceEditor(QMainWindow):
             if not files[0]:
                 return
 
-            currentProject["project"].addResource(files[0])
+            currentProject["project"].addResources(files[0])
 
             self.reloadImages(currentProject["project"].getImageFolder())
             currentProject["canvas"].loadObjects(currentProject["project"],
@@ -1066,7 +1066,44 @@ class WatchfaceEditor(QMainWindow):
 
         for object in selectedObjects:
             # preserve layer order
-            self.clipboard.insert(int(object.zValue()), currentProject["project"].getWidget(object.data(0)))
+            widgetData = {
+                "widget": currentProject["project"].getWidget(object.data(0)),
+                "images": []
+            }
+            widgetType = widgetData["widget"].getProperty("widget_type")
+            if widgetType == "widget_analog":
+                if widgetType["widget"].getProperty("analog_hour_image") != "":
+                    widgetData["images"].append(widgetData["widget"].getProperty("analog_hour_image"))
+
+                if widgetType["widget"].getProperty("analog_minute_image") != "":
+                    widgetData["images"].append(widgetData["widget"].getProperty("analog_minute_image"))
+                    
+                if widgetType["widget"].getProperty("analog_second_image") != "":
+                    widgetData["images"].append(widgetData["widget"].getProperty("analog_second_image"))
+            
+            elif widgetType == "widget_arc":
+                if widgetData["widget"].getProperty("widget_background_bitmap") != "":
+                    widgetData["images"].append(widgetData["widget"].getProperty("widget_background_bitmap"))
+                
+                if widgetData["widget"].getProperty("arc_image") != "":
+                    widgetData["images"].append(widgetData["widget"].getProperty("arc_image"))
+                
+            elif widgetType == "widget":
+                if widgetData["widget"].getProperty("widget_bitmap") != "":
+                    widgetData["images"].append(widgetData["widget"].getProperty("widget_bitmap"))
+
+            elif widgetType == "widget_imagelist":
+                if widgetData["widget"].getProperty("widget_bitmaplist") != []:
+                    widgetData["images"] = [image[1] for image in widgetData["widget"].getProperty("widget_bitmaplist")]
+
+            elif widgetType == "widget_num":
+                if widgetData["widget"].getProperty("widget_bitmaplist") != []:
+                    widgetData["images"] = widgetData["widget"].getProperty("widget_bitmaplist")
+
+            for index, image in enumerate(widgetData["images"]):
+                widgetData["images"][index] = os.path.join(currentProject["project"].getImageFolder(), image)
+
+            self.clipboard.insert(int(object.zValue()), widgetData)
 
     def pasteWatchfaceWidgets(self):
         currentProject = self.getCurrentProject()
@@ -1077,6 +1114,8 @@ class WatchfaceEditor(QMainWindow):
         clipboardCopy = self.clipboard.copy()
 
         for item in clipboardCopy:
+            item = item["widget"] # too lazy to rewrite everything
+
             count = 0
 
             for existingWidget in currentProject["project"].getAllWidgets():
@@ -1094,10 +1133,25 @@ class WatchfaceEditor(QMainWindow):
 
             if type == "undo":
                 for widget in clipboard:
-                    currentProject["project"].deleteWidget(widget)
+                    currentProject["project"].deleteWidget(widget["widget"])
+                    for image in widget["images"]:
+                        # remove image
+                        imagePath = os.path.join(currentProject["project"].getImageFolder(), image)
+                        currentProject["project"].removeResource(image)
+
             elif type == "redo":
                 for widget in clipboard:
-                    currentProject["project"].appendWidget(widget)
+                    for image in widget["images"]:
+                        # check if image does not exist in current project
+                        imagePath = os.path.join(currentProject["project"].getImageFolder(), os.path.basename(image))
+                        print(image, currentProject["project"].getImageFolder(), imagePath)
+                        if os.path.isfile(imagePath) is True:
+                            # remove it from the list so that when undoing paste the image wont get removed
+                            widget["images"].pop(widget["images"].index(image))
+                        else:
+                            # copy the image to the image folder
+                            currentProject["project"].addResource(image)
+                    currentProject["project"].appendWidget(widget["widget"])
 
             currentProject["canvas"].loadObjects(currentProject["project"], self.settings["Canvas"]["Snap"]["value"],
                                                 self.settings["Canvas"]["Interpolation"]["value"],
@@ -1107,12 +1161,15 @@ class WatchfaceEditor(QMainWindow):
             if currentProject["canvas"].isPreviewPlaying:
                 self.playAllPreviews(currentProject["canvas"])
 
+            self.reloadImages(currentProject["project"].getImageFolder())
             self.Explorer.updateExplorer(currentProject["project"])
+
+            self.markCurrentProjectChanged(True)
 
             # select objects pasted in
             if type == "redo":
                 for widget in clipboard:
-                    currentProject["canvas"].selectObject(widget.getProperty("widget_name"), False)
+                    currentProject["canvas"].selectObject(widget["widget"].getProperty("widget_name"), False)
 
         command = CommandPasteWidget(clipboardCopy, commandFunc, f"Paste objects through ModifyProjectData command")
         self.History.undoStack.push(command)
