@@ -1605,12 +1605,17 @@ class ProgressLine(QGraphicsLineItem):
         else:
             pen.setBrush(QBrush(pathImage))
         
+        print(isFlat)
+
         if isFlat == "1":
             pen.setCapStyle(Qt.PenCapStyle.FlatCap)
         else:
+            line = self.line()
+            line.setP1(QPointF(startX + (thickness / 2), startY))
+            line.setP2(QPointF(endX - (thickness / 2), endY))
+            self.setLine(line)
             pen.setCapStyle(Qt.PenCapStyle.RoundCap)
 
-        pen.setCapStyle(Qt.PenCapStyle.FlatCap)
         self.setPen(pen)
 
 class ProgressWidget(BaseWidget):
