@@ -737,6 +737,7 @@ class WatchfaceEditor(QMainWindow):
             logging.info(f"Set property {args[0]}, {args[1]} for widget {currentSelected.data(0)}")
 
             def updateProperty(widgetName, property, value):
+                print(widgetName)
                 if currentProject["canvas"].getObject(widgetName).isSelected() is not True:
                     currentProject["canvas"].selectObject(widgetName)
 
@@ -842,7 +843,7 @@ class WatchfaceEditor(QMainWindow):
             if self.propertiesWidget.clearOnRefresh:
                 if isinstance(currentProject["project"], FprjProject):
                     split = widget.getProperty("widget_name").split("_")
-                    if split[0] == "lineProgress" and itemType == "widget_arc":
+                    if split[0].lower() == "lineprogress" and itemType == "widget_arc":
                         self.propertiesWidget.loadProperties(self.propertiesFprjJson["widget_line"], currentProject["project"], item,
                                                             self.resourceImages, currentProject["project"].getDeviceType())
                     else:

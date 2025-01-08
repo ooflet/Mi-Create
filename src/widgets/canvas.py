@@ -1599,10 +1599,17 @@ class ProgressLine(QGraphicsLineItem):
 
         pen = QPen()
         pen.setWidth(thickness)
+        
         if pathImage.isNull():
             pen.setColor(QColor(255, 0, 0, 100))    
         else:
             pen.setBrush(QBrush(pathImage))
+        
+        if isFlat == "1":
+            pen.setCapStyle(Qt.PenCapStyle.FlatCap)
+        else:
+            pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+
         pen.setCapStyle(Qt.PenCapStyle.FlatCap)
         self.setPen(pen)
 
@@ -1626,7 +1633,7 @@ class ProgressWidget(BaseWidget):
         self.arc = None
 
         split = name.split("_")
-        if split[0] == "lineProgress":
+        if split[0].lower() == "lineprogress":
             self.startX = int(offsetX)
             self.startY = int(offsetY)
             self.endX = startAngle
