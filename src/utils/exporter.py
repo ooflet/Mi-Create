@@ -15,6 +15,30 @@ import lxml
 
 del lxml
 
+jump_codes = {
+    "alarm" : "010C8F02",
+    "alexa" : "010CDF02",
+    "AIVS" : "010CDF02",
+    "cards" : "010ABF02",
+    "steps" : "03023F01",
+    "calories" : "03033F01",
+    "standing" : "03043F01",
+    "moving" : "03053F01",
+    "hrm" : "03065F00",
+    "spo2" : "0307EF00",
+    "stress" : "03083F00",
+    "sleep" : "0300CF00",
+    "weather" : "030B1F02",
+    "timer" : "010C6F02",
+    "music" : "010C5F01",
+    "flashlight" : "010CAF01",
+    "stopwatch" : "010C0F02",
+    "photo" : "010CCF01",
+    "phone" : "010C3F02",
+    "contact" : "010CEF02",
+    "voice" : "010C9F02"
+    }
+
 def remove_path(path: str):
     if os.path.isdir(path):
         shutil.rmtree(path)
@@ -184,6 +208,9 @@ class FprjConverter:
                 elif element_type == "element_anim":
                     widget_info["animInterval"] = widget_name.split("[")[1].split("@")[0]
                     widget_info["animRepeat"] = widget_name.split("@")[1][:-1]
+                elif element_type == "element" and widget_name[:4] == "btn_":
+                    widget_info["jumpName"] = widget_name.split("[")[1].split("]")[0]
+                    widget_info["jumpCode"] = jump_codes.get(widget_info["jumpName"], "")
 
                 # Images
                 if element_type == "element":
