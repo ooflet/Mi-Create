@@ -340,6 +340,169 @@
             }
         }
     },
+    "widget_line": {
+        "Shape": "LineProgress",
+        "properties": {
+            "General": {
+                "WidgetType": {
+                    "string": "Widget Type",
+                    "type": "disabled",
+                    "value": "LineProgress"
+                },
+                "widget_name": {
+                    "string": "Name",
+                    "type": "str",
+                    "value": ""
+                }
+            },
+            "Position": {
+                "widget_pos_x": {
+                    "string": "X",
+                    "type": "int",
+                    "value": "",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "widget_pos_y": {
+                    "string": "Y",
+                    "type": "int",
+                    "value": "",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "widget_size_width": {
+                    "string": "Width",
+                    "type": "int",
+                    "value": "48",
+                    "min": "0",
+                    "max": "none"
+                },
+                "widget_size_height": {
+                    "string": "Height",
+                    "type": "int",
+                    "value": "48",
+                    "min": "0",
+                    "max": "none"
+                }
+            },
+            "Appearance": {
+                "widget_alpha": {
+                    "string": "Opacity",
+                    "type": "int",
+                    "value": "255",
+                    "min": "0",
+                    "max": "255"
+                },
+                "widget_visibility_source": {
+                    "string": "Visibility Trigger",
+                    "type": "src",
+                    "value": "",
+                    "visibleOn": [
+                        "xiaomi_color",
+                        "xiaomi_color_sport",
+                        "xiaomi_color_2/s1/s2",
+                        "xiaomi_watch_s1_pro"
+                    ]
+                }
+            },
+            "Progress Bar": {
+                "arc_pos_x": {
+                    "string": "Start X",
+                    "type": "int",
+                    "value": "0",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "arc_pos_y": {
+                    "string": "Start Y",
+                    "type": "int",
+                    "value": "0",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "arc_thickness": {
+                    "string": "Thickness",
+                    "type": "int",
+                    "value": "0",
+                    "min": "0",
+                    "max": "999"
+                },
+                "arc_start_angle": {
+                    "string": "End X",
+                    "type": "int",
+                    "value": "0",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "arc_end_angle": {
+                    "string": "End Y",
+                    "type": "int",
+                    "value": "0",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "arc_flat_caps": {
+                    "string": "Flat Ends",
+                    "type": "bool",
+                    "value": "0"
+                }
+            },
+            "Range": {
+                "arc_min_value": {
+                    "string": "Minimum Value",
+                    "type": "int",
+                    "value": "0",
+                    "min": "0",
+                    "max": "100"
+                },
+                "arc_max_value": {
+                    "string": "Maximum Value",
+                    "type": "int",
+                    "value": "0",
+                    "min": "0",
+                    "max": "100"
+                },
+                "arc_min_step_value": {
+                    "string": "Minimum Step Value",
+                    "type": "int",
+                    "value": "0",
+                    "min": "0",
+                    "max": "100"
+                },
+                "arc_step_value": {
+                    "string": "Step Value",
+                    "type": "int",
+                    "value": "0",
+                    "min": "0",
+                    "max": "100"
+                }
+            },
+            "Data": {
+                "arc_source": {
+                    "string": "Data Source",
+                    "type": "src",
+                    "value": ""
+                },
+                "arc_max_value_source": {
+                    "string": "Max Value Source",
+                    "type": "src",
+                    "value": ""
+                }
+            },
+            "Images": {
+                "widget_background_bitmap": {
+                    "string": "Background",
+                    "type": "img",
+                    "value": ""
+                },
+                "arc_image": {
+                    "string": "Progress Bar",
+                    "type": "img",
+                    "value": ""
+                }
+            }
+        }
+    },
     "widget": {
         "Shape": "Image",
         "properties": {

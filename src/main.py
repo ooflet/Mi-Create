@@ -789,7 +789,7 @@ class WatchfaceEditor(QMainWindow):
                     currentItem.setProperty(property, value)
 
                 if property == "widget_name":
-                    self.propertiesWidget.clearOnRefresh = False
+                    self.propertiesWidget.clearOnRefresh = True
                     self.Explorer.updateExplorer(currentProject["project"])
                     currentProject["canvas"].loadObjects(currentProject["project"],
                                                          self.settings["Canvas"]["Snap"]["value"],
@@ -838,10 +838,16 @@ class WatchfaceEditor(QMainWindow):
     def updateProperties(self, item, itemType=None):
         currentProject = self.getCurrentProject()
         if item and currentProject["project"].getWidget(item) != None:
+            widget = currentProject["project"].getWidget(item)
             if self.propertiesWidget.clearOnRefresh:
                 if isinstance(currentProject["project"], FprjProject):
-                    self.propertiesWidget.loadProperties(self.propertiesFprjJson[itemType], currentProject["project"], item,
-                                                        self.resourceImages, currentProject["project"].getDeviceType())
+                    split = widget.getProperty("widget_name").split("_")
+                    if split[0] == "lineProgress" and itemType == "widget_arc":
+                        self.propertiesWidget.loadProperties(self.propertiesFprjJson["widget_line"], currentProject["project"], item,
+                                                            self.resourceImages, currentProject["project"].getDeviceType())
+                    else:
+                        self.propertiesWidget.loadProperties(self.propertiesFprjJson[itemType], currentProject["project"], item,
+                                                            self.resourceImages, currentProject["project"].getDeviceType())
                 elif isinstance(currentProject["project"], GMFProject):
                     self.propertiesWidget.loadProperties(self.propertiesGMFJson[itemType], currentProject["project"], item,
                                                         self.resourceImages, currentProject["project"].getDeviceType())
@@ -1755,7 +1761,7 @@ class WatchfaceEditor(QMainWindow):
                 if project["hasFileChanged"]:
                     if not project.get("project"):
                         return
-                    success, message = project["project"].save()
+                    success, message, debugMessage = project["project"].save()
                     if not success:
                         self.showDialog("error", _("Failed to save project: ") + str(message))
                     else:

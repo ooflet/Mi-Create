@@ -17,9 +17,9 @@ sys.path.append("..")
 from utils.data import WatchData
 from utils.project import FprjWidget, GMFWidget
 
-from PyQt6.QtCore import pyqtSignal, QPoint, QPointF, QSize, QRect, QRectF, QTimer, Qt, QModelIndex
+from PyQt6.QtCore import pyqtSignal, QPoint, QPointF, QSize, QRect, QRectF, QLineF, QTimer, Qt, QModelIndex
 from PyQt6.QtGui import QPainter, QPainterPath, QPen, QColor, QPixmap, QIcon, QBrush, QImage, QStandardItemModel
-from PyQt6.QtWidgets import (QApplication, QGraphicsPathItem, QGraphicsScene, QGraphicsSceneMouseEvent, QGraphicsView, QGraphicsItem, QGraphicsRectItem, 
+from PyQt6.QtWidgets import (QApplication, QGraphicsPathItem, QGraphicsScene, QGraphicsSceneMouseEvent, QGraphicsView, QGraphicsItem, QGraphicsRectItem, QGraphicsLineItem,
                             QToolButton, QGraphicsPixmapItem, QGraphicsEllipseItem, QMessageBox, QRubberBand, QGraphicsDropShadowEffect, QHBoxLayout, QVBoxLayout)
 
 from utils.menu import ContextMenu
@@ -1107,14 +1107,11 @@ class BaseWidget(QGraphicsRectItem):
 
     def quickReloadProperty(self, property, value):
         print("quick reload", property, value)
+        rect = self.rect()
         if property == "widget_pos_x":
             self.setX(int(value))
         elif property == "widget_pos_y":
             self.setY(int(value))
-        elif property == "widget_size_width":
-            self.setRect(self.rect().setWidth(int(value)))  
-        elif property == "widget_size_height":
-            self.setRect(self.rect().setHeight(int(value)))
         else:
             return False # returns when property cannot be quick reloaded
         return True # returns when property has ben set successfully
@@ -1576,8 +1573,6 @@ class ProgressArc(QGraphicsEllipseItem):
             pen.setColor(QColor(255, 0, 0, 100))    
         else:
             pen.setBrush(QBrush(pathImage))
-        
-        pen.setCapStyle(Qt.PenCapStyle.FlatCap)
 
         if isFlat == "1":
             pen.setCapStyle(Qt.PenCapStyle.FlatCap)
@@ -1592,6 +1587,24 @@ class ProgressArc(QGraphicsEllipseItem):
         painter.setPen(self.pen())
         painter.setBrush(self.brush())
         painter.drawArc(self.rect(), self.startAngle(), self.spanAngle())
+
+class ProgressLine(QGraphicsLineItem):
+    def __init__(self, parentX, parentY, startX, startY, parent, thickness, endX, endY, isFlat, pathImage):
+        startX = startX - parentX
+        startY = startY - parentY
+        endX = endX - parentX
+        endY = endY - parentY
+
+        super().__init__(startX, startY, endX, endY, parent)
+
+        pen = QPen()
+        pen.setWidth(thickness)
+        if pathImage.isNull():
+            pen.setColor(QColor(255, 0, 0, 100))    
+        else:
+            pen.setBrush(QBrush(pathImage))
+        pen.setCapStyle(Qt.PenCapStyle.FlatCap)
+        self.setPen(pen)
 
 class ProgressWidget(BaseWidget):
     def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name, offsetX, offsetY, radius, thickness, startAngle, endAngle, isFlat, bgImage, pathImage, isAntialiased):
@@ -1609,18 +1622,48 @@ class ProgressWidget(BaseWidget):
         
         radius = radius - thickness / 2
 
-        self.arc = ProgressArc(
-            int(offsetX) - radius - (thickness / 2), 
-            int(offsetY) - radius - (thickness / 2), 
-            (radius * 2) + thickness,
-            (radius * 2) + thickness, 
-            self, 
-            int(thickness),
-            startAngle,
-            endAngle,
-            isFlat,
-            pathImage)
+        self.line = None
+        self.arc = None
 
+        split = name.split("_")
+        if split[0] == "lineProgress":
+            self.startX = int(offsetX)
+            self.startY = int(offsetY)
+            self.endX = startAngle
+            self.endY = endAngle
+            self.line = ProgressLine(
+                posX,
+                posY,
+                int(offsetX),
+                int(offsetY),
+                self, 
+                int(thickness),
+                startAngle,
+                endAngle,
+                isFlat,
+                pathImage)
+        else:
+            self.arc = ProgressArc(
+                int(offsetX) - radius - (thickness / 2), 
+                int(offsetY) - radius - (thickness / 2), 
+                (radius * 2) + thickness,
+                (radius * 2) + thickness, 
+                self, 
+                int(thickness),
+                startAngle,
+                endAngle,
+                isFlat,
+                pathImage)
+            
         if isAntialiased:
             self.backgroundImage.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
             #self.arc.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
+
+    def mouseMoveEvent(self, event):
+        if self.line != None:
+            print("line")
+            print(self.startX - self.pos().x())
+            print(self.startY)
+            line = QLineF(self.startX - self.pos().x(), self.startY - self.pos().y(), self.endX - self.pos().x(), self.endY - self.pos().y())
+            self.line.setLine(line)
+        return super().mouseMoveEvent(event)
