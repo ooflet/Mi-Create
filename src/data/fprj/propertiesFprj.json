@@ -420,13 +420,6 @@
                     "min": "-999",
                     "max": "999"
                 },
-                "arc_thickness": {
-                    "string": "Thickness",
-                    "type": "int",
-                    "value": "0",
-                    "min": "0",
-                    "max": "999"
-                },
                 "arc_start_angle": {
                     "string": "End X",
                     "type": "int",
@@ -439,6 +432,13 @@
                     "type": "int",
                     "value": "0",
                     "min": "-999",
+                    "max": "999"
+                },
+                "arc_thickness": {
+                    "string": "Thickness",
+                    "type": "int",
+                    "value": "0",
+                    "min": "0",
                     "max": "999"
                 },
                 "arc_flat_caps": {
