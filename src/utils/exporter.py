@@ -206,8 +206,8 @@ class FprjConverter:
                     widget_info["dataSrc"] = widget["Value_Src"]
                     widget_info["spacing"] = int(widget["Spacing"])
                 elif element_type == "element_anim":
-                    widget_info["animInterval"] = widget_name.split("[")[1].split("@")[0]
-                    widget_info["animRepeat"] = widget_name.split("@")[1][:-1]
+                    widget_info["animInterval"] = widget_name.split("@")[1][:-1] 
+                    widget_info["animRepeat"] = widget_name.split("[")[1].split("@")[0]
                 elif element_type == "element" and widget_name[:4] == "btn_":
                     widget_info["jumpName"] = widget_name.split("[")[1].split("]")[0]
                     widget_info["jumpCode"] = jump_codes.get(widget_info["jumpName"], "")
