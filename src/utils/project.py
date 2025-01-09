@@ -605,7 +605,9 @@ class FprjProject:
         self.themes[self.currentTheme]["data"]["FaceProject"]["Screen"]["@Bitmap"] = value
 
     def toString(self):
-        xml_string = xmltodict.unparse(self.themes[self.currentTheme]["data"], pretty=True)
+        raw = xmltodict.unparse(self.themes[self.currentTheme]["data"])
+        dom = xml.dom.minidom.parseString(raw)
+        xml_string = dom.toprettyxml()
         return xml_string
 
     def save(self):
@@ -726,6 +728,7 @@ class FprjWidget:
             return self.data.get(property)
 
     def setProperty(self, property, value):
+        print("fprjwidget set property", property, value, type(value))
         property = [k for k, v in self.project.propertyIds.items() if v == property][0]
         if property == "@BitmapList":
             for index, item in enumerate(value):
@@ -737,7 +740,6 @@ class FprjWidget:
             alignment = ["Left", "Center", "Right"]
             value = alignment.index(value)
         self.data[property] = value
-
     
 class XiaomiProject:
     def __init__(self):

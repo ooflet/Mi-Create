@@ -55,7 +55,7 @@ from utils.theme import Theme
 from utils.menu import ContextMenu
 from utils.updater import Updater
 from utils.history import History, CommandAddWidget, CommandDeleteWidget, CommandPasteWidget, CommandModifyWidgetLayer, \
-    CommandModifyProperty, CommandModifyPosition, CommandChangeTheme
+    CommandModifyProperty, CommandModifyPosition, CommandModifyAlignment, CommandChangeTheme
 from utils.exporter import FprjConverter
 from utils.plugin import PluginLoader
 from widgets.canvas import Canvas, ObjectIcon, ImageWidget, NumberWidget, AnalogWidget, ImagelistWidget
@@ -1181,6 +1181,50 @@ class WatchfaceEditor(QMainWindow):
         command = CommandPasteWidget(clipboardCopy, commandFunc, f"Paste objects through ModifyProjectData command")
         self.History.undoStack.push(command)
 
+    def alignSelectedWatchfaceWidgets(self, changeType):
+        currentProject = self.getCurrentProject()
+        selectedObjects = currentProject["canvas"].getSelectedObjects()
+        selectedObjectsRect = currentProject["canvas"].getSelectionRect()
+
+        objectPosList = [object.pos().toPoint() for object in selectedObjects]
+        objectNameList = [object.data(0) for object in selectedObjects]
+
+        def commandFunc(command, data, nameList):
+            self.markCurrentProjectChanged(True)
+            if command == "redo":
+                for name in nameList:
+                    widget = currentProject["project"].getWidget(name)
+                    object = currentProject["canvas"].getObject(name)
+                    if data == "left":
+                        widget.setProperty("widget_pos_x", selectedObjectsRect.left())
+                    elif data == "top":
+                        widget.setProperty("widget_pos_y", selectedObjectsRect.top())
+                    elif data == "right":
+                        widget.setProperty("widget_pos_x", selectedObjectsRect.right() - object.rect().width())
+                    elif data == "bottom":
+                        widget.setProperty("widget_pos_y", selectedObjectsRect.bottom() - object.rect().height())
+                    elif data == "vertical":
+                        widget.setProperty("widget_pos_y", selectedObjectsRect.center().y() - object.rect().height() // 2)
+                    elif data == "horizontal":
+                        widget.setProperty("widget_pos_x", selectedObjectsRect.center().x() - object.rect().width() // 2)
+            
+            elif command == "undo":
+                for index, name in enumerate(nameList):
+                    widget = currentProject["project"].getWidget(name)
+                    widget.setProperty("widget_pos_x", data[index].x())
+                    widget.setProperty("widget_pos_y", data[index].y())
+
+            currentProject["canvas"].loadObjects(currentProject["project"], self.settings["Canvas"]["Snap"]["value"],
+                                                self.settings["Canvas"]["Interpolation"]["value"],
+                                                self.settings["Canvas"]["ClipDeviceShape"]["value"],
+                                                self.settings["Canvas"]["ShowDeviceOutline"]["value"])
+            
+            for name in nameList:
+                currentProject["canvas"].selectObject(name, clearSelection=False)
+
+        command = CommandModifyAlignment(objectPosList, changeType, objectNameList, commandFunc, f"Align objects {changeType}")
+        self.History.undoStack.push(command)
+
     def zoomCanvas(self, zoom):
         currentProject = self.getCurrentProject()
 
@@ -1618,6 +1662,14 @@ class WatchfaceEditor(QMainWindow):
         self.ui.actionProject_XML_File.triggered.connect(self.editProjectXML)
         self.ui.actionPreferences.triggered.connect(self.showSettings)
 
+        # alignment
+        self.ui.actionAlignLeft.triggered.connect(lambda: self.alignSelectedWatchfaceWidgets("left"))
+        self.ui.actionAlignTop.triggered.connect(lambda: self.alignSelectedWatchfaceWidgets("top"))
+        self.ui.actionAlignRight.triggered.connect(lambda: self.alignSelectedWatchfaceWidgets("right"))
+        self.ui.actionAlignBottom.triggered.connect(lambda: self.alignSelectedWatchfaceWidgets("bottom"))
+        self.ui.actionAlignVertical.triggered.connect(lambda: self.alignSelectedWatchfaceWidgets("vertical"))
+        self.ui.actionAlignHorizontal.triggered.connect(lambda: self.alignSelectedWatchfaceWidgets("horizontal"))
+
         # view
         def updateViewMenu():
             self.ui.actionToggleExplorer.setChecked(self.ui.explorerWidget.isVisible())
@@ -1763,10 +1815,12 @@ class WatchfaceEditor(QMainWindow):
                     if not project.get("project"):
                         return
                     success, message, debugMessage = project["project"].save()
-                    if not success:
-                        self.showDialog("error", _("Failed to save project: ") + str(message))
-                    else:
+                    if success:
+                        self.Explorer.clearSelection()
+                        currentProject["hasFileChanged"] = False
                         project["canvas"].createPreview()
+                    else:
+                        self.showDialog("error", _("Failed to save project: ") + str(message))
 
         elif projectsToSave == "current":
             currentIndex = self.ui.workspace.currentIndex()
@@ -1777,6 +1831,7 @@ class WatchfaceEditor(QMainWindow):
                 if success:
                     self.statusBar().showMessage(_("Project saved at ") + currentProject["project"].getPath(), 2000)
                     self.fileChanged = False
+                    self.Explorer.clearSelection()
                     currentProject["hasFileChanged"] = False
                     currentProject["canvas"].createPreview()
                     if currentProject["canvas"].isPreviewPlaying:

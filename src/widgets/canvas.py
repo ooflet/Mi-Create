@@ -444,8 +444,17 @@ class Canvas(QGraphicsView):
             self.widgets[item["Name"]].setSelected(True)
 
     def getSelectedObjects(self):
-        print(self.scene().selectedItems())
         return self.scene().selectedItems()
+    
+    def getSelectionRect(self):
+        selectedObjects = self.getSelectedObjects()
+        selectionRect = QRectF()
+
+        for object in selectedObjects:
+            # unite all object's bounding rects
+            selectionRect = selectionRect.united(object.mapRectToScene(object.boundingRect()))
+
+        return selectionRect.toRect()
 
     def onObjectDeleted(self, name, widget):
         self.objectDeleted.emit(name)
@@ -1037,9 +1046,12 @@ class BaseWidget(QGraphicsRectItem):
             pen = QPen(self.scene().palette().highlight(), 2, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin)
             self.selectionPath.setPen(pen)
 
+        return self.rect()
+    
         # hack to get rid of bounding box ghosting
-        outline_width = 4
-        return self.rect().adjusted(-outline_width, -outline_width, outline_width, outline_width)
+        # this is only required when using the object's outline for selection
+        # outline_width = 4
+        # return self.rect().adjusted(-outline_width, -outline_width, outline_width, outline_width)
     
     def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent):
         super().mouseMoveEvent(event)

@@ -92,7 +92,6 @@ class CommandModifyProperty(QUndoCommand):
     def undo(self):
         self.commandFunc(self.name, self.property, self.previousValue)
     
-    
 class CommandModifyPosition(QUndoCommand):
     def __init__(self, previousPosition, currentPosition, commandFunc, description):
         super(CommandModifyPosition, self).__init__(description)
@@ -105,6 +104,20 @@ class CommandModifyPosition(QUndoCommand):
 
     def undo(self):
         self.commandFunc(self.prevPos)
+
+class CommandModifyAlignment(QUndoCommand):
+    def __init__(self, prevPosList, alignment, nameList, commandFunc, description):
+        super(CommandModifyAlignment, self).__init__(description)
+        self.prevPosList = prevPosList
+        self.alignment = alignment
+        self.nameList = nameList
+        self.commandFunc = commandFunc
+
+    def redo(self):
+        self.commandFunc("redo", self.alignment, self.nameList)
+
+    def undo(self):
+        self.commandFunc("undo", self.prevPosList, self.nameList)
 
 class CommandChangeTheme(QUndoCommand):
     def __init__(self, previousTheme, currentTheme, commandFunc, description):
