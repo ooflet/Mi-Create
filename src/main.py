@@ -1402,9 +1402,6 @@ class WatchfaceEditor(QMainWindow):
                 prevPos.append(prevPosObject)
                 currentPos.append(currentPosObject)
 
-            print(prevPosObject)
-            print(currentPos)
-
             self.markCurrentProjectChanged(True)
 
             def commandFunc(objects):
@@ -1817,7 +1814,7 @@ class WatchfaceEditor(QMainWindow):
                     success, message, debugMessage = project["project"].save()
                     if success:
                         self.Explorer.clearSelection()
-                        currentProject["hasFileChanged"] = False
+                        project["hasFileChanged"] = False
                         project["canvas"].createPreview()
                     else:
                         self.showDialog("error", _("Failed to save project: ") + str(message))
