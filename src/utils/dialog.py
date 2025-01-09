@@ -6,6 +6,8 @@
 
 import os
 import sys
+import platform
+import subprocess
 import gettext
 import threading
 from pathlib import Path
@@ -13,12 +15,12 @@ from pathlib import Path
 sys.path.append("..")
 
 from PyQt6.QtCore import Qt, QObject, QSize, pyqtSignal, QUrl, QMetaMethod
-from PyQt6.QtGui import QIcon, QPixmap, QMovie
+from PyQt6.QtGui import QIcon, QPixmap, QMovie, QIntValidator
 from PyQt6.QtWidgets import (QDialog, QLabel, QLineEdit, QComboBox, QToolButton, QSpinBox, QVBoxLayout, 
                              QHBoxLayout, QSizePolicy, QWidget, QDialogButtonBox, QFileDialog, QFrame,
-                             QPushButton, QCheckBox, QListWidget, QListWidgetItem, QMenu)
+                             QPushButton, QCheckBox, QListWidget, QListWidgetItem, QMenu, QMessageBox)
 from PyQt6.QtMultimedia import QSoundEffect
-from widgets.stackedWidget import QStackedWidget, loadJsonStyle
+from widgets.stackedwidget import QStackedWidget, loadJsonStyle
 
 from translate import Translator
 
@@ -34,10 +36,13 @@ class CoreDialog(QDialog):
 
     projectConfigSaved = pyqtSignal()
 
-    def __init__(self, parent, settingsWidget, versionString, deviceList):
+    def __init__(self, parent, settings, settingsWidget, versionString, deviceList, pluginLoader):
         super().__init__(parent)
 
         self.dialogButtonCallback = None
+
+        self.settingsWidget = settingsWidget
+        self.settings = settings
 
         self.setWindowTitle(Translator.translate("", "Welcome"))
         self.setWindowIcon(QIcon(":Images/MiCreate48x48.png"))      
@@ -78,7 +83,7 @@ class CoreDialog(QDialog):
         self.setupWelcomePage(versionString)
         self.setupNewProjectPage(deviceList)
         self.setupManageProjectPage()
-        self.setupSettingsPage(settingsWidget)
+        self.setupSettingsPage(pluginLoader)
 
     def translate(self):
         self.welcomeSidebarNewProject.setText(Translator.translate("", "New Project"))
@@ -88,12 +93,33 @@ class CoreDialog(QDialog):
         self.watchfaceCategory.setText(Translator.translate("", "Watchface"))
         self.manageProjectSidebarTitle.setText(Translator.translate("", "Manage Project"))
         self.configureProjectCategory.setText(Translator.translate("", "Configure"))
+        self.configurePageDeviceTitle.setText(Translator.translate("", "Device type"))
+        self.configurePageIdTitle.setText(Translator.translate("", "Watchface ID (9 digits)"))
         self.configurePageNameTitle.setText(Translator.translate("", "Watchface name"))
         self.configurePagePreviewText.setText(Translator.translate("", "Watchface thumbnail"))
         self.settingsSidebarTitle.setText(Translator.translate("", "Settings"))
         self.watchfacePageDeviceTitle.setText(Translator.translate("", "Select device"))
         self.watchfacePageProjectTitle.setText(Translator.translate("", "Project name"))
         self.watchfacePageDirectoryTitle.setText(Translator.translate("", "Project location"))
+
+        def addItem(category):
+            categoryName = Translator.translate("", category)
+            item = QListWidgetItem(self.settingsSidebarList)
+            item.setSizeHint(QSize(25, 40))
+            item.setData(100, categoryName)
+            item.setData(101, category)
+            item.setText(categoryName)
+
+            if self.settingsIcons.get(category):
+                item.setIcon(QIcon().fromTheme(self.settingsIcons[category]))
+            else:
+                item.setIcon(QIcon().fromTheme("preferences-desktop"))
+
+        self.settingsSidebarList.clear()
+        for category in self.settings:
+            addItem(category)
+
+        addItem("Plugins")
 
     def getSignal (self, oObject : QObject, strSignalName : str):
         oMetaObj = oObject.metaObject()
@@ -237,7 +263,7 @@ class CoreDialog(QDialog):
         self.newProjectSidebarList.setFrameShape(QFrame.Shape.NoFrame)
         self.newProjectSidebarList.setProperty("floating", True)
         self.watchfaceCategory = QListWidgetItem(self.newProjectSidebarList)
-        self.watchfaceCategory.setSizeHint(QSize(25, 35))
+        self.watchfaceCategory.setSizeHint(QSize(25, 40))
         self.watchfaceCategory.setIcon(QIcon().fromTheme("device-watch"))
         
         self.newProjectSidebarLayout.addLayout(self.newProjectSidebarHeader, 0)
@@ -350,8 +376,9 @@ class CoreDialog(QDialog):
         self.manageProjectSidebarList = QListWidget()
         self.manageProjectSidebarList.setFrameShape(QFrame.Shape.NoFrame)
         self.manageProjectSidebarList.setProperty("floating", True)
+
         self.configureProjectCategory = QListWidgetItem(self.manageProjectSidebarList)
-        self.configureProjectCategory.setSizeHint(QSize(25, 35))
+        self.configureProjectCategory.setSizeHint(QSize(25, 40))
         self.configureProjectCategory.setIcon(QIcon().fromTheme("project-config"))
 
         self.manageProjectSidebarLayout.addLayout(self.manageProjectSidebarHeader, 0)
@@ -367,6 +394,19 @@ class CoreDialog(QDialog):
         self.configurePage = QFrame(self)
         self.configurePage.setContentsMargins(9,6,9,9)
         self.configurePageLayout = QVBoxLayout(self.configurePage)
+
+        self.configurePageDevice = QHBoxLayout()
+        self.configurePageDeviceTitle = QLabel()
+        
+        self.configurePageDeviceField = QComboBox()
+        self.configurePageDeviceField.setFixedWidth(175)
+
+        self.configurePageId = QHBoxLayout()
+        self.configurePageIdTitle = QLabel()
+        
+        self.configurePageIdField = QSpinBox()
+        self.configurePageIdField.setRange(100000000, 999999999) # set to only allow numbers with 9 digits
+        self.configurePageIdField.setFixedWidth(175)
 
         self.configurePageName = QHBoxLayout()
         self.configurePageNameTitle = QLabel()
@@ -384,12 +424,20 @@ class CoreDialog(QDialog):
         
         #self.configurePageAutoThumbnail = QCheckBox("Auto-generate watchface preview")
 
+        self.configurePageDevice.addWidget(self.configurePageDeviceTitle)
+        self.configurePageDevice.addWidget(self.configurePageDeviceField)
+
+        self.configurePageId.addWidget(self.configurePageIdTitle)
+        self.configurePageId.addWidget(self.configurePageIdField)
+
         self.configurePageName.addWidget(self.configurePageNameTitle)
         self.configurePageName.addWidget(self.configurePageNameField)
 
         self.configurePagePreview.addWidget(self.configurePagePreviewText)
         self.configurePagePreview.addWidget(self.configurePagePreviewField)
 
+        self.configurePageLayout.addLayout(self.configurePageDevice)
+        self.configurePageLayout.addLayout(self.configurePageId)
         self.configurePageLayout.addLayout(self.configurePageName)
         self.configurePageLayout.addLayout(self.configurePagePreview)
         self.configurePageLayout.addStretch()
@@ -402,14 +450,23 @@ class CoreDialog(QDialog):
         self.sidebar.addWidget(self.manageProjectSidebar)
         self.contentPanel.addWidget(self.manageProjectPage)
 
-    def setupSettingsPage(self, settingsWidget):
+    def setupSettingsPage(self, pluginLoader):
         self.settingsSidebar = QFrame()
         self.settingsSidebarLayout = QVBoxLayout()
         self.settingsSidebarLayout.setContentsMargins(0,0,0,0)
 
         self.settingsMenu = QMenu()
+        installPluginAction = self.settingsMenu.addAction("Install Plugin from File")
+        pluginFolderAction = self.settingsMenu.addAction("Open Plugins Folder")
         updateAction = self.settingsMenu.addAction("Update Compiler from EasyFace")
         resetAction = self.settingsMenu.addAction("Reset Settings")
+
+        def install():
+            file = QFileDialog.getOpenFileName(self, "Install plugin...", "%userprofile%/", "Plugin File (*.plg)")
+            if file[0]:
+                pluginLoader.installPlugin(file[0])
+                pluginLoader.loadPlugins()
+                loadPlugins()
 
         def update():
             folder = QFileDialog.getExistingDirectory(self)
@@ -417,6 +474,125 @@ class CoreDialog(QDialog):
             if folder:
                 self.updateCompiler.emit(os.path.join(folder, "Compiler.exe"), os.path.join(folder, "DeviceInfo.db"))
 
+        def showFolder():
+            path = os.path.join(os.getcwd(), pluginLoader.folder)
+            if platform.system() == "Windows":
+                path = str.replace(path, "/", "\\")
+                os.startfile(path)
+            elif platform.system() == "Darwin":
+                subprocess.Popen(["open", path])
+            else:
+                subprocess.Popen(["xdg-open", path])
+
+        self.widgetEntries = {}
+
+        def loadPlugins():
+            self.pluginsPage.clear()
+            self.pluginsPage.setDisabled(False)
+            if pluginLoader.plugins == {}:
+                listItem = QListWidgetItem(self.pluginsPage)
+                listItem.setText("No plugins installed")
+                listItem.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                listItem.setSizeHint(QSize(24, 24))
+                self.pluginsPage.setDisabled(True)
+                return
+
+            for plugin in pluginLoader.plugins.values():
+                listItem = QListWidgetItem(self.pluginsPage)
+
+                listWidget = QWidget()
+                textLayout = QVBoxLayout()
+                buttonLayout = QHBoxLayout()
+                widgetLayout = QHBoxLayout()
+
+                pluginName = QLabel()
+                pluginLocation = QLabel()
+                pluginDescription = QLabel()
+                pluginIcon = QLabel()
+
+                pluginDisable = QPushButton()
+                pluginDelete = QToolButton()
+
+                pluginName.setText(plugin["name"])
+                pluginLocation.setText(f"{plugin["author"]} • {plugin["version"]}")
+                pluginLocation.setStyleSheet("color: palette(midlight)")
+                pluginDescription.setText(plugin["description"])
+                pluginDescription.setWordWrap(True)
+                pluginIcon.setFixedSize(48, 48)
+
+                if plugin["icon"] == "none":
+                    icon = QIcon.fromTheme("application-plugin")
+                    pluginIcon.setPixmap(icon.pixmap(48, 48))
+                else:
+                    pluginIcon.setPixmap(QPixmap(plugin["icon"]))
+
+                def deletePlugin(name):
+                    result = QMessageBox.question(self, "Plugin", f"Delete '{name}'?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.No)
+                    if result == QMessageBox.StandardButton.Yes:
+                        success, message = pluginLoader.deletePlugin(name)
+                        if success:
+                            QMessageBox.information(self, "Plugin", "Success! The program will now restart.")
+                            # get main window from plugin loader
+                            pluginLoader.main_window.restartWindow()
+                        else:
+                            QMessageBox.critical(None, "Plugin", f"Failed to delete plugin: {message}")
+
+                def togglePluginDisabled(widget, name):
+                    if pluginLoader.getPluginDisabled(name):
+                        pluginLoader.enablePlugin(name)
+                        widget.setText(Translator.translate("", "Disable"))
+                    else:
+                        pluginLoader.disablePlugin(name)
+                        widget.setText(Translator.translate("", "Enable"))
+                        
+                if pluginLoader.getPluginDisabled(plugin["name"]):
+                    pluginDisable.setText(Translator.translate("", "Enable"))
+                else:
+                    pluginDisable.setText(Translator.translate("", "Disable"))
+                    
+                pluginDisable.clicked.connect(lambda event, widget=pluginDisable, name=plugin["name"]: togglePluginDisabled(widget, name))
+
+                pluginDelete.setObjectName("inputField-button")
+                pluginDelete.setIcon(QIcon.fromTheme("edit-delete"))
+                pluginDelete.clicked.connect(lambda event, name=plugin["name"]: deletePlugin(name))
+
+                buttonLayout.setSpacing(5)
+                buttonLayout.setContentsMargins(0, 5, 0, 0)
+                buttonLayout.addWidget(pluginDisable, 0)
+                buttonLayout.addWidget(pluginDelete, 0)
+                buttonLayout.addStretch()
+                    
+                textLayout.setSpacing(0)
+                textLayout.addStretch()
+                textLayout.addWidget(pluginName)
+                textLayout.addWidget(pluginLocation)
+                textLayout.addWidget(pluginDescription)
+                textLayout.addLayout(buttonLayout)
+                textLayout.addStretch()
+
+                widgetLayout.setSpacing(8)
+                widgetLayout.setContentsMargins(12, 8, 12, 8)
+                widgetLayout.addWidget(pluginIcon, 0)
+                widgetLayout.addLayout(textLayout, 1)
+
+                listWidget.setLayout(widgetLayout)
+
+                listItem.setSizeHint(listWidget.sizeHint())
+                self.pluginsPage.setItemWidget(listItem, listWidget)
+
+        def loadCategory():
+            if self.settingsSidebarList.currentItem() == None:
+                return
+            
+            if self.settingsSidebarList.currentItem().data(101) == "Plugins":
+                self.contentPanel.setCurrentWidget(self.pluginsPage)
+                loadPlugins()
+            else:
+                self.contentPanel.setCurrentWidget(self.settingsPage)
+                self.settingsWidget.loadProperties(self.settings[self.settingsSidebarList.currentItem().data(100)])
+
+        installPluginAction.triggered.connect(install)
+        pluginFolderAction.triggered.connect(showFolder)
         updateAction.triggered.connect(update)
         resetAction.triggered.connect(self.resetSettings.emit)
 
@@ -439,17 +615,35 @@ class CoreDialog(QDialog):
         self.settingsSidebarHeaderLine.setFrameShape(QFrame.Shape.HLine)
         self.settingsSidebarHeaderLine.setFrameShadow(QFrame.Shadow.Sunken)
 
-        self.settingsPage = settingsWidget
-        settingsWidget.setStyleSheet("background-color: transparent;")
+        self.settingsSidebarList = QListWidget()
+        self.settingsSidebarList.setFrameShape(QFrame.Shape.NoFrame)
+        self.settingsSidebarList.setProperty("floating", True)
+
+        self.settingsIcons = {
+            "General": "preferences-desktop",
+            "Canvas": "widget-image",
+            "Plugins": "application-plugin"
+        }
+
+        self.settingsSidebarList.setCurrentRow(0)
+        self.settingsSidebarList.currentItemChanged.connect(loadCategory)
+
+        self.settingsPage = self.settingsWidget
+        self.settingsWidget.setStyleSheet("background-color: transparent;")
+
+        self.pluginsPage = QListWidget()
+        self.pluginsPage.setStyleSheet("background-color: transparent;")
 
         self.settingsSidebarLayout.addLayout(self.settingsSidebarHeader, 0)
         self.settingsSidebarLayout.addWidget(self.settingsSidebarHeaderLine, 0)
         self.settingsSidebarLayout.addStretch()
+        self.settingsSidebarLayout.addWidget(self.settingsSidebarList, 1)
 
         self.settingsSidebar.setLayout(self.settingsSidebarLayout)
 
         self.sidebar.addWidget(self.settingsSidebar)
         self.contentPanel.addWidget(self.settingsPage)
+        self.contentPanel.addWidget(self.pluginsPage)
 
     def showWelcomePage(self, animate=False):
         self.setWindowTitle(Translator.translate("", "Welcome"))
@@ -478,6 +672,9 @@ class CoreDialog(QDialog):
 
         self.newProjectSidebarList.setCurrentRow(0)
 
+        if self.newProjectSidebarBack.isSignalConnected(self.getSignal(self.newProjectSidebarBack, "clicked")):
+            self.newProjectSidebarBack.clicked.disconnect()
+
         if prevPageFunc:
             self.newProjectSidebarBack.setVisible(True)
             self.newProjectSidebarBack.clicked.connect(lambda: prevPageFunc(animate=True))
@@ -494,6 +691,9 @@ class CoreDialog(QDialog):
 
         self.manageProjectSidebarList.setCurrentRow(0)
 
+        if self.manageProjectSidebarBack.isSignalConnected(self.getSignal(self.manageProjectSidebarBack, "clicked")):
+            self.manageProjectSidebarBack.clicked.disconnect()
+
         if prevPageFunc:
             self.manageProjectSidebarBack.setVisible(True)
             self.manageProjectSidebarBack.clicked.connect(lambda: prevPageFunc(animate=True))
@@ -502,15 +702,22 @@ class CoreDialog(QDialog):
             self.manageProjectSidebarBack.setVisible(False)
 
     def showSettingsPage(self, prevPageFunc=None, animate=False):
+        print("settings")
         self.setWindowTitle(Translator.translate("", "Settings"))
         self.hertaGif.stop()
+
         self.reloadSettings.emit()
+
+        self.settingsSidebarList.setCurrentRow(0)
 
         self.sidebar.setSlideTransition(animate)
         self.sidebar.setCurrentWidget(self.settingsSidebar)
-        
+        self.settingsWidget.loadProperties(self.settings[self.settingsSidebarList.currentItem().data(100)])
         self.contentPanel.setCurrentWidget(self.settingsPage)
-        
+
+        if self.settingsSidebarBack.isSignalConnected(self.getSignal(self.settingsSidebarBack, "clicked")):
+            self.settingsSidebarBack.clicked.disconnect()
+
         if prevPageFunc:
             self.settingsSidebarBack.setVisible(True)
             self.settingsSidebarBack.clicked.connect(lambda: prevPageFunc(animate=True))

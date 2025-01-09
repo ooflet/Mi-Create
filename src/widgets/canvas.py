@@ -9,23 +9,29 @@ import sys
 import traceback
 import logging
 from pprint import pprint
+from datetime import datetime
+from math import cos, sin, radians
 
 sys.path.append("..")
-from utils.project import WatchData
 
-from PyQt6.QtCore import pyqtSignal, QPointF, QSize, QRect, QRectF, QLineF, Qt
-from PyQt6.QtGui import QPainter, QPainterPath, QPen, QColor, QPixmap, QIcon, QBrush
-from PyQt6.QtWidgets import (QApplication, QGraphicsPathItem, QGraphicsScene, QGraphicsSceneMouseEvent, QGraphicsView, QGraphicsItem, QGraphicsRectItem, 
-                            QToolButton, QGraphicsPixmapItem, QGraphicsEllipseItem, QMessageBox, QRubberBand, QGraphicsOpacityEffect, QHBoxLayout, QVBoxLayout)
+from utils.data import WatchData
+from utils.project import FprjWidget, GMFWidget
 
-from utils.contextMenu import ContextMenu
+from PyQt6.QtCore import pyqtSignal, QPoint, QPointF, QSize, QRect, QRectF, QLineF, QTimer, Qt, QModelIndex
+from PyQt6.QtGui import QPainter, QPainterPath, QPen, QColor, QPixmap, QIcon, QBrush, QImage, QStandardItemModel
+from PyQt6.QtWidgets import (QApplication, QGraphicsPathItem, QGraphicsScene, QGraphicsSceneMouseEvent, QGraphicsView, QGraphicsItem, QGraphicsRectItem, QGraphicsLineItem,
+                            QToolButton, QGraphicsPixmapItem, QGraphicsEllipseItem, QMessageBox, QRubberBand, QGraphicsDropShadowEffect, QHBoxLayout, QVBoxLayout)
+
+from utils.menu import ContextMenu
 
 class ObjectIcon:
     def __init__(self):
         super().__init__()
         self.icon = {
             "widget_analog" : "widget-analogdisplay",
+            "widget_pointer" : "widget-pointer",
             "widget" : "widget-image",
+            "widget_container" : "widget-container",
             "widget_imagelist" : "widget-imagelist",
             "widget_num" : "widget-digitalnumber",
             "widget_arc" : "widget-arcprogress"
@@ -91,26 +97,53 @@ class Scene(QGraphicsScene):
         self.posLines = []
 
     def updatePosMap(self):
-        self.positionMap = {"X":[], "Y":[]}
+        self.positionMap = {"X": [0, self.sceneRect().width() / 2, self.sceneRect().width()], "Y": [0, self.sceneRect().height() / 2, self.sceneRect().height()]}
         for item in self.items():
+            # if isinstance(item, NumberWidget) and hasattr(item, "angle") and item.angle != 0:
+            #     # calculate points when widget is rotated
+            #     angle_rad = radians(item.angle)
+            #     origin = item.pos() + item.transformOriginPoint()
+            #     rotated_points = []
+
+            #     # translate
+            #     x1 = item.pos().x() + origin.x()
+            #     y1 = item.pos().y() + origin.y()
+
+            #     x2 = item.rect().bottomRight().x() + origin.x()
+            #     y2 = item.rect().bottomRight().y() + origin.y()
+
+            #     rotated_x1 = cos(angle_rad) * x1 - sin(angle_rad) * y1
+            #     rotated_y1 = sin(angle_rad) * x1 + cos(angle_rad) * y1
+
+            #     rotated_x2 = cos(angle_rad) * x2 - sin(angle_rad) * y2
+            #     rotated_y2 = sin(angle_rad) * x2 + cos(angle_rad) * y2
+
+            #     self.positionMap["X"].append(rotated_x1)
+            #     self.positionMap["X"].append(rotated_x2)
+            #     self.positionMap["Y"].append(rotated_y1)
+            #     self.positionMap["Y"].append(rotated_y2)
+
             if isinstance(item, BaseWidget):
+                # get points
                 self.positionMap["X"].append(item.pos().x())
+                self.positionMap["X"].append(item.pos().x() + (item.rect().width() / 2))
                 self.positionMap["X"].append(item.pos().x() + item.rect().width())
                 self.positionMap["Y"].append(item.pos().y())
+                self.positionMap["Y"].append(item.pos().y() + (item.rect().height() / 2))
                 self.positionMap["Y"].append(item.pos().y() + item.rect().height())
 
     def getAdjacentPos(self, object: QGraphicsRectItem):
-        catchRange = 3 # pixel offset before the object gets snapped
-        adjacentPosList = []
-        pos = [None, None, None, None] # x1, y1, x2, y2
+        catchRange = 6 # pixel offset before the object gets snapped
+        pos = [None, None, None, None, None, None] # x1, y1, x2, y2, x3, y3
 
         """
-        x1, y1  •───────────┐
-                │           │
-                │           │
-                │           │
-                │           │
-                └───────────• x2, y2
+        x1, y1  •─────────────┐
+                │             │
+                │             │
+                │      •x2, y2│
+                │             │
+                │             │
+                └─────────────• x3, y3
         """
 
         # filter function
@@ -122,7 +155,10 @@ class Scene(QGraphicsScene):
     
         # filter both X & Y pos and place in a list
         adjacentPosList1 = [list(filter(lambda x, objPos=object.pos().x(): posFilter(x, objPos), self.positionMap["X"])), list(filter(lambda x, objPos=object.pos().y(): posFilter(x, objPos), self.positionMap["Y"]))]
-        adjacentPosList2 = [list(filter(lambda x, objPos=object.pos().x()+object.rect().width(): posFilter(x, objPos), self.positionMap["X"])), list(filter(lambda x, objPos=object.pos().y()+object.rect().height(): posFilter(x, objPos), self.positionMap["Y"]))]
+        adjacentPosList2 = [list(filter(lambda x, objPos=object.pos().x()+(object.rect().width() / 2): posFilter(x, objPos), self.positionMap["X"])), list(filter(lambda x, objPos=object.pos().y()+(object.rect().height() / 2): posFilter(x, objPos), self.positionMap["Y"]))]
+        adjacentPosList3 = [list(filter(lambda x, objPos=object.pos().x()+object.rect().width(): posFilter(x, objPos), self.positionMap["X"])), list(filter(lambda x, objPos=object.pos().y()+object.rect().height(): posFilter(x, objPos), self.positionMap["Y"]))]
+
+        print("1", adjacentPosList1, "2", adjacentPosList2, "3", adjacentPosList3)
 
         if adjacentPosList1[0] != []:
             pos[0] = (min(adjacentPosList1[0], key=lambda x:abs(x-object.pos().x())))
@@ -136,41 +172,86 @@ class Scene(QGraphicsScene):
         if adjacentPosList2[1] != []:
             pos[3] = (min(adjacentPosList2[1], key=lambda x:abs(x-object.pos().y()+object.rect().height())))
 
-        # prioritize snap positions
+        if adjacentPosList3[0] != []:
+            pos[4] = (min(adjacentPosList3[0], key=lambda x:abs(x-object.pos().x()+object.rect().width())))
 
-        if pos[0] != None and pos[2] != None:
-            if pos[2] - pos[0] != object.rect().width():
-                if pos[0] - object.pos().x() > pos[2] - (object.pos().x() + object.rect().width()):
-                    pos[0] = None
-                else:
-                    pos[2] = None
+        if adjacentPosList3[1] != []:
+            pos[5] = (min(adjacentPosList3[1], key=lambda x:abs(x-object.pos().y()+object.rect().height())))
 
-        if pos[1] != None and pos[3] != None:
-            if pos[1] - pos[3] != object.rect().width():
-                if pos[1] - object.pos().y() > pos[3] - (object.pos().y() + object.rect().height()):
-                    pos[1] = None
-                else:
-                    pos[3] = None
+        # # compare positions and check which one should be prioritised
+        # catchX = None
+        # catchY = None
+        
+        # for i in range(0, 5, 2):
+        #     x = pos[i]
+        #     y = pos[i + 1]
+        #     if catchX == None or min(myList, key=lambda x:abs(x-myNumber))
+ 
 
         return pos
     
+    def getPreviewNumber(self, source):
+        now = datetime.now()
+        if source == "Hour":
+            return now.strftime("%I")
+        elif source == "Hour High":
+            return now.strftime("%I")[0]
+        elif source == "Hour Low":
+            return now.strftime("%I")[1]
+        elif source == "Minute":
+            return now.strftime("%M")
+        elif source == "Minute High":
+            return now.strftime("%M")[0]
+        elif source == "Minute Low":
+            return now.strftime("%M")[1]
+        elif source == "Second":
+            return now.strftime("%S")
+        elif source == "Second High":
+            return now.strftime("%S")[0]
+        elif source == "Second Low":
+            return now.strftime("%S")[1]
+        elif source == "Day":
+            return now.strftime("%d")
+        elif source == "Month":
+            return now.strftime("%m")
+        elif source == "Week":
+            return now.strftime("%w")
+        elif source == "AM/PM":
+            am_pm = now.strftime("%p")
+            if am_pm == "AM" or am_pm == "am":
+                return "0"
+            elif am_pm == "PM" or am_pm == "pm":
+                return "1"
+
     def drawSnapLines(self, pos):
         for line in self.posLines:
             self.removeItem(line)
 
         self.posLines.clear()
 
-        if pos[0] != None:
-            self.posLines.append(self.addRect(pos[0], 0, 1, self.sceneRect().height(), QPen(Qt.PenStyle.NoPen), self.palette().highlight()))
+        print(pos)
 
+        pen = QPen()
+        pen.setWidth(2)
+        pen.setColor(self.palette().highlight().color())
+
+        if pos[0] != None:
+            self.posLines.append(self.addLine(pos[0], 0, pos[0], self.sceneRect().height(), pen))
+           
         if pos[1] != None:
-            self.posLines.append(self.addRect(0, pos[1], self.sceneRect().width(), 1, QPen(Qt.PenStyle.NoPen), self.palette().highlight()))
-        
+            self.posLines.append(self.addLine(0, pos[1], self.sceneRect().width(), pos[1], pen))
+
         if pos[2] != None:
-            self.posLines.append(self.addRect(pos[2], 0, 1, self.sceneRect().height(), QPen(Qt.PenStyle.NoPen), self.palette().highlight()))
+            self.posLines.append(self.addLine(pos[2], 0, pos[2], self.sceneRect().height(), pen))
 
         if pos[3] != None:
-            self.posLines.append(self.addRect(0, pos[3], self.sceneRect().width(), 1, QPen(Qt.PenStyle.NoPen), self.palette().highlight()))
+            self.posLines.append(self.addLine(0, pos[3], self.sceneRect().width(), pos[3], pen))
+        
+        if pos[4] != None:
+            self.posLines.append(self.addLine(pos[4], 0, pos[4], self.sceneRect().height(), pen))
+
+        if pos[5] != None:
+            self.posLines.append(self.addLine(0, pos[5], self.sceneRect().width(), pos[5], pen))
 
     def clearSnapLines(self):
         for line in self.posLines:
@@ -179,11 +260,11 @@ class Scene(QGraphicsScene):
         self.posLines.clear()
 
 class Canvas(QGraphicsView):
-    onObjectAdded = pyqtSignal(QPointF, str)
+    onObjectAdded = pyqtSignal(str, int, int)
     onObjectChange = pyqtSignal(str, str, object) # hate hacky workarounds, just support any type already Qt
     onObjectPosChange = pyqtSignal()
 
-    def __init__(self, device, antialiasingEnabled: bool, deviceOutlineVisible: bool, ui: object, parent=None):
+    def __init__(self, antialiasingEnabled: bool, deviceOutlineVisible: bool, ui: object, parent=None):
         super().__init__(parent)
 
         if antialiasingEnabled:
@@ -191,6 +272,8 @@ class Canvas(QGraphicsView):
 
         self.mainWindowUI = ui # used for ContextMenu, it needs window UI to access QActions
         self.widgets = {}
+
+        self.itemDragPreview = None
 
         self.rubberBand = QRubberBand(QRubberBand.Shape.Rectangle, self)
 
@@ -202,41 +285,15 @@ class Canvas(QGraphicsView):
 
         self.zoomValue = 0
 
-        self.deviceSize = WatchData().modelSize[str(device)]
-
         self.graphicsScene = Scene()
-        self.graphicsScene.setSceneRect(0,0,self.deviceSize[0],self.deviceSize[1])
 
-        self.drawDecorations()
+        self.isPreviewPlaying = False
 
         self.setScene(self.graphicsScene)
 
     def fireObjectPositionChanged(self):
         self.scene().updatePosMap()
         self.onObjectPosChange.emit()
-
-    def drawDecorations(self):
-        mainLayout = QVBoxLayout(self)
-        mainLayout.setContentsMargins(20, 20, 20, 20)
-
-        toolButtonLayout = QHBoxLayout()
-        toolButtonLayout.setContentsMargins(0, 0, 0, 0)
-
-        insertButton = QToolButton(self)
-        insertButton.setObjectName("canvasDecoration-button")
-        insertButton.setFixedSize(40, 25)
-        insertButton.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
-        insertButton.setMenu(self.mainWindowUI.menuInsert)
-        insertButton.setIcon(QIcon().fromTheme("insert-object"))
-        insertButton.setIconSize(QSize(18, 18))
-        insertButton.setToolTip("Create Widget")
-        insertButton.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
-
-        mainLayout.addLayout(toolButtonLayout)
-        mainLayout.addStretch()
-
-        toolButtonLayout.addWidget(insertButton)
-        toolButtonLayout.addStretch()
 
     def mousePressEvent(self, event):
         if not any(isinstance(item, BaseWidget) for item in self.items(event.pos())):
@@ -249,6 +306,7 @@ class Canvas(QGraphicsView):
     def mouseMoveEvent(self, event):
         if not self.rubberBand.isHidden():
             self.rubberBand.setGeometry(QRect(self.rubberBandOrigin, event.pos()).normalized())
+
         return super().mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event):
@@ -258,6 +316,45 @@ class Canvas(QGraphicsView):
                 item.setSelected(True)
         self.rubberBand.setGeometry(QRect(0,0,0,0))
         return super().mouseReleaseEvent(event)
+
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
+            event.acceptProposedAction()
+
+            model = QStandardItemModel()
+            model.dropMimeData(event.mimeData(), Qt.DropAction.CopyAction, 0, 0, QModelIndex())
+
+            self.itemDragPreview = QGraphicsPixmapItem()
+            self.scene().addItem(self.itemDragPreview)
+            self.itemDragPreview.setOpacity(0.5)
+            self.itemDragPreview.setPixmap(QPixmap(os.path.join(self.imageFolder, model.item(0, 0).data(0))))
+
+    def dragMoveEvent(self, event):
+        if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
+            event.acceptProposedAction()
+
+            if self.itemDragPreview != None:
+                self.itemDragPreview.setPos(self.mapToScene(int(event.position().x()), int(event.position().y())))
+
+    def dragLeaveEvent(self, event):
+        if self.itemDragPreview != None:
+            self.scene().removeItem(self.itemDragPreview)
+            self.itemDragPreview = None
+
+    def dropEvent(self, event):
+        event.acceptProposedAction()
+
+        model = QStandardItemModel()
+        model.dropMimeData(event.mimeData(), Qt.DropAction.CopyAction, 0, 0, QModelIndex())
+
+        if self.itemDragPreview != None:
+            self.scene().removeItem(self.itemDragPreview)
+            self.itemDragPreview = None
+
+        if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
+            position = self.mapToScene(int(event.position().x()), int(event.position().y()))
+            self.onObjectAdded.emit(model.item(0, 0).data(0), int(position.x()), int(position.y()))
+
 
     def contextMenuEvent(self, event):
         scenePos = self.mapToScene(event.pos())
@@ -282,6 +379,26 @@ class Canvas(QGraphicsView):
             menu = ContextMenu("default", self.mainWindowUI)
 
         menu.exec(viewPos)
+
+    def keyPressEvent(self, event):
+        if self.getSelectedObjects() == []:
+            return
+
+        if event.key() == Qt.Key.Key_Left:
+            for object in self.getSelectedObjects():
+                object.setX(object.x() - 1)
+        elif event.key() == Qt.Key.Key_Up:
+            for object in self.getSelectedObjects():
+                object.setY(object.y() - 1)
+        elif event.key() == Qt.Key.Key_Right:
+            for object in self.getSelectedObjects():
+                object.setX(object.x() + 1)
+        elif event.key() == Qt.Key.Key_Down:
+            for object in self.getSelectedObjects():
+                object.setY(object.y() + 1)
+
+        self.fireObjectPositionChanged()
+        # return super().keyPressEvent(event)
 
     def wheelEvent(self, event):
         modifiers = QApplication.keyboardModifiers()
@@ -315,22 +432,98 @@ class Canvas(QGraphicsView):
             return
         if clearSelection:
             self.scene().clearSelection()
-        print(self.widgets)
-        self.widgets[name].setSelected(True)
+
+        if self.widgets.get(name):
+            self.widgets[name].setSelected(True)
+        else:
+            logging.warning(f"Widget {name} was not found in canvas")
 
     def selectObjectsFromPropertyList(self, items: list):
+        self.clearSelected()
         for item in items:
             self.widgets[item["Name"]].setSelected(True)
 
     def getSelectedObjects(self):
         return self.scene().selectedItems()
+    
+    def getSelectionRect(self):
+        selectedObjects = self.getSelectedObjects()
+        selectionRect = QRectF()
+
+        for object in selectedObjects:
+            # unite all object's bounding rects
+            selectionRect = selectionRect.united(object.mapRectToScene(object.boundingRect()))
+
+        return selectionRect.toRect()
 
     def onObjectDeleted(self, name, widget):
         self.objectDeleted.emit(name)
 
-    def createAnalogDisplay(self, transparency, name, pos, zValue, backgroundImage, hourHandImage, minuteHandImage, secondHandImage, itemAnchors, snap, interpolationStyle):
+    def createPreview(self):
+        large_preview_path = os.path.join(self.projectDirectory, "preview_large.png")
+        area = self.scene().sceneRect()
+
+        # if os.path.exists(large_preview_path):
+        #     os.remove(large_preview_path)
+
+        print("preview", WatchData().previewSizes.get(self.project.getDeviceType()))
+        if WatchData().previewSizes.get(self.project.getDeviceType()) == None:
+            return
+
+        preview_size = WatchData().previewSizes[self.project.getDeviceType()]
+            
+        prev_theme = self.project.currentTheme
+
+        for theme in self.project.themes:
+            print(theme)
+            self.project.setTheme(theme)
+
+            if self.project.getAllWidgets() != [] or theme == "default":
+                preview_path = os.path.join(self.project.themes["default"]["directory"], f"preview_{theme}.png")
+                preview_path_large = os.path.join(self.project.themes["default"]["directory"], f"preview_{theme}_large.png")
+                print(theme, preview_path, preview_path_large)
+
+                preview = QImage(QSize(preview_size[0], preview_size[1]), QImage.Format.Format_ARGB32)
+                preview.fill(Qt.GlobalColor.transparent)
+                preview_painter = QPainter(preview)
+                preview_painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+                
+                preview_large = QImage(area.size().toSize(), QImage.Format.Format_ARGB32)
+                preview_large.fill(Qt.GlobalColor.transparent)
+                preview_painter_large = QPainter(preview_large)
+                preview_painter_large.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+                self.loadObjects(self.project, self.snap, self.interpolation, True, False, True)
+                self.scene().render(preview_painter, QRectF(0, 0, preview_size[0], preview_size[1]), area)
+                self.scene().render(preview_painter_large, self.scene().sceneRect(), area)
+
+                preview_painter.end()
+                preview_painter_large.end()
+
+                preview.save(preview_path)
+                preview_large.save(preview_path_large)
+
+
+        self.project.setTheme(prev_theme)
+
+        self.loadObjects(self.project, self.snap, self.interpolation, self.clip, self.outline)
+
+
+    def createAnalogDisplay(self, transparency, name, pos, zValue, backgroundImage, hourHandImage, minuteHandImage, secondHandImage, itemAnchors, smoothHr, smoothMin, snap, interpolationStyle):
+        suffix = name.split("_")
+        smoothSec = "0" # false
+        updateInterval = 30 # update interval in miliseconds
+        if len(suffix) >= 2:
+            interval = suffix[-1].split("[")
+            
+            if interval[0] == "smooth":
+                smoothSec = "1" # true
+
+            if len(interval) == 2 and interval[1].strip("[]") != "":
+                updateInterval = int(interval[1].strip("[]"))
+
         # Create widget
-        widget = AnalogWidget(int(pos.x()), int(pos.y()), int(pos.width()), int(pos.height()), self.frame, self, QColor(255,255,255,0), transparency, name)
+        widget = AnalogWidget(int(pos.x()), int(pos.y()), int(pos.width()), int(pos.height()), self.frame, self, QColor(255,255,255,0), transparency, name, smoothHr, smoothMin, smoothSec, updateInterval)
         widget.setZValue(zValue)
         widget.setData(1, "widget_analog") # Item ID
         widget.snap = snap
@@ -362,6 +555,21 @@ class Canvas(QGraphicsView):
             widget.color = QColor(255, 0, 0, 100)
 
         return widget
+    
+    def createPointer(self, transparency, name, rect, zValue, pointer, pointerAnchorX, pointerAnchorY, snap, interpolationStyle):
+        # Create widget
+        widget = PointerWidget(int(rect.x()), int(rect.y()), int(rect.width()), int(rect.height()), self.frame, self, QColor(255,255,255,0), transparency, name)
+        widget.setZValue(zValue)
+        widget.setData(1, "widget") # Item ID
+        widget.snap = snap
+
+        # Add image
+        pixmap = QPixmap()
+        pixmap.load(os.path.join(self.imageFolder, pointer))
+
+        widget.addPointer(pixmap, pointerAnchorX, pointerAnchorY, interpolationStyle)
+
+        return widget
 
     def createImage(self, transparency, name, rect, zValue, image, snap, interpolationStyle):
         # Create widget
@@ -374,56 +582,66 @@ class Canvas(QGraphicsView):
         pixmap = QPixmap()
         pixmap.load(os.path.join(self.imageFolder, image))
 
-        widget.addImage(pixmap, 0, 0, 0, interpolationStyle)
+        widget.setImage(pixmap, interpolationStyle)
         
         return widget
 
-    def createImageList(self, transparency, name, rect, zValue, defaultValue, bitmapList, snap, interpolationStyle):
+    def createImageList(self, transparency, name, rect, zValue, defaultValue, source, bitmapList, snap, interpolationStyle, previewIndex=None):
         # Create widget
-        widget = ImageWidget(int(rect.x()), int(rect.y()), int(rect.width()), int(rect.height()), self.frame, self, QColor(255,255,255,0), transparency, name)
+        widget = ImagelistWidget(int(rect.x()), int(rect.y()), int(rect.width()), int(rect.height()), self.frame, self, QColor(255,255,255,0), transparency, name)
         widget.setZValue(zValue)
         widget.setData(1, "widget_imagelist") # Item ID 
         widget.snap = snap
 
+        # check if animation
 
-        # displayImage is a list with 2 values, image index & image
+        animationName = name.split("_")
 
-        if bitmapList != []:
-            values = [int(x[0]) for x in bitmapList]
-
-            # Get default image if available
-            if defaultValue in values:
-                displayImage = bitmapList[values.index(defaultValue)]
-            else:
-                displayImage = bitmapList[0]
-
-            # Get Image
-            if len(displayImage) >= 2:
-                image = QPixmap()
-                image.load(os.path.join(self.imageFolder, displayImage[1]))
-                widget.addImage(image, 0, 0, 0, interpolationStyle)
-            else:
-                widget.representNoImage()
+        if animationName[0] == "anim":
+            animImageList = [QPixmap(os.path.join(self.imageFolder, image[1])) for image in bitmapList]
+            widget.addAnimatedImagelist(animImageList, interpolationStyle)
         else:
-            widget.addImage(QPixmap(), 0, 0, 0, interpolationStyle)
-            
+            imageList = {}
+            for image in bitmapList:
+                if len(image) >= 2:
+                    imageList[int(image[0])] = QPixmap(os.path.join(self.imageFolder, image[1]))
+                else:
+                    widget.representNoImage()
+                    break
+
+            widget.addImagelist(imageList, source, previewIndex, defaultValue, interpolationStyle)
+
+        return widget
+    
+    def createContainer(self, transparency, name, rect, zValue):
+        # no use for it so far, just bare bones implementation
+        widget = BaseWidget(rect.x(), rect.y(), rect.width(), rect.height(), self.frame, self, QColor(255,255,255,0), transparency, name)
+        widget.setZValue(zValue)
         return widget
 
-    def createDigitalNumber(self, transparency, name, rect, zValue, numList, digits, spacing, snap, interpolationStyle):
-        widget = ImageWidget(rect.x(), rect.y(), rect.width(), rect.height(), self.frame, self, QColor(255,255,255,0), transparency, name)
+    def createDigitalNumber(self, transparency, name, rect, zValue, source, numList, digits, spacing, alignment, hideZeros, snap, interpolationStyle, posRelativeToAlign, previewNumber=None):
+        split = name.split("_")
+        angle = 0
+
+        if len(split) >= 2:
+            nameAngle = split[-1].split("[")
+            if len(nameAngle) >= 2:
+                angleString = nameAngle[1].strip("[]")
+                if nameAngle[0] == "angle" and angleString != "":
+                    angle = int(angleString) / 10
+        
+        widget = NumberWidget(rect.x(), rect.y(), rect.width(), rect.height(), self.frame, self, QColor(255,255,255,0), transparency, name, angle, posRelativeToAlign)
         widget.setZValue(zValue)
         widget.setData(1, "widget_imagelist") # Item ID
         widget.snap = snap
 
-        for x in range(int(digits)):
-            # Get QPixmap from file string
-            if len(numList) >= 11:
-                image = QPixmap()
-                image.load(os.path.join(self.imageFolder, numList[x % len(numList)]))
+        numList = [QPixmap(os.path.join(self.imageFolder, image)) for image in numList]
 
-                widget.addImage(image, (image.size().width() * x) + (int(spacing) * x), 0, int(spacing), interpolationStyle)
-            else:
-                widget.representNoImage()
+        # Get QPixmap from file string
+        if len(numList) >= 10:
+            widget.addNumbers(previewNumber, source, numList, digits, spacing, alignment, hideZeros, interpolationStyle)
+        else:
+            widget.representNoImage()
                 
         return widget
 
@@ -449,7 +667,7 @@ class Canvas(QGraphicsView):
     def createWidgetFromData(self, index, item, snap, interpolation):
         widget = None
 
-        # qt calls this "smooth transformation" (????)
+        # qt calls this "smooth transformation"
         if interpolation == "Bilinear":
             interpolation = True
         else:
@@ -495,6 +713,26 @@ class Canvas(QGraphicsView):
                             "y": item.getProperty("analog_second_anchor_y"),
                         },
                     },
+                    item.getProperty("analog_hour_smooth_motion"),
+                    item.getProperty("analog_minute_smooth_motion"),
+                    snap,
+                    interpolation
+                )
+            
+            elif item.getProperty("widget_type") == "widget_pointer":
+                widget = self.createPointer(
+                    item.getProperty("widget_alpha"),
+                    item.getProperty("widget_name"),
+                    QRect(
+                        int(item.getProperty("widget_pos_x")),
+                        int(item.getProperty("widget_pos_y")),
+                        int(item.getProperty("widget_size_width")),
+                        int(item.getProperty("widget_size_height"))
+                    ),
+                    index,
+                    item.getProperty("widget_bitmap"),
+                    item.getProperty("pointer_anchor_x"),
+                    item.getProperty("pointer_anchor_y"),
                     snap,
                     interpolation
                 )
@@ -524,6 +762,13 @@ class Canvas(QGraphicsView):
                 )
 
             elif item.getProperty("widget_type") == "widget":
+                if isinstance(item, GMFWidget):
+                    unitImageFromWidget = False
+                elif isinstance(item, FprjWidget):
+                    unitImageFromWidget = True
+                else:
+                    posRelativeToAlign = False
+
                 widget = self.createImage(
                     item.getProperty("widget_alpha"),
                     item.getProperty("widget_name"),
@@ -539,6 +784,14 @@ class Canvas(QGraphicsView):
                     interpolation
                 )
 
+                split = item.getProperty("widget_name").split("[")
+                if len(split) >= 2:
+                    nameRef = split[0].split("_")
+                    if len(nameRef) >= 2 and nameRef[-1] == "ref":
+                        if self.unitImages.get(item.getProperty("widget_name")):
+                            self.unitImages.pop(item.getProperty("widget_name"))
+                        self.unitImages[item.getProperty("widget_name")] = [item, widget, unitImageFromWidget]
+
             elif item.getProperty("widget_type") == "widget_imagelist":
                 widget = self.createImageList(
                     item.getProperty("widget_alpha"),
@@ -551,12 +804,36 @@ class Canvas(QGraphicsView):
                     ),
                     index,
                     int(item.getProperty("imagelist_default_index")),
+                    item.getSourceName(),
                     item.getProperty("widget_bitmaplist"),
                     snap,
-                    interpolation
+                    interpolation,
+                    item.getPreviewNumber(),
+                )
+
+            elif item.getProperty("widget_type") == "widget_container":
+                widget = self.createContainer(
+                    item.getProperty("widget_alpha"),
+                    item.getProperty("widget_name"),
+                    QRect(
+                        int(item.getProperty("widget_pos_x")),
+                        int(item.getProperty("widget_pos_y")),
+                        int(item.getProperty("widget_size_width")),
+                        int(item.getProperty("widget_size_height"))
+                    ),
+                    index
                 )
 
             elif item.getProperty("widget_type") == "widget_num":
+                if isinstance(item, GMFWidget):
+                    posRelativeToAlign = True
+                    unitImageFromWidget = False
+                elif isinstance(item, FprjWidget):
+                    posRelativeToAlign = False
+                    unitImageFromWidget = True
+                else:
+                    posRelativeToAlign = False
+
                 widget = self.createDigitalNumber(
                     item.getProperty("widget_alpha"),
                     item.getProperty("widget_name"),
@@ -567,11 +844,16 @@ class Canvas(QGraphicsView):
                         int(item.getProperty("widget_size_height"))
                     ),
                     index,
+                    item.getSourceName(),
                     item.getProperty("widget_bitmaplist"),
                     item.getProperty("num_digits"),
                     item.getProperty("num_spacing"),
+                    item.getProperty("num_alignment"),
+                    bool(int(item.getProperty("num_toggle_zeros"))),
                     snap,
-                    interpolation
+                    interpolation,
+                    posRelativeToAlign,
+                    item.getPreviewNumber()
                 )
 
             elif item.getProperty("widget_type") == "widget_arc":
@@ -608,8 +890,18 @@ class Canvas(QGraphicsView):
             # status, user facing message, debug info
             return False, f"Widget '{item.getProperty('widget_name')}' has malformed data or is corrupt", f"Canvas failed to create object {item.getProperty('widget_name')}:\n {traceback.format_exc()}"
 
-    def loadObjects(self, project, snap=None, interpolation=None, clip=True, outline=False):
+    def loadObjects(self, project, snap=None, interpolation=None, clip=True, outline=False, previewReload=False):
+        self.deviceSize = WatchData().modelSize[project.getDeviceType()]
+        self.scene().setSceneRect(0,0,self.deviceSize[0],self.deviceSize[1])
+        
         self.frame = DeviceFrame(self.deviceSize, clip)
+
+        if not previewReload:
+            self.project = project
+            self.snap = snap
+            self.interpolation = interpolation
+            self.clip = clip
+            self.outline = outline
         
         if interpolation == None:
             interpolation = self.interpolation
@@ -624,43 +916,63 @@ class Canvas(QGraphicsView):
         # device representation shows the device as an image behind the watchface
         # why? no reason
         #self.deviceRep = DeviceRepresentation(project.getDeviceType(), interpolation)
-        if project.widgets != None:
-            self.scene().clear()
-            self.widgets.clear()
-            #self.scene().addItem(self.deviceRep)
-            self.scene().addItem(self.frame)
 
-            if outline:
-                self.deviceOutline = DeviceOutline(self.deviceSize)
-                self.scene().addItem(self.deviceOutline)
- 
-            self.imageFolder = project.imageFolder
+        self.unitImages = {}
+        self.scene().clear()
+        self.widgets.clear()
+        #self.scene().addItem(self.deviceRep)
+        self.scene().addItem(self.frame)
 
-            self.scene().originPositons = {}
-
-            widgets = project.getAllWidgets()
-            if type(widgets) == list:
-                for index, widget in enumerate(widgets):    
-                    result, userFacingReason, debugReason = self.createWidgetFromData(index, widget, snap, interpolation)
-                    self.scene().originPositions[widget.getProperty("widget_name")] = [int(widget.getProperty("widget_pos_x")), int(widget.getProperty("widget_pos_y"))]
-                    if not result:
-                        return False, userFacingReason, debugReason
-                self.scene().updatePosMap()
-                return True, "Success", ""
-            else:
-                return False, "Widgets not in list!", ""
+        if outline:
+            self.deviceOutline = DeviceOutline(self.deviceSize)
+            self.scene().addItem(self.deviceOutline)
             
-        else:
-            self.scene().addItem(self.frame)
+        self.projectDirectory = project.getDirectory()
+        self.imageFolder = project.getImageFolder()
+
+        if project.getAllWidgets() == []:
             return True, "Success", ""
+
+        self.scene().originPositons = {}
+
+        widgets = project.getAllWidgets()
+
+        for index, widget in enumerate(widgets):    
+            result, userFacingReason, debugReason = self.createWidgetFromData(index, widget, snap, interpolation)
+            self.scene().originPositions[widget.getProperty("widget_name")] = [int(widget.getProperty("widget_pos_x")), int(widget.getProperty("widget_pos_y"))]
+            if not result:
+                print(debugReason)
+                return False, userFacingReason, debugReason
         
-    def reloadObject(self, objectName, widget):
+        for unitWidget in self.unitImages.values():
+            split = unitWidget[0].getProperty("widget_name").split("[", 1)
+            if len(split) >= 2:
+                nameRef = split[0].split("_")
+                if len(nameRef) >= 2 and nameRef[-1] == "ref":
+                    numWidget = self.getObject(split[-1][:-1])
+                    if numWidget and isinstance(numWidget, NumberWidget):
+                        numWidget.addUnitImage(
+                            True,
+                            unitWidget[1],
+                            interpolation,
+                            numWidget.alignment
+                        )
+                    else:
+                        QMessageBox.warning(None, "Canvas", "Invalid widget for _ref!")
+
+        self.scene().updatePosMap()
+        return True, "Success", ""
+        
+    def reloadObject(self, objectName, widget, property, value):
         # loads a single object without reloading every object in the canvas
         # if using on a mass set of objects, its usually easier to call the loadobjects function
         object = self.widgets[objectName]
         objectZValue = object.zValue()
 
         if object != None:
+            if object.quickReloadProperty(property, value):
+                print("quick reload")
+                return True, "Quick reloaded object", ""
 
             result, userFacingReason, debugReason = self.createWidgetFromData(objectZValue, widget, self.snap, self.interpolation)
             if not result:
@@ -670,8 +982,21 @@ class Canvas(QGraphicsView):
                 self.scene().updatePosMap()
                 object.selectionPath.prepareGeometryChange()
                 object.delete()
+                for unitWidget in self.unitImages.values():
+                    split = unitWidget[0].getProperty("widget_name").split("[", 1)
+                    numWidget = self.getObject(split[-1][:-1])
+                    if numWidget and isinstance(numWidget, NumberWidget):
+                        numWidget.addUnitImage(
+                            True,
+                            unitWidget[1],
+                            self.interpolation,
+                            numWidget.alignment
+                        )
+                    else:
+                        QMessageBox.warning(None, "Canvas", "Invalid widget for _ref!")
+                
                 return True, "Success", ""
-        
+
 class BaseWidget(QGraphicsRectItem):
     # Basic widget with draggable and selectable controls
     # Allows for snap to guides
@@ -681,9 +1006,12 @@ class BaseWidget(QGraphicsRectItem):
         # Initialize the shape.
         super().__init__(posX, posY, sizeX, sizeY, parent)
         self.setRect(0, 0, sizeX, sizeY)
+        self.setPos(posX, posY)
         self.setPen(QPen(QColor(0,0,0,0)))
         self.origPos = None
         self.size = QPointF(sizeX, sizeY)
+        self.boundingPosOverride = False
+        self.boundingPos = QPointF(0, 0)
         self.color = color
         self.canvas = canvas
         self.selectionPos = None
@@ -706,18 +1034,32 @@ class BaseWidget(QGraphicsRectItem):
         # Create outline
         if self.selectionPos == None or self.pos().x() != self.selectionPos.x() or self.pos().y() != self.selectionPos.y():
             self.selectionPos = self.pos()
+
+            if self.boundingPosOverride:
+                self.selectionPath.setPos(self.boundingPos)
+            else:
+                self.selectionPath.setPos(self.pos())
+                
             self.selectionPainterPath.clear()
-            self.selectionPainterPath.addRoundedRect(self.pos().x(), self.pos().y(), self.rect().width(), self.rect().height(), self.highlightRadius, self.highlightRadius)
+            self.selectionPainterPath.addRoundedRect(0, 0, self.rect().width(), self.rect().height(), self.highlightRadius, self.highlightRadius)
             self.selectionPath.setPath(self.selectionPainterPath)
             pen = QPen(self.scene().palette().highlight(), 2, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin)
             self.selectionPath.setPen(pen)
 
+        return self.rect()
+    
         # hack to get rid of bounding box ghosting
-        outline_width = 4
-        return self.rect().adjusted(-outline_width, -outline_width, outline_width, outline_width)
+        # this is only required when using the object's outline for selection
+        # outline_width = 4
+        # return self.rect().adjusted(-outline_width, -outline_width, outline_width, outline_width)
     
     def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent):
         super().mouseMoveEvent(event)
+
+        print(event.button())
+
+        if event.buttons() != Qt.MouseButton.LeftButton:
+            return
 
         # handle snap
         if self.snap:
@@ -735,10 +1077,16 @@ class BaseWidget(QGraphicsRectItem):
                 self.setY(snapPos[1])
 
             if snapPos[2] != None:
-                self.setX(snapPos[2] - self.rect().width())
+                self.setX(snapPos[2] - (self.rect().width() / 2))
                 
             if snapPos[3] != None:
-                self.setY(snapPos[3] - self.rect().height())
+                self.setY(snapPos[3] - (self.rect().height() / 2))
+
+            if snapPos[4] != None:
+                self.setX(snapPos[4] - self.rect().width())
+                
+            if snapPos[5] != None:
+                self.setY(snapPos[5] - self.rect().height())
 
         self.setPos(round(self.x()), round(self.y()))
 
@@ -750,17 +1098,35 @@ class BaseWidget(QGraphicsRectItem):
 
     def mousePressEvent(self, event):
         super().mousePressEvent(event)
+
+        if event.button() != Qt.MouseButton.LeftButton:
+            return
+        
         self.origPos = self.pos()
 
     def mouseReleaseEvent(self, event):
         super().mouseReleaseEvent(event)
+
+        if event.button() != Qt.MouseButton.LeftButton:
+            return
+        
         self.scene().clearSnapLines()
-        if event.button() != Qt.MouseButton.RightButton:
-            self.canvas.fireObjectPositionChanged()
+        self.canvas.fireObjectPositionChanged()
     
     def delete(self):
         self.scene().removeItem(self.selectionPath)
         self.scene().removeItem(self)
+
+    def quickReloadProperty(self, property, value):
+        print("quick reload", property, value)
+        rect = self.rect()
+        if property == "widget_pos_x":
+            self.setX(int(value))
+        elif property == "widget_pos_y":
+            self.setY(int(value))
+        else:
+            return False # returns when property cannot be quick reloaded
+        return True # returns when property has ben set successfully
 
     def paint(self, painter, option, widget=None):
         # Paint the node in the graphic view.
@@ -776,14 +1142,198 @@ class BaseWidget(QGraphicsRectItem):
         painter.drawRect(self.rect())
 
 class ImageWidget(BaseWidget):
-    # Widget for basic images and handling for DigitalNumber
-    # All ImageList related things are handled in the addImage function
-    # Live previews of animations are planned with this widget
+    # Widget for basic images
 
     def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name):
         super().__init__(posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name)
-        self.imageItems = []
+        self.pixmapItem = QGraphicsPixmapItem(self)
         self.setPos(posX, posY)
+
+    def setImage(self, qPixmap, isAntialiased):
+        if qPixmap.isNull():
+            self.representNoImage()
+            return
+        
+        self.pixmapItem.setPixmap(qPixmap)
+        self.setRect(0, 0, qPixmap.width(), qPixmap.height())
+
+        if isAntialiased:
+            self.pixmapItem.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
+
+    def representNoImage(self):
+        self.color = QColor(255, 0, 0, 100)
+
+class ImagelistWidget(ImageWidget):
+    # Widget for imagelists and animated images
+
+    def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name):
+        super().__init__(posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name)
+        self.previewIndex = None
+        self.defaultValue = None
+        self.imagelist = None
+        self.isAnimation = False
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.updateImage)
+        self.source = None
+
+    def getLastValidListIndex(self, index):
+        if self.imagelist.get(index):
+            return index
+
+        for i in range(index, -1, -1):
+            if self.imagelist.get(int(i)) != None:
+                return i
+
+        return None
+
+    def addImagelist(self, imagelist, source, previewIndex, defaultValue, isAntialiased):
+        if imagelist == {}:
+            self.representNoImage()
+            return
+
+        if previewIndex != None:
+            previewIndex = int(previewIndex)
+        
+        self.previewIndex = previewIndex
+        self.defaultValue = defaultValue
+        self.antialiased = isAntialiased
+
+        self.source = source
+        self.imagelist = imagelist
+
+        print(defaultValue, previewIndex)
+
+        if previewIndex != None and imagelist.get(self.getLastValidListIndex(previewIndex)):
+            previewImage = imagelist[self.getLastValidListIndex(previewIndex)]
+        elif previewIndex == None and defaultValue != None and defaultValue != 0:
+            previewImage = imagelist[self.getLastValidListIndex(defaultValue)]
+        elif imagelist != {}:
+            previewImage = imagelist[next(iter(imagelist))] # get first item
+        else:
+            previewImage = QPixmap()
+
+        if previewImage.isNull():
+            self.representNoImage()
+        else:
+            self.pixmapItem.setPixmap(previewImage)
+            self.setRect(0, 0, previewImage.width(), previewImage.height())
+            
+        if isAntialiased:
+            self.pixmapItem.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
+
+    def addAnimatedImagelist(self, imagelist, isAntialiased):
+        self.isAnimation = True
+        self.imagelist = imagelist
+        initialFrame = imagelist[0]
+
+        self.animatedImageList = imagelist
+        self.pixmapItem.setPixmap(initialFrame)
+        self.setRect(0, 0, initialFrame.width(), initialFrame.height())
+        
+        if isAntialiased:
+            self.pixmapItem.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
+
+    def updateImage(self):
+        if self.isAnimation:
+            self.currentFrame = (self.currentFrame + 1) % len(self.animatedImageList)
+            self.pixmapItem.setPixmap(self.animatedImageList[self.currentFrame])
+
+            if self.totalRepeats != 0:
+                if self.currentFrame + 1 > len(self.animatedImageList) - 1:
+                    self.animRepeats += 1
+
+                if self.animRepeats >= self.totalRepeats:
+                    self.stopPreview(False)
+        else:
+            livePreviewIndex = None
+            
+            if self.scene().getPreviewNumber(self.source) != None:
+                livePreviewIndex = int(self.scene().getPreviewNumber(self.source))
+            
+            if livePreviewIndex != None:
+                self.pixmapItem.setPixmap(self.imagelist[self.getLastValidListIndex(livePreviewIndex)])
+            elif self.previewIndex != None:
+                self.pixmapItem.setPixmap(self.imagelist[self.getLastValidListIndex(self.previewIndex)])
+            elif self.previewIndex == None and self.defaultValue != None:
+                self.pixmapItem.setPixmap(self.imagelist[self.getLastValidListIndex(self.defaultValue)])
+            else:
+                self.pixmapItem.setPixmap(self.imagelist[next(iter(self.imagelist))])
+            
+
+    def startPreview(self, framesec=None, repeatAmounts=None):
+        if self.imagelist == None:
+            return
+        
+        if self.isAnimation:    
+            self.animRepeats = 0
+            self.totalRepeats = int(repeatAmounts)
+            self.currentFrame = 0
+            interval = int(framesec)
+        else:
+            interval = 100
+            
+        self.updateImage()
+        self.timer.start(interval)
+
+    def stopPreview(self, endPreview=True):
+        if self.imagelist == None:
+            return
+        
+        self.timer.stop()
+
+        if self.isAnimation:
+            if endPreview:
+                self.pixmapItem.setPixmap(self.imagelist[0])    
+        else:
+            if self.previewIndex != None:
+                self.pixmapItem.setPixmap(self.imagelist[self.getLastValidListIndex(self.previewIndex)])
+            elif self.previewIndex == None and self.defaultValue != None:
+                self.pixmapItem.setPixmap(self.imagelist[self.getLastValidListIndex(self.defaultValue)])
+            else:
+                self.pixmapItem.setPixmap(self.imagelist[next(iter(self.imagelist))])
+
+    def representNoImage(self):
+        self.color = QColor(255, 0, 0, 100)
+            
+
+class NumberWidget(BaseWidget):
+    # Displays numbers
+
+    def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name, angle, isPosRelativeToAlignment=False):
+        super().__init__(posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name)
+        self.imageItems = []
+        self.numList = []
+        self.source = None
+        self.pivot = self.rect().topLeft()
+        self.angle = angle
+        self.relativeToAlign = isPosRelativeToAlignment
+        self.timer = QTimer()
+        self.timer.setInterval(100)
+        self.timer.timeout.connect(self.updatePreviewNumber)
+        self.posX = posX
+        self.setPos(posX, posY)
+
+    def addBlankImage(self):
+        self.imageItems.append("") # append blank to imageitems
+
+    def updateAngle(self):
+        # calculate pivot point of the widget
+        rect = self.rect()
+        if self.alignment != None:
+            if self.alignment == "Left":
+                self.pivot = rect.topLeft()
+            elif self.alignment == "Center":
+                self.pivot = rect.center() - QPointF(0, rect.height() / 2)
+            elif self.alignment == "Right":
+                self.pivot = rect.topRight()
+        
+        # set angle to widget
+        self.setTransformOriginPoint(self.pivot)
+        self.setRotation(self.angle)
+
+        # set angle to selection box
+        self.selectionPath.setTransformOriginPoint(self.pivot)
+        self.selectionPath.setRotation(self.angle)
 
     def addImage(self, qPixmap, posX, posY, spacing, isAntialiased):
         if qPixmap.isNull():
@@ -795,13 +1345,135 @@ class ImageWidget(BaseWidget):
         self.imageItems.append(item)
         if isAntialiased:
             item.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
+        
+    def addNumbers(self, previewNumber, source, numList, digits, spacing, alignment, hideZeros, interpolationStyle, previewFromSource=False):
+        # store arguments for later
+        if not previewFromSource:
+            self.previewNumber = previewNumber
+        self.initialImage = numList[0]
+        self.source = source
+        self.numList = numList
+        self.digits = digits
+        self.spacing = spacing
+        self.alignment = alignment
+        self.hideZeros = hideZeros
+        self.interpolationStyle = interpolationStyle
+        
+        self.clearImages()
 
-        width = ( qPixmap.width() * len(self.imageItems) ) + ( spacing * len(self.imageItems) )
-        self.setRect(0, 0, width, qPixmap.height())
+        for x in range(int(digits)):
+            # Get QPixmap from file string
+            if len(numList) >= 10:
+                if previewNumber != None:
+                    previewNumber = str(previewNumber)
+                    cropped = previewNumber[-int(digits):] # crop number
+                    previewNumber = cropped.zfill(int(digits)) # pad number with zeroes
+                    if previewNumber[x] == "." and len(numList) != 12:
+                        image = numList[0]
+                    elif previewNumber[x] == "." and len(numList) == 12:
+                        image = numList[11]
+                    else:
+                        image = numList[int(previewNumber[x])]
+                else:
+                    image = numList[x % len(numList)]
+
+                if hideZeros and previewNumber != None and previewNumber[x] == "0":
+                    self.addBlankImage()
+                else:
+                    if hideZeros:
+                        hideZeros = False
+                    
+                    if alignment == "Left":
+                        num = len([item for item in self.imageItems if item != ""])
+                        self.addImage(image, (image.size().width() * num) + (int(spacing) * num), 0, int(spacing), interpolationStyle)
+                    elif alignment == "Center":
+                        # check if this is the first item by checking if there are no other items
+                        items = [item for item in self.imageItems if item != ""]
+                        # get pos x by multiplying all empty items by width and dividing by 2
+                        initialItemPosX = (len([item for item in self.imageItems if item == ""]) * image.size().width()) / 2
+                        if items == []:
+                            self.addImage(image, initialItemPosX, 0, int(spacing), interpolationStyle)
+                        else:
+                            self.addImage(image, (image.size().width() + int(spacing)) * len(items) + initialItemPosX , 0, int(spacing), interpolationStyle)
+                    elif alignment == "Right":
+                        self.addImage(image, (image.size().width() * x) + (int(spacing) * x), 0, int(spacing), interpolationStyle)
+            else:
+                self.representNoImage()
+
+            if not previewFromSource:
+                width = ( self.initialImage.width() * len(self.imageItems) ) + ( int(spacing) * len(self.imageItems) )
+                self.setRect(0, 0, width, self.initialImage.height())
+
+            if self.relativeToAlign:
+                if alignment == "Center":
+                    self.setX(self.posX - (self.rect().width() / 2))
+                elif alignment == "Right":
+                    self.setX(self.posX - self.rect().width())
+
+            self.updateAngle()
+
+    def addUnitImage(self, unitImageFromWidget, unitWidget, interpolationStyle, alignment=None, unitImage=None):
+        
+        if alignment != None:
+            if alignment == "Left":
+                num = len([item for item in self.imageItems if item != ""])
+                unitImagePosX = (self.initialImage.size().width() * num) + (int(self.spacing) * num) 
+            elif alignment == "Center":
+                # check if this is the first item by checking if there are no other items
+                items = [item for item in self.imageItems if item != ""]
+                # get pos x by multiplying all empty items by width and dividing by 2
+                initialItemPosX = (len([item for item in self.imageItems if item == ""]) * self.initialImage.size().width()) / 2
+                if items == []:
+                    unitImagePosX = initialItemPosX
+                else:
+                    unitImagePosX = (self.initialImage.size().width() + int(self.spacing)) * len(items) + initialItemPosX
+            elif alignment == "Right":
+                unitImagePosX = (self.initialImage.size().width() * len(self.imageItems)) + (int(self.spacing) * len(self.imageItems))
+
+        else:
+            unitImagePosX = self.rect().width()
+
+        if unitImageFromWidget:
+            unitWidget.setPos(unitImagePosX, 0)
+            unitWidget.setParentItem(self)
+            unitWidget.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsMovable, False)
+            unitWidget.snap = False
+            unitWidget.boundingPosOverride = True
+            unitWidget.boundingPos = QPointF(self.pos().x() + unitImagePosX, self.pos().y())
+            self.setRect(0, 0, self.rect().width() + unitWidget.rect().width(), self.initialImage.height())
+            pivot = self.pivot
+            pivot.setX(self.pivot.x() - unitImagePosX)
+            unitWidget.selectionPath.setTransformOriginPoint(pivot)
+            unitWidget.selectionPath.setRotation(self.angle)
+        else:
+            unitImageWidget = QGraphicsPixmapItem(self)
+            unitImageWidget.setPixmap(unitImage)
+            unitImageWidget.setX(unitImagePosX)
+            self.setRect(0, 0, self.rect().width() + unitImage.width(), self.initialImage.height())
+
+            if interpolationStyle:
+                unitImageWidget.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
+        
+    def updatePreviewNumber(self):
+        previewNumber = self.scene().getPreviewNumber(self.source)
+        
+        if previewNumber is not None:
+            self.addNumbers(previewNumber, self.source, self.numList, self.digits, self.spacing, self.alignment, self.hideZeros, self.interpolationStyle, previewFromSource=True)
+
+    def startPreview(self):
+        if self.source != None:
+            self.updatePreviewNumber()
+            self.timer.start()
+
+    def stopPreview(self):
+        if self.source != None:
+            self.timer.stop()
+            self.addNumbers(self.previewNumber, self.source, self.numList, self.digits, self.spacing, self.alignment, self.hideZeros, self.interpolationStyle, True)
 
     def clearImages(self):
         for x in self.imageItems:
-            self.scene().removeItem(x)
+            if isinstance(x, str) is not True:
+                self.scene().removeItem(x)
         self.imageItems.clear()
 
     def representNoImage(self):
@@ -810,13 +1482,18 @@ class ImageWidget(BaseWidget):
 class AnalogWidget(BaseWidget):
     # Widget for handling AnalogDisplays
     
-    def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name):
+    def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name, smoothHr, smoothMin, smoothSec, updateInterval):
         super().__init__(posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name)
+        print(smoothHr, smoothMin)
+        self.smoothHr = smoothHr 
+        self.smoothMin = smoothMin 
+        self.smoothSec = smoothSec
+        self.timer = QTimer()
+        self.timer.setInterval(updateInterval)
+        self.timer.timeout.connect(self.updatePreviewHands)
         self.setPos(posX, posY)
 
     def addBackground(self, backgroundImage, bgX, bgY, antialiasing):
-        if backgroundImage != "":
-            self.background = QGraphicsPixmapItem(backgroundImage, self)
         self.bgImage = QGraphicsPixmapItem(backgroundImage, self)
         self.bgImage.setPos(int(bgX), int(bgY))
         if antialiasing:
@@ -832,7 +1509,7 @@ class AnalogWidget(BaseWidget):
     def addMinuteHand(self, minHandImage, minHandX, minHandY, antialiasing):
         self.minHand = QGraphicsPixmapItem(minHandImage, self)
         self.minHand.setOffset(-int(minHandX), -int(minHandY))
-        self.minHand.setRotation(60)
+        self.minHand.setRotation(48)
         self.minHand.setPos(self.rect().width()/2, self.rect().height()/2)
         if antialiasing:
             self.minHand.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
@@ -840,23 +1517,74 @@ class AnalogWidget(BaseWidget):
     def addHourHand(self, hourHandImage, hrHandX, hrHandY, antialiasing):
         self.hrHand = QGraphicsPixmapItem(hourHandImage, self)
         self.hrHand.setOffset(-int(hrHandX), -int(hrHandY))
-        self.hrHand.setRotation(-60)
+        self.hrHand.setRotation(300)
         self.hrHand.setPos(self.rect().width()/2, self.rect().height()/2)
         if antialiasing:
             self.hrHand.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
+
+    def updatePreviewHands(self):
+        now = datetime.now()
+        if self.hrHand != None:
+            if self.smoothHr == "1":
+                min = int(now.strftime("%M")) / 60
+                angle = (int(now.strftime("%I")) + min) / 12 * 360
+            else:
+                angle = int(now.strftime("%I")) / 12 * 360
+            self.hrHand.setRotation(angle)
+
+        if self.minHand != None:
+            if self.smoothMin == "1":
+                sec = int(now.strftime("%S")) / 60
+                angle = (int(now.strftime("%M")) + sec) / 60 * 360
+            else:
+                angle = int(now.strftime("%M")) / 60 * 360
+
+            self.minHand.setRotation(angle)
+
+        if self.secHand != None:
+            if self.smoothSec == "1":
+                msec = int(now.strftime("%f")) / 1000000
+                angle = (int(now.strftime("%S")) + msec)  / 60 * 360
+            else:
+                angle = int(now.strftime("%S")) / 60 * 360
+            self.secHand.setRotation(angle)
+
+    def startPreview(self):
+        self.timer.start()
+        self.updatePreviewHands()
+
+    def stopPreview(self):
+        self.timer.stop()
+        if self.hrHand != None:
+            self.hrHand.setRotation(300)
+        if self.minHand != None:
+            self.minHand.setRotation(48)
+        if self.secHand != None:
+            self.secHand.setRotation(0)
+
+class PointerWidget(BaseWidget):
+    def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name):
+        super().__init__(posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name)
+        self.setPos(posX, posY)
+        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemClipsChildrenToShape, False)
+
+    def addPointer(self, image, anchorX, anchorY, antialiasing):
+        self.pointer = QGraphicsPixmapItem(image, self)
+        self.pointer.setOffset(-int(anchorX), -int(anchorY))
+        self.pointer.setPos(image.width()/2, image.height()/2)
+        self.setRect(0, 0, image.width(), image.height())
+        if antialiasing:
+            self.pointer.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
 
 class ProgressArc(QGraphicsEllipseItem):
     def __init__(self, posX, posY, width, height, parent, thickness, startAngle, endAngle, isFlat, pathImage):
         super().__init__(posX, posY, width, height, parent)
         pen = QPen()
         pen.setWidth(thickness)
-        QPixmap.isNull
         if pathImage.isNull():
             pen.setColor(QColor(255, 0, 0, 100))    
         else:
             pen.setBrush(QBrush(pathImage))
-        
-        pen.setCapStyle(Qt.PenCapStyle.FlatCap)
 
         if isFlat == "1":
             pen.setCapStyle(Qt.PenCapStyle.FlatCap)
@@ -871,6 +1599,36 @@ class ProgressArc(QGraphicsEllipseItem):
         painter.setPen(self.pen())
         painter.setBrush(self.brush())
         painter.drawArc(self.rect(), self.startAngle(), self.spanAngle())
+
+class ProgressLine(QGraphicsLineItem):
+    def __init__(self, parentX, parentY, startX, startY, parent, thickness, endX, endY, isFlat, pathImage):
+        startX = startX - parentX
+        startY = startY - parentY
+        endX = endX - parentX
+        endY = endY - parentY
+
+        super().__init__(startX, startY, endX, endY, parent)
+
+        pen = QPen()
+        pen.setWidth(thickness)
+        
+        if pathImage.isNull():
+            pen.setColor(QColor(255, 0, 0, 100))    
+        else:
+            pen.setBrush(QBrush(pathImage))
+        
+        print(isFlat)
+
+        if isFlat == "1":
+            pen.setCapStyle(Qt.PenCapStyle.FlatCap)
+        else:
+            line = self.line()
+            line.setP1(QPointF(startX + (thickness / 2), startY))
+            line.setP2(QPointF(endX - (thickness / 2), endY))
+            self.setLine(line)
+            pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+
+        self.setPen(pen)
 
 class ProgressWidget(BaseWidget):
     def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name, offsetX, offsetY, radius, thickness, startAngle, endAngle, isFlat, bgImage, pathImage, isAntialiased):
@@ -888,18 +1646,48 @@ class ProgressWidget(BaseWidget):
         
         radius = radius - thickness / 2
 
-        self.arc = ProgressArc(
-            int(offsetX) - radius - (thickness / 2), 
-            int(offsetY) - radius - (thickness / 2), 
-            (radius * 2) + thickness,
-            (radius * 2) + thickness, 
-            self, 
-            int(thickness),
-            startAngle,
-            endAngle,
-            isFlat,
-            pathImage)
+        self.line = None
+        self.arc = None
 
+        split = name.split("_")
+        if split[0].lower() == "lineprogress":
+            self.startX = int(offsetX)
+            self.startY = int(offsetY)
+            self.endX = startAngle
+            self.endY = endAngle
+            self.line = ProgressLine(
+                posX,
+                posY,
+                int(offsetX),
+                int(offsetY),
+                self, 
+                int(thickness),
+                startAngle,
+                endAngle,
+                isFlat,
+                pathImage)
+        else:
+            self.arc = ProgressArc(
+                int(offsetX) - radius - (thickness / 2), 
+                int(offsetY) - radius - (thickness / 2), 
+                (radius * 2) + thickness,
+                (radius * 2) + thickness, 
+                self, 
+                int(thickness),
+                startAngle,
+                endAngle,
+                isFlat,
+                pathImage)
+            
         if isAntialiased:
             self.backgroundImage.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
             #self.arc.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
+
+    def mouseMoveEvent(self, event):
+        if self.line != None:
+            print("line")
+            print(self.startX - self.pos().x())
+            print(self.startY)
+            line = QLineF(self.startX - self.pos().x(), self.startY - self.pos().y(), self.endX - self.pos().x(), self.endY - self.pos().y())
+            self.line.setLine(line)
+        return super().mouseMoveEvent(event)

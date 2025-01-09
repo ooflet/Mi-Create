@@ -107,7 +107,6 @@ class PropertiesWidget(QWidget):
             self.ignorePropertyChange = False
 
     def addProperty(self, srcProperty, name, valueWidget, parent=None, inputSinker=None) -> QTreeWidgetItem:
-        print(srcProperty)
         if parent != None:
             item = QTreeWidgetItem(parent, [_(name), ""])
 
@@ -264,7 +263,7 @@ class PropertiesWidget(QWidget):
             comboBox.setCursor(Qt.CursorShape.PointingHandCursor)
             
         if selected:
-            if selected.isnumeric():
+            if isinstance(selected, int) or selected.isnumeric():
                 comboBox.setCurrentIndex(int(selected))
             else:
                 if selected in items:
@@ -289,7 +288,7 @@ class PropertiesWidget(QWidget):
         comboBox.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         comboBox.addItems(items)
         if selected:
-            comboBox.setCurrentIndex(int(selected))
+            comboBox.setItemText(selected)
         comboBox.wheelEvent = wheelEvent
         comboBox.currentTextChanged.connect(onChanged)
         return comboBox
@@ -438,6 +437,7 @@ class PropertiesWidget(QWidget):
                             decimalList.clear()
 
                     def updateNumberList(index, text):
+                        print(propertyValue)
                         if index >= len(propertyValue):
                             propertyValue.insert(index, text)
                         else:
@@ -485,12 +485,12 @@ class PropertiesWidget(QWidget):
                     for x in self.sourceData[str(device)]:
                         if propertyValue != '':
                             if isinstance(propertyValue, int) or propertyValue.isnumeric():
-                                if int(x["@ID"]) == int(propertyValue):
-                                    inputWidget = self.createComboBox(self.sourceList[str(device)], x["@Name"], key, True)
+                                if int(x["id_fprj"]) == int(propertyValue):
+                                    inputWidget = self.createComboBox(self.sourceList[str(device)], x["string"], key, True)
                                     break
                             else:
-                                if x["@ID"] == propertyValue:
-                                    inputWidget = self.createComboBox(self.sourceList[str(device)], x["@Name"], key, True)
+                                if x["id_fprj"] == propertyValue:
+                                    inputWidget = self.createComboBox(self.sourceList[str(device)], x["string"], key, True)
                                     break
                         else:
                             inputWidget = self.createComboBox(self.sourceList[str(device)], False, key, True)

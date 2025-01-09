@@ -245,6 +245,9 @@ QToolButton:pressed#canvasDecoration-button {
     background-color: palette(highlight)
 }
 
+QToolButton:checked#canvasDecoration-button {
+    background-color: palette(highlight)   
+}
 
 /*
  * QGroupBox
@@ -472,6 +475,7 @@ QListView {
 QListView::item[floating="true"] {
     border: 1px solid transparent;
     border-radius: 4px;
+    margin-bottom: 6px;
 }
 
 QListView::item:hover:!selected {

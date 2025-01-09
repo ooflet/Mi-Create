@@ -111,7 +111,7 @@ QMenu::indicator {
 QPushButton {
     background-color: transparent;
     min-width: 3.5em;
-    padding: 4px 8px;
+    padding: 5px 8px;
     border-radius: 4px;
     border: 1px solid palette(light);
     font-weight: normal
@@ -243,6 +243,10 @@ QToolButton:pressed {
 
 QToolButton:pressed#canvasDecoration-button {
     background-color: palette(highlight)
+}
+
+QToolButton:checked#canvasDecoration-button {
+    background-color: palette(highlight)   
 }
 
 /*
@@ -471,6 +475,7 @@ QListView {
 QListView::item[floating="true"] {
     border: 1px solid transparent;
     border-radius: 4px;
+    margin-bottom: 6px;
 }
 
 QListView::item:hover:!selected {

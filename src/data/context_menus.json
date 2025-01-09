@@ -1,0 +1,107 @@
+{
+    "default": {
+        "Undo": {
+            "inherit": "actionUndo"
+        },
+        "Redo": {
+            "inherit": "actionRedo"
+        },
+        "sep1": {
+            "specialType": "seperator"
+        },
+        "Paste": {
+            "inherit": "actionPaste"
+        },
+        "sep2": {
+            "specialType": "seperator"
+        },
+        "Zoom": {
+            "inheritSubmenu": "menuZoom"
+        }
+    },
+    "shape": {
+        "Undo": {
+            "inherit": "actionUndo"
+        },
+        "Redo": {
+            "inherit": "actionRedo"
+        },
+        "sep1": {
+            "specialType": "seperator"
+        },
+        "Cut": {
+            "inherit": "actionCut"
+        },
+        "Copy": {
+            "inherit": "actionCopy"
+        },
+        "Paste": {
+            "inherit": "actionPaste"
+        },
+        "sep2": {
+            "specialType": "seperator"
+        },
+        "Layers": {
+            "inheritSubmenu": "menuLayers"
+        },
+        "sep3": {
+            "specialType": "seperator"
+        },
+        "Delete": {
+            "inherit": "actionDelete"
+        }
+    },
+    "fprj": {
+        "Image": {
+            "icon": "widget-image",
+            "id": "widget"
+        },
+        "Image List": {
+            "icon": "widget-imagelist",
+            "id": "widget_imagelist"
+        },
+        "sep1": {
+            "specialType": "seperator"
+        },
+        "Digital Number": {
+            "icon": "widget-digitalnumber",
+            "id": "widget_num"
+        },
+        "Analog Display": {
+            "icon": "widget-analogdisplay",
+            "id": "widget_analog"
+        },
+        "Arc Progress": {
+            "icon": "widget-arcprogress",
+            "id": "widget_arc"
+        },
+        "sep2": {
+            "specialType": "seperator"
+        },
+        "Container": {
+            "icon": "widget-container",
+            "id": "widget_container"
+        }
+    },
+    "gmf": {
+        "Image": {
+            "icon": "widget-image",
+            "id": "widget"
+        },
+        "Image List": {
+            "icon": "widget-imagelist",
+            "id": "widget_imagelist"
+        },
+        "sep1": {
+            "specialType": "seperator"
+        },
+        "Digital Number": {
+            "icon": "widget-digitalnumber",
+            "id": "widget_num"
+        },
+        "Pointer": {
+            "icon": "widget-pointer",
+            "id": "widget_pointer"
+        }
+    }
+}

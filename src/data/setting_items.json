@@ -1,0 +1,50 @@
+{
+    "General": {
+        "Theme": {
+            "string": "Theme",
+            "type": "list",
+            "value": "Default Dark",
+            "options": []
+        },
+        "Language": {
+            "string": "Language",
+            "type": "list",
+            "value": "English",
+            "options": []
+        },
+        "CheckUpdate": {
+            "string": "Check for Updates",
+            "type": "bool",
+            "value": true
+        }
+    },
+    "Canvas": {
+        "Snap": {
+            "string": "Snap to Guides",
+            "type": "bool",
+            "value": true
+        },
+        "ClipDeviceShape": {
+            "string": "Clip to Device Shape",
+            "type": "bool",
+            "value": true
+        },
+        "ShowDeviceOutline": {
+            "string": "Show Device Outline",
+            "type": "bool",
+            "value": true,
+            "changeState": ["ClipDeviceShape", "disabled", false]
+        },
+        "Antialiasing": {
+            "string": "Antialiasing",
+            "type": "bool",
+            "value": true
+        },
+        "Interpolation": {
+            "string": "Image Interpolation",
+            "type": "list",
+            "value": "Bilinear",
+            "options": ["Bilinear", "Nearest Neighbour"]
+        }
+    }
+}

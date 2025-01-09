@@ -1,0 +1,255 @@
+{
+    "widget_pointer": {
+        "Shape": "Pointer",
+        "properties": {
+            "General": {
+                "WidgetType": {
+                    "string": "Widget Type",
+                    "type": "disabled",
+                    "value": "Pointer"
+                },
+                "widget_name": {
+                    "string": "Name",
+                    "type": "str",
+                    "value": ""
+                }
+            },
+            "Position": {
+                "widget_pos_x": {
+                    "string": "X",
+                    "type": "int",
+                    "value": "",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "widget_pos_y": {
+                    "string": "Y",
+                    "type": "int",
+                    "value": "",
+                    "min": "-999",
+                    "max": "999"
+                }
+            },
+            "Appearance": {
+                "widget_alpha": {
+                    "string": "Opacity",
+                    "type": "int",
+                    "value": "255",
+                    "min": "0",
+                    "max": "255"
+                },
+                "widget_visibility_source": {
+                    "string": "Visibility Trigger",
+                    "type": "src",
+                    "value": "",
+                    "visibleOn": [
+                        "xiaomi_color",
+                        "xiaomi_color_sport",
+                        "xiaomi_color_2/s1/s2",
+                        "xiaomi_watch_s1_pro"
+                    ]
+                }
+            },
+            "Pointer": {
+                "pointer_image": {
+                    "string": "Image",
+                    "type": "img",
+                    "value": ""
+                },
+                "Anchor Point": {
+                    "pointer_anchor_x": {
+                        "string": "X",
+                        "type": "int",
+                        "value": "",
+                        "min": "0",
+                        "max": "999"
+                    },
+                    "pointer_anchor_y": {
+                        "string": "Y",
+                        "type": "int",
+                        "value": "",
+                        "min": "0",
+                        "max": "999"
+                    }
+                }
+            }
+        }
+    },
+    "widget": {
+        "Shape": "Image",
+        "properties": {
+            "General": {
+                "WidgetType": {
+                    "string": "Widget Type",
+                    "type": "disabled",
+                    "value": "Image"
+                },
+                "widget_name": {
+                    "string": "Name",
+                    "type": "str",
+                    "value": ""
+                }
+            },
+            "Position": {
+                "widget_pos_x": {
+                    "string": "X",
+                    "type": "int",
+                    "value": "",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "widget_pos_y": {
+                    "string": "Y",
+                    "type": "int",
+                    "value": "",
+                    "min": "-999",
+                    "max": "999"
+                }
+            },
+            "Image": {
+                "widget_bitmap": {
+                    "string": "Image",
+                    "type": "img",
+                    "value": ""
+                }
+            }
+        }
+    },
+    "widget_imagelist": {
+        "Shape": "ImageList",
+        "properties": {
+            "General": {
+                "WidgetType": {
+                    "string": "Widget Type",
+                    "type": "disabled",
+                    "value": "ImageList"
+                },
+                "widget_name": {
+                    "string": "Name",
+                    "type": "str",
+                    "value": ""
+                }
+            },
+            "Position": {
+                "widget_pos_x": {
+                    "string": "X",
+                    "type": "int",
+                    "value": "",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "widget_pos_y": {
+                    "string": "Y",
+                    "type": "int",
+                    "value": "",
+                    "min": "-999",
+                    "max": "999"
+                }
+            },
+            "Data": {
+                "widget_source": {
+                    "string": "Data Source",
+                    "type": "src",
+                    "value": ""
+                }
+            },
+            "Image List": {
+                "imagelist_default_index": {
+                    "string": "Default Index",
+                    "type": "int",
+                    "value": "0",
+                    "min": "none",
+                    "max": "none"
+                },
+                "widget_bitmaplist": {
+                    "string": "Images",
+                    "type": "imglist",
+                    "value": ""
+                }
+            }
+        }
+    },
+    "widget_num": {
+        "Shape": "DigitalNumber",
+        "properties": {
+            "General": {
+                "WidgetType": {
+                    "string": "Widget Type",
+                    "type": "disabled",
+                    "value": "DigitalNumber"
+                },
+                "widget_name": {
+                    "string": "Name",
+                    "type": "str",
+                    "value": ""
+                }
+            },
+            "Position": {
+                "widget_pos_x": {
+                    "string": "X",
+                    "type": "int",
+                    "value": "",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "widget_pos_y": {
+                    "string": "Y",
+                    "type": "int",
+                    "value": "",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "num_alignment": {
+                    "string": "Alignment",
+                    "type": "list",
+                    "value": "",
+                    "options": [
+                        "Left",
+                        "Center",
+                        "Right"
+                    ]
+                }
+            },
+            "Appearance": {
+                "num_digits": {
+                    "string": "Digits",
+                    "type": "int",
+                    "value": "1",
+                    "min": "1",
+                    "max": "20"
+                },
+                "num_spacing": {
+                    "string": "Spacing",
+                    "type": "int",
+                    "value": "0",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "num_toggle_zeros": {
+                    "string": "Hide Zeroes",
+                    "type": "bool",
+                    "value": ""
+                }
+            },
+            "Data": {
+                "widget_source": {
+                    "string": "Data Source",
+                    "type": "src",
+                    "value": ""
+                }
+            },
+            "Images": {
+                "widget_bitmaplist": {
+                    "string": "Images",
+                    "type": "numlist",
+                    "value": ""
+                },
+                "widget_unit_icon": {
+                    "string": "Unit Icon",
+                    "type": "src",
+                    "value": ""
+                }
+            }
+        }
+    }
+}

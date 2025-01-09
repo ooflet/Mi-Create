@@ -9,305 +9,43 @@
 
 # All project manipulation is done through functions
 # There are designated IDs for each property, device type and data source.
-
-# Processes like compilation are handled by Qt's QProcess. 
-# If you are planning to port the code over to your own project, make sure you either:
-# - install PyQt/PySide libraries if you are fine with the extra bloat
-# - port to Python's subprocess
+# IDs are in the WatchData class
 
 import os
+import mmap
 import traceback
 import logging
 import json
 import shutil
 import xmltodict
 import xml
-import xml.dom.minidom as minidom
 
+from shutil import which
+from typing import List, Optional
 from pathlib import Path
 from pprint import pprint
 from copy import deepcopy
 from PyQt6.QtCore import QProcess, QSettings
 from PyQt6.QtWidgets import QMessageBox, QInputDialog
 
+from utils.data import WatchData
+from utils.binary import WatchfaceBinary
 from translate import Translator
 
 supportedOneFileVersion = "1.0"
 logging.basicConfig(level=logging.DEBUG)
 
-class WatchData:
-    def __init__(self):
-        self.models = []
-        self.modelID = {}
-        self.modelSize = {}
-        self.modelSourceList = {}
-        self.modelSourceData = {}
-        self.fprjDeviceIds = {
-            "0": "xiaomi_color",
-            "1": "xiaomi_color_sport",
-            "2": "70mai_saphir",
-            "3": "xiaomi_color_2/s1/s2",
-            "4": "xiaomi_watch_s1_pro",
-            "5": "redmi/poco_watch",
-            "6": "xiaomi_band_7_pro",
-            "7": "redmi_watch_3",
-            "8": "redmi_band_pro",
-            "9": "xiaomi_band_8",
-            "10": "redmi_watch_2_lite",
-            "11": "xiaomi_band_8_pro",
-            "12": "redmi_watch_3_active",
-            "362": "xiaomi_watch_s3",
-            "365": "redmi_watch_4",
-            "366": "xiaomi_band_9",
-        }
-        self.deviceId = [
-            "xiaomi_color",
-            "70mai_saphir",
-            "xiaomi_color_sport",
-            "xiaomi_color_2/s1/s2",
-            "xiaomi_watch_s1_pro",
-            "redmi/poco_watch",
-            "xiaomi_band_7_pro",
-            "redmi_watch_3",
-            "redmi_band_pro",
-            "xiaomi_band_8",
-            "redmi_watch_2_lite",
-            "xiaomi_band_8_pro",
-            "redmi_watch_3_active",
-            "xiaomi_watch_s3",
-            "redmi_watch_4",
-            "xiaomi_band_9"
-        ]
-        self.widgetId = [
-            "widget"
-            "widget_analog"
-            "widget_arc"
-            "widget_imagelist"
-            "widget_num"
-        ]
-        self.propertyId = [
-            "num_alignment",
-            "widget_alpha",
-            "widget_background_bitmap",
-            "analog_bg_anchor_x",
-            "analog_bg_anchor_y",
-            "widget_bitmap",
-            "widget_bitmaplist",
-            "num_hide_zeros",
-            "imagelist_default_index",
-            "num_digits",
-            "arc_end_angle",
-            "arc_image",
-            "widget_size_height",
-            "analog_hour_image",
-            "analog_hour_anchor_x",
-            "analog_hour_anchor_y",
-            "analog_hour_smooth_motion",
-            "imagelist_source",
-            "arc_thickness",
-            "analog_minute_image",
-            "analog_minute_anchor_x",
-            "analog_minute_anchor_y",
-            "analog_minute_smooth_motion",
-            "widget_name",
-            "arc_radius",
-            "arc_max_value",
-            "arc_max_value_source",
-            "arc_min_value",
-            "arc_min_step_value",
-            "arc_step_value",
-            "arc_source",
-            "arc_pos_x",
-            "arc_pos_y",
-            "analog_second_image",
-            "analog_second_anchor_x",
-            "analog_second_anchor_y",
-            "widget_type",
-            "num_spacing",
-            "arc_start_angle",
-            "num_source",
-            "widget_visiblity_source",
-            "widget_size_width",
-            "widget_pos_x",
-            "widget_pos_y"
-        ]
-        self.sourceId = [
-            'time_hour',
-            'time_hour_low',
-            'time_hour_high',
-            'time_minute',
-            'time_minute_low',
-            'time_minute_high',
-            'time_second',
-            'time_second_low',
-            'time_second_high',
-            'time_centi_second',
-            'time_centi_second_low',
-            'time_centi_second_high',
-            'date_year',
-            'date_year_digit1',
-            'date_year_digit2',
-            'date_year_digit3',
-            'date_year_digit4',
-            'date_month',
-            'date_month_low',
-            'date_month_high',
-            'date_day',
-            'date_day_low',
-            'date_day_high',
-            'date_week',
-            'date_lunar_year',
-            'date_lunar_month',
-            'date_lunar_day',
-            'date_week_string_short_cn',
-            'date_week_string_full_cn',
-            'date_week_string_full_pascal_en',
-            'date_week_string_full_upper_en',
-            'date_week_string_full_lower_en',
-            'date_week_string_short_pascal_en',
-            'date_week_string_short_upper_en',
-            'date_week_string_short_lower_en',
-            'date_month_string_short_cn',
-            'date_month_string_full_pascal_en',
-            'date_month_string_full_upper_en',
-            'date_month_string_full_lower_en',
-            'date_month_string_short_pascal_en',
-            'date_month_string_short_upper_en',
-            'date_month_string_short_lower_en',
-            'misc_is_am',
-            'misc_is_pm',
-            'misc_is24_h',
-            'health_step_count',
-            'health_step_count_digit1',
-            'health_step_count_digit2',
-            'health_step_count_digit3',
-            'health_step_count_digit4',
-            'health_step_count_digit5',
-            'health_step_progress',
-            'health_step_kilo_meter',
-            'health_heart_rate',
-            'health_heart_rate_zone',
-            'health_heart_rate_min',
-            'health_heart_rate_max',
-            'health_calorie',
-            'health_calorie_value',
-            'health_calorie_progress',
-            'health_stand_count',
-            'health_stand_progress',
-            'health_oxygen_spo2',
-            'health_pressure_index',
-            'health_blood_diastolic_pressure_mmhg',
-            'health_blood_systolic_pressure_mmhg',
-            'health_blood_diastolic_pressure_kpa',
-            'health_blood_systolic_pressure_kpa',
-            'health_blood_pressure_unit',
-            'health_sleep_duration',
-            'health_sleep_duration_minute',
-            'health_sleep_score',
-            'health_sleep_quality',
-            'health_sleep_target_progress',
-            'health_exercise_duration',
-            'health_exercise_progress',
-            'health_energy_consumed',
-            'health_misc_recovery_time',
-            'health_misc_run_power_index',
-            'health_misc_today_vitality_value',
-            'health_misc_seven_days_vitality_value',
-            'weather_current_sun_rise_hour',
-            'weather_current_sun_rise_minute',
-            'weather_current_sun_set_hour',
-            'weather_current_sun_set_minute',
-            'weather_temperature_unit',
-            'weather_current_temperature',
-            'weather_current_temperature_fahrenheit',
-            'weather_current_temperature_feel',
-            'weather_current_humidity',
-            'weather_current_weather',
-            'weather_current_wind_direction',
-            'weather_current_wind_angle',
-            'weather_current_wind_speed',
-            'weather_current_wind_level',
-            'weather_current_air_quality_index',
-            'weather_current_air_quality_level',
-            'weather_current_chance_of_rain',
-            'weather_current_pressure',
-            'weather_current_visibility',
-            'weather_current_uv_index',
-            'weather_current_dress_index',
-            'weather_today_temperature_max',
-            'weather_today_temperature_min',
-            'weather_today_temperature_max_fahrenheit',
-            'weather_today_temperature_min_fahrenheit',
-            'weather_tomorrow_temperature_max',
-            'weather_tomorrow_temperature_min',
-            'weather_tomorrow_temperature_max_fahrenheit',
-            'weather_tomorrow_temperature_min_fahrenheit',
-            'system_status_battery',
-            'system_status_charge',
-            'system_status_disturb',
-            'system_status_bluetooth',
-            'system_status_wifi',
-            'system_status_screen_lock',
-            'system_sensor_fusion_altitude',
-            'app_alarm_hour',
-            'app_alarm_minute'
-        ]
-
-        self.update()
-
-    def update(self):
-        dataPath = "data/DeviceInfo.db"
-        self.models.clear()
-        self.modelID.clear()
-        self.modelSize.clear()
-        self.modelSourceData.clear()
-        self.modelSourceList.clear()
-
-        with open(dataPath, "r") as file:
-            deviceInfo = xmltodict.parse(file.read())
-            for x in deviceInfo["DeviceList"]["DeviceInfo"]:
-                self.models.append(x["@Name"])
-                self.modelID[x["@Name"]] = x["@Type"]
-                self.modelSize[self.fprjDeviceIds[x["@Type"]]] = [int(x["@Width"]), int(x["@Height"]), int(x["@Radius"])]
-                self.modelSourceData[self.fprjDeviceIds[x["@Type"]]] = x["SourceDataList"]["SRC"]
-                self.modelSourceList[self.fprjDeviceIds[x["@Type"]]] = []
-                for y in x["SourceDataList"]["SRC"]:
-                    self.modelSourceList[self.fprjDeviceIds[x["@Type"]]].append(y["@Name"])
-
-    def updateDataFiles(self, compiler, deviceInfo):
-        try:
-            settings = QSettings("Mi Create", "Workspace")
-            shutil.copyfile(compiler, os.path.join(os.getcwd(), "compiler/compile.exe"))
-            shutil.copyfile(deviceInfo, os.path.join(os.getcwd(), "data/DeviceInfo.db"))
-            self.update()
-            settings.setValue("compilerVersion", "custom")
-            QMessageBox.information(None, "Data File Update", "Compiler updated successfully. Please restart the program.")
-        except Exception as e:
-            QMessageBox.critical(None, "Data File Update", "Failed to update: "+str(e))
-
-    def getCompilerVersion(self):
-        settings = QSettings("Mi Create", "Workspace")
-        if settings.value("compilerVersion") is None:
-            settings.setValue("compilerVersion", "m0tral-v4.16")
-        return settings.value("compilerVersion")
-
-    def getWatchModel(self, id):
-        return self.watchID[id]
-    
 class ProjectTools:
     def __init__(self):
         pass
 
 class FprjProject:  
     def __init__(self):
-        self.data = None
-        self.widgets = None
         self.watchData = WatchData()
 
         self.name = None
-        self.directory = None
-        self.dataPath = None
-        self.imageFolder = None
+        self.currentTheme = "default"
+        self.themes = {}
 
         self.deviceIds = {
             "0": "xiaomi_color",
@@ -326,6 +64,11 @@ class FprjProject:
             "362": "xiaomi_watch_s3",
             "365": "redmi_watch_4",
             "366": "xiaomi_band_9",
+            "367": "xiaomi_band_9_pro",
+            "462": "xiaomi_watch_s4",
+            "465": "redmi_watch_5",
+            "3651": "redmi_watch_5_active",
+            "3652": "redmi_watch_5_lite"
         }
 
         self.widgetIds = {
@@ -334,6 +77,7 @@ class FprjProject:
             "30": "widget",
             "31": "widget_imagelist",
             "32": "widget_num",
+            "34": "widget_container",
             "42": "widget_arc" # progress arc plus, prefer using this
         }
 
@@ -345,7 +89,7 @@ class FprjProject:
             "@BgImage_rotate_yc": "analog_bg_anchor_y",
             "@Bitmap": "widget_bitmap",
             "@BitmapList": "widget_bitmaplist",
-            "@Blanking": "num_hide_zeros",
+            "@Blanking": "num_toggle_zeros",
             "@Butt_cap_ending_style_En": "arc_flat_caps",
             "@DefaultIndex": "imagelist_default_index",
             "@Digits": "num_digits",
@@ -454,6 +198,16 @@ class FprjProject:
                 "@Spacing":"0",
                 "@Blanking":"0"
             },
+            "widget_container": {
+                "@Shape":"34",
+                "@Name":"",
+                "@X":"0",
+                "@Y":"0",
+                "@Width":"50",
+                "@Height":"50",
+                "@Alpha":"255",
+                "@Visible_Src":"0"
+            },
             "widget_arc": {
                 "@Shape":"42",
                 "@Name":"",
@@ -484,6 +238,7 @@ class FprjProject:
         self.watchFileBlank = {
             "FaceProject": {
                 "@DeviceType": "",
+                "@Id": "",
                 "Screen": {
                     "@Title": "",
                     "@Bitmap": "",
@@ -492,77 +247,172 @@ class FprjProject:
             }
         }
 
-    def fromBlank(self, path, device, name):
+    def createBlank(self, path, device, name, theme="default") -> tuple[bool, str, Optional[str]]:
+        """
+        Creates a blank project in the specified path.
+
+        :return: True and path of the .fprj project if successful, otherwise False, short error message and traceback.
+        """
+        print("path", path)
         try:
-            template = self.watchFileBlank
-            template["FaceProject"]["@DeviceType"] = str(device)
+            template = self.watchFileBlank.copy()
+            aodTemplate = self.watchFileBlank.copy()
+            template["FaceProject"]["@DeviceType"] = list(self.deviceIds.keys())[list(self.deviceIds.values()).index(str(device))]
+            aodTemplate["FaceProject"]["@DeviceType"] = list(self.deviceIds.keys())[list(self.deviceIds.values()).index(str(device))]
             folder = os.path.join(path, name)
             os.makedirs(os.path.join(folder, "images"))
             os.makedirs(os.path.join(folder, "output"))
             with open(os.path.join(folder, f"{name}.fprj"), "x", encoding="utf8") as fprj:
-                rawXml = xmltodict.unparse(template)
-                dom = minidom.parseString(rawXml)
-                prettyXml = dom.toprettyxml()
-                fprj.write(prettyXml)
-
-            self.data = template
-            self.widgets = template["FaceProject"]["Screen"].get("Widget")
+                xml_string = xmltodict.unparse(template, pretty=True)
+                fprj.write(xml_string)
 
             self.name = f"{name}.fprj"
-            self.directory = os.path.dirname(path)
-            self.dataPath = os.path.join(folder, f"{name}.fprj")
-            self.imageFolder = os.path.join(folder, "images")
+
+            self.themes[theme] = {
+                "directory": os.path.dirname(path),
+                "path": os.path.join(folder, f"{name}.fprj"),
+                "data": template,
+                "widgets": template["FaceProject"]["Screen"].get("Widget"),
+                "imageFolder": os.path.join(folder, "images")
+            }
+
+            if theme != "aod":
+                self.themes["aod"] = {
+                    "directory": "",
+                    "path": "",
+                    "data": aodTemplate,
+                    "widgets": aodTemplate["FaceProject"]["Screen"].get("Widget"),
+                    "imageFolder": ""
+                }
 
             return True, os.path.join(folder, f"{name}.fprj")
         except Exception as e:
             return False, str(e), traceback.format_exc()
         
-    def fromExisting(self, path):
+    def createAod(self, ignoreAodCheck=False) -> None:
+        """
+        Creates an AOD project. Will only work when a project is loaded.
+
+        The compiler handles AODs with a seperate project created in the current one.
+        """
+
+        if not ignoreAodCheck and self.themes["aod"]["widgets"] == []:
+            return
+
+        # Before proper creation of an AOD, the project creates a temporary AOD theme
+        # Copy the data before applying the default template project
+        data = deepcopy(self.themes["aod"]["data"])
+
+        # Create blank project in AOD location
+        self.createBlank(self.themes["default"]["directory"], self.deviceIds.get(str(self.themes[self.currentTheme]["data"]["FaceProject"]["@DeviceType"])), "AOD", "aod")
+        
+        # Restore data
+        self.themes["aod"]["data"] = data
+        self.themes["aod"]["widgets"] = self.themes["aod"]["data"]["FaceProject"]["Screen"]["Widget"]
+
+    def processFprj(self, file) -> dict:
+        """
+        Process an Fprj project and parse it to a Python dict object.
+
+        :return: dict if success, otherwise False.
+        """
+        source = file.read()
+        parse = xmltodict.parse(source)
+        if parse.get("FaceProject"):
+            # set widget to a list
+            if not parse["FaceProject"]["Screen"].get("Widget"):
+                parse["FaceProject"]["Screen"]["Widget"] = []
+            if type(parse["FaceProject"]["Screen"]["Widget"]) == dict:
+                parse["FaceProject"]["Screen"]["Widget"] = [parse["FaceProject"]["Screen"]["Widget"]]
+
+            # get rid of duplicate items
+            seen = set()
+            duplicatesRemoved = []
+            
+            for widget in parse["FaceProject"]["Screen"]["Widget"]:
+                # convert shape
+                if widget["@Shape"] == "29": # legacy circle progress
+                    widget["@Shape"] = "42" # circle progress plus 
+
+                name = widget.get("@Name")
+                if name not in seen:
+                    seen.add(name)
+                    duplicatesRemoved.append(widget)
+
+            parse["FaceProject"]["Screen"]["Widget"] = duplicatesRemoved
+            return parse
+        else:
+            return False
+
+    def load(self, path) -> tuple[bool, str, Optional[str]]:
+        """
+        Loads an Fprj file and adds it to the project's theme list
+
+        The theme list contains the default (normal) theme and AOD.
+        This will eventually also contain other color themes.
+
+        :return: True and the success message, otherwise False, short error message and traceback.
+        """
+
         projectDir = os.path.dirname(path)
+
         try:
-            with open(path, "r", encoding="utf8") as project:
-                xmlsource = project.read()
-                parse = xmltodict.parse(xmlsource)
-                if parse.get("FaceProject"):
-                    imagesDir = os.path.join(projectDir, "images")
+            imagesDir = os.path.join(projectDir, "images")
+            
+            with open(path, "r", encoding="utf8", errors="replace") as file:
+                parse = self.processFprj(file)
 
-                    # set widget to a list
-                    if not parse["FaceProject"]["Screen"].get("Widget"):
-                        parse["FaceProject"]["Screen"]["Widget"] = []
-                    if type(parse["FaceProject"]["Screen"]["Widget"]) == dict:
-                        parse["FaceProject"]["Screen"]["Widget"] = [parse["FaceProject"]["Screen"]["Widget"]]
+            if not parse:
+                return False, "Invalid/corrupted fprj project!", "FaceProject root not found"
 
-                    # get rid of duplicate items
-                    seen = set()
-                    duplicatesRemoved = []
-                    
-                    for widget in parse["FaceProject"]["Screen"]["Widget"]:
-                        name = widget.get("@Name")
-                        if name not in seen:
-                            seen.add(name)
-                            duplicatesRemoved.append(widget)
+            self.name = os.path.basename(path)
+            self.themes["default"] = {
+                "directory": projectDir,
+                "path": path,
+                "data": parse,
+                "widgets": parse["FaceProject"]["Screen"]["Widget"],
+                "imageFolder": imagesDir
+            }
 
-                    parse["FaceProject"]["Screen"]["Widget"] = duplicatesRemoved
+            aodDir = os.path.join(projectDir, "AOD")
 
-                    self.data = parse
-                    self.widgets = parse["FaceProject"]["Screen"]["Widget"]
-
-                    for widget in self.widgets:
-                        if widget["@Shape"] == "29": # legacy circle progress
-                            widget["@Shape"] = "42" # circle progress plus 
-                    
-                    self.name = os.path.basename(path)
-                    self.directory = projectDir
-                    self.dataPath = path
-                    self.imageFolder = imagesDir
-
-                    return True, "Success"
+            if os.path.isdir(aodDir):
+                for file in os.listdir(aodDir):
+                    if file.endswith(".fprj"):
+                        aodFile = file
+                        break
                 else:
-                    return False, "Invalid/corrupted fprj project!", "FaceProject root not found"
+                    return False, "no AOD project found!", ""
+                    
+                with open(os.path.join(aodDir, aodFile), "r", encoding="utf8") as file:
+                    aodParse = self.processFprj(file)
+
+                self.themes["aod"] = {
+                    "directory": aodDir,
+                    "path": os.path.join(aodDir, aodFile),
+                    "data": aodParse,
+                    "widgets": aodParse["FaceProject"]["Screen"]["Widget"],
+                    "imageFolder": os.path.join(aodDir, "images")
+                }
+            else:
+                template = self.watchFileBlank
+                template["FaceProject"]["@DeviceType"] = str(self.themes["default"]["data"]["FaceProject"]["@DeviceType"])
+                self.themes["aod"] = {
+                    "directory": "",
+                    "path": "",
+                    "data": template,
+                    "widgets": template["FaceProject"]["Screen"].get("Widget"),
+                    "imageFolder": ""
+                }
+                
+            return True, "Success"
+        
         except Exception as e:
             return False, str(e), traceback.format_exc()
         
     def fromBinary(self, outputDir, path, decompilerPath):
+        raise NotImplementedError
+
         logging.info("Decompiling project "+path)
         process = QProcess()
         process.setWorkingDirectory(outputDir)
@@ -571,26 +421,97 @@ class FprjProject:
         process.start()
         process.waitForFinished()
         print(process.readAllStandardOutput())
+
+    def getDirectory(self) -> str:
+        """
+        Returns a path to the containing folder/directory of the project.
         
-    def getDeviceType(self):
-        return self.deviceIds.get(str(self.data["FaceProject"]["@DeviceType"]))
+        :return: The path to the directory as a string.
+        """
+        return self.themes[self.currentTheme]["directory"]
+    
+    def getImageFolder(self) -> str:
+        """
+        Returns a path to the folder where images are stored.
         
-    def getAllWidgets(self, type=None, theme=None): # type and theme are for theme support someday over the rainbow
+        :return: The path to the directory as a string.
+        """
+        return self.themes[self.currentTheme]["imageFolder"]
+    
+    def getPath(self, theme=None) -> str:
+        """
+        Returns a path to the fprj file.
+        
+        :return: The path to the file as a string.
+        """
+        if theme == None:
+            return self.themes[self.currentTheme]["path"]
+        else:
+            return self.themes[theme]["path"]
+
+    def getDeviceType(self) -> str:
+        """
+        Returns the device the project was made for out of:
+
+        "xiaomi_color"
+        "70mai_saphir"
+        "xiaomi_color_sport"
+        "xiaomi_color_2/s1/s2"
+        "xiaomi_watch_s1_pro"
+        "redmi/poco_watch"
+        "xiaomi_band_7_pro"
+        "redmi_watch_3"
+        "redmi_band_pro"
+        "xiaomi_band_8"
+        "redmi_watch_2_lite"
+        "xiaomi_band_8_pro"
+        "redmi_watch_3_active"
+        "xiaomi_watch_s3"
+        "redmi_watch_4"
+        "xiaomi_band_9"
+        
+        :return: The DeviceId.
+        """
+        return self.deviceIds.get(str(self.themes["default"]["data"]["FaceProject"]["@DeviceType"]))
+        
+    def getAllWidgets(self) -> list:
+        """
+        Returns a list of FprjWidgets
+        
+        :return: A list of FprjWidgets
+        """
         widgetList = []
-        for widget in self.widgets:
+
+        for widget in self.themes[self.currentTheme]["widgets"]:
             widgetList.append(FprjWidget(self, widget))
+        
         return widgetList
 
     def getWidget(self, name):
-        widget = list(filter(lambda widget: widget["@Name"] == name, self.widgets))
+        """
+        Returns an FprjWidget from the name of the widget
+        
+        :return: An FprjWidget
+        """
+        widget = list(filter(lambda widget: widget["@Name"] == name, self.themes[self.currentTheme]["widgets"]))
+        
         if len(widget) == 0:
             return None
         else:
             return FprjWidget(self, widget[0])
         
-    def createWidget(self, id, name, posX, posY):
+    def createWidget(self, id, name, posX, posY, properties):
         widget = self.defaultItems[id].copy()
         widget["@Name"] = name
+        
+        if properties != None:
+            for property, value in properties.items():
+                property = [k for k, v in self.propertyIds.items() if v == property]
+            
+                if len(property) > 0:
+                    property = property[0]
+                    widget[property] = value
+
         if posX == "center":
             widget["@X"] = int(self.watchData.modelSize[self.getDeviceType()][0] / 2 - int(widget["@Width"]) / 2)
         else:
@@ -601,87 +522,143 @@ class FprjProject:
         else:
             widget["@Y"] = posY
 
-        self.widgets.append(widget)
+        self.themes[self.currentTheme]["widgets"].append(widget)
         
     def deleteWidget(self, widget):
-        for index, item in enumerate(self.widgets):
+        for index, item in enumerate(self.themes[self.currentTheme]["widgets"]):
             if item["@Name"] == widget.getProperty("widget_name"):
-                self.widgets.pop(index) 
-
+                self.themes[self.currentTheme]["widgets"].pop(index) 
+        
     def restoreWidget(self, widget, index):
-        self.widgets.insert(index, widget.data)
+        self.themes[self.currentTheme]["widgets"].insert(index, widget.data)
 
     def appendWidget(self, widget):
-        self.widgets.append(widget.data)
+        if isinstance(widget, GMFWidget):
+            QMessageBox.information(None, "Project", "Cannot paste widgets from another project format. Use the export function to convert one format to another.")
+            return
+        
+        self.themes[self.currentTheme]["widgets"].append(widget.data)
+
+    def addResource(self, file):
+        if self.currentTheme == "aod" and os.path.isdir(self.themes["aod"]["imageFolder"]) is not True:
+            self.createAod(True)
+
+        destFile = os.path.join(self.themes[self.currentTheme]["imageFolder"], os.path.basename(file))
+        if os.path.isfile(destFile):
+            QMessageBox.information(None, "Resource Importer", f"File {destFile} already exists!")
+        else:
+            shutil.copyfile(file, destFile)
+
+    def addResources(self, files):
+        if self.currentTheme == "aod" and os.path.isdir(self.themes["aod"]["imageFolder"]) is not True:
+            self.createAod(True)
+
+        for file in files:
+            self.addResource(file)
+
+    def removeResource(self, file):
+        destFile = os.path.join(self.themes[self.currentTheme]["imageFolder"], os.path.basename(file))
+        if os.path.isfile(destFile) is not True:
+            QMessageBox.information(None, "Resource Importer", f"File {destFile} does not exist!")
+        else:
+            os.remove(destFile)
+
+    def setTheme(self, theme):
+        self.currentTheme = theme
 
     def setWidgetLayer(self, widget, layerIndex):        
-        self.widgets.pop(self.widgets.index(widget.data))
+        self.themes[self.currentTheme]["widgets"].pop(self.themes[self.currentTheme]["widgets"].index(widget.data))
         if layerIndex == "top":
-            self.widgets.append(widget.data)
+            self.themes[self.currentTheme]["widgets"].append(widget.data)
         else:
-            self.widgets.insert(layerIndex, widget.data)
+            self.themes[self.currentTheme]["widgets"].insert(layerIndex, widget.data)
+    
+    def getId(self):
+        return self.themes["default"]["data"]["FaceProject"].get("@Id") or "167210065"
     
     def getTitle(self):
-        return self.data["FaceProject"]["Screen"]["@Title"]
+        return self.themes["default"]["data"]["FaceProject"]["Screen"]["@Title"]
     
     def getThumbnail(self):
-        return self.data["FaceProject"]["Screen"]["@Bitmap"]
+        return self.themes["default"]["data"]["FaceProject"]["Screen"]["@Bitmap"]
 
     def setWidgetPos(self, name, posX, posY):
-        widget = list(filter(lambda widget: widget["@Name"] == name, self.widgets))
+        widget = list(filter(lambda widget: widget["@Name"] == name, self.themes[self.currentTheme]["widgets"]))
+
         if len(widget) == 0:
             return "Widget does not exist!"
         else:
             widget[0]["@X"] = posX
             widget[0]["@Y"] = posY
         
+    def setDevice(self, value):
+        for theme in self.themes.values():
+            theme["data"]["FaceProject"]["@DeviceType"] = list(self.deviceIds.keys())[list(self.deviceIds.values()).index(value)]
+    
+    def setId(self, value):
+        self.themes[self.currentTheme]["data"]["FaceProject"]["@Id"] = value
+
     def setTitle(self, value):
-        self.data["FaceProject"]["Screen"]["@Title"] = value
+        self.themes[self.currentTheme]["data"]["FaceProject"]["Screen"]["@Title"] = value
 
     def setThumbnail(self, value):
-        self.data["FaceProject"]["Screen"]["@Bitmap"] = value
+        self.themes[self.currentTheme]["data"]["FaceProject"]["Screen"]["@Bitmap"] = value
 
     def toString(self):
-        raw = xmltodict.unparse(self.data)
+        raw = xmltodict.unparse(self.themes[self.currentTheme]["data"])
         dom = xml.dom.minidom.parseString(raw)
-        pretty_xml = dom.toprettyxml()
-
-        return pretty_xml
+        xml_string = dom.toprettyxml()
+        return xml_string
 
     def save(self):
-        raw = xmltodict.unparse(self.data)
-        dom = xml.dom.minidom.parseString(raw)
-        pretty_xml = dom.toprettyxml()
-
         try:
-            with open(self.dataPath, "w", encoding="utf8") as file:
-                file.write(pretty_xml)
-            return True, "success"
+            if self.themes["aod"]["widgets"] != []:
+                self.createAod()
+                raw = xmltodict.unparse(self.themes["aod"]["data"])
+                dom = xml.dom.minidom.parseString(raw)
+                aod_xml_string = dom.toprettyxml()
+                with open(self.themes["aod"]["path"], "w", encoding="utf8") as file:
+                    file.write(aod_xml_string)
+
+            for theme in self.themes:
+                if os.path.isfile(self.themes[theme]["path"]):
+                    raw = xmltodict.unparse(self.themes[theme]["data"])
+                    dom = xml.dom.minidom.parseString(raw)
+                    xml_string = dom.toprettyxml()
+                    with open(self.themes[theme]["path"], "w", encoding="utf8") as file:
+                        file.write(xml_string)
+                
+            return True, "success", self.themes["default"]["path"]
             
         except Exception as e:
-            return False, e        
+            return False, e, traceback.format_exc()
 
-    def compile(self, path, location, compilerLocation):
+    def compile(self, platform, path, location, compilerLocation, id=None):
         logging.info("Compiling project "+path)
         process = QProcess()
-        process.setProgram(compilerLocation)
-        process.setArguments(["compile", path, location, str.split(os.path.basename(path), ".")[0]+".face", "0"])
+
+        if not os.path.isdir(os.path.join(self.themes["default"]["directory"], "output")):
+            os.makedirs(os.path.join(self.themes["default"]["directory"], "output"))
+
+        if platform == "Windows":
+            process.setProgram(compilerLocation)
+            process.setArguments(["-b", path.replace("/", "\\"), location.replace("/", "\\"), str.split(os.path.basename(path), ".")[0]+".face", "1461256429"])
+        elif platform == "Linux":
+            process.setProgram(which("wine"))
+            process.setArguments([compilerLocation, "-b", path.replace("/", "\\"), location.replace("/", "\\"), str.split(os.path.basename(path), ".")[0]+".face", "1461256429"])
+        else:
+            return False, "Platform not implemented"
+
+        print(process.arguments())
+
         process.start()
-        return process
-    
-    def decompile(self, path, location, compilerLocation):
-        logging.info("Decompiling project "+path)
-        process = QProcess()
-        process.setWorkingDirectory(location)
-        process.setProgram(compilerLocation)
-        process.setArguments(path)
-        process.start()
-        return process
+        return process, "Success"
     
 class FprjWidget:
     def __init__(self, project, data):
-        self.project = project
+        self.project: FprjProject = project
         self.data = data
+        self.previewData = project.watchData.previewData
     
     def removeAssociation(self):
         # by default, the data that is passed through in the data argument is linked to the source data list/dict
@@ -689,6 +666,32 @@ class FprjWidget:
         # so modifications to the widget wont get applied over to the original data list
         self.data = deepcopy(self.data)
 
+    def getSourceName(self):
+        if self.data.get("@Shape") == "31":
+            dataSource = self.getProperty("imagelist_source")
+        elif self.data.get("@Shape") == "32":
+            dataSource = self.getProperty("num_source")
+        else:
+            return
+        
+        if dataSource == None:
+            return
+
+        modelSources = self.project.watchData.modelSourceData[self.project.getDeviceType()]
+        try:
+            dataSourceName = [source["string"] for source in modelSources if int(source["id_fprj"]) == int(dataSource)]
+        except ValueError:
+            print(f"ValueError:{dataSource} is not a Integer")
+            dataSourceName = ['None']
+
+        if dataSourceName == []:
+            return
+
+        return dataSourceName[0]
+    
+    def getPreviewNumber(self):
+        return self.previewData.get(self.getSourceName())
+    
     def getProperty(self, property):
         property = [k for k, v in self.project.propertyIds.items() if v == property]
         
@@ -718,10 +721,14 @@ class FprjWidget:
                         bitmapList[index] = split
 
             return bitmapList
+        elif property == "@Alignment":
+            alignment = ["Left", "Center", "Right"]
+            return alignment[int(self.data.get(property))]
         else:
             return self.data.get(property)
 
     def setProperty(self, property, value):
+        print("fprjwidget set property", property, value, type(value))
         property = [k for k, v in self.project.propertyIds.items() if v == property][0]
         if property == "@BitmapList":
             for index, item in enumerate(value):
@@ -729,8 +736,10 @@ class FprjWidget:
                     item[0] = f"({item[0]})" # add brackets
                     value[index] = ":".join(item)
             value = "|".join(value)
+        elif property == "@Alignment":
+            alignment = ["Left", "Center", "Right"]
+            value = alignment.index(value)
         self.data[property] = value
-
     
 class XiaomiProject:
     def __init__(self):
@@ -768,7 +777,7 @@ class XiaomiProject:
         <Watchface width="" height="" editable="false" id="" _recolorEnable="" recolorTable="" compressMethod="" name="">
             <Resources>
             </Resources>
-            <Theme type="normal" name="default" bg="" isPhotoAlbumWatchface="false" preview="">
+            <Theme type="default" name="default" bg="" isPhotoAlbumWatchface="false" preview="">
             </Theme>
         </Watchface>
         """
@@ -818,7 +827,8 @@ class XiaomiProject:
 
 class GMFProject:
     def __init__(self):
-        self.data = None
+        self.currentTheme = "default"
+        self.themes = {}
         self.widgets = None
         self.widgetsAOD = None
         self.watchData = WatchData()
@@ -828,26 +838,117 @@ class GMFProject:
         self.dataPath = None
         self.imageFolder = None
 
-    def fromExisting(self, location):
+        self.widgetIds = {
+            "element": "widget",
+            "widge_imagelist": "widget_imagelist",
+            "widge_dignum": "widget_num",
+            "widge_pointer": "widget_pointer"
+        }
+
+        self.propertyIds = {
+            "align": "num_alignment",
+            "dataSrc": "widget_source",
+            "image": "widget_bitmap",
+            "imageList": "widget_bitmaplist",
+            "maxValue": "pointer_max_value",
+            "allAngle": "pointer_max_angle",
+            "imageRotateX": "pointer_anchor_x",
+            "imageRotateY": "pointer_anchor_y",
+            "id": "widget_name",
+            "showCount": "num_digits",
+            "showZero": "num_toggle_zeros",
+            "spacing": "num_spacing",
+            "type": "widget_type",
+            "width": "widget_size_width", # temporary
+            "height": "widget_size_height", # temporary
+            "alpha": "widget_alpha", # temporary
+            "defaultIndex": "imagelist_default_index", # temporary
+            "x": "widget_pos_x",
+            "y": "widget_pos_y"
+        }
+
+        self.defaultItems = {
+            "widget_pointer": {
+                "type": "widge_pointer",
+                "x": 0,
+                "y": 0,
+                "dataSrc": "0",
+                "image": "image_0001",
+                "maxValue": 0,
+                "allAngle": 0,
+                "imageRotateX": 0,
+                "imageRotateY": 0
+            },
+            "widget": {
+                "type": "element",
+                "x": 0,
+                "y": 0,
+                "image": ""
+            },
+            "widget_imagelist": {
+                "type": "widge_imagelist",
+                "x": 0,
+                "y": 0,
+                "dataSrc": "0",
+                "imageList": [],
+                "imageIndexList": []
+            },
+            "widget_num": {
+                "type": "widge_dignum",
+                "x": 0,
+                "y": 0,
+                "showCount": 1,
+                "align": 1,
+                "spacing": 0,
+                "showZero": False,
+                "dataSrc": "0",
+                "imageList": []
+            }
+        }
+
+    def setNameToWidgetList(self, widgetList):
+        # applies a Universally Unique identifier for widgets
+        # GMF projects dont use names for widgets
+        nameList = []
+
+        for widget in widgetList:
+            widget["id"] = f"{widget['type']}-{str(nameList.count(widget['type']))}"
+            nameList.append(widget["type"])
+
+    def load(self, location):
         projectDir = os.path.dirname(location)
         try:
             with open(location, "r", encoding="utf8") as project:
                 projectJson = dict(json.load(project))
                 imagesDir = os.path.join(projectDir, "images")
-                if projectJson.get("elementsNormal"):
+                aodImagesDir = os.path.join(projectDir, "images_aod")
+                print(projectJson, projectJson.get("elementsNormal"))
+                if projectJson.get("elementsNormal") != None:
                     if not projectJson.get("deviceType"):
                         item, accepted = QInputDialog().getItem(None, "GMFProject", Translator.translate("Project", "Select the device the watchface was made for:"), self.watchData.deviceId, 0, False)
                         if item in self.watchData.deviceId and accepted:
                             projectJson["deviceType"] = item
-                    
-                    self.name = os.path.basename(location)
-                    self.directory = projectDir
-                    self.dataPath = location
-                    self.imageFolder = imagesDir
 
-                    self.data = projectJson
-                    self.widgets = projectJson["elementsNormal"]
-                    self.widgetsAOD = projectJson["elementsAOD"]
+                    self.setNameToWidgetList(projectJson["elementsNormal"])
+                    self.setNameToWidgetList(projectJson["elementsAod"])
+
+                    self.name = os.path.basename(location)
+
+                    self.themes["default"] = {
+                        "directory": projectDir,
+                        "path": location,
+                        "data": projectJson,
+                        "widgets": projectJson["elementsNormal"],
+                        "imageFolder": imagesDir
+                    }
+
+                    self.themes["aod"] = {
+                        "directory": projectDir,
+                        "path": location,
+                        "data": projectJson,
+                        "widgets": projectJson["elementsAod"],
+                        "imageFolder": aodImagesDir
+                    }
 
                     return True, "Success"
                 else:
@@ -856,5 +957,313 @@ class GMFProject:
         except Exception as e:
             return False, str(e), traceback.format_exc()
         
-    def getDeviceType(self):
-        return self.data["deviceType"]
+    def save(self):
+        json_string = json.dumps(self.themes["default"]["data"], indent=4, ensure_ascii=False)
+        
+        try:
+            with open(self.themes["default"]["path"], "w", encoding="utf8") as file:
+                file.write(json_string)
+            
+            return True, "success", ""
+            
+        except Exception as e:
+            return False, e, traceback.format_exc()
+        
+    def toString(self):
+        json_string = json.dumps(self.themes[self.currentTheme]["data"], indent=4)
+        return json_string
+
+    def compile(self, platform, path, location, compilerLocation, id=None):
+        return False, "Compiler not implemented"
+
+
+    def getDirectory(self) -> str:
+        """
+        Returns a path to the containing folder/directory of the project.
+        
+        :return: The path to the directory as a string.
+        """
+        return self.themes[self.currentTheme]["directory"]
+    
+    def getImageFolder(self) -> str:
+        """
+        Returns a path to the folder where images are stored.
+        
+        :return: The path to the directory as a string.
+        """
+        return self.themes[self.currentTheme]["imageFolder"]
+    
+    def getPath(self, theme=None) -> str:
+        """
+        Returns a path to the json file.
+        
+        :return: The path to the file as a string.
+        """
+        if theme == None:
+            return self.themes[self.currentTheme]["path"]
+        else:
+            return self.themes[theme]["path"]
+
+    def getDeviceType(self) -> str:
+        """
+        Returns the device the project was made for out of:
+
+        "xiaomi_color"
+        "70mai_saphir"
+        "xiaomi_color_sport"
+        "xiaomi_color_2/s1/s2"
+        "xiaomi_watch_s1_pro"
+        "redmi/poco_watch"
+        "xiaomi_band_7_pro"
+        "redmi_watch_3"
+        "redmi_band_pro"
+        "xiaomi_band_8"
+        "redmi_watch_2_lite"
+        "xiaomi_band_8_pro"
+        "redmi_watch_3_active"
+        "xiaomi_watch_s3"
+        "redmi_watch_4"
+        "xiaomi_band_9"
+        
+        :return: The DeviceId.
+        """
+        return self.themes[self.currentTheme]["data"]["deviceType"]
+        
+    def getWidget(self, name):
+        widget = list(filter(lambda widget: widget["id"] == name, self.themes[self.currentTheme]["widgets"]))
+        if len(widget) == 0:
+            return None
+        else:
+            return GMFWidget(self, widget[0])
+
+    def getAllWidgets(self, type=None, theme=None):
+        widgetList = []
+        for widget in self.themes[self.currentTheme]["widgets"]:
+            widgetList.append(GMFWidget(self, widget))
+        return widgetList
+
+    def createWidget(self, id, name, posX, posY, properties):
+        widget = self.defaultItems[id].copy()
+        widget["id"] = name
+        
+        if properties != None:
+            for property, value in properties.items():
+                property = [k for k, v in self.propertyIds.items() if v == property]
+            
+                if len(property) > 0:
+                    property = property[0]
+                    widget[property] = value
+
+        if posX == "center":
+            widget["x"] = int(self.watchData.modelSize[self.getDeviceType()][0] / 2 - 40 / 2)
+        else:
+            widget["x"] = posX
+
+        if posY == "center":
+            widget["y"] = int(self.watchData.modelSize[self.getDeviceType()][1] / 2 - 40 / 2)
+        else:
+            widget["y"] = posY
+
+        self.themes[self.currentTheme]["widgets"].append(widget)
+    
+    def deleteWidget(self, widget):
+        for index, item in enumerate(self.themes[self.currentTheme]["widgets"]):
+            if item["id"] == widget.getProperty("widget_name"):
+                self.themes[self.currentTheme]["widgets"].pop(index) 
+
+    def restoreWidget(self, widget, index):
+        self.themes[self.currentTheme]["widgets"].insert(index, widget.data)
+
+    def appendWidget(self, widget):
+        if isinstance(widget, FprjWidget):
+            QMessageBox.information(None, "Project", "Cannot paste widgets from another project format. Use the export function to convert one format to another.")
+            return
+        
+        self.themes[self.currentTheme]["widgets"].append(widget.data)
+
+    def setWidgetLayer(self, widget, layerIndex):        
+        self.themes[self.currentTheme]["widgets"].pop(self.themes[self.currentTheme]["widgets"].index(widget.data))
+        if layerIndex == "top":
+            self.themes[self.currentTheme]["widgets"].append(widget.data)
+        else:
+            self.themes[self.currentTheme]["widgets"].insert(layerIndex, widget.data)
+
+    def setWidgetPos(self, name, posX, posY):
+        widget = list(filter(lambda widget: widget["id"] == name, self.themes[self.currentTheme]["widgets"]))
+
+        if len(widget) == 0:
+            return "Widget does not exist!"
+        else:
+            widget[0]["x"] = posX
+            widget[0]["y"] = posY
+
+    def addResource(self, files):
+        for file in files:
+            destFile = os.path.join(self.themes[self.currentTheme]["imageFolder"], os.path.basename(file))
+            if os.path.isfile(destFile):
+                QMessageBox.information(None, "Resource Importer", f"File {destFile} already exists!")
+            else:
+                shutil.copyfile(file, destFile)
+    
+    def getId(self):
+        return self.themes[self.currentTheme]["data"].get("@Id") or "167210065"
+
+    def getTitle(self):
+        return self.themes[self.currentTheme]["data"]["name"]
+    
+    def getThumbnail(self):
+        return self.themes[self.currentTheme]["data"]["previewImg"]
+
+    def setDevice(self, value):
+        self.themes[self.currentTheme]["data"]["deviceType"] = value
+
+    def setId(self, value):
+        self.themes[self.currentTheme]["data"]["id"]
+
+    def setTitle(self, value):
+        self.themes[self.currentTheme]["data"]["name"] = value
+
+    def setThumbnail(self, value):
+        self.themes[self.currentTheme]["data"]["previewImg"] = value
+
+    def setId(self, value):
+        self.themes[self.currentTheme]["data"]["id"] = value
+    
+    def setTheme(self, theme):
+        self.currentTheme = theme
+
+class GMFWidget:
+    def __init__(self, project, data):
+        self.project = project
+        self.data = data
+        self.previewData = project.watchData.previewData
+    
+    def removeAssociation(self):
+        # by default, the data that is passed through in the data argument is linked to the source data list/dict
+        # removing association means that the data is instead independent as a seperate list
+        # so modifications to the widget wont get applied over to the original data list
+        self.data = deepcopy(self.themes[self.currentTheme]["data"])
+
+    def getProperty(self, property):
+        property = [k for k, v in self.project.propertyIds.items() if v == property]
+        
+        if len(property) > 0:
+            property = property[0]
+        else:
+            return
+
+        if property == "WidgetType":
+            return
+
+        if property == "type":
+            return self.project.widgetIds.get(self.data.get(property))
+        
+        elif property == "width":
+            return "50"
+
+        elif property == "height":
+            return "50"
+        
+        elif property == "alpha":
+            return "255"
+
+        elif property == "defaultIndex":
+            return "0"
+        
+        elif property == "align":
+            alignment = ["Right", "Left", "Center"]
+            return alignment[int(self.data.get(property))]
+        
+        elif property == "showZero":
+            if self.data.get("showZero") == False:
+                return "1"
+            else:
+                return "0"
+
+        elif property == "imageList":
+            bitmapList = self.data[property]
+            bitmapListCopy = deepcopy(self.data[property])
+
+            if self.data["type"] == "widge_imagelist":
+                if self.data.get("imageIndexList"):   
+                    for index, item in enumerate(bitmapList):
+                        print("merge", self.data["id"], self.data["imageIndexList"][index])
+                        merge = [self.data["imageIndexList"][index], item]
+                        bitmapListCopy[index] = merge
+                else:
+                    for index, item in enumerate(bitmapList):
+                        bitmapListCopy[index] = [index, item]
+            
+            return bitmapListCopy
+        else:
+            return self.data.get(property)
+
+    def setProperty(self, property, value):
+        property = [k for k, v in self.project.propertyIds.items() if v == property][0]
+        print(property, value)
+
+        if property == "imageList":
+            if self.data["type"] == "widge_imagelist":
+                useImageIndexList = False
+                imageList = []
+                imageIndexList = []
+                
+                for index, image in enumerate(value):
+                    if index != int(image[0]):
+                        useImageIndexList = True
+
+                    imageList.append(image[1])
+
+                # If useImageIndexList flagged, make imageIndexList
+                # This must be done so that all images have an entry in imageIndexList
+                # otherwise if the first index uses something like "0" then it skips it
+                # (we dont want that)
+                if useImageIndexList:
+                    for imageIndex, image in value:
+                        imageIndexList.append(int(imageIndex))
+                    print("imageIndexFlag", imageIndexList)
+                    self.data["imageIndexList"] = imageIndexList # we set the property here now
+                else:
+                    if self.data.get("imageIndexList"):
+                        self.data.pop("imageIndexList")
+
+                value = imageList
+                
+
+        elif property == "showZero":
+            if value == "0":
+                value = True
+            elif value == "1":
+                value = False
+
+        elif property == "align":
+            alignment = ["Right", "Left", "Center"]
+            value = alignment.index(value)
+
+        self.data[property] = value
+
+    def getPreviewNumber(self):
+        return self.previewData.get(self.getSourceName())
+
+    def getSourceName(self):
+        dataSource = self.getProperty("widget_source")
+        
+        if dataSource == None:
+            return
+
+        modelSources = self.project.watchData.modelSourceData[self.project.getDeviceType()]
+        dataSourceName = None
+
+        for source in modelSources:
+            if source["id_gmf"] == "":
+                if source["id_fprj"] == dataSource:
+                    dataSourceName = source["string"]
+                    break
+            else:
+                if source["id_gmf"] == dataSource:
+                    dataSourceName = source["string"]
+                    break
+
+        return dataSourceName
+
+    
