@@ -1200,13 +1200,13 @@ class WatchfaceEditor(QMainWindow):
                     elif data == "top":
                         widget.setProperty("widget_pos_y", selectedObjectsRect.top())
                     elif data == "right":
-                        widget.setProperty("widget_pos_x", selectedObjectsRect.right() - object.rect().width())
+                        widget.setProperty("widget_pos_x", selectedObjectsRect.right() + 1 - object.rect().width())
                     elif data == "bottom":
-                        widget.setProperty("widget_pos_y", selectedObjectsRect.bottom() - object.rect().height())
+                        widget.setProperty("widget_pos_y", selectedObjectsRect.bottom() + 1 - object.rect().height())
                     elif data == "vertical":
-                        widget.setProperty("widget_pos_y", selectedObjectsRect.center().y() - object.rect().height() // 2)
+                        widget.setProperty("widget_pos_y", selectedObjectsRect.center().y() + 1 - object.rect().height() // 2)
                     elif data == "horizontal":
-                        widget.setProperty("widget_pos_x", selectedObjectsRect.center().x() - object.rect().width() // 2)
+                        widget.setProperty("widget_pos_x", selectedObjectsRect.center().x() + 1 - object.rect().width() // 2)
             
             elif command == "undo":
                 for index, name in enumerate(nameList):
