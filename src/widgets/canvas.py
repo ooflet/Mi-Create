@@ -1119,7 +1119,6 @@ class BaseWidget(QGraphicsRectItem):
 
     def quickReloadProperty(self, property, value):
         print("quick reload", property, value)
-        rect = self.rect()
         if property == "widget_pos_x":
             self.setX(int(value))
         elif property == "widget_pos_y":

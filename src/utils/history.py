@@ -90,8 +90,11 @@ class CommandModifyProperty(QUndoCommand):
         self.commandFunc(self.name, self.property, self.currentValue)
 
     def undo(self):
-        self.commandFunc(self.name, self.property, self.previousValue)
-    
+        if self.property == "widget_name":
+            self.commandFunc(self.currentValue, self.property, self.previousValue)
+        else:
+            self.commandFunc(self.name, self.property, self.previousValue)
+
 class CommandModifyPosition(QUndoCommand):
     def __init__(self, previousPosition, currentPosition, commandFunc, description):
         super(CommandModifyPosition, self).__init__(description)

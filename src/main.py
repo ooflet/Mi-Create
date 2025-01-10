@@ -1388,14 +1388,12 @@ class WatchfaceEditor(QMainWindow):
                 prevPosObject = {
                     "Name": widget.getProperty("widget_name"),
                     "Widget": widget,
-                    "CanvasWidget": object,
                     "X": widget.getProperty("widget_pos_x"),
                     "Y": widget.getProperty("widget_pos_y")
                 }
                 currentPosObject = {
                     "Name": widget.getProperty("widget_name"),
                     "Widget": widget,
-                    "CanvasWidget": object,
                     "X": objectX,
                     "Y": round(object.pos().y())
                 }
@@ -1406,10 +1404,11 @@ class WatchfaceEditor(QMainWindow):
 
             def commandFunc(objects):
                 for object in objects:
+                    canvasWidget = currentProject["canvas"].getObject(object["Widget"].getProperty("widget_name"))
                     object["Widget"].setProperty("widget_pos_x", int(object["X"]))
                     object["Widget"].setProperty("widget_pos_y", int(object["Y"]))
-                    object["CanvasWidget"].quickReloadProperty("widget_pos_x", int(object["X"]))
-                    object["CanvasWidget"].quickReloadProperty("widget_pos_y", int(object["Y"]))
+                    canvasWidget.quickReloadProperty("widget_pos_x", int(object["X"]))
+                    canvasWidget.quickReloadProperty("widget_pos_y", int(object["Y"]))
 
                 print("before load")
                 # currentProject["canvas"].loadObjects(currentProject["project"],
