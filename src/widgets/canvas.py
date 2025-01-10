@@ -1403,13 +1403,13 @@ class NumberWidget(BaseWidget):
                 width = ( self.initialImage.width() * len(self.imageItems) ) + ( int(spacing) * len(self.imageItems) )
                 self.setRect(0, 0, width, self.initialImage.height())
 
-            if self.relativeToAlign:
-                if alignment == "Center":
-                    self.setX(self.posX - (self.rect().width() / 2))
-                elif alignment == "Right":
-                    self.setX(self.posX - self.rect().width())
+                if self.relativeToAlign:
+                    if alignment == "Center":
+                        self.setX(self.posX - (self.rect().width() / 2))
+                    elif alignment == "Right":
+                        self.setX(self.posX - self.rect().width())
 
-            self.updateAngle()
+                self.updateAngle()
 
     def addUnitImage(self, unitImageFromWidget, unitWidget, interpolationStyle, alignment=None, unitImage=None):
         
