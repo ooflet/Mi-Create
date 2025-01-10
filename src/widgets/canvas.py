@@ -1056,8 +1056,6 @@ class BaseWidget(QGraphicsRectItem):
     def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent):
         super().mouseMoveEvent(event)
 
-        print(event.button())
-
         if event.buttons() != Qt.MouseButton.LeftButton:
             return
 
@@ -1199,8 +1197,6 @@ class ImagelistWidget(ImageWidget):
 
         self.source = source
         self.imagelist = imagelist
-
-        print(defaultValue, previewIndex)
 
         if previewIndex != None and imagelist.get(self.getLastValidListIndex(previewIndex)):
             previewImage = imagelist[self.getLastValidListIndex(previewIndex)]
@@ -1483,7 +1479,6 @@ class AnalogWidget(BaseWidget):
     
     def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name, smoothHr, smoothMin, smoothSec, updateInterval):
         super().__init__(posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name)
-        print(smoothHr, smoothMin)
         self.smoothHr = smoothHr 
         self.smoothMin = smoothMin 
         self.smoothSec = smoothSec
@@ -1615,8 +1610,6 @@ class ProgressLine(QGraphicsLineItem):
             pen.setColor(QColor(255, 0, 0, 100))    
         else:
             pen.setBrush(QBrush(pathImage))
-        
-        print(isFlat)
 
         if isFlat == "1":
             pen.setCapStyle(Qt.PenCapStyle.FlatCap)
@@ -1684,9 +1677,6 @@ class ProgressWidget(BaseWidget):
 
     def mouseMoveEvent(self, event):
         if self.line != None:
-            print("line")
-            print(self.startX - self.pos().x())
-            print(self.startY)
             line = QLineF(self.startX - self.pos().x(), self.startY - self.pos().y(), self.endX - self.pos().x(), self.endY - self.pos().y())
             self.line.setLine(line)
         return super().mouseMoveEvent(event)

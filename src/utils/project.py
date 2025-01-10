@@ -728,7 +728,6 @@ class FprjWidget:
             return self.data.get(property)
 
     def setProperty(self, property, value):
-        print("fprjwidget set property", property, value, type(value))
         property = [k for k, v in self.project.propertyIds.items() if v == property][0]
         if property == "@BitmapList":
             for index, item in enumerate(value):
@@ -922,7 +921,6 @@ class GMFProject:
                 projectJson = dict(json.load(project))
                 imagesDir = os.path.join(projectDir, "images")
                 aodImagesDir = os.path.join(projectDir, "images_aod")
-                print(projectJson, projectJson.get("elementsNormal"))
                 if projectJson.get("elementsNormal") != None:
                     if not projectJson.get("deviceType"):
                         item, accepted = QInputDialog().getItem(None, "GMFProject", Translator.translate("Project", "Select the device the watchface was made for:"), self.watchData.deviceId, 0, False)
@@ -1187,7 +1185,6 @@ class GMFWidget:
             if self.data["type"] == "widge_imagelist":
                 if self.data.get("imageIndexList"):   
                     for index, item in enumerate(bitmapList):
-                        print("merge", self.data["id"], self.data["imageIndexList"][index])
                         merge = [self.data["imageIndexList"][index], item]
                         bitmapListCopy[index] = merge
                 else:
@@ -1221,7 +1218,6 @@ class GMFWidget:
                 if useImageIndexList:
                     for imageIndex, image in value:
                         imageIndexList.append(int(imageIndex))
-                    print("imageIndexFlag", imageIndexList)
                     self.data["imageIndexList"] = imageIndexList # we set the property here now
                 else:
                     if self.data.get("imageIndexList"):
