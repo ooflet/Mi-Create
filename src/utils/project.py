@@ -254,14 +254,19 @@ class FprjProject:
         :return: True and path of the .fprj project if successful, otherwise False, short error message and traceback.
         """
         print("path", path)
+        
         try:
-            template = self.watchFileBlank.copy()
-            aodTemplate = self.watchFileBlank.copy()
+            template = deepcopy(self.watchFileBlank)
+            aodTemplate = deepcopy(self.watchFileBlank)
+
             template["FaceProject"]["@DeviceType"] = list(self.deviceIds.keys())[list(self.deviceIds.values()).index(str(device))]
             aodTemplate["FaceProject"]["@DeviceType"] = list(self.deviceIds.keys())[list(self.deviceIds.values()).index(str(device))]
+
             folder = os.path.join(path, name)
+
             os.makedirs(os.path.join(folder, "images"))
             os.makedirs(os.path.join(folder, "output"))
+
             with open(os.path.join(folder, f"{name}.fprj"), "x", encoding="utf8") as fprj:
                 xml_string = xmltodict.unparse(template, pretty=True)
                 fprj.write(xml_string)
@@ -612,8 +617,9 @@ class FprjProject:
 
     def save(self):
         try:
-            if self.themes["aod"]["widgets"] != []:
+            if self.themes["aod"]["widgets"] != [] :
                 self.createAod()
+                pprint(self.themes)
                 raw = xmltodict.unparse(self.themes["aod"]["data"])
                 dom = xml.dom.minidom.parseString(raw)
                 aod_xml_string = dom.toprettyxml()

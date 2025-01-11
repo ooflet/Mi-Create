@@ -1696,6 +1696,10 @@ class WatchfaceEditor(QMainWindow):
     def newProject(self, file, projectName, watchModel):
         # Check if file was selected
         if file:
+            if os.path.isdir(os.path.join(file, projectName)):
+                self.showDialog(_("Project already exists here, try a different path."))
+                return
+
             newProject = FprjProject()
             create = newProject.createBlank(file, self.WatchData.modelID[str(watchModel)], projectName)
             if create[0]:
@@ -1798,7 +1802,7 @@ class WatchfaceEditor(QMainWindow):
                         project["hasFileChanged"] = False
                         project["canvas"].createPreview()
                     else:
-                        self.showDialog("error", _("Failed to save project: ") + str(message))
+                        self.showDialog("error", _("Failed to save project: ") + str(message), debugMessage)
 
         elif projectsToSave == "current":
             currentIndex = self.ui.workspace.currentIndex()

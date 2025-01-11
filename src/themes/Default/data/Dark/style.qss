@@ -153,6 +153,7 @@ QLineEdit:focus {
 
 QSpinBox {
     padding: 4px;
+    height: 24px;
     background-color: transparent;
     border: 1px solid palette(light);
     border-radius: 4px;
