@@ -1697,7 +1697,7 @@ class WatchfaceEditor(QMainWindow):
         # Check if file was selected
         if file:
             if os.path.isdir(os.path.join(file, projectName)):
-                self.showDialog(_("Project already exists here, try a different path."))
+                self.showDialog("warning", _("Project already exists here, try a different path."))
                 return
 
             newProject = FprjProject()
