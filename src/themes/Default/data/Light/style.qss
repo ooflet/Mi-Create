@@ -111,9 +111,10 @@ QMenu::indicator {
 QPushButton {
     background-color: transparent;
     min-width: 3.5em;
-    padding: 4px 8px;
+    padding: 5px 8px;
     border-radius: 4px;
     border: 1px solid palette(light);
+    font-weight: normal
 }
 
 QPushButton:default {
@@ -152,6 +153,7 @@ QLineEdit:focus {
 
 QSpinBox {
     padding: 4px;
+    height: 24px;
     background-color: transparent;
     border: 1px solid palette(light);
     border-radius: 4px;
