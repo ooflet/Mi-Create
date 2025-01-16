@@ -32,7 +32,7 @@
         "ShowDeviceOutline": {
             "string": "Show Device Outline",
             "type": "bool",
-            "value": true,
+            "value": false,
             "changeState": ["ClipDeviceShape", "disabled", false]
         },
         "Antialiasing": {

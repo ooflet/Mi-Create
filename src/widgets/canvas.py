@@ -160,33 +160,31 @@ class Scene(QGraphicsScene):
 
         print("1", adjacentPosList1, "2", adjacentPosList2, "3", adjacentPosList3)
 
-        if adjacentPosList1[0] != []:
-            pos[0] = (min(adjacentPosList1[0], key=lambda x:abs(x-object.pos().x())))
+        # check proximity
 
-        if adjacentPosList1[1] != []:
-            pos[1] = (min(adjacentPosList1[1], key=lambda x:abs(x-object.pos().y())))
-
-        if adjacentPosList2[0] != []:
-            pos[2] = (min(adjacentPosList2[0], key=lambda x:abs(x-object.pos().x()+object.rect().width())))
-
-        if adjacentPosList2[1] != []:
-            pos[3] = (min(adjacentPosList2[1], key=lambda x:abs(x-object.pos().y()+object.rect().height())))
-
-        if adjacentPosList3[0] != []:
-            pos[4] = (min(adjacentPosList3[0], key=lambda x:abs(x-object.pos().x()+object.rect().width())))
-
-        if adjacentPosList3[1] != []:
-            pos[5] = (min(adjacentPosList3[1], key=lambda x:abs(x-object.pos().y()+object.rect().height())))
-
-        # # compare positions and check which one should be prioritised
-        # catchX = None
-        # catchY = None
         
-        # for i in range(0, 5, 2):
-        #     x = pos[i]
-        #     y = pos[i + 1]
-        #     if catchX == None or min(myList, key=lambda x:abs(x-myNumber))
- 
+
+        # group by priority
+        # center pos first before outer pos
+
+        if adjacentPosList2 != [[], []]:
+            if adjacentPosList2[0] != []:
+                pos[2] = (min(adjacentPosList2[0], key=lambda x:abs(x-object.pos().x()+object.rect().width())))
+
+            if adjacentPosList2[1] != []:
+                pos[3] = (min(adjacentPosList2[1], key=lambda x:abs(x-object.pos().y()+object.rect().height())))
+        else:
+            if adjacentPosList1[0] != []:
+                pos[0] = (min(adjacentPosList1[0], key=lambda x:abs(x-object.pos().x())))
+
+            if adjacentPosList1[1] != []:
+                pos[1] = (min(adjacentPosList1[1], key=lambda x:abs(x-object.pos().y())))
+            
+            if adjacentPosList3[0] != []:
+                pos[4] = (min(adjacentPosList3[0], key=lambda x:abs(x-object.pos().x()+object.rect().width())))
+
+            if adjacentPosList3[1] != []:
+                pos[5] = (min(adjacentPosList3[1], key=lambda x:abs(x-object.pos().y()+object.rect().height())))
 
         return pos
     

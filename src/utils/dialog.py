@@ -588,6 +588,7 @@ class CoreDialog(QDialog):
                 self.contentPanel.setCurrentWidget(self.pluginsPage)
                 loadPlugins()
             else:
+                self.reloadSettings.emit()
                 self.contentPanel.setCurrentWidget(self.settingsPage)
                 self.settingsWidget.loadProperties(self.settings[self.settingsSidebarList.currentItem().data(100)])
 
