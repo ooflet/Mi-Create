@@ -90,47 +90,42 @@ class Scene(QGraphicsScene):
         # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
         self.originPositions = {}
-        self.positionMap = {
-            "X": [],
-            "Y": []
-        }
+        self.positionMap = {}
         self.posLines = []
 
     def updatePosMap(self):
-        self.positionMap = {"X": [0, self.sceneRect().width() / 2, self.sceneRect().width()], "Y": [0, self.sceneRect().height() / 2, self.sceneRect().height()]}
         for item in self.items():
-            # if isinstance(item, NumberWidget) and hasattr(item, "angle") and item.angle != 0:
-            #     # calculate points when widget is rotated
-            #     angle_rad = radians(item.angle)
-            #     origin = item.pos() + item.transformOriginPoint()
-            #     rotated_points = []
-
-            #     # translate
-            #     x1 = item.pos().x() + origin.x()
-            #     y1 = item.pos().y() + origin.y()
-
-            #     x2 = item.rect().bottomRight().x() + origin.x()
-            #     y2 = item.rect().bottomRight().y() + origin.y()
-
-            #     rotated_x1 = cos(angle_rad) * x1 - sin(angle_rad) * y1
-            #     rotated_y1 = sin(angle_rad) * x1 + cos(angle_rad) * y1
-
-            #     rotated_x2 = cos(angle_rad) * x2 - sin(angle_rad) * y2
-            #     rotated_y2 = sin(angle_rad) * x2 + cos(angle_rad) * y2
-
-            #     self.positionMap["X"].append(rotated_x1)
-            #     self.positionMap["X"].append(rotated_x2)
-            #     self.positionMap["Y"].append(rotated_y1)
-            #     self.positionMap["Y"].append(rotated_y2)
-
             if isinstance(item, BaseWidget):
                 # get points
-                self.positionMap["X"].append(item.pos().x())
-                self.positionMap["X"].append(item.pos().x() + (item.rect().width() / 2))
-                self.positionMap["X"].append(item.pos().x() + item.rect().width())
-                self.positionMap["Y"].append(item.pos().y())
-                self.positionMap["Y"].append(item.pos().y() + (item.rect().height() / 2))
-                self.positionMap["Y"].append(item.pos().y() + item.rect().height())
+                self.positionMap[item.data(0)] = {
+                    "topLeft": {
+                        "X": item.pos().x(),
+                        "Y": item.pos().y()
+                    },
+                    "center": {
+                        "X": item.pos().x() + (item.rect().width() / 2),
+                        "Y": item.pos().y() + (item.rect().height() / 2)
+                    },
+                    "bottomRight": {
+                        "X": item.pos().x() + item.rect().width(),
+                        "Y": item.pos().y() + item.rect().height()
+                    }
+                }
+
+        self.positionMap["canvasRectCoordinates"] = { # easy way to get scene snapping
+            "topLeft": {
+                "X": 0,
+                "Y": 0
+            },
+            "center": {
+                "X": self.sceneRect().width() / 2,
+                "Y": self.sceneRect().height() / 2
+            },
+            "bottomRight": {
+                "X": self.sceneRect().width(),
+                "Y": self.sceneRect().height()
+            }
+        }
 
     def getAdjacentPos(self, object: QGraphicsRectItem):
         catchRange = 6 # pixel offset before the object gets snapped
@@ -146,47 +141,46 @@ class Scene(QGraphicsScene):
                 └─────────────• x3, y3
         """
 
-        # filter function
-        def posFilter(x, objPos):
-            if x - catchRange <= objPos <= x + catchRange:
-                return True
-            else:
-                return False
-    
-        # filter both X & Y pos and place in a list
-        adjacentPosList1 = [list(filter(lambda x, objPos=object.pos().x(): posFilter(x, objPos), self.positionMap["X"])), list(filter(lambda x, objPos=object.pos().y(): posFilter(x, objPos), self.positionMap["Y"]))]
-        adjacentPosList2 = [list(filter(lambda x, objPos=object.pos().x()+(object.rect().width() / 2): posFilter(x, objPos), self.positionMap["X"])), list(filter(lambda x, objPos=object.pos().y()+(object.rect().height() / 2): posFilter(x, objPos), self.positionMap["Y"]))]
-        adjacentPosList3 = [list(filter(lambda x, objPos=object.pos().x()+object.rect().width(): posFilter(x, objPos), self.positionMap["X"])), list(filter(lambda x, objPos=object.pos().y()+object.rect().height(): posFilter(x, objPos), self.positionMap["Y"]))]
-
-        print("1", adjacentPosList1, "2", adjacentPosList2, "3", adjacentPosList3)
-
-        # check proximity
-
-        
-
-        # group by priority
-        # center pos first before outer pos
-
-        if adjacentPosList2 != [[], []]:
-            if adjacentPosList2[0] != []:
-                pos[2] = (min(adjacentPosList2[0], key=lambda x:abs(x-object.pos().x()+object.rect().width())))
-
-            if adjacentPosList2[1] != []:
-                pos[3] = (min(adjacentPosList2[1], key=lambda x:abs(x-object.pos().y()+object.rect().height())))
-        else:
-            if adjacentPosList1[0] != []:
-                pos[0] = (min(adjacentPosList1[0], key=lambda x:abs(x-object.pos().x())))
-
-            if adjacentPosList1[1] != []:
-                pos[1] = (min(adjacentPosList1[1], key=lambda x:abs(x-object.pos().y())))
+        def getSnapPos(axis) -> dict:
+            posList = {}
+            if axis == "X":
+                objectPos = object.pos().x()
+                objectRectLength = object.rect().width()
+            elif axis == "Y":
+                objectPos = object.pos().y()
+                objectRectLength = object.rect().height()
             
-            if adjacentPosList3[0] != []:
-                pos[4] = (min(adjacentPosList3[0], key=lambda x:abs(x-object.pos().x()+object.rect().width())))
+            for key, value in self.positionMap.items():
+                if key != object.data(0):        
+                    for point, pos in value.items():
+                        # if pos[axis] == objectPos and point == "center": # we only want to snap the pos in the center
+                        #     # comparison pos is used to check which pos is closest relative to the center
+                        #     posList[pos[axis]] = {"pos": pos[axis], "point": point, "comparisonPos": pos[axis]}
+                        if point == "topLeft":
+                            if pos[axis] - catchRange <= objectPos <= pos[axis] + catchRange:
+                                posList[pos[axis] + objectRectLength / 2] = {"pos": pos[axis], "comparisonPos": pos[axis] + objectRectLength / 2, "point": point}
+                        elif point == "bottomRight":
+                            if pos[axis] - catchRange <= objectPos + objectRectLength <= pos[axis] + catchRange:
+                                posList[pos[axis] - objectRectLength / 2] = {"pos": pos[axis], "comparisonPos": pos[axis] - objectRectLength / 2, "point": point}
+                        elif point == "center":
+                            if pos[axis] - catchRange <= objectPos + (objectRectLength / 2) <= pos[axis] + catchRange:
+                                posList[pos[axis]] = {"pos": pos[axis], "comparisonPos": pos[axis], "point": point}
+            return posList
 
-            if adjacentPosList3[1] != []:
-                pos[5] = (min(adjacentPosList3[1], key=lambda x:abs(x-object.pos().y()+object.rect().height())))
+        posListX = getSnapPos("X")
+        posListY = getSnapPos("Y")
 
-        return pos
+        posX = None
+        posY = None
+
+        if list(posListX.keys()) != []:
+            posX = posListX[min([pos["comparisonPos"] for pos in posListX.values()], key=lambda x:abs(x - object.pos().x() + object.rect().width() / 2))]
+        if list(posListY.keys()) != []:
+            posY = posListY[min([pos["comparisonPos"] for pos in posListY.values()], key=lambda x:abs(x - object.pos().y() + object.rect().height() / 2))]
+
+        print(posX, posY)
+
+        return posX, posY
     
     def getPreviewNumber(self, source):
         now = datetime.now()
@@ -234,22 +228,10 @@ class Scene(QGraphicsScene):
         pen.setColor(self.palette().highlight().color())
 
         if pos[0] != None:
-            self.posLines.append(self.addLine(pos[0], 0, pos[0], self.sceneRect().height(), pen))
+            self.posLines.append(self.addLine(pos[0]["pos"], 0, pos[0]["pos"], self.sceneRect().height(), pen))
            
         if pos[1] != None:
-            self.posLines.append(self.addLine(0, pos[1], self.sceneRect().width(), pos[1], pen))
-
-        if pos[2] != None:
-            self.posLines.append(self.addLine(pos[2], 0, pos[2], self.sceneRect().height(), pen))
-
-        if pos[3] != None:
-            self.posLines.append(self.addLine(0, pos[3], self.sceneRect().width(), pos[3], pen))
-        
-        if pos[4] != None:
-            self.posLines.append(self.addLine(pos[4], 0, pos[4], self.sceneRect().height(), pen))
-
-        if pos[5] != None:
-            self.posLines.append(self.addLine(0, pos[5], self.sceneRect().width(), pos[5], pen))
+            self.posLines.append(self.addLine(0, pos[1]["pos"], self.sceneRect().width(), pos[1]["pos"], pen))
 
     def clearSnapLines(self):
         for line in self.posLines:
@@ -1067,22 +1049,20 @@ class BaseWidget(QGraphicsRectItem):
             self.scene().drawSnapLines(snapPos)
 
             if snapPos[0] != None:
-                self.setX(snapPos[0])
-                
+                if snapPos[0]["point"] == "topLeft":
+                    self.setX(snapPos[0]["pos"])
+                elif snapPos[0]["point"] == "center":
+                    self.setX(snapPos[0]["pos"] - self.rect().width() / 2)
+                elif snapPos[0]["point"] == "bottomRight":
+                    self.setX(snapPos[0]["pos"] - self.rect().width())
+
             if snapPos[1] != None:
-                self.setY(snapPos[1])
-
-            if snapPos[2] != None:
-                self.setX(snapPos[2] - (self.rect().width() / 2))
-                
-            if snapPos[3] != None:
-                self.setY(snapPos[3] - (self.rect().height() / 2))
-
-            if snapPos[4] != None:
-                self.setX(snapPos[4] - self.rect().width())
-                
-            if snapPos[5] != None:
-                self.setY(snapPos[5] - self.rect().height())
+                if snapPos[1]["point"] == "topLeft":
+                    self.setY(snapPos[1]["pos"])
+                elif snapPos[1]["point"] == "center":
+                    self.setY(snapPos[1]["pos"] - self.rect().height() / 2)
+                elif snapPos[1]["point"] == "bottomRight":
+                    self.setY(snapPos[1]["pos"] - self.rect().height())
 
         self.setPos(round(self.x()), round(self.y()))
 
