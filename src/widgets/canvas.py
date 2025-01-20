@@ -1341,12 +1341,15 @@ class NumberWidget(BaseWidget):
                     previewNumber = str(previewNumber)
                     cropped = previewNumber[-int(digits):] # crop number
                     previewNumber = cropped.zfill(int(digits)) # pad number with zeroes
-                    if previewNumber[x] == "." and len(numList) != 12:
-                        image = numList[0]
-                    elif previewNumber[x] == "." and len(numList) == 12:
+
+                    if previewNumber[x] == "." and len(numList) == 12:
                         image = numList[11]
-                    else:
+                    elif previewNumber[x] == "-" and len(numList) == 11:
+                        image = numList[10]
+                    elif isinstance(x, int):
                         image = numList[int(previewNumber[x])]
+                    else:
+                        image = numList[0]
                 else:
                     image = numList[x % len(numList)]
 
