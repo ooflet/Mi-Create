@@ -1346,7 +1346,7 @@ class NumberWidget(BaseWidget):
                         image = numList[11]
                     elif previewNumber[x] == "-" and len(numList) == 11:
                         image = numList[10]
-                    elif isinstance(x, int):
+                    elif previewNumber[x].isdigit():
                         image = numList[int(previewNumber[x])]
                     else:
                         image = numList[0]
