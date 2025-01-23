@@ -1074,13 +1074,13 @@ class WatchfaceEditor(QMainWindow):
             }
             widgetType = widgetData["widget"].getProperty("widget_type")
             if widgetType == "widget_analog":
-                if widgetType["widget"].getProperty("analog_hour_image") != "":
+                if widgetData["widget"].getProperty("analog_hour_image") != "":
                     widgetData["images"].append(widgetData["widget"].getProperty("analog_hour_image"))
 
-                if widgetType["widget"].getProperty("analog_minute_image") != "":
+                if widgetData["widget"].getProperty("analog_minute_image") != "":
                     widgetData["images"].append(widgetData["widget"].getProperty("analog_minute_image"))
                     
-                if widgetType["widget"].getProperty("analog_second_image") != "":
+                if widgetData["widget"].getProperty("analog_second_image") != "":
                     widgetData["images"].append(widgetData["widget"].getProperty("analog_second_image"))
             
             elif widgetType == "widget_arc":
