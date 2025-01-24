@@ -689,6 +689,14 @@ class WatchfaceEditor(QMainWindow):
 
             self.reloadImages(currentProject["project"].getImageFolder())
 
+            currentProject["canvas"].loadObjects(currentProject["project"], self.settings["Canvas"]["Snap"]["value"],
+                                                self.settings["Canvas"]["Interpolation"]["value"],
+                                                self.settings["Canvas"]["ClipDeviceShape"]["value"],
+                                                self.settings["Canvas"]["ShowDeviceOutline"]["value"])
+            
+            if currentProject["canvas"].isPreviewPlaying:
+                self.playAllPreviews(currentProject["canvas"])
+
         self.statusBar().setContentsMargins(4, 4, 4, 4)
         
         self.ui.workspace.tabBar().setMinimumWidth(99999) # hack to not get tab bars clipped
@@ -870,6 +878,8 @@ class WatchfaceEditor(QMainWindow):
                                     self.settings["Canvas"]["Interpolation"]["value"],
                                     self.settings["Canvas"]["ClipDeviceShape"]["value"],
                                     self.settings["Canvas"]["ShowDeviceOutline"]["value"])
+            if currentProject["canvas"].isPreviewPlaying:
+                self.playAllPreviews(currentProject["canvas"])
             self.coreDialog.close()
 
         def resetSettings():
@@ -1779,6 +1789,7 @@ class WatchfaceEditor(QMainWindow):
     def showManageProjectDialog(self):
         currentProject: FprjProject = self.getCurrentProject()["project"]
 
+        self.coreDialog.configurePagePreviewField.clear()
         self.coreDialog.configurePagePreviewField.addItems(self.resourceImages)
 
         self.coreDialog.configurePageIdField.setValue(int(currentProject.getId()))
