@@ -78,3 +78,18 @@ msgstr ""
 
 msgid "Create Widget"
 msgstr ""
+
+msgid "Please set the watchface's name and thumbnail before building!"
+msgstr ""
+
+msgid "This watch does not support ID assignment, custom IDs will not be applied."
+msgstr ""
+
+msgid "Wine was not found."
+msgstr ""
+
+msgid "Building watchface..."
+msgstr ""
+
+msgid "Watchface built successfully at "
+msgstr ""

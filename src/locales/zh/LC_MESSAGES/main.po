@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "POT-Creation-Date: 2024-01-02 11:05+1100\n"
-"PO-Revision-Date: 2024-06-21 14:18+1000\n"
+"PO-Revision-Date: 2025-01-25 21:41+1100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: zh_CN\n"
@@ -13,7 +13,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
-"X-Generator: Poedit 3.4\n"
+"X-Generator: Poedit 3.0.1\n"
 
 msgid "You have unsaved project(s) open. Save and quit?"
 msgstr "您打开了未保存的项目。保存并退出？"
@@ -84,3 +84,19 @@ msgstr "在建设之前保存项目？"
 
 msgid "Create Widget"
 msgstr "创建小部件"
+
+msgid "Please set the watchface's name and thumbnail before building!"
+msgstr "请在制作前设置手表表面的名称和缩略图！"
+
+msgid ""
+"This watch does not support ID assignment, custom IDs will not be applied."
+msgstr "此表不支持 ID 分配，因此不会应用自定义 ID。"
+
+msgid "Wine was not found."
+msgstr "未找到 Wine 程序。"
+
+msgid "Building watchface..."
+msgstr "建立手表界面..."
+
+msgid "Watchface built successfully at "
+msgstr "表盘构建成功于 "

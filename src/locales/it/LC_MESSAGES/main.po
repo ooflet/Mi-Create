@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "POT-Creation-Date: 2024-01-02 11:05+1100\n"
-"PO-Revision-Date: 2024-07-30 21:48+0200\n"
+"PO-Revision-Date: 2025-01-25 21:51+1100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: it\n"
@@ -13,7 +13,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
-"X-Generator: Poedit 3.4.2\n"
+"X-Generator: Poedit 3.0.1\n"
 
 msgid "You have unsaved project(s) open. Save and quit?"
 msgstr "Hai progetti aperti non salvati. Vuoi salvarli e uscire?"
@@ -39,7 +39,7 @@ msgid ""
 "graphics item: "
 msgstr ""
 "Nessun oggetto trovato nell'elenco dei widget che abbia il nome "
-"dell'elemento grafico attualmente selezionato:"
+"dell'elemento grafico attualmente selezionato: "
 
 msgid "Error occured during property update: Object not found!"
 msgstr ""
@@ -66,31 +66,51 @@ msgstr ""
 "programma ?"
 
 msgid "Failed to createNewWorkspace: "
-msgstr "Impossibile creare una nuova area di lavoro:"
+msgstr "Impossibile creare una nuova area di lavoro: "
 
 msgid "Cannot open project: "
-msgstr "Impossibile aprire il progetto:"
+msgstr "Impossibile aprire il progetto: "
 
 msgid "Failed to create a new project: "
-msgstr "Impossibile creare un nuovo progetto:"
+msgstr "Impossibile creare un nuovo progetto: "
 
 msgid "Open Project..."
 msgstr "Progetto aperto..."
 
 msgid "Failed to open project: "
-msgstr "Impossibile aprire il progetto:"
+msgstr "Impossibile aprire il progetto: "
 
 msgid "Failed to save: "
-msgstr "Impossibile salvare:"
+msgstr "Impossibile salvare: "
 
 msgid "Failed to save project: "
-msgstr "Impossibile salvare il progetto:"
+msgstr "Impossibile salvare il progetto: "
 
 msgid "Project saved at "
-msgstr "Progetto salvato in"
+msgstr "Progetto salvato in "
 
 msgid "Save project before building?"
 msgstr "Salvare il progetto prima di compilare ?"
 
 msgid "Create Widget"
 msgstr "Crea widget"
+
+msgid "Please set the watchface's name and thumbnail before building!"
+msgstr ""
+"Impostare il nome e la miniatura della superficie dell'orologio prima della "
+"costruzione!"
+
+msgid ""
+"This watch does not support ID assignment, custom IDs will not be applied."
+msgstr ""
+"Questo orologio non supporta l'assegnazione di ID; gli ID personalizzati non "
+"verranno applicati."
+
+msgid "Wine was not found."
+msgstr "Il programma Wine non è stato trovato."
+
+msgid "Building watchface..."
+msgstr "Costruire la superficie dell'orologio..."
+
+msgid "Watchface built successfully at "
+msgstr "Interfaccia orologio costruita con successo a "

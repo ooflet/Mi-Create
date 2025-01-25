@@ -5,15 +5,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "POT-Creation-Date: 2024-01-02 11:05+1100\n"
-"PO-Revision-Date: 2024-07-26 19:07+1000\n"
+"PO-Revision-Date: 2025-01-25 21:43+1100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"Language: en\n"
+"Language: zh_CN\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "Generated-By: pygettext.py 1.5\n"
-"X-Generator: Poedit 3.4.2\n"
+"X-Generator: Poedit 3.0.1\n"
 
 msgid "Theme"
 msgstr "主题"
@@ -41,6 +42,9 @@ msgstr "抗锯齿"
 
 msgid "Image Interpolation"
 msgstr "图像插值模式"
+
+msgid "Plugins"
+msgstr "插件"
 
 msgid "General"
 msgstr "一般的"
@@ -176,3 +180,18 @@ msgstr "小数点"
 
 msgid "Decimal"
 msgstr "十进制"
+
+msgid "Start X"
+msgstr "开始 X"
+
+msgid "Start Y"
+msgstr "开始 Y"
+
+msgid "End X"
+msgstr "结束 X"
+
+msgid "End Y"
+msgstr "结束 Y"
+
+msgid "Flat Ends"
+msgstr "平头"

@@ -5,16 +5,17 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.1\n"
 "POT-Creation-Date: 2024-01-02 11:05+1100\n"
-"PO-Revision-Date: 2024-07-26 22:42+0000\n"
+"PO-Revision-Date: 2025-01-25 21:13+1100\n"
 "Last-Translator: Serhii Horichenko <mail@sgg.im>\n"
 "Language-Team: \n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
 "Generated-By: pygettext.py 1.5\n"
-"X-Generator: Poedit 3.2.2\n"
+"X-Generator: Poedit 3.0.1\n"
 
 msgid "Theme"
 msgstr "Тема"
@@ -42,6 +43,9 @@ msgstr "Сглаживание"
 
 msgid "Image Interpolation"
 msgstr "Интерполяция изображения"
+
+msgid "Plugins"
+msgstr "Плагины"
 
 msgid "General"
 msgstr "Общий"
@@ -177,3 +181,18 @@ msgstr "Разделитель десятичных"
 
 msgid "Decimal"
 msgstr "Десятичное"
+
+msgid "Start X"
+msgstr "Начало X"
+
+msgid "Start Y"
+msgstr "Начало Y"
+
+msgid "End X"
+msgstr "Конец X"
+
+msgid "End Y"
+msgstr "Конец Y"
+
+msgid "Flat Ends"
+msgstr "Плоские концы"

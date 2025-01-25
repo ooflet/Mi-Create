@@ -1,20 +1,29 @@
 from PyQt6.QtCore import QCoreApplication
 import gettext
 
-_ = gettext.gettext
+windowTranslate = gettext.gettext
+propertyTranslate = gettext.gettext
 
 class Translator():
     @staticmethod
     def loadLanguage(language):
-        translation = gettext.translation('window', localedir='locales', languages=[language])
-        translation.install()
-        global _
-        _ = translation.gettext
+        windowTranslation = gettext.translation('window', localedir='locales', languages=[language])
+        windowTranslation.install()
+        global windowTranslate
+        windowTranslate = windowTranslation.gettext
+
+        propertyTranslation = gettext.translation('properties', localedir='locales', languages=[language])
+        propertyTranslation.install()
+        global propertyTranslate
+        propertyTranslate = propertyTranslation.gettext
 
     @staticmethod
     def translate(context, key):
         if not "Ctrl" in key:
-            return _(key)
+            if context == "property":
+                return propertyTranslate(key)
+            else:
+                return windowTranslate(key)
         else:
             return key
 

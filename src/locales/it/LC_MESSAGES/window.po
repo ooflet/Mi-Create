@@ -1,12 +1,11 @@
 # Window Translation for Mi Create.
 # FIRST AUTHOR <ooflet@proton.me>, 2024.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "POT-Creation-Date: 2024-01-05 14:27+1100\n"
-"PO-Revision-Date: 2024-08-06 18:46+0200\n"
+"PO-Revision-Date: 2025-01-25 21:53+1100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: it\n"
@@ -14,7 +13,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
-"X-Generator: Poedit 3.4.2\n"
+"X-Generator: Poedit 3.0.1\n"
 
 msgid "Mi Create"
 msgstr "Mi Create"
@@ -118,26 +117,8 @@ msgstr "Progresso circolare"
 msgid "Documentation"
 msgstr "Documentazione"
 
-msgid ""
-"<html><head/><body><p><img src=\":/Dark/folder-open.png\"/> <a "
-"href=\"\\&quot;\\&quot;\"><span style=\" text-decoration: underline; color:"
-"#55aaff;\">Open Project...</span></a></p></body></html>"
-msgstr ""
-"<html><head/><body><p><img src=\":/Dark/folder-open.png\"/> <a "
-"href=\"\\&quot;\\&quot;\"><span style=\" text-decoration: underline; color:"
-"#55aaff;\">Apri Progetto...</span></a></p></body></html>"
-
 msgid "Welcome"
 msgstr "Benvenuto"
-
-msgid ""
-"<html><head/><body><p><img src=\":/Dark/file-plus.png\"/> <a href=\"\\&quot;"
-"\\&quot;\"><span style=\" text-decoration: underline; color:#55aaff;\">New "
-"Project...</span></a></p></body></html>"
-msgstr ""
-"<html><head/><body><p><img src=\":/Dark/file-plus.png\"/> <a href=\"\\&quot;"
-"\\&quot;\"><span style=\" text-decoration: underline; color:#55aaff;"
-"\">Nuovo Progetto...</span></a></p></body></html>"
 
 msgid "Help"
 msgstr "Aiuto"
@@ -258,3 +239,42 @@ msgstr "Utensili"
 
 msgid "File Toolbar"
 msgstr "Barra degli strumenti File"
+
+msgid "Device type"
+msgstr "Tipo di dispositivo"
+
+msgid "Watchface ID (9 digits)"
+msgstr "ID della superficie dell'orologio (9 cifre)"
+
+msgid "Export..."
+msgstr "Esportazione..."
+
+msgid "Export project"
+msgstr "Progetto di esportazione"
+
+msgid "Export format"
+msgstr "Formato di esportazione"
+
+msgid "Export to"
+msgstr "Esportazione in"
+
+msgid "No plugins installed"
+msgstr "Nessun plugin installato"
+
+msgid "Install Plugin from File"
+msgstr "Installare il plugin da un file"
+
+msgid "Open Plugins Folder"
+msgstr "Aprire la cartella dei plugin"
+
+msgid "Update Compiler from EasyFace"
+msgstr "Aggiornare il compilatore da EasyFace"
+
+msgid "Reset Settings"
+msgstr "Ripristino delle impostazioni"
+
+#~ msgid "<html><head/><body><p><img src=\":/Dark/folder-open.png\"/> <a href=\"\\&quot;\\&quot;\"><span style=\" text-decoration: underline; color:#55aaff;\">Open Project...</span></a></p></body></html>"
+#~ msgstr "<html><head/><body><p><img src=\":/Dark/folder-open.png\"/> <a href=\"\\&quot;\\&quot;\"><span style=\" text-decoration: underline; color:#55aaff;\">Apri Progetto...</span></a></p></body></html>"
+
+#~ msgid "<html><head/><body><p><img src=\":/Dark/file-plus.png\"/> <a href=\"\\&quot;\\&quot;\"><span style=\" text-decoration: underline; color:#55aaff;\">New Project...</span></a></p></body></html>"
+#~ msgstr "<html><head/><body><p><img src=\":/Dark/file-plus.png\"/> <a href=\"\\&quot;\\&quot;\"><span style=\" text-decoration: underline; color:#55aaff;\">Nuovo Progetto...</span></a></p></body></html>"

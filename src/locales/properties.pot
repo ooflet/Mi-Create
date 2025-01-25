@@ -40,6 +40,9 @@ msgstr ""
 msgid "Image Interpolation"
 msgstr ""
 
+msgid "Plugins"
+msgstr ""
+
 msgid "General"
 msgstr ""
 
@@ -151,16 +154,10 @@ msgstr ""
 msgid "Hide Zeroes"
 msgstr ""
 
-msgid "Widget Type"
-msgstr ""
-
 msgid "Image List"
 msgstr ""
 
 msgid "Image Count"
-msgstr ""
-
-msgid "Image"
 msgstr ""
 
 msgid "Index"
@@ -179,4 +176,19 @@ msgid "Decimal Point"
 msgstr ""
 
 msgid "Decimal"
+msgstr ""
+
+msgid "Start X"
+msgstr ""
+
+msgid "Start Y"
+msgstr ""
+
+msgid "End X"
+msgstr ""
+
+msgid "End Y"
+msgstr ""
+
+msgid "Flat Ends"
 msgstr ""

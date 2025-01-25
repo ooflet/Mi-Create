@@ -167,7 +167,14 @@ class WatchfaceEditor(QMainWindow):
         self.loadLanguage(True)
 
         # Setup History System
+        def indexChanged():
+            if self.History.undoStack.index() == 0:
+                self.markCurrentProjectChanged(False)
+            else:
+                self.markCurrentProjectChanged(True)
+
         self.History = History()
+        self.History.undoStack.indexChanged.connect(indexChanged)
         self.ignoreHistoryInvoke = False
 
         # Undo History Dialog
@@ -199,10 +206,11 @@ class WatchfaceEditor(QMainWindow):
 
         def quitWindow():
             logging.info("-- Exiting Mi Create --")
-            logging.info("Disconnecting selectionChanged event")
+            logging.info("Disconnecting events")
             for project in self.projects.values():
                 if project.get("canvas"):
                     project["canvas"].scene().selectionChanged.disconnect()
+            self.History.undoStack.indexChanged.disconnect()
             logging.info("Saving Window State")
             self.saveWindowState()
             logging.info("Quitting")
@@ -737,8 +745,6 @@ class WatchfaceEditor(QMainWindow):
             if currentItem == None:
                 return
 
-            self.markCurrentProjectChanged(True)
-
             logging.info(f"Set property {args[0]}, {args[1]} for widget {currentSelected.data(0)}")
 
             def updateProperty(widgetName, property, value):
@@ -943,7 +949,6 @@ class WatchfaceEditor(QMainWindow):
             self.ignoreHistoryInvoke = False
         else:
             def commandFunc(type, name, posX, posY, properties):
-                self.markCurrentProjectChanged(True)
                 if type == "undo":
                     currentProject["project"].deleteWidget(currentProject["project"].getWidget(name))
                 elif type == "redo":
@@ -989,7 +994,6 @@ class WatchfaceEditor(QMainWindow):
             return
 
         def commandFunc(type, layerChange, widgets):
-            self.markCurrentProjectChanged(True)
             if type == "undo":
                 for widget in widgets:
                     currentProject["project"].setWidgetLayer(widget[0], widget[1])
@@ -1175,8 +1179,6 @@ class WatchfaceEditor(QMainWindow):
             self.reloadImages(currentProject["project"].getImageFolder())
             self.Explorer.updateExplorer(currentProject["project"])
 
-            self.markCurrentProjectChanged(True)
-
             # select objects pasted in
             if type == "redo":
                 for widget in clipboard:
@@ -1194,7 +1196,6 @@ class WatchfaceEditor(QMainWindow):
         objectNameList = [object.data(0) for object in selectedObjects]
 
         def commandFunc(command, data, nameList):
-            self.markCurrentProjectChanged(True)
             if command == "redo":
                 for name in nameList:
                     widget = currentProject["project"].getWidget(name)
@@ -1392,8 +1393,6 @@ class WatchfaceEditor(QMainWindow):
                 }
                 prevPos.append(prevPosObject)
                 currentPos.append(currentPosObject)
-
-            self.markCurrentProjectChanged(True)
 
             def commandFunc(objects):
                 for object in objects:
@@ -1825,7 +1824,7 @@ class WatchfaceEditor(QMainWindow):
                     self.statusBar().showMessage(_("Project saved at ") + currentProject["project"].getPath(), 2000)
                     self.fileChanged = False
                     self.Explorer.clearSelection()
-                    currentProject["hasFileChanged"] = False
+                    self.markCurrentProjectChanged(False)
                     currentProject["canvas"].createPreview()
                     if currentProject["canvas"].isPreviewPlaying:
                         self.playAllPreviews(currentProject["canvas"])
@@ -1836,12 +1835,11 @@ class WatchfaceEditor(QMainWindow):
                 try:
                     with open(currentProject["path"], "w", encoding="utf8") as file:
                         file.write(currentProject["editor"].text())
+                    self.markCurrentProjectChanged(False)
                     self.statusBar().showMessage(_("Project saved at ") + currentProject["path"], 2000)
                 except Exception as e:
                     self.statusBar().showMessage(_("Failed to save: ") + str(e), 10000)
                     self.showDialog("error", _("Failed to save project: ") + str(e), debugMessage)
-
-            self.markCurrentProjectChanged(False)
 
     def exportCurrentProject(self):
         currentProject = self.getCurrentProject()
@@ -1901,7 +1899,7 @@ class WatchfaceEditor(QMainWindow):
 
         # check if wine exists if we're compiling on Linux
         if platform.system() == "Linux" and which("wine") == None:
-            self.showDialog("error", _("Failed to compile project: Wine was not found."))
+            self.showDialog("error", _("Failed to compile project: ") + _("Wine was not found."))
             return
 
         result = self.showDialog("question", _("Save project before building?"), buttons=QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, defaultButton=QMessageBox.StandardButton.Yes)
@@ -1951,7 +1949,7 @@ class WatchfaceEditor(QMainWindow):
 
         progressBar = QProgressBar()
         progressBar.setRange(0, 0)
-        text = QLabel("Building watchface...")
+        text = QLabel(_("Building watchface..."))
         self.statusBar().addPermanentWidget(text, 0)
         self.statusBar().addPermanentWidget(progressBar, 1)
 

@@ -5,6 +5,7 @@ from PyQt6.QtWidgets import QTreeWidget, QTreeWidgetItem, QFrame, QMessageBox, Q
 from PyQt6.QtGui import QContextMenuEvent, QIcon, QStandardItemModel
 from PyQt6.QtCore import Qt, QSize, pyqtSignal, QModelIndex, QPoint
 
+from translate import Translator
 from utils.menu import ContextMenu
 
 class Explorer(QTreeWidget):
@@ -68,9 +69,9 @@ class Explorer(QTreeWidget):
         icon = QIcon().fromTheme("device-watch")
         name = None
         if project.currentTheme == "aod":
-            name = "AOD"
+            name = Translator.translate("", "Always on Display")
         elif project.getTitle() == "":
-            name = "Watchface"
+            name = Translator.translate("", "Watchface")
         else:
             name = project.getTitle()
         root = QTreeWidgetItem(self)

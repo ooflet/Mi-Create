@@ -117,19 +117,7 @@ msgstr ""
 msgid "Documentation"
 msgstr ""
 
-msgid ""
-"<html><head/><body><p><img src=\":/Dark/folder-open.png\"/> <a "
-"href=\"\\&quot;\\&quot;\"><span style=\" text-decoration: underline; color:"
-"#55aaff;\">Open Project...</span></a></p></body></html>"
-msgstr ""
-
 msgid "Welcome"
-msgstr ""
-
-msgid ""
-"<html><head/><body><p><img src=\":/Dark/file-plus.png\"/> <a href=\"\\&quot;"
-"\\&quot;\"><span style=\" text-decoration: underline; color:#55aaff;\">New "
-"Project...</span></a></p></body></html>"
 msgstr ""
 
 msgid "Help"
@@ -234,9 +222,6 @@ msgstr ""
 msgid "Delete"
 msgstr ""
 
-msgid "Layers"
-msgstr ""
-
 msgid "New Project"
 msgstr ""
 
@@ -254,3 +239,37 @@ msgstr ""
 
 msgid "File Toolbar"
 msgstr ""
+
+msgid "Device type"
+msgstr ""
+
+msgid "Watchface ID (9 digits)"
+msgstr ""
+
+msgid "Export..."
+msgstr ""
+
+msgid "Export project"
+msgstr ""
+
+msgid "Export format"
+msgstr ""
+
+msgid "Export to"
+msgstr ""
+
+msgid "No plugins installed"
+msgstr ""
+
+msgid "Install Plugin from File"
+msgstr ""
+
+msgid "Open Plugins Folder"
+msgstr ""
+
+msgid "Update Compiler from EasyFace"
+msgstr ""
+
+msgid "Reset Settings"
+msgstr ""
+

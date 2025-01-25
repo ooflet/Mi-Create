@@ -1,12 +1,11 @@
 # Property Translation for Mi Create.
 # FIRST AUTHOR <ooflet@proton.me>, 2024.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "POT-Creation-Date: 2024-01-02 11:05+1100\n"
-"PO-Revision-Date: 2024-08-06 17:06+0200\n"
+"PO-Revision-Date: 2025-01-25 21:52+1100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: it\n"
@@ -14,7 +13,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
-"X-Generator: Poedit 3.4.2\n"
+"X-Generator: Poedit 3.0.1\n"
 
 msgid "Theme"
 msgstr "Tema"
@@ -42,6 +41,9 @@ msgstr "Antialiasing (anti scalettatura)"
 
 msgid "Image Interpolation"
 msgstr "Interpolazione dell'immagine"
+
+msgid "Plugins"
+msgstr "Plugin"
 
 msgid "General"
 msgstr "Generali"
@@ -140,7 +142,7 @@ msgid "Max Value Source"
 msgstr "Valore massimo fote"
 
 msgid "Images"
-msgstr "immagini"
+msgstr "Immagini"
 
 msgid "Default Index"
 msgstr "Indice predefinito"
@@ -177,3 +179,18 @@ msgstr "Punto decimale"
 
 msgid "Decimal"
 msgstr "Decimale"
+
+msgid "Start X"
+msgstr "Inizio X"
+
+msgid "Start Y"
+msgstr "Inizio Y"
+
+msgid "End X"
+msgstr "Fine X"
+
+msgid "End Y"
+msgstr "Fine Y"
+
+msgid "Flat Ends"
+msgstr "Estremità piatte"

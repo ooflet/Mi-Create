@@ -101,9 +101,15 @@ class CoreDialog(QDialog):
         self.watchfacePageDeviceTitle.setText(Translator.translate("", "Select device"))
         self.watchfacePageProjectTitle.setText(Translator.translate("", "Project name"))
         self.watchfacePageDirectoryTitle.setText(Translator.translate("", "Project location"))
+        self.installPluginAction.setText(Translator.translate("", "Install Plugin from File"))
+        self.pluginFolderAction.setText(Translator.translate("", "Open Plugins Folder"))
+        self.updateAction.setText(Translator.translate("", "Update Compiler from EasyFace"))
+        self.resetAction.setText(Translator.translate("", "Reset Settings"))
+
+        currentRow = self.settingsSidebarList.currentRow()
 
         def addItem(category):
-            categoryName = Translator.translate("", category)
+            categoryName = Translator.translate("property", category)
             item = QListWidgetItem(self.settingsSidebarList)
             item.setSizeHint(QSize(25, 40))
             item.setData(100, categoryName)
@@ -120,6 +126,8 @@ class CoreDialog(QDialog):
             addItem(category)
 
         addItem("Plugins")
+
+        self.settingsSidebarList.setCurrentRow(currentRow)
 
     def getSignal (self, oObject : QObject, strSignalName : str):
         oMetaObj = oObject.metaObject()
@@ -456,10 +464,12 @@ class CoreDialog(QDialog):
         self.settingsSidebarLayout.setContentsMargins(0,0,0,0)
 
         self.settingsMenu = QMenu()
-        installPluginAction = self.settingsMenu.addAction("Install Plugin from File")
-        pluginFolderAction = self.settingsMenu.addAction("Open Plugins Folder")
-        updateAction = self.settingsMenu.addAction("Update Compiler from EasyFace")
-        resetAction = self.settingsMenu.addAction("Reset Settings")
+        self.installPluginAction = self.settingsMenu.addAction("Install Plugin from File")
+        self.pluginFolderAction = self.settingsMenu.addAction("Open Plugins Folder")
+        self.settingsMenu.addSeparator()
+        self.updateAction = self.settingsMenu.addAction("Update Compiler from EasyFace")
+        self.settingsMenu.addSeparator()
+        self.resetAction = self.settingsMenu.addAction("Reset Settings")
 
         def install():
             file = QFileDialog.getOpenFileName(self, "Install plugin...", "%userprofile%/", "Plugin File (*.plg)")
@@ -491,7 +501,7 @@ class CoreDialog(QDialog):
             self.pluginsPage.setDisabled(False)
             if pluginLoader.plugins == {}:
                 listItem = QListWidgetItem(self.pluginsPage)
-                listItem.setText("No plugins installed")
+                listItem.setText(Translator.translate("", "No plugins installed"))
                 listItem.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
                 listItem.setSizeHint(QSize(24, 24))
                 self.pluginsPage.setDisabled(True)
@@ -590,12 +600,12 @@ class CoreDialog(QDialog):
             else:
                 self.reloadSettings.emit()
                 self.contentPanel.setCurrentWidget(self.settingsPage)
-                self.settingsWidget.loadProperties(self.settings[self.settingsSidebarList.currentItem().data(100)])
+                self.settingsWidget.loadProperties(self.settings[self.settingsSidebarList.currentItem().data(101)])
 
-        installPluginAction.triggered.connect(install)
-        pluginFolderAction.triggered.connect(showFolder)
-        updateAction.triggered.connect(update)
-        resetAction.triggered.connect(self.resetSettings.emit)
+        self.installPluginAction.triggered.connect(install)
+        self.pluginFolderAction.triggered.connect(showFolder)
+        self.updateAction.triggered.connect(update)
+        self.resetAction.triggered.connect(self.resetSettings.emit)
 
         self.settingsSidebarHeader = QHBoxLayout()
         self.settingsSidebarBack = QToolButton(self)
@@ -713,7 +723,7 @@ class CoreDialog(QDialog):
 
         self.sidebar.setSlideTransition(animate)
         self.sidebar.setCurrentWidget(self.settingsSidebar)
-        self.settingsWidget.loadProperties(self.settings[self.settingsSidebarList.currentItem().data(100)])
+        self.settingsWidget.loadProperties(self.settings[self.settingsSidebarList.currentItem().data(101)])
         self.contentPanel.setCurrentWidget(self.settingsPage)
 
         if self.settingsSidebarBack.isSignalConnected(self.getSignal(self.settingsSidebarBack, "clicked")):

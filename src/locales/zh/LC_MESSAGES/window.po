@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "POT-Creation-Date: 2024-01-05 14:27+1100\n"
-"PO-Revision-Date: 2024-06-21 14:24+1000\n"
+"PO-Revision-Date: 2025-01-25 21:44+1100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: zh_CN\n"
@@ -13,7 +13,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
-"X-Generator: Poedit 3.4\n"
+"X-Generator: Poedit 3.0.1\n"
 
 msgid "Mi Create"
 msgstr "Mi Create"
@@ -117,26 +117,8 @@ msgstr "弧形进步"
 msgid "Documentation"
 msgstr "文件"
 
-msgid ""
-"<html><head/><body><p><img src=\":/Dark/folder-open.png\"/> <a "
-"href=\"\\&quot;\\&quot;\"><span style=\" text-decoration: underline; color:"
-"#55aaff;\">Open Project...</span></a></p></body></html>"
-msgstr ""
-"<html><head/><body><p><img src=\":/Dark/folder-open.png\"/> <a "
-"href=\"\\&quot;\\&quot;\"><span style=\" text-decoration: underline; color:"
-"#55aaff;\">打开项目...</span></p></body></html>"
-
 msgid "Welcome"
 msgstr "欢迎"
-
-msgid ""
-"<html><head/><body><p><img src=\":/Dark/file-plus.png\"/> <a href=\"\\&quot;"
-"\\&quot;\"><span style=\" text-decoration: underline; color:#55aaff;\">New "
-"Project...</span></a></p></body></html>"
-msgstr ""
-"<html><head/><body><p><img src=\":/Dark/file-plus.png\"/> <a href=\"\\&quot;"
-"\\&quot;\"><span style=\" text-decoration: underline; color:#55aaff;\">新项"
-"目......</span></p></body></html>"
 
 msgid "Help"
 msgstr "帮助"
@@ -257,3 +239,42 @@ msgstr "工具"
 
 msgid "File Toolbar"
 msgstr "文件工具栏"
+
+msgid "Device type"
+msgstr "设备类型"
+
+msgid "Watchface ID (9 digits)"
+msgstr "表界面 ID（9 位数字）"
+
+msgid "Export..."
+msgstr "出口..."
+
+msgid "Export project"
+msgstr "出口项目"
+
+msgid "Export format"
+msgstr "导出格式"
+
+msgid "Export to"
+msgstr "出口到"
+
+msgid "No plugins installed"
+msgstr "未安装插件"
+
+msgid "Install Plugin from File"
+msgstr "从文件安装插件"
+
+msgid "Open Plugins Folder"
+msgstr "打开插件文件夹"
+
+msgid "Update Compiler from EasyFace"
+msgstr "从 EasyFace 更新编译器"
+
+msgid "Reset Settings"
+msgstr "重置设置"
+
+#~ msgid "<html><head/><body><p><img src=\":/Dark/folder-open.png\"/> <a href=\"\\&quot;\\&quot;\"><span style=\" text-decoration: underline; color:#55aaff;\">Open Project...</span></a></p></body></html>"
+#~ msgstr "<html><head/><body><p><img src=\":/Dark/folder-open.png\"/> <a href=\"\\&quot;\\&quot;\"><span style=\" text-decoration: underline; color:#55aaff;\">打开项目...</span></p></body></html>"
+
+#~ msgid "<html><head/><body><p><img src=\":/Dark/file-plus.png\"/> <a href=\"\\&quot;\\&quot;\"><span style=\" text-decoration: underline; color:#55aaff;\">New Project...</span></a></p></body></html>"
+#~ msgstr "<html><head/><body><p><img src=\":/Dark/file-plus.png\"/> <a href=\"\\&quot;\\&quot;\"><span style=\" text-decoration: underline; color:#55aaff;\">新项目......</span></p></body></html>"
