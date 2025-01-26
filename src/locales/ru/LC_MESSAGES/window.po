@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.1\n"
 "POT-Creation-Date: 2024-01-05 14:27+1100\n"
-"PO-Revision-Date: 2025-01-25 21:36+1100\n"
+"PO-Revision-Date: 2025-01-26 20:48+1100\n"
 "Last-Translator: Serhii Horichenko <mail@sgg.im>\n"
 "Language-Team: \n"
 "Language: ru\n"
@@ -274,6 +274,18 @@ msgstr "Обновление компилятора с «EasyFace»"
 
 msgid "Reset Settings"
 msgstr "Сброс настроек"
+
+msgid "Watchface"
+msgstr "Часового интерфейса"
+
+msgid "Configure"
+msgstr "Настроить"
+
+msgid "Disable"
+msgstr "Отключить"
+
+msgid "Enable"
+msgstr "Включить"
 
 #~ msgid ""
 #~ "<html><head/><body><p><img src=\":/Dark/folder-open.png\"/> <a "

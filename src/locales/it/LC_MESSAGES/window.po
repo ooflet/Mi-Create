@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "POT-Creation-Date: 2024-01-05 14:27+1100\n"
-"PO-Revision-Date: 2025-01-25 21:53+1100\n"
+"PO-Revision-Date: 2025-01-26 20:47+1100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: it\n"
@@ -244,7 +244,7 @@ msgid "Device type"
 msgstr "Tipo di dispositivo"
 
 msgid "Watchface ID (9 digits)"
-msgstr "ID della superficie dell'orologio (9 cifre)"
+msgstr "ID della quadrante (9 cifre)"
 
 msgid "Export..."
 msgstr "Esportazione..."
@@ -272,6 +272,18 @@ msgstr "Aggiornare il compilatore da EasyFace"
 
 msgid "Reset Settings"
 msgstr "Ripristino delle impostazioni"
+
+msgid "Watchface"
+msgstr "Quadrante"
+
+msgid "Configure"
+msgstr "Configurare"
+
+msgid "Disable"
+msgstr "Disattivare"
+
+msgid "Enable"
+msgstr "Abilitazione"
 
 #~ msgid "<html><head/><body><p><img src=\":/Dark/folder-open.png\"/> <a href=\"\\&quot;\\&quot;\"><span style=\" text-decoration: underline; color:#55aaff;\">Open Project...</span></a></p></body></html>"
 #~ msgstr "<html><head/><body><p><img src=\":/Dark/folder-open.png\"/> <a href=\"\\&quot;\\&quot;\"><span style=\" text-decoration: underline; color:#55aaff;\">Apri Progetto...</span></a></p></body></html>"

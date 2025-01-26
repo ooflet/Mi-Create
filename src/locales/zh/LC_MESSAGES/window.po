@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "POT-Creation-Date: 2024-01-05 14:27+1100\n"
-"PO-Revision-Date: 2025-01-25 21:44+1100\n"
+"PO-Revision-Date: 2025-01-26 20:49+1100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: zh_CN\n"
@@ -272,6 +272,18 @@ msgstr "从 EasyFace 更新编译器"
 
 msgid "Reset Settings"
 msgstr "重置设置"
+
+msgid "Watchface"
+msgstr "观看界面"
+
+msgid "Configure"
+msgstr "配置"
+
+msgid "Disable"
+msgstr "禁用"
+
+msgid "Enable"
+msgstr "启用"
 
 #~ msgid "<html><head/><body><p><img src=\":/Dark/folder-open.png\"/> <a href=\"\\&quot;\\&quot;\"><span style=\" text-decoration: underline; color:#55aaff;\">Open Project...</span></a></p></body></html>"
 #~ msgstr "<html><head/><body><p><img src=\":/Dark/folder-open.png\"/> <a href=\"\\&quot;\\&quot;\"><span style=\" text-decoration: underline; color:#55aaff;\">打开项目...</span></p></body></html>"

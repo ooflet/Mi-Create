@@ -273,3 +273,14 @@ msgstr ""
 msgid "Reset Settings"
 msgstr ""
 
+msgid "Watchface"
+msgstr ""
+
+msgid "Configure"
+msgstr ""
+
+msgid "Disable"
+msgstr ""
+
+msgid "Enable"
+msgstr ""

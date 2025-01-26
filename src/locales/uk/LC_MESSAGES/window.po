@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "POT-Creation-Date: 2024-01-05 14:27+1100\n"
-"PO-Revision-Date: 2025-01-25 21:49+1100\n"
+"PO-Revision-Date: 2025-01-26 20:49+1100\n"
 "Last-Translator: Serhii Horichenko <mail@sgg.im>\n"
 "Language-Team: \n"
 "Language: uk\n"
@@ -246,7 +246,7 @@ msgid "Device type"
 msgstr "Тип пристрою"
 
 msgid "Watchface ID (9 digits)"
-msgstr "Ідентифікатор циферблата (9 цифр)"
+msgstr "Ідентифікатор інтерфейсу (9 цифр)"
 
 msgid "Export..."
 msgstr "Експорт..."
@@ -274,6 +274,18 @@ msgstr "Компілятор оновлень від EasyFace"
 
 msgid "Reset Settings"
 msgstr "Скидання налаштувань"
+
+msgid "Watchface"
+msgstr "Iнтерфейсу"
+
+msgid "Configure"
+msgstr "Налаштувати"
+
+msgid "Disable"
+msgstr "Вимкнути"
+
+msgid "Enable"
+msgstr "Увімкнути"
 
 #~ msgid ""
 #~ "<html><head/><body><p><img src=\":/Dark/folder-open.png\"/> <a "
