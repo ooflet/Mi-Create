@@ -102,13 +102,13 @@ class Scene(QGraphicsScene):
                         "X": item.pos().x(),
                         "Y": item.pos().y()
                     },
-                    "center": {
-                        "X": item.pos().x() + (item.rect().width() / 2),
-                        "Y": item.pos().y() + (item.rect().height() / 2)
-                    },
                     "bottomRight": {
                         "X": item.pos().x() + item.rect().width(),
                         "Y": item.pos().y() + item.rect().height()
+                    },
+                    "center": {
+                        "X": item.pos().x() + (item.rect().width() / 2),
+                        "Y": item.pos().y() + (item.rect().height() / 2)
                     }
                 }
 
@@ -117,13 +117,13 @@ class Scene(QGraphicsScene):
                 "X": 0,
                 "Y": 0
             },
-            "center": {
-                "X": self.sceneRect().width() / 2,
-                "Y": self.sceneRect().height() / 2
-            },
             "bottomRight": {
                 "X": self.sceneRect().width(),
                 "Y": self.sceneRect().height()
+            },
+            "center": {
+                "X": self.sceneRect().width() / 2,
+                "Y": self.sceneRect().height() / 2
             }
         }
 
