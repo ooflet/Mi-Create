@@ -1,5 +1,5 @@
 <br />
-<h2 align="center"> Mi Create </h2>
+<h1 align="center"> Mi Create </h1>
 <p align="center"> Unofficial watchface creator for Xiaomi Wearables. Compatible with all Xiaomi wearables made ~2021 and above </p>
 
 <p align="center">
