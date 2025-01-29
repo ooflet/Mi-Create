@@ -412,9 +412,18 @@ class CoreDialog(QDialog):
         self.configurePageId = QHBoxLayout()
         self.configurePageIdTitle = QLabel()
         
-        self.configurePageIdField = QSpinBox()
-        self.configurePageIdField.setRange(100000000, 999999999) # set to only allow numbers with 9 digits
+        def enforce9Digits():
+            text = self.configurePageIdField.text()
+            cursorPos = self.configurePageIdField.cursorPosition()
+            if len(text) > 9:
+                self.configurePageIdField.setText(text[:9])  # Trim extra digits
+            elif len(text) < 9:
+                self.configurePageIdField.setText(text.ljust(9, '0'))
+            self.configurePageIdField.setCursorPosition(cursorPos)
+
+        self.configurePageIdField = QLineEdit()
         self.configurePageIdField.setFixedWidth(175)
+        self.configurePageIdField.textChanged.connect(enforce9Digits)
 
         self.configurePageName = QHBoxLayout()
         self.configurePageNameTitle = QLabel()

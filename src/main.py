@@ -1791,7 +1791,7 @@ class WatchfaceEditor(QMainWindow):
         self.coreDialog.configurePagePreviewField.clear()
         self.coreDialog.configurePagePreviewField.addItems(self.resourceImages)
 
-        self.coreDialog.configurePageIdField.setValue(int(currentProject.getId()))
+        self.coreDialog.configurePageIdField.setText(currentProject.getId())
         self.coreDialog.configurePageNameField.setText(currentProject.getTitle())
         self.coreDialog.configurePageDeviceField.setCurrentText(list(self.WatchData.modelID.keys())[list(self.WatchData.modelID.values()).index(currentProject.getDeviceType())])
         self.coreDialog.configurePagePreviewField.setCurrentText(currentProject.getThumbnail())
