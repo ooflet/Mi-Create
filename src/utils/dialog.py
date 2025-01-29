@@ -422,6 +422,7 @@ class CoreDialog(QDialog):
             self.configurePageIdField.setCursorPosition(cursorPos)
 
         self.configurePageIdField = QLineEdit()
+        self.configurePageIdField.setValidator(QIntValidator())
         self.configurePageIdField.setFixedWidth(175)
         self.configurePageIdField.textChanged.connect(enforce9Digits)
 
