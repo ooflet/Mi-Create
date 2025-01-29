@@ -206,6 +206,8 @@ class Scene(QGraphicsScene):
             return now.strftime("%d")
         elif source == "Month":
             return now.strftime("%m")
+        elif source == "Year":
+            return now.strftime("%Y")
         elif source == "Week":
             return now.strftime("%w")
         elif source == "AM/PM":
