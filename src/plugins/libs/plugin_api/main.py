@@ -36,4 +36,6 @@ class PluginAPI:
 
     def delete_library(self, library_name):
         libs_folder = os.path.join(self.plugin_loader.folder, "libs")
-        shutil.rmtree(os.path.join(libs_folder, library_name))
+        module_path = os.path.join(libs_folder, library_name)
+        if os.path.exists(module_path):
+            shutil.rmtree(module_path)
