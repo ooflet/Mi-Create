@@ -2679,6 +2679,12 @@
             "tip": "Pedometry goal achievement rate (percentage)"
         },
         {
+            "string": "Current step (kilometer)",
+            "id_fprj": "1821",
+            "id_gmf": "",
+            "tip": "Pedometry goal achievement rate (kilometer)"
+        },
+        {
             "string": "Active Calorie",
             "id_fprj": "0823",
             "id_gmf": "",
