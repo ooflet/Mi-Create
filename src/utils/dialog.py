@@ -534,7 +534,7 @@ class CoreDialog(QDialog):
                 pluginDelete = QToolButton()
 
                 pluginName.setText(plugin["name"])
-                pluginLocation.setText(f"{plugin["author"]} • {plugin["version"]}")
+                pluginLocation.setText(f"{plugin['author']} • {plugin['version']}")
                 pluginLocation.setStyleSheet("color: palette(midlight)")
                 pluginDescription.setText(plugin["description"])
                 pluginDescription.setWordWrap(True)
