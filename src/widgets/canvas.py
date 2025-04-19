@@ -1264,7 +1264,7 @@ class ImagelistWidget(ImageWidget):
         else:
             if self.previewIndex != None:
                 self.pixmapItem.setPixmap(self.imagelist[self.getLastValidListIndex(self.previewIndex)])
-            elif self.previewIndex == None and self.defaultValue != None:
+            elif self.previewIndex == None and self.defaultValue != None and self.getLastValidListIndex(self.defaultValue) != None:
                 self.pixmapItem.setPixmap(self.imagelist[self.getLastValidListIndex(self.defaultValue)])
             else:
                 self.pixmapItem.setPixmap(self.imagelist[next(iter(self.imagelist))])
