@@ -1,0 +1,79 @@
+# Translation for Mi Create.
+# FIRST AUTHOR <ooflet@proton.me>, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.0\n"
+"POT-Creation-Date: 2024-01-02 11:05+1100\n"
+"PO-Revision-Date: 2025-04-20 12:10+1000\n"
+"Last-Translator: billabongbruno\n"
+"Language-Team: billabongbruno\n"
+"Language: pt\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+"X-Generator: Poedit 3.5\n"
+
+msgid "You have unsaved project(s) open. Save and quit?"
+msgstr "Tem um ou mais projetos não guardados abertos. Guardar e sair?"
+
+msgid "An urgent update {version} was released! The app will now update."
+msgstr "Foi lançada uma atualização urgente {version}! A aplicação será agora atualizada."
+
+msgid "A new update has been found (v{version}). Would you like to update now?"
+msgstr "Foi encontrada uma nova atualização (v{version}). Gostaria de atualizar agora?"
+
+msgid "Widget {shape} not implemented in ObjectIcon(), please report as issue."
+msgstr "Widget {shape} não implementado em ObjectIcon(), por favor comunique o problema."
+
+msgid "Failed to obtain currentItem"
+msgstr "Falha ao obter currentItem"
+
+msgid ""
+"No object found in widget list that has the name of currently selected graphics item: "
+msgstr ""
+"Não foi encontrado nenhum objeto na lista de widgets que tenha o nome doitem gráfico "
+"atualmente selecionado: "
+
+msgid "Error occured during property update: Object not found!"
+msgstr "Ocorreu um erro durante a atualização da propriedade: Objeto não encontrado!"
+
+msgid "Unable to find"
+msgstr "Não foi possível encontrar"
+
+msgid "Select Folder..."
+msgstr "Selecionar pasta..."
+
+msgid "Are you sure you want to reset all dock widget positions?"
+msgstr "Tem a certeza de que pretende repor todas as posições dos widgets de ancoragem?"
+
+msgid "Are you sure you want to create your project in the directory of this program?"
+msgstr "Tem a certeza de que pretende criar o seu projeto no diretório deste programa?"
+
+msgid "Failed to createNewWorkspace: "
+msgstr "Falha a createNewWorkspace: "
+
+msgid "Cannot open project: "
+msgstr "Não é possível abrir o projeto: "
+
+msgid "Failed to create a new project: "
+msgstr "Falha ao criar um novo projeto: "
+
+msgid "Open Project..."
+msgstr "Abrir Projeto..."
+
+msgid "Failed to open project: "
+msgstr "Falha ao abrir o projeto: "
+
+msgid "Failed to save: "
+msgstr "Não foi possível guardar: "
+
+msgid "Failed to save project: "
+msgstr "Não fois possível guardar o projeto: "
+
+msgid "Project saved at "
+msgstr "Projeto guardado em "
+
+msgid "Save project before building?"
+msgstr "Guardar o projeto antes de o construir?"
