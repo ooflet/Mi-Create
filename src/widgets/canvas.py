@@ -1227,11 +1227,15 @@ class ImagelistWidget(ImageWidget):
             
             print(self.getLastValidListIndex(self.defaultValue))
 
+            if self.getLastValidListIndex(self.defaultValue) == None or self.getLastValidListIndex(livePreviewIndex) == None:
+                self.pixmapItem.setPixmap(self.imagelist[next(iter(self.imagelist))])
+                return
+
             if livePreviewIndex != None:
                 self.pixmapItem.setPixmap(self.imagelist[self.getLastValidListIndex(livePreviewIndex)])
             elif self.previewIndex != None:
                 self.pixmapItem.setPixmap(self.imagelist[self.getLastValidListIndex(self.previewIndex)])
-            elif self.previewIndex == None and self.defaultValue != None and self.getLastValidListIndex(self.defaultValue) != None:
+            elif self.previewIndex == None and self.defaultValue != None:
                 self.pixmapItem.setPixmap(self.imagelist[self.getLastValidListIndex(self.defaultValue)])
             else:
                 self.pixmapItem.setPixmap(self.imagelist[next(iter(self.imagelist))])
@@ -1262,9 +1266,13 @@ class ImagelistWidget(ImageWidget):
             if endPreview:
                 self.pixmapItem.setPixmap(self.imagelist[0])    
         else:
+            if self.getLastValidListIndex(self.defaultValue) == None or self.getLastValidListIndex(self.previewIndex) == None:
+                self.pixmapItem.setPixmap(self.imagelist[next(iter(self.imagelist))])
+                return
+            
             if self.previewIndex != None:
                 self.pixmapItem.setPixmap(self.imagelist[self.getLastValidListIndex(self.previewIndex)])
-            elif self.previewIndex == None and self.defaultValue != None and self.getLastValidListIndex(self.defaultValue) != None:
+            elif self.previewIndex == None and self.defaultValue != None:
                 self.pixmapItem.setPixmap(self.imagelist[self.getLastValidListIndex(self.defaultValue)])
             else:
                 self.pixmapItem.setPixmap(self.imagelist[next(iter(self.imagelist))])
