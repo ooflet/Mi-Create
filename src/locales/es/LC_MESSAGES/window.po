@@ -1,0 +1,214 @@
+# Window Translation for Mi Create.
+# FIRST AUTHOR <ooflet@proton.me>, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.0\n"
+"POT-Creation-Date: 2024-01-05 14:27+1100\n"
+"PO-Revision-Date: 2025-04-24 12:39-0600\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: es_MX\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+"X-Generator: Poedit 3.6\n"
+
+msgid "Mi Create"
+msgstr "Mi Create"
+
+msgid "Save..."
+msgstr "Guardar..."
+
+msgid "Save as..."
+msgstr "Guardar como..."
+
+msgid "About Mi Create"
+msgstr "Acerca de Mi Create"
+
+msgid "Settings"
+msgstr "Configuración"
+
+msgid "Build..."
+msgstr "Compilar..."
+
+msgid "Build"
+msgstr "Compilar"
+
+msgid "Explorer"
+msgstr "Explorador"
+
+msgid "Attributes"
+msgstr "Atributos"
+
+msgid "Exit"
+msgstr "Salir"
+
+msgid "Edit"
+msgstr "Editar"
+
+msgid "File"
+msgstr "Archivo"
+
+msgid "Layout"
+msgstr "Diseño"
+
+msgid "New..."
+msgstr "Nuevo..."
+
+msgid "New File"
+msgstr "Nuevo archivo"
+
+msgid "Open..."
+msgstr "Abrir..."
+
+msgid "Open File"
+msgstr "Abrir archivo"
+
+msgid "Undo"
+msgstr "Deshacer"
+
+msgid "Redo"
+msgstr "Rehacer"
+
+msgid "About Qt"
+msgstr "Acerca de Qt"
+
+msgid "Third Party Notices"
+msgstr "Notificación a terceros"
+
+msgid "Unpack..."
+msgstr "Desempaquetar..."
+
+msgid "Cut"
+msgstr "Cortar"
+
+msgid "Copy"
+msgstr "Copiar"
+
+msgid "Paste"
+msgstr "Pegar"
+
+msgid "Project Source Code"
+msgstr "Código fuente del proyecto"
+
+msgid "Resize Images"
+msgstr "Redimensionar imágenes"
+
+msgid "Image"
+msgstr "Imagen"
+
+msgid "Image List"
+msgstr "Lista de imágenes"
+
+msgid "Digital Number"
+msgstr "Número digital"
+
+msgid "Analog Display"
+msgstr "Reloj analógico"
+
+msgid "Arc Progress"
+msgstr "Barra de progreso circular"
+
+msgid "Documentation"
+msgstr "Documentación"
+
+msgid ""
+"<html><head/><body><p><img src=\":/Dark/folder-open.png\"/> <a "
+"href=\"\\&quot;\\&quot;\"><span style=\" text-decoration: underline; "
+"color:#55aaff;\">Open Project...</span></a></p></body></html>"
+msgstr ""
+"<html><head/><body><p><img src=\":/Dark/folder-open.png\"/> <a "
+"href=\"\\&quot;\\&quot;\"><span style=\" text-decoration: underline; "
+"color:#55aaff;\">Abrir Proyecto...</span></a></p></body></html>"
+
+msgid "Welcome"
+msgstr "Bienvenida"
+
+msgid ""
+"<html><head/><body><p><img src=\":/Dark/file-plus.png\"/> <a href=\"\\&quot;"
+"\\&quot;\"><span style=\" text-decoration: underline; color:#55aaff;\">New "
+"Project...</span></a></p></body></html>"
+msgstr ""
+"<html><head/><body><p><img src=\":/Dark/file-plus.png\"/> <a href=\"\\&quot;"
+"\\&quot;\"><span style=\" text-decoration: underline; color:#55aaff;"
+"\">Nuevo Proyecto...</span></a></p></body></html>"
+
+msgid "Help"
+msgstr "Ayuda"
+
+msgid "About"
+msgstr "Acerca de"
+
+msgid "View"
+msgstr "Vista"
+
+msgid "Toolbars"
+msgstr "Barras de herramientas"
+
+msgid "Tools"
+msgstr "Herramientas"
+
+msgid "Create"
+msgstr "Crear"
+
+msgid "Project"
+msgstr "Proyecto"
+
+msgid "Properties"
+msgstr "Propiedades"
+
+msgid "File Toolbar"
+msgstr "Barra de herramientas de archivo"
+
+msgid "toolBar_2"
+msgstr "toolBar_2"
+
+msgid "toolBar"
+msgstr "toolBar"
+
+msgid "New Project..."
+msgstr "Nuevo Proyecto..."
+
+msgid "Select device"
+msgstr "Seleccionar dispositivo"
+
+msgid "Project name"
+msgstr "Nombre del proyecto"
+
+msgid "Create project..."
+msgstr "Crear proyecto..."
+
+msgid "Project location"
+msgstr "Ubicación del proyecto"
+
+msgid "Build Project..."
+msgstr "Compilar proyecto..."
+
+msgid "Configure project..."
+msgstr "Configurar proyecto..."
+
+msgid "Watchface name"
+msgstr "Nombre de la esfera de reloj"
+
+msgid "Watchface thumbnail"
+msgstr "Miniatura de la esfera de reloj"
+
+msgid "Build project..."
+msgstr "Compilar proyecto..."
+
+msgid "Building project..."
+msgstr "Compilando proyecto..."
+
+msgid "Build results..."
+msgstr "Resultados de compilación..."
+
+msgid "Select resource..."
+msgstr "Seleccionar recurso..."
+
+msgid "..."
+msgstr "..."
+
+msgid "Search:"
+msgstr "Buscar:"
