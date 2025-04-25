@@ -1,11 +1,11 @@
-# Translation for Mi Create.
+# Main Translation for Mi Create.
 # FIRST AUTHOR <ooflet@proton.me>, 2024.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "POT-Creation-Date: 2024-01-02 11:05+1100\n"
-"PO-Revision-Date: 2025-04-22 18:20-0600\n"
+"PO-Revision-Date: 2025-04-25 12:02-0600\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: es_MX\n"
@@ -22,9 +22,9 @@ msgid "An urgent update {version} was released! The app will now update."
 msgstr ""
 "¡Una versión urgente {version} fue lanzada! La aplicación se actualizará."
 
-msgid "A new update has been found (v{version}). Would you like to update now?"
+msgid "A new update has been found ({version}). Would you like to update now?"
 msgstr ""
-"Una nueva actualización fue encontrada (v{version}). ¿Te gustaráa actualizar "
+"Una nueva actualización fue encontrada {version}. ¿Te gustaría actualizar "
 "ahora?"
 
 msgid "Widget {shape} not implemented in ObjectIcon(), please report as issue."
@@ -51,6 +51,9 @@ msgstr "No se puede encontrar"
 
 msgid "Select Folder..."
 msgstr "Seleccionar carpeta..."
+
+msgid "Add Image..."
+msgstr "Añadir imagen..."
 
 msgid "Are you sure you want to reset all dock widget positions?"
 msgstr ""
@@ -89,3 +92,26 @@ msgstr "Proyecto guardado en "
 
 msgid "Save project before building?"
 msgstr "¿Guardar proyecto antes de compilar?"
+
+msgid "Create Widget"
+msgstr "Crear widget"
+
+msgid "Please set the watchface's name and thumbnail before building!"
+msgstr ""
+"Por favor, elige el nombre y la miniatura de la esfera de reloj antes de "
+"compilar!"
+
+msgid ""
+"This watch does not support ID assignment, custom IDs will not be applied."
+msgstr ""
+"Este dispositivo no admite la asignación de ID, no se aplicará el ID "
+"personalizado."
+
+msgid "Wine was not found."
+msgstr "No se encontró Wine."
+
+msgid "Building watchface..."
+msgstr "Compilando esfera de reloj..."
+
+msgid "Watchface built successfully at "
+msgstr "Esfera de reloj compilada correctamente en: "

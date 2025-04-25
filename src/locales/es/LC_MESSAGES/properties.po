@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "POT-Creation-Date: 2024-01-02 11:05+1100\n"
-"PO-Revision-Date: 2025-04-22 18:32-0600\n"
+"PO-Revision-Date: 2025-04-25 13:37-0600\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: es_MX\n"
@@ -15,11 +15,41 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 "X-Generator: Poedit 3.6\n"
 
+msgid "Theme"
+msgstr "Tema"
+
+msgid "Language"
+msgstr "Idioma"
+
+msgid "Check for Updates"
+msgstr "Comprobar actualizaciones"
+
+msgid "Canvas"
+msgstr "Espacio de trabajo"
+
+msgid "Snap to Guides"
+msgstr "Ajustar a las guías"
+
+msgid "Clip to Device Shape"
+msgstr "Recortar a forma del dispositivo"
+
+msgid "Show Device Outline"
+msgstr "Mostrar contorno del dispisitivo"
+
+msgid "Antialiasing"
+msgstr "Antialias"
+
+msgid "Image Interpolation"
+msgstr "Interpolación de imagenes"
+
+msgid "Plugins"
+msgstr "Complementos"
+
 msgid "General"
 msgstr "General"
 
 msgid "Widget Type"
-msgstr "Tipo de widget"
+msgstr "Tipo de Widget"
 
 msgid "Name"
 msgstr "Nombre"
@@ -49,13 +79,16 @@ msgid "Minute Hand Smooth"
 msgstr "Suavizar manecilla de minutos"
 
 msgid "Analog Properties"
-msgstr "Propiedades de reloj análogo"
+msgstr "Propiedades de reloj análogico"
 
 msgid "Background"
 msgstr "Fondo"
 
 msgid "Image"
 msgstr "Imagen"
+
+msgid "Alignment"
+msgstr "Alineación"
 
 msgid "Anchor Point"
 msgstr "Punto de anclaje"
@@ -94,10 +127,10 @@ msgid "Maximum Value"
 msgstr "Valor máximo"
 
 msgid "Minimum Step Value"
-msgstr "Valor de paso minimo"
+msgstr "Valor de salto mínimo"
 
 msgid "Step Value"
-msgstr "Valor de paso"
+msgstr "Valor de salto"
 
 msgid "Data"
 msgstr "Datos"
@@ -120,5 +153,44 @@ msgstr "Dígitos"
 msgid "Spacing"
 msgstr "Espaciado"
 
-msgid "Blanking"
-msgstr "Vaciado"
+msgid "Hide Zeroes"
+msgstr "Ocultar ceros"
+
+msgid "Image List"
+msgstr "Lista de imágenes"
+
+msgid "Image Count"
+msgstr "Numero de imágenes"
+
+msgid "Index"
+msgstr "Índice"
+
+msgid "Show Decimals"
+msgstr "Mostrar decimales"
+
+msgid "Number"
+msgstr "Numero"
+
+msgid "Negative Sign"
+msgstr "Signo negativo"
+
+msgid "Decimal Point"
+msgstr "Punto decimal"
+
+msgid "Decimal"
+msgstr "Decimal"
+
+msgid "Start X"
+msgstr "Inicio X"
+
+msgid "Start Y"
+msgstr "Inicio Y"
+
+msgid "End X"
+msgstr "Fin X"
+
+msgid "End Y"
+msgstr "Fin Y"
+
+msgid "Flat Ends"
+msgstr "Puntas planas"

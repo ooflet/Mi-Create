@@ -1,11 +1,12 @@
 # Window Translation for Mi Create.
 # FIRST AUTHOR <ooflet@proton.me>, 2024.
 #
+#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "POT-Creation-Date: 2024-01-05 14:27+1100\n"
-"PO-Revision-Date: 2025-04-24 12:39-0600\n"
+"PO-Revision-Date: 2025-04-25 13:36-0600\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: es_MX\n"
@@ -47,6 +48,9 @@ msgstr "Salir"
 
 msgid "Edit"
 msgstr "Editar"
+
+msgid "Search..."
+msgstr "Buscar..."
 
 msgid "File"
 msgstr "Archivo"
@@ -114,26 +118,8 @@ msgstr "Barra de progreso circular"
 msgid "Documentation"
 msgstr "Documentación"
 
-msgid ""
-"<html><head/><body><p><img src=\":/Dark/folder-open.png\"/> <a "
-"href=\"\\&quot;\\&quot;\"><span style=\" text-decoration: underline; "
-"color:#55aaff;\">Open Project...</span></a></p></body></html>"
-msgstr ""
-"<html><head/><body><p><img src=\":/Dark/folder-open.png\"/> <a "
-"href=\"\\&quot;\\&quot;\"><span style=\" text-decoration: underline; "
-"color:#55aaff;\">Abrir Proyecto...</span></a></p></body></html>"
-
 msgid "Welcome"
 msgstr "Bienvenida"
-
-msgid ""
-"<html><head/><body><p><img src=\":/Dark/file-plus.png\"/> <a href=\"\\&quot;"
-"\\&quot;\"><span style=\" text-decoration: underline; color:#55aaff;\">New "
-"Project...</span></a></p></body></html>"
-msgstr ""
-"<html><head/><body><p><img src=\":/Dark/file-plus.png\"/> <a href=\"\\&quot;"
-"\\&quot;\"><span style=\" text-decoration: underline; color:#55aaff;"
-"\">Nuevo Proyecto...</span></a></p></body></html>"
 
 msgid "Help"
 msgstr "Ayuda"
@@ -144,11 +130,20 @@ msgstr "Acerca de"
 msgid "View"
 msgstr "Vista"
 
-msgid "Toolbars"
-msgstr "Barras de herramientas"
-
-msgid "Tools"
+msgid "Toolbar"
 msgstr "Herramientas"
+
+msgid "Zoom"
+msgstr "Zoom"
+
+msgid "Zoom In"
+msgstr "Acercar"
+
+msgid "Zoom Out"
+msgstr "Alejar"
+
+msgid "Full Screen"
+msgstr "Pantalla completa"
 
 msgid "Create"
 msgstr "Crear"
@@ -158,15 +153,6 @@ msgstr "Proyecto"
 
 msgid "Properties"
 msgstr "Propiedades"
-
-msgid "File Toolbar"
-msgstr "Barra de herramientas de archivo"
-
-msgid "toolBar_2"
-msgstr "toolBar_2"
-
-msgid "toolBar"
-msgstr "toolBar"
 
 msgid "New Project..."
 msgstr "Nuevo Proyecto..."
@@ -212,3 +198,90 @@ msgstr "..."
 
 msgid "Search:"
 msgstr "Buscar:"
+
+msgid "Resources"
+msgstr "Recursos"
+
+msgid "Add Image..."
+msgstr "Agregar imagen..."
+
+msgid "Layers"
+msgstr "Capas"
+
+msgid "Bring to Front"
+msgstr "Traer al frente"
+
+msgid "Bring Forwards"
+msgstr "Hacia delante"
+
+msgid "Send to Back"
+msgstr "Enviar detrás"
+
+msgid "Send Backwards"
+msgstr "Hacia atrás"
+
+msgid "Delete"
+msgstr "Borrar"
+
+msgid "New Project"
+msgstr "Nuevo proyecto"
+
+msgid "Open Project"
+msgstr "Abrir proyecto"
+
+msgid "Manage Project"
+msgstr "Editar proyecto"
+
+msgid "Close Project"
+msgstr "Cerrar proyecto"
+
+msgid "Tools"
+msgstr "Herramientas"
+
+msgid "File Toolbar"
+msgstr "Barra de herramientas de archivo"
+
+msgid "Device type"
+msgstr "Tipo de dispositivo"
+
+msgid "Watchface ID (9 digits)"
+msgstr "ID de la esfera de reloj (8 digitos)"
+
+msgid "Export..."
+msgstr "Exportar..."
+
+msgid "Export project"
+msgstr "Exportar proyecto"
+
+msgid "Export format"
+msgstr "Formato de exportación"
+
+msgid "Export to"
+msgstr "Exportar a"
+
+msgid "No plugins installed"
+msgstr "No hay complementos instalados"
+
+msgid "Install Plugin from File"
+msgstr "Instalar complemento desde archivo"
+
+msgid "Open Plugins Folder"
+msgstr "Abrir carpeta de complementos"
+
+msgid "Update Compiler from EasyFace"
+msgstr "Actualizar compilador desde Easyface"
+
+msgid "Reset Settings"
+msgstr "Reestablecer configuración"
+
+msgid "Watchface"
+msgstr "Esfera de reloj"
+
+msgid "Configure"
+msgstr "Configurar"
+
+msgid "Disable"
+msgstr "Desactivar"
+
+msgid "Enable"
+msgstr "Activar"
