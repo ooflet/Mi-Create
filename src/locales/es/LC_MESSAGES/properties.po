@@ -1,0 +1,196 @@
+# Property Translation for Mi Create.
+# FIRST AUTHOR <ooflet@proton.me>, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.0\n"
+"POT-Creation-Date: 2024-01-02 11:05+1100\n"
+"PO-Revision-Date: 2025-04-25 13:37-0600\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: es_MX\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+"X-Generator: Poedit 3.6\n"
+
+msgid "Theme"
+msgstr "Tema"
+
+msgid "Language"
+msgstr "Idioma"
+
+msgid "Check for Updates"
+msgstr "Comprobar actualizaciones"
+
+msgid "Canvas"
+msgstr "Espacio de trabajo"
+
+msgid "Snap to Guides"
+msgstr "Ajustar a las guías"
+
+msgid "Clip to Device Shape"
+msgstr "Recortar a forma del dispositivo"
+
+msgid "Show Device Outline"
+msgstr "Mostrar contorno del dispisitivo"
+
+msgid "Antialiasing"
+msgstr "Antialias"
+
+msgid "Image Interpolation"
+msgstr "Interpolación de imagenes"
+
+msgid "Plugins"
+msgstr "Complementos"
+
+msgid "General"
+msgstr "General"
+
+msgid "Widget Type"
+msgstr "Tipo de Widget"
+
+msgid "Name"
+msgstr "Nombre"
+
+msgid "Position"
+msgstr "Posición"
+
+msgid "Width"
+msgstr "Ancho"
+
+msgid "Height"
+msgstr "Alto"
+
+msgid "Appearance"
+msgstr "Apariencia"
+
+msgid "Opacity"
+msgstr "Opacidad"
+
+msgid "Visibility Trigger"
+msgstr "Activador de visibilidad"
+
+msgid "Hour Hand Smooth"
+msgstr "Suavizar manecilla de horas"
+
+msgid "Minute Hand Smooth"
+msgstr "Suavizar manecilla de minutos"
+
+msgid "Analog Properties"
+msgstr "Propiedades de reloj análogico"
+
+msgid "Background"
+msgstr "Fondo"
+
+msgid "Image"
+msgstr "Imagen"
+
+msgid "Alignment"
+msgstr "Alineación"
+
+msgid "Anchor Point"
+msgstr "Punto de anclaje"
+
+msgid "Hour Hand"
+msgstr "Manecilla de horas"
+
+msgid "Minute Hand"
+msgstr "Manecilla de minutos"
+
+msgid "Second Hand"
+msgstr "Manecilla de segundos"
+
+msgid "Progress Bar"
+msgstr "Barra de progreso"
+
+msgid "Radius"
+msgstr "Radio"
+
+msgid "Thickness"
+msgstr "Grosor"
+
+msgid "Start Angle"
+msgstr "Angulo inicial"
+
+msgid "End Angle"
+msgstr "Angulo final"
+
+msgid "Range"
+msgstr "Rango"
+
+msgid "Minimum Value"
+msgstr "Valor mínimo"
+
+msgid "Maximum Value"
+msgstr "Valor máximo"
+
+msgid "Minimum Step Value"
+msgstr "Valor de salto mínimo"
+
+msgid "Step Value"
+msgstr "Valor de salto"
+
+msgid "Data"
+msgstr "Datos"
+
+msgid "Data Source"
+msgstr "Origen de datos"
+
+msgid "Max Value Source"
+msgstr "Origen de valor máximo"
+
+msgid "Images"
+msgstr "Imágenes"
+
+msgid "Default Index"
+msgstr "Índice por defecto"
+
+msgid "Digits"
+msgstr "Dígitos"
+
+msgid "Spacing"
+msgstr "Espaciado"
+
+msgid "Hide Zeroes"
+msgstr "Ocultar ceros"
+
+msgid "Image List"
+msgstr "Lista de imágenes"
+
+msgid "Image Count"
+msgstr "Numero de imágenes"
+
+msgid "Index"
+msgstr "Índice"
+
+msgid "Show Decimals"
+msgstr "Mostrar decimales"
+
+msgid "Number"
+msgstr "Numero"
+
+msgid "Negative Sign"
+msgstr "Signo negativo"
+
+msgid "Decimal Point"
+msgstr "Punto decimal"
+
+msgid "Decimal"
+msgstr "Decimal"
+
+msgid "Start X"
+msgstr "Inicio X"
+
+msgid "Start Y"
+msgstr "Inicio Y"
+
+msgid "End X"
+msgstr "Fin X"
+
+msgid "End Y"
+msgstr "Fin Y"
+
+msgid "Flat Ends"
+msgstr "Puntas planas"
