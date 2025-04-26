@@ -421,10 +421,6 @@ QScrollArea {
   border-style: none;
 }
 
-QScrollArea > QWidget > QWidget {
-  background-color: palette(alternate-base);
-}
-
 /*
  * QSlider
  */
@@ -488,7 +484,6 @@ QListView::item:selected{
     background-color: palette(highlight);
 }
 
-
 QStackedWidget#contentPanel {
     background-color: palette(base)
 }
@@ -541,6 +536,33 @@ QMenu::item {
 
 QMenu::item:selected {
     background-color: palette(highlight);
+}
+
+QFrame#propertyContainer {
+    padding: 4px;
+    background-color: transparent;
+    border: 1px solid palette(light);
+    border-radius: 4px;
+}
+
+QFrame#propertyContainer[focused="true"] {
+    border-color: palette(highlight)
+}
+
+QLabel#propertyHeader {
+    font-size: 8pt;
+}
+
+QLabel#propertyCaption {
+    font-size: 8pt;
+    color: palette(light);
+}
+
+QLineEdit#propertyInput {
+    margin: 0px;
+    padding: 0px;
+    border: none;
+    background-color: transparent;   
 }
 
 QLineEdit#propertyField-input {

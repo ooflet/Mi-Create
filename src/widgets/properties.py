@@ -14,11 +14,11 @@ import threading
 from typing import Any
 from utils.project import FprjProject, XiaomiProject
 
-from PyQt6.QtWidgets import (QStyleOptionViewItem, QStyledItemDelegate, QWidget, QFileDialog, QTreeWidget, QFrame, QHeaderView, QPushButton,
-                               QDialog, QDialogButtonBox, QVBoxLayout, QListWidgetItem, QTreeWidgetItem, QLineEdit, 
-                               QSpinBox, QComboBox, QStyle, QCheckBox, QMessageBox, QAbstractItemView, QApplication)
+from PyQt6.QtWidgets import (QStackedWidget, QStyledItemDelegate, QWidget, QFileDialog, QTreeWidget, QFrame, QHeaderView, QPushButton,
+                               QHBoxLayout, QVBoxLayout, QScrollArea, QTreeWidgetItem, QLineEdit, QSizePolicy,
+                               QSpinBox, QComboBox, QLabel, QCheckBox, QMessageBox, QAbstractItemView, QApplication)
 from PyQt6.QtCore import Qt, pyqtSignal, QPoint, QSize, QModelIndex
-from PyQt6.QtGui import QColor, QPen, QGuiApplication, QIcon, QPalette, QStandardItemModel
+from PyQt6.QtGui import QColor, QPen, QIntValidator, QIcon, QPalette, QStandardItemModel
 from pprint import pprint
 
 from translate import Translator
@@ -50,7 +50,343 @@ class TreeWidgetDelegate(QStyledItemDelegate):
         # Call the base class paint method to paint the item
         super().paint(painter, option, index)
 
-class PropertiesWidget(QWidget):
+class PropertiesWidget(QStackedWidget):
+    propertyChanged = pyqtSignal(object, object)
+    def __init__(self, parent, properties, widgetProperties=False, srcList=None, srcData=None):
+        super().__init__(parent)
+
+        self.clearOnRefresh = True
+        self.ignorePropertyChange = False
+
+        self.properties = {}
+
+        self.sourceList = srcList
+        self.sourceData = srcData
+
+        self.setupProperties(properties, widgetProperties)
+
+    def loadLanguage(self, language):
+        translation = gettext.translation('properties', localedir='locales', languages=[language])
+        translation.install()
+        global _
+        _ = translation.gettext
+
+    def sendPropertyChangedSignal(self, property, value):
+        if not self.ignorePropertyChange:
+            self.propertyChanged.emit(property, value)
+        else:
+            self.ignorePropertyChange = False
+
+    def createLineEdit(self, text, disabled, propertySignalDisabled, srcProperty=""):
+        def onDeselect():
+            lineEdit.clearFocus()
+            if not propertySignalDisabled:
+                self.sendPropertyChangedSignal(srcProperty, lineEdit.text())
+
+        lineEdit = QLineEdit(self)
+        lineEdit.setText(str(text))
+        lineEdit.setObjectName("propertyInput")
+        lineEdit.setDisabled(disabled)
+        lineEdit.editingFinished.connect(onDeselect)
+
+        return lineEdit
+
+    def createStrEdit(self, header, value, caption, srcProperty, disabled):
+        layout = QVBoxLayout()
+        propertyHeader = QLabel(header)
+        propertyHeader.setObjectName("propertyHeader")
+
+        propertyFrame = QFrame()
+        propertyFrame.setObjectName("propertyContainer")
+        propertyLayout = QHBoxLayout()
+        propertyLayout.setContentsMargins(0,0,0,0)
+
+        propertyEdit = self.createLineEdit(value, disabled, False, srcProperty)
+        propertyCaption = QLabel(caption)
+        propertyCaption.setObjectName("propertyCaption")
+
+        propertyFrame.setLayout(propertyLayout)
+        propertyLayout.addWidget(propertyEdit, 1)
+        propertyLayout.addWidget(propertyCaption, 0)
+        
+        layout.addWidget(propertyHeader)
+        layout.addWidget(propertyFrame)
+
+        return propertyEdit, layout
+
+    def createButton(self, text, disabled, property):
+        def onClick():
+            self.sendPropertyChangedSignal(property, "click")
+
+        button = QPushButton(self)
+        button.setText(text)
+        button.setDisabled(disabled)
+        button.clicked.connect(onClick)
+        return button
+    
+    def createSpinBox(self, text, disabled, propertySignalDisabled, srcProperty, minVal=-9999, maxVal=9999):
+        def onChanged():
+            if not propertySignalDisabled:
+                self.sendPropertyChangedSignal(srcProperty, spinBox.text())
+
+        def onDeselect():
+            spinBox.clearFocus()
+
+        validator = QIntValidator()
+
+        spinBox = QLineEdit(self)
+        spinBox.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        spinBox.setValidator(validator)
+
+        if minVal != "none":
+            validator.setBottom(int(minVal))
+        else:
+            validator.setBottom(-2147483647) # max int32 signed integer
+
+        if maxVal != "none":
+            validator.setTop(int(maxVal))
+        else:
+            validator.setTop(2147483647)
+
+        if text == None:
+            text = "0"
+
+        spinBox.setText(int(text))
+        spinBox.setDisabled(disabled)
+        spinBox.textChanged.connect(onChanged)
+        spinBox.editingFinished.connect(onDeselect)
+        return spinBox
+    
+    def createIntEdit(self, header, value, caption, min, max, srcProperty, disabled):
+        layout = QVBoxLayout()
+
+        propertyHeader = QLabel(header)
+        propertyHeader.setObjectName("propertyHeader")
+
+        propertyFrame = QFrame()
+        propertyFrame.setObjectName("propertyContainer")
+        propertyLayout = QHBoxLayout()
+
+        propertyEdit = self.createSpinBox(value, disabled, False, srcProperty, min, max)
+        propertyCaption = QLabel(caption)
+        propertyCaption.setObjectName("propertyCaption")
+
+        propertyFrame.setLayout(propertyLayout)
+        propertyLayout.addWidget(propertyEdit, 1)
+        propertyLayout.addWidget(propertyCaption, 0)
+        
+        layout.addWidget(propertyHeader)
+        layout.addWidget(propertyFrame)
+
+    def createDualIntEdit(self, header, int1, int2, int1Caption, int2Caption, min, max, src1, src2, disabled):
+        layout = QVBoxLayout()
+        propertyHeader = QLabel(header)
+        propertyHeader.setObjectName("propertyHeader")
+
+        inputLayout = QHBoxLayout()
+        inputLayout.setContentsMargins(0,0,0,0)
+        
+        intEdit1Frame = QFrame()
+        intEdit1Frame.setObjectName("propertyContainer")
+        intEdit1Layout = QHBoxLayout()
+        intEdit1Layout.setContentsMargins(0,0,0,0)
+
+        intEdit1 = self.createSpinBox(int1, disabled, False, src1, min, max)
+        intEdit1Caption = QLabel(int1Caption)
+        intEdit1Caption.setObjectName("propertyCaption")
+
+        intEdit1Frame.setLayout(intEdit1Layout)
+        intEdit1Layout.addWidget(intEdit1, 1)
+        intEdit1Layout.addWidget(intEdit1Caption, 0)
+
+        intEdit2Frame = QFrame()
+        intEdit2Frame.setObjectName("propertyContainer")
+        intEdit2Layout = QHBoxLayout()
+        
+        intEdit2 = self.createSpinBox(int2, disabled, False, src2, min, max)
+        intEdit2Caption = QLabel(int2Caption)
+        intEdit2Caption.setObjectName("propertyCaption")
+
+        intEdit2Frame.setLayout(intEdit2Layout)
+        intEdit2Layout.addWidget(intEdit2, 1)
+        intEdit2Layout.addWidget(intEdit2Caption, 0)
+
+        inputLayout.addWidget(intEdit1Frame)
+        inputLayout.addWidget(intEdit2Frame)
+
+        layout.addWidget(propertyHeader)
+        layout.addLayout(inputLayout)
+
+        return layout
+    
+    def createComboBox(self, items, selected, srcProperty, editable):
+        def onChanged():
+            comboBox.clearFocus()
+            self.sendPropertyChangedSignal(srcProperty, comboBox.currentText())
+
+        def wheelEvent(event):
+            if comboBox.hasFocus():
+                return QComboBox.wheelEvent(comboBox, event)
+            else:
+                event.ignore()
+
+        comboBox = QComboBox(self)
+        comboBox.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        comboBox.addItems(items)
+        comboBox.wheelEvent = wheelEvent
+
+        if editable:
+            comboBox.setEditable(True)
+        else:
+            comboBox.setCursor(Qt.CursorShape.PointingHandCursor)
+            
+        if selected:
+            if isinstance(selected, int) or selected.isnumeric():
+                comboBox.setCurrentIndex(int(selected))
+            else:
+                if selected in items:
+                    comboBox.setCurrentIndex(items.index(selected))
+
+        comboBox.activated.connect(onChanged)
+        return comboBox
+    
+    def createAlignmentWidget(self, selected, srcProperty):
+        frame = QFrame()
+
+    def createCheckBox(self, checked, disabled, srcProperty, propertySignalDisabled=False):
+        def onChecked():
+            self.sendPropertyChangedSignal(srcProperty, checkBox.isChecked())
+
+        checkBox = QCheckBox()
+        if checked == None or checked == "":
+            checked = False
+        checkBox.setChecked(checked)
+        checkBox.setDisabled(disabled)
+        if propertySignalDisabled == False:
+            checkBox.stateChanged.connect(onChecked)
+        return checkBox
+    
+    def createCategory(self, parent, name: str, seperator: bool) -> QVBoxLayout:
+        layout = QVBoxLayout()
+
+        if seperator:
+            line = QFrame()
+            line.setFrameShape(QFrame.Shape.HLine)
+            line.setFrameShadow(QFrame.Shadow.Sunken)
+            layout.addWidget(line)
+
+        category = QLabel(name)
+        layout.addWidget(category)
+
+        return layout
+
+    def addProperty(self, layout: QVBoxLayout, propertyLayout):
+        propertyItemLayout = QHBoxLayout()
+        propertyText = QLabel(_(property))
+        propertyItemLayout.addWidget(propertyText)
+        propertyItemLayout.addLayout(propertyLayout)
+
+        layout.addLayout(propertyItemLayout)
+    
+    def addProperties(self, propertiesList, parent, properties):
+        for key, property in properties.items():
+            print(property)
+            if not property.get("string"): # category
+                category = self.createCategory(parent, _(key), True)
+                parent.addLayout(category)
+                self.addProperties(propertiesList, category, property)
+            else:
+                propertyValue = property["value"]
+                propertyDisabled = False
+
+                if property.get("disabled") and property["disabled"] == "true":
+                    propertyDisabled = True
+
+                if property["type"] == "str":
+                    propertyWidget, propertyLayout = self.createStrEdit(property["string"], propertyValue, "str", key, propertyDisabled)
+                elif property["type"] == "btn":
+                    propertyWidget, propertyLayout = self.createButton(propertyValue, propertyDisabled, key)
+                elif property["type"] == "img":
+                    propertyWidget, propertyLayout = self.createStrEdit(property["string"], propertyValue, "img", key, propertyDisabled)
+                elif property["type"] == "list":
+                    propertyWidget, propertyLayout = self.createStrEdit(property["string"], propertyValue, "list", key, propertyDisabled)
+                elif property["type"] == "imglist":
+                    propertyWidget, propertyLayout = self.createStrEdit(property["string"], propertyValue, "imglist", key, propertyDisabled)
+                elif property["type"] == "numlist":
+                    propertyWidget, propertyLayout = self.createStrEdit(property["string"], propertyValue, "numlist", key, propertyDisabled)
+                elif property["type"] == "int":
+                    propertyWidget, propertyLayout = self.createStrEdit(property["string"], propertyValue, "int", key, propertyDisabled)
+                elif property["type"] == "bool":
+                    #propertyLayout = self.createCheckBox(propertyValue, propertyDisabled, key, False)
+                    continue
+                elif property["type"] == "src":
+                    propertyWidget, propertyLayout = self.createStrEdit(property["string"], propertyValue, "src", propertyDisabled, False)
+
+                propertiesList[key] = propertyWidget
+                parent.addLayout(propertyLayout)
+
+    def setupProperties(self, properties: dict, usingWidgetProperties: bool):
+        emptyPage = QWidget()
+        self.properties["none"] = {
+            "widget": emptyPage,
+            "propertyWidgets": {}
+        }
+        self.addWidget(emptyPage)
+
+        if usingWidgetProperties:
+            for widget, widgetProperties in properties.items():
+                scroll = QScrollArea()
+                scroll.setWidgetResizable(True)
+                propertiesWidget = QWidget()
+                propertiesLayout = QVBoxLayout()
+                propertiesWidget.setLayout(propertiesLayout)
+                self.properties[widget] = {
+                    "widget": scroll,
+                    "propertyWidgets": {}
+                }
+                scroll.setWidget(propertiesWidget)
+                self.addProperties(self.properties[widget]["propertyWidgets"], propertiesLayout, widgetProperties["properties"])
+                propertiesLayout.addStretch()
+                self.addWidget(scroll)
+        else:
+            propertiesWidget = QWidget()
+            propertiesLayout = QVBoxLayout()
+            propertiesWidget.setLayout(propertiesLayout)
+            self.properties = {}
+            self.addProperties(self.properties, propertiesLayout, properties)
+            self.addWidget(propertiesWidget)
+
+    def changePropertiesPage(self, category):
+        self.setCurrentWidget(self.properties[category]["widget"])
+        for key, property in self.properties.items():
+            if key == category:
+                property["widget"].setVisible(True)
+            else:
+                property["widget"].setVisible(False)
+
+    def loadProperties(self, category, values=None, widget=None):
+        if category == None:
+            self.changePropertiesPage("none")
+            return
+
+        self.changePropertiesPage(category)
+        for property, propertyWidget in self.properties[category]["propertyWidgets"].items():
+            if widget != None:
+                value = widget.getProperty(property)
+            else:
+                value = values.get(property)
+
+            if value == None:
+                continue
+
+            if isinstance(propertyWidget, QLineEdit):
+                propertyWidget.setText(value)
+
+
+    def clearProperties(self):
+        self.changePropertiesPage("none")
+
+class LegacyPropertiesWidget(QWidget):
     propertyChanged = pyqtSignal(object, object)
     def __init__(self, window, srcList=None, srcData=None):
         super().__init__()

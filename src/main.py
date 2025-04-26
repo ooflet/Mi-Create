@@ -35,10 +35,10 @@ from PyQt6.QtGui import QIcon, QPixmap, QDesktopServices, QDrag, QImage, QPainte
 from PyQt6.QtCore import Qt, QSettings, QSize, QUrl, pyqtSignal
 from window import FramelessDialog
 
-if platform.system() == "Windows":
-    from window import QMainWindow
-else:
-    from PyQt6.QtWidgets import QMainWindow
+# if platform.system() == "Windows":
+from window import QMainWindow
+# else:
+#     from PyQt6.QtWidgets import QMainWindow
 
 from shutil import which
 from pprint import pprint, pformat
@@ -60,7 +60,7 @@ from utils.exporter import FprjConverter
 from utils.plugin import PluginLoader
 from widgets.canvas import Canvas, ObjectIcon, ImageWidget, NumberWidget, AnalogWidget, ImagelistWidget
 from widgets.explorer import Explorer
-from widgets.properties import PropertiesWidget
+from widgets.properties import PropertiesWidget, LegacyPropertiesWidget
 from widgets.delegates import ResourcesDelegate
 from widgets.editor import Editor, XMLLexer, JsonLexer
 from translate import Translator
@@ -100,10 +100,10 @@ class WatchfaceEditor(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
-        if platform.system() == "Windows":
-            self.titleBar.layout().insertWidget(0, self.ui.menubar, 0, Qt.AlignmentFlag.AlignLeft)
-            self.titleBar.layout().insertStretch(1, 1)
-            self.setMenuWidget(self.titleBar)
+        # if platform.system() == "Windows":
+        self.titleBar.layout().insertWidget(0, self.ui.menubar, 0, Qt.AlignmentFlag.AlignLeft)
+        self.titleBar.layout().insertStretch(1, 1)
+        self.setMenuWidget(self.titleBar)
 
         # Setup WatchData
         logging.info("Initializing WatchData")
@@ -143,12 +143,12 @@ class WatchfaceEditor(QMainWindow):
         self.setupProperties()
 
         logging.info("Initializing Settings")
-        self.settingsWidget = PropertiesWidget(self)
 
         self.setupThemes()
         self.loadSettings()
         self.loadTheme()
 
+        self.settingsWidget = LegacyPropertiesWidget(self, self.settings)
         self.settingsWidget.propertyChanged.connect(lambda property, value: self.setSetting(property, value))
 
         self.pluginLoader = PluginLoader(self)
@@ -841,8 +841,7 @@ class WatchfaceEditor(QMainWindow):
             source = raw.read()
             self.propertiesGMFJson = json.loads(source)
 
-        self.propertiesWidget = PropertiesWidget(self, self.WatchData.modelSourceList,
-                                                    self.WatchData.modelSourceData)
+        self.propertiesWidget = PropertiesWidget(self, self.propertiesFprjJson, True)
         self.propertiesWidget.propertyChanged.connect(lambda *args: setProperty(args))
         self.ui.propertiesWidget.setWidget(self.propertiesWidget)
 
@@ -857,8 +856,7 @@ class WatchfaceEditor(QMainWindow):
                         self.propertiesWidget.loadProperties(self.propertiesFprjJson["widget_line"], currentProject["project"], item,
                                                             self.resourceImages, currentProject["project"].getDeviceType())
                     else:
-                        self.propertiesWidget.loadProperties(self.propertiesFprjJson[itemType], currentProject["project"], item,
-                                                            self.resourceImages, currentProject["project"].getDeviceType())
+                        self.propertiesWidget.loadProperties(itemType, widget=widget)
                 elif isinstance(currentProject["project"], GMFProject):
                     self.propertiesWidget.loadProperties(self.propertiesGMFJson[itemType], currentProject["project"], item,
                                                         self.resourceImages, currentProject["project"].getDeviceType())
@@ -2024,7 +2022,7 @@ class WatchfaceEditor(QMainWindow):
             <head/>
             <body>
                 <p>Mi Create {programVersion}<br/>Visit the <a href="https://github.com/ooflet/Mi-Create/">Github Repo</a> to get help or contribute.</p>
-                <p>Copyright (C) 2024 ooflet<br/>
+                <p>Copyright (C) 2025 ooflet<br/>
                     This program comes with ABSOLUTELY NO WARRANTY.<br/>
                     This is free software, and you are welcome to redistribute it<br/>
                     under certain conditions.</p>

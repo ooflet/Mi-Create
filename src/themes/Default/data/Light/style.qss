@@ -545,6 +545,11 @@ QMenu::item:selected {
     background-color: palette(highlight);
 }
 
+QLabel#propertyHeader {
+    font-size: 8pt;
+    color: palette(disabled)
+}
+
 QLineEdit#propertyField-input {
     border-color: transparent;
     background-color: transparent;

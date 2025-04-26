@@ -5,7 +5,8 @@
             "General": {
                 "WidgetType": {
                     "string": "Widget Type",
-                    "type": "disabled",
+                    "type": "str",
+                    "disabled": "true",
                     "value": "AnalogDisplay"
                 },
                 "widget_name": {
@@ -176,7 +177,8 @@
             "General": {
                 "WidgetType": {
                     "string": "Widget Type",
-                    "type": "disabled",
+                    "type": "str",
+                    "disabled": "true",
                     "value": "CircleProgress"
                 },
                 "widget_name": {
@@ -346,7 +348,8 @@
             "General": {
                 "WidgetType": {
                     "string": "Widget Type",
-                    "type": "disabled",
+                    "type": "str",
+                    "disabled": "true",
                     "value": "LineProgress"
                 },
                 "widget_name": {
@@ -509,7 +512,8 @@
             "General": {
                 "WidgetType": {
                     "string": "Widget Type",
-                    "type": "disabled",
+                    "type": "str",
+                    "disabled": "true",
                     "value": "Image"
                 },
                 "widget_name": {
@@ -535,12 +539,14 @@
                 },
                 "widget_size_width": {
                     "string": "Width",
-                    "type": "disabled",
+                    "type": "int",
+                    "disabled": "true",
                     "value": "48"
                 },
                 "widget_size_height": {
                     "string": "Height",
-                    "type": "disabled",
+                    "type": "int",
+                    "disabled": "true",
                     "value": "48"
                 }
             },
@@ -579,7 +585,8 @@
             "General": {
                 "WidgetType": {
                     "string": "Widget Type",
-                    "type": "disabled",
+                    "type": "str",
+                    "disabled": "true",
                     "value": "ImageList"
                 },
                 "widget_name": {
@@ -605,12 +612,14 @@
                 },
                 "widget_size_width": {
                     "string": "Width",
-                    "type": "disabled",
+                    "type": "int",
+                    "disabled": "true",
                     "value": "48"
                 },
                 "widget_size_height": {
                     "string": "Height",
-                    "type": "disabled",
+                    "type": "int",
+                    "disabled": "true",
                     "value": "48"
                 }
             },
@@ -663,7 +672,8 @@
             "General": {
                 "WidgetType": {
                     "string": "Widget Type",
-                    "type": "disabled",
+                    "type": "str",
+                    "disabled": "true",
                     "value": "Container"
                 },
                 "widget_name": {
@@ -719,7 +729,8 @@
             "General": {
                 "WidgetType": {
                     "string": "Widget Type",
-                    "type": "disabled",
+                    "type": "str",
+                    "disabled": "true",
                     "value": "DigitalNumber"
                 },
                 "widget_name": {
@@ -745,12 +756,14 @@
                 },
                 "widget_size_width": {
                     "string": "Width",
-                    "type": "disabled",
+                    "type": "int",
+                    "disabled": "true",
                     "value": ""
                 },
                 "widget_size_height": {
                     "string": "Height",
-                    "type": "disabled",
+                    "type": "int",
+                    "disabled": "true",
                     "value": ""
                 },
                 "num_alignment": {
