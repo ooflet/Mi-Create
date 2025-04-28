@@ -1,11 +1,17 @@
 import os
 import sys
+import json
 import shutil
-import traceback
 import zipfile
+import platform
+import traceback
+
 from importlib import util
 from configparser import ConfigParser
+
 from PyQt6.QtCore import QSettings
+from PyQt6.QtGui import QIcon, QPixmap
+from PyQt6.QtWidgets import QMessageBox
 
 libs_folder = "plugins/libs"
 
@@ -15,7 +21,7 @@ if os.path.exists(libs_folder) and libs_folder not in sys.path:
 from plugin_api import PluginAPI
 
 class PluginLoader:
-    def __init__(self, main_window, ):
+    def __init__(self, main_window):
         self.settings = QSettings("Mi Create", "Settings")
         self.folder = "plugins"
         self.plugins = {}
@@ -69,7 +75,6 @@ class PluginLoader:
                     "description": config.get("config", "description")
                 }
 
-
     def loadPlugin(self, plugin_name, plugin_path):
         spec = util.spec_from_file_location(plugin_name, plugin_path)
         if spec and spec.loader:
@@ -81,12 +86,37 @@ class PluginLoader:
             return plugin
         
     def installPlugin(self, plugin_path):
+        plugin_zip = zipfile.ZipFile(plugin_path)
         config_file = zipfile.Path(plugin_path, at='config.ini')
         
         config = ConfigParser()
         config.read_file(config_file.open(encoding="utf-8"))
     
+        if platform.system() not in json.loads(config.get("plugin_api", "supported_platforms")):
+            QMessageBox.information(None, "Plugin", "This plugin does not support your OS.")
+            return
+
         plugin_name = config.get("config", "name")
+
+        dialog = QMessageBox()
+
+        dialog.setWindowTitle(plugin_name)
+        dialog.setText(f"Install {plugin_name}?")
+
+        if config.get("config", "icon") != "none":
+            icon = QPixmap()
+            icon.loadFromData(plugin_zip.open(config.get("config", "icon")).read())
+            dialog.setIconPixmap(icon)
+        else:
+            icon = QIcon.fromTheme("application-plugin")
+            dialog.setIconPixmap(icon.pixmap(48, 48))
+
+        dialog.setStandardButtons(QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel)
+
+        result = dialog.exec()
+
+        if result == QMessageBox.StandardButton.Cancel:
+            return
 
         plugin_folder = os.path.join(self.folder, plugin_name)
         os.mkdir(plugin_folder)
