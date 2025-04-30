@@ -5,15 +5,45 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "POT-Creation-Date: 2024-01-02 11:05+1100\n"
-"PO-Revision-Date: 2025-04-20 12:10+1000\n"
+"PO-Revision-Date: 2025-04-29 22:43+0100\n"
 "Last-Translator: billabongbruno\n"
 "Language-Team: billabongbruno\n"
-"Language: pt\n"
+"Language: pt_PT\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
-"X-Generator: Poedit 3.5\n"
+"X-Generator: Poedit 3.6\n"
+
+msgid "Theme"
+msgstr "Tema"
+
+msgid "Language"
+msgstr "Idioma"
+
+msgid "Check for Updates"
+msgstr "Verificar atualizações"
+
+msgid "Canvas"
+msgstr "Tela"
+
+msgid "Snap to Guides"
+msgstr "Ajustar a guias"
+
+msgid "Clip to Device Shape"
+msgstr "Ajustar a forma do dispositivo"
+
+msgid "Show Device Outline"
+msgstr "Mostrar delimitador do dispositivo"
+
+msgid "Antialiasing"
+msgstr "Antialiasing"
+
+msgid "Image Interpolation"
+msgstr "Interpolação de imagem"
+
+msgid "Plugins"
+msgstr "Plugins"
 
 msgid "General"
 msgstr "Geral"
@@ -40,16 +70,16 @@ msgid "Opacity"
 msgstr "Opacidade"
 
 msgid "Visibility Trigger"
-msgstr "Acionador de Visibilidade"
+msgstr "Acionador de visibilidade"
 
 msgid "Hour Hand Smooth"
-msgstr "Ponteiro das horas Suave"
+msgstr "Ponteiro das horas suave"
 
 msgid "Minute Hand Smooth"
-msgstr "Ponteiro dos minutos Suave"
+msgstr "Ponteiro dos minutos suave"
 
 msgid "Analog Properties"
-msgstr "Propriedades Analógicas"
+msgstr "Propriedades do analógico"
 
 msgid "Background"
 msgstr "Fundo"
@@ -57,20 +87,23 @@ msgstr "Fundo"
 msgid "Image"
 msgstr "Imagem"
 
+msgid "Alignment"
+msgstr "Alinhamento"
+
 msgid "Anchor Point"
-msgstr "Ponto de Ancoragem"
+msgstr "Ponto de ancoragem"
 
 msgid "Hour Hand"
-msgstr "Ponteiro das Horas"
+msgstr "Ponteiro das horas"
 
 msgid "Minute Hand"
-msgstr "Ponteiro dos Minutos"
+msgstr "Ponteiro dos minutos"
 
 msgid "Second Hand"
-msgstr "Ponteiro dos Segundos"
+msgstr "Ponteiro dos segundos"
 
 msgid "Progress Bar"
-msgstr "Barra de Progresso"
+msgstr "Barra de progresso"
 
 msgid "Radius"
 msgstr "Raio"
@@ -79,34 +112,34 @@ msgid "Thickness"
 msgstr "Espessura"
 
 msgid "Start Angle"
-msgstr "Ângulo Inicial"
+msgstr "Ângulo inicial"
 
 msgid "End Angle"
-msgstr "Ângulo Final"
+msgstr "Ângulo final"
 
 msgid "Range"
 msgstr "Intervalo"
 
 msgid "Minimum Value"
-msgstr "Valor Mínimo"
+msgstr "Valor mínimo"
 
 msgid "Maximum Value"
-msgstr "Valor Máximo"
+msgstr "Valor máximo"
 
 msgid "Minimum Step Value"
-msgstr "Valor Mínimo do Passo"
+msgstr "Valor mínimo do passo"
 
 msgid "Step Value"
-msgstr "Valor do Passo"
+msgstr "Valor do passo"
 
 msgid "Data"
 msgstr "Dados"
 
 msgid "Data Source"
-msgstr "Origem dos Dados"
+msgstr "Origem dos dados"
 
 msgid "Max Value Source"
-msgstr "Valor Máximo da Origem"
+msgstr "Valor máximo da origem"
 
 msgid "Images"
 msgstr "Imagens"
@@ -120,5 +153,44 @@ msgstr "Dígitos"
 msgid "Spacing"
 msgstr "Espaçamento"
 
-msgid "Blanking"
-msgstr "Supressão"
+msgid "Hide Zeroes"
+msgstr "Esconder zeros"
+
+msgid "Image List"
+msgstr "Lista de imagens"
+
+msgid "Image Count"
+msgstr "Contador de imagens"
+
+msgid "Index"
+msgstr "Índice"
+
+msgid "Show Decimals"
+msgstr "Mostrar decimais"
+
+msgid "Number"
+msgstr "Número"
+
+msgid "Negative Sign"
+msgstr "Sinal negativo"
+
+msgid "Decimal Point"
+msgstr "Ponto decimal"
+
+msgid "Decimal"
+msgstr "Decimal"
+
+msgid "Start X"
+msgstr "Coordenada X inicial"
+
+msgid "Start Y"
+msgstr "Coordenada Y inicial"
+
+msgid "End X"
+msgstr "Coordenada X final"
+
+msgid "End Y"
+msgstr "Coordenada Y final"
+
+msgid "Flat Ends"
+msgstr "Bordas lisas"

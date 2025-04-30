@@ -1,19 +1,20 @@
 # Window Translation for Mi Create.
 # FIRST AUTHOR <ooflet@proton.me>, 2024.
 #
+#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "POT-Creation-Date: 2024-01-05 14:27+1100\n"
-"PO-Revision-Date: 2025-04-20 12:10+1000\n"
+"PO-Revision-Date: 2025-04-29 22:43+0100\n"
 "Last-Translator: billabongbruno\n"
 "Language-Team: billabongbruno\n"
-"Language: pt\n"
+"Language: pt_PT\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
-"X-Generator: Poedit 3.5\n"
+"X-Generator: Poedit 3.6\n"
 
 msgid "Mi Create"
 msgstr "Mi Create"
@@ -25,7 +26,7 @@ msgid "Save as..."
 msgstr "Guardar como..."
 
 msgid "About Mi Create"
-msgstr "Acerca de Mi Create"
+msgstr "Acerca do Mi Create"
 
 msgid "Settings"
 msgstr "Definições"
@@ -34,7 +35,7 @@ msgid "Build..."
 msgstr "Compilação..."
 
 msgid "Build"
-msgstr "Compilação"
+msgstr "Compilar"
 
 msgid "Explorer"
 msgstr "Explorador"
@@ -48,6 +49,9 @@ msgstr "Sair"
 msgid "Edit"
 msgstr "Editar"
 
+msgid "Search..."
+msgstr "Pesquisar..."
+
 msgid "File"
 msgstr "Ficheiro"
 
@@ -58,13 +62,13 @@ msgid "New..."
 msgstr "Novo..."
 
 msgid "New File"
-msgstr "Novo Ficheiro"
+msgstr "Novo ficheiro"
 
 msgid "Open..."
 msgstr "Abrir..."
 
 msgid "Open File"
-msgstr "Abrir Ficheiro"
+msgstr "Abrir ficheiro"
 
 msgid "Undo"
 msgstr "Desfazer"
@@ -76,10 +80,10 @@ msgid "About Qt"
 msgstr "Acerca do Qt"
 
 msgid "Third Party Notices"
-msgstr "Avisos a Terceiros"
+msgstr "Aviso a terceiros"
 
 msgid "Unpack..."
-msgstr "Desempacotar..."
+msgstr "Extrair..."
 
 msgid "Cut"
 msgstr "Cortar"
@@ -91,49 +95,31 @@ msgid "Paste"
 msgstr "Colar"
 
 msgid "Project Source Code"
-msgstr "Código-Fonte do Projeto"
+msgstr "Código-fonte do projeto"
 
 msgid "Resize Images"
-msgstr "Redimensionar Imagens"
+msgstr "Redimensionar imagens"
 
 msgid "Image"
 msgstr "Imagem"
 
 msgid "Image List"
-msgstr "Lista de Imagens"
+msgstr "Lista de imagens"
 
 msgid "Digital Number"
 msgstr "Número Digital"
 
 msgid "Analog Display"
-msgstr "Mostrador Analógico"
+msgstr "Mostrador analógico"
 
 msgid "Arc Progress"
-msgstr "Progresso em Arco"
+msgstr "Progresso em arco"
 
 msgid "Documentation"
 msgstr "Documentação"
 
-msgid ""
-"<html><head/><body><p><img src=\":/Dark/folder-open.png\"/> <a "
-"href=\"\\&quot;\\&quot;\"><span style=\" text-decoration: underline; "
-"color:#55aaff;\">Open Project...</span></a></p></body></html>"
-msgstr ""
-"<html><head/><body><p><img src=\":/Dark/folder-open.png\"/> <a "
-"href=\"\\&quot;\\&quot;\"><span style=\" text-decoration: underline; "
-"color:#55aaff;\">Abrir Projeto...</span></a></p></body></html>"
-
 msgid "Welcome"
 msgstr "Bem-vindo"
-
-msgid ""
-"<html><head/><body><p><img src=\":/Dark/file-plus.png\"/> <a href=\"\\&quot;"
-"\\&quot;\"><span style=\" text-decoration: underline; color:#55aaff;\">New "
-"Project...</span></a></p></body></html>"
-msgstr ""
-"<html><head/><body><p><img src=\":/Dark/file-plus.png\"/> <a href=\"\\&quot;"
-"\\&quot;\"><span style=\" text-decoration: underline; color:#55aaff;\">Novo "
-"Projeto...</span></a></p></body></html>"
 
 msgid "Help"
 msgstr "Ajuda"
@@ -144,11 +130,20 @@ msgstr "Acerca"
 msgid "View"
 msgstr "Ver"
 
-msgid "Toolbars"
-msgstr "Barra de Ferramentas"
+msgid "Toolbar"
+msgstr "Barra de ferramentas"
 
-msgid "Tools"
-msgstr "Ferramentas"
+msgid "Zoom"
+msgstr "Zoom"
+
+msgid "Zoom In"
+msgstr "Mais zoom"
+
+msgid "Zoom Out"
+msgstr "Menos zoom"
+
+msgid "Full Screen"
+msgstr "Ecrã inteiro"
 
 msgid "Create"
 msgstr "Criar"
@@ -159,15 +154,6 @@ msgstr "Projeto"
 msgid "Properties"
 msgstr "Propriedades"
 
-msgid "File Toolbar"
-msgstr "Barra de Ferramentas de Ficheiro"
-
-msgid "toolBar_2"
-msgstr "toolBar_2"
-
-msgid "toolBar"
-msgstr "toolBar"
-
 msgid "New Project..."
 msgstr "Novo Projeto..."
 
@@ -175,7 +161,7 @@ msgid "Select device"
 msgstr "Seleccione o dispositivo"
 
 msgid "Project name"
-msgstr "Nome do Projeto"
+msgstr "Nome do projeto"
 
 msgid "Create project..."
 msgstr "Criar projeto..."
@@ -190,10 +176,10 @@ msgid "Configure project..."
 msgstr "Configurar projeto..."
 
 msgid "Watchface name"
-msgstr "Nome do Mostrador de Relógio"
+msgstr "Nome do mostrador de relógio"
 
 msgid "Watchface thumbnail"
-msgstr "Miniatura do Mostrador de Relógio"
+msgstr "Miniatura do mostrador de relógio"
 
 msgid "Build project..."
 msgstr "Construir projeto..."
@@ -212,3 +198,90 @@ msgstr "..."
 
 msgid "Search:"
 msgstr "Pesquisar:"
+
+msgid "Resources"
+msgstr "Recursos"
+
+msgid "Add Image..."
+msgstr "Adicionar imagem..."
+
+msgid "Layers"
+msgstr "Camadas"
+
+msgid "Bring to Front"
+msgstr "Trazer para diante"
+
+msgid "Bring Forwards"
+msgstr "Trazer para a frente"
+
+msgid "Send to Back"
+msgstr "Enviar para trás"
+
+msgid "Send Backwards"
+msgstr "Enviar para o fundo"
+
+msgid "Delete"
+msgstr "Apagar"
+
+msgid "New Project"
+msgstr "Novo projeto"
+
+msgid "Open Project"
+msgstr "Abrir projeto"
+
+msgid "Manage Project"
+msgstr "Gerir projeto"
+
+msgid "Close Project"
+msgstr "Fechar projeto"
+
+msgid "Tools"
+msgstr "Ferramentas"
+
+msgid "File Toolbar"
+msgstr "Barra de ferramentas do ficheiro"
+
+msgid "Device type"
+msgstr "Tipo de dispositivo"
+
+msgid "Watchface ID (9 digits)"
+msgstr "ID do mostrador (9 dígitos)"
+
+msgid "Export..."
+msgstr "Exportar..."
+
+msgid "Export project"
+msgstr "Exportar projeto"
+
+msgid "Export format"
+msgstr "Exportar formato"
+
+msgid "Export to"
+msgstr "Exportar para"
+
+msgid "No plugins installed"
+msgstr "Sem plugins instalados"
+
+msgid "Install Plugin from File"
+msgstr "Instalar plugin de ficheiro"
+
+msgid "Open Plugins Folder"
+msgstr "Abrir pasta de plugins"
+
+msgid "Update Compiler from EasyFace"
+msgstr "Atualizar o compilador do EasyFace"
+
+msgid "Reset Settings"
+msgstr "Restaurar pré-definições"
+
+msgid "Watchface"
+msgstr "Mostrador de relógio"
+
+msgid "Configure"
+msgstr "Configurar"
+
+msgid "Disable"
+msgstr "Desativar"
+
+msgid "Enable"
+msgstr "Ativar"
