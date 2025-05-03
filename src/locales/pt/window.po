@@ -1,0 +1,305 @@
+# Window Translation for Mi Create.
+# FIRST AUTHOR <ooflet@proton.me>, 2024.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.0\n"
+"POT-Creation-Date: 2024-01-05 14:27+1100\n"
+"PO-Revision-Date: 2025-05-02 23:25+0100\n"
+"Last-Translator: billabongbruno\n"
+"Language-Team: billabongbruno\n"
+"Language: pt_PT\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+"X-Generator: Poedit 3.6\n"
+
+msgid "Mi Create"
+msgstr "Mi Create"
+
+msgid "Save..."
+msgstr "Guardar..."
+
+msgid "Save as..."
+msgstr "Guardar como..."
+
+msgid "About Mi Create"
+msgstr "Acerca do Mi Create"
+
+msgid "Settings"
+msgstr "Definições"
+
+msgid "Build..."
+msgstr "Compilar..."
+
+msgid "Build"
+msgstr "Compilar"
+
+msgid "Explorer"
+msgstr "Explorador"
+
+msgid "Attributes"
+msgstr "Atributos"
+
+msgid "Exit"
+msgstr "Sair"
+
+msgid "Edit"
+msgstr "Editar"
+
+msgid "Search..."
+msgstr "Pesquisar..."
+
+msgid "File"
+msgstr "Ficheiro"
+
+msgid "Layout"
+msgstr "Esquema"
+
+msgid "New..."
+msgstr "Novo..."
+
+msgid "New File"
+msgstr "Novo ficheiro"
+
+msgid "Open..."
+msgstr "Abrir..."
+
+msgid "Open File"
+msgstr "Abrir ficheiro"
+
+msgid "Undo"
+msgstr "Desfazer"
+
+msgid "Redo"
+msgstr "Refazer"
+
+msgid "About Qt"
+msgstr "Acerca do Qt"
+
+msgid "Third Party Notices"
+msgstr "Aviso a terceiros"
+
+msgid "Unpack..."
+msgstr "Extrair..."
+
+msgid "Cut"
+msgstr "Cortar"
+
+msgid "Copy"
+msgstr "Copiar"
+
+msgid "Paste"
+msgstr "Colar"
+
+msgid "Project Source Code"
+msgstr "Código-fonte do projeto"
+
+msgid "Resize Images"
+msgstr "Redimensionar imagens"
+
+msgid "Image"
+msgstr "Imagem"
+
+msgid "Image List"
+msgstr "Lista de imagens"
+
+msgid "Digital Number"
+msgstr "Número Digital"
+
+msgid "Analog Display"
+msgstr "Mostrador analógico"
+
+msgid "Arc Progress"
+msgstr "Progresso em arco"
+
+msgid "Documentation"
+msgstr "Documentação"
+
+msgid "Welcome"
+msgstr "Bem-vindo"
+
+msgid "Help"
+msgstr "Ajuda"
+
+msgid "About"
+msgstr "Acerca"
+
+msgid "View"
+msgstr "Ver"
+
+msgid "Toolbar"
+msgstr "Barra de ferramentas"
+
+msgid "Zoom"
+msgstr "Zoom"
+
+msgid "Zoom In"
+msgstr "Mais zoom"
+
+msgid "Zoom Out"
+msgstr "Menos zoom"
+
+msgid "Full Screen"
+msgstr "Ecrã inteiro"
+
+msgid "Create"
+msgstr "Criar"
+
+msgid "Project"
+msgstr "Projeto"
+
+msgid "Properties"
+msgstr "Propriedades"
+
+msgid "New Project..."
+msgstr "Novo Projeto..."
+
+msgid "Select device"
+msgstr "Seleccione o dispositivo"
+
+msgid "Project name"
+msgstr "Nome do projeto"
+
+msgid "Create project..."
+msgstr "Criar projeto..."
+
+msgid "Project location"
+msgstr "Localização do projeto"
+
+msgid "Build Project..."
+msgstr "Construir Projeto..."
+
+msgid "Configure project..."
+msgstr "Configurar projeto..."
+
+msgid "Watchface name"
+msgstr "Nome do mostrador de relógio"
+
+msgid "Watchface thumbnail"
+msgstr "Miniatura do mostrador de relógio"
+
+msgid "Build project..."
+msgstr "Construir projeto..."
+
+msgid "Building project..."
+msgstr "A construir o projeto..."
+
+msgid "Build results..."
+msgstr "Resultado da compilação..."
+
+msgid "Select resource..."
+msgstr "Seleccione os recursos..."
+
+msgid "..."
+msgstr "..."
+
+msgid "Search:"
+msgstr "Pesquisar:"
+
+msgid "Resources"
+msgstr "Recursos"
+
+msgid "Add Image..."
+msgstr "Adicionar imagem..."
+
+msgid "Layers"
+msgstr "Camadas"
+
+msgid "Bring to Front"
+msgstr "Trazer para diante"
+
+msgid "Bring Forwards"
+msgstr "Trazer para a frente"
+
+msgid "Send to Back"
+msgstr "Enviar para trás"
+
+msgid "Send Backwards"
+msgstr "Enviar para o fundo"
+
+msgid "Delete"
+msgstr "Apagar"
+
+msgid "New Project"
+msgstr "Novo projeto"
+
+msgid "Open Project"
+msgstr "Abrir projeto"
+
+msgid "Manage Project"
+msgstr "Gerir projeto"
+
+msgid "Close Project"
+msgstr "Fechar projeto"
+
+msgid "Tools"
+msgstr "Ferramentas"
+
+msgid "File Toolbar"
+msgstr "Barra de ferramentas do ficheiro"
+
+msgid "Device type"
+msgstr "Tipo de dispositivo"
+
+msgid "Watchface ID (9 digits)"
+msgstr "ID do mostrador (9 dígitos)"
+
+msgid "Export..."
+msgstr "Exportar..."
+
+msgid "Export project"
+msgstr "Exportar projeto"
+
+msgid "Export format"
+msgstr "Exportar formato"
+
+msgid "Export to"
+msgstr "Exportar para"
+
+msgid "No plugins installed"
+msgstr "Sem plugins instalados"
+
+msgid "Install Plugin from File"
+msgstr "Instalar plugin de ficheiro"
+
+msgid "Open Plugins Folder"
+msgstr "Abrir pasta de plugins"
+
+msgid "Update Compiler from EasyFace"
+msgstr "Atualizar o compilador do EasyFace"
+
+msgid "Reset Settings"
+msgstr "Restaurar pré-definições"
+
+msgid "Watchface"
+msgstr "Mostrador de relógio"
+
+msgid "Configure"
+msgstr "Configurar"
+
+msgid "Disable"
+msgstr "Desativar"
+
+msgid "Enable"
+msgstr "Ativar"
+
+msgid "Align Left"
+msgstr "Alinhar à esquerda"
+
+msgid "Align Top"
+msgstr "Alinhar superior"
+
+msgid "Align Right"
+msgstr "Alinhar à direita"
+
+msgid "Align Bottom"
+msgstr "Alinhar inferior"
+
+msgid "Align Horizontal"
+msgstr "Alinhar horizontal"
+
+msgid "Align Vertical"
+msgstr "Alinhar vertical"

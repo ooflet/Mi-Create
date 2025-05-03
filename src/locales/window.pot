@@ -284,3 +284,21 @@ msgstr ""
 
 msgid "Enable"
 msgstr ""
+
+msgid "Align Left"
+msgstr ""
+
+msgid "Align Top"
+msgstr ""
+
+msgid "Align Right"
+msgstr ""
+
+msgid "Align Bottom"
+msgstr ""
+
+msgid "Align Horizontal"
+msgstr ""
+
+msgid "Align Vertical"
+msgstr ""
