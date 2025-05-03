@@ -380,7 +380,7 @@ class WatchData(QObject):
     def getCompilerVersion(self):
         settings = QSettings("Mi Create", "Workspace")
         if settings.value("compilerVersion") is None:
-            version = "m0tral-v4.18"
+            version = "m0tral-v4.21"
         else:
             version = settings.value("compilerVersion")
         return version
