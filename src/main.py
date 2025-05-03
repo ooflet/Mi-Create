@@ -1934,7 +1934,7 @@ class WatchfaceEditor(QMainWindow):
                     self.showDialog("error", _("Failed to build watchface! ") + extracted_error)
                 return
 
-            fileLocation = str.split(os.path.basename(currentProject["project"].getPath()), ".")[0] + ".face"
+            fileLocation = currentProject["project"].getTitle() + ".face"
 
             if currentProject["project"].getDeviceType() != "redmi_watch_3_active":
                 binary = WatchfaceBinary(os.path.join(compileDirectory, fileLocation))
