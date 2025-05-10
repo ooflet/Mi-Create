@@ -43,6 +43,9 @@ Executing from source however will not create log files, it will output logs to 
 Mi Create can end up running into a few bugs. Please report them with the main log file attached. If you have not changed the install location on Windows during setup, the main log file will be located at  
 `C:\Users\{username}\AppData\Local\Programs\Mi Create\data\app.log`
 
+## Testing
+You may test upcoming features in the "next" branch of Mi Create. Usually features in the next branch are not stable and ready to use, so keep this in mind when testing. If you're contributing a relatively minor feature or bug fix pull request the main branch, but if the feature is large and deserves its own major version, push it to the next branch.
+
 ## Help
 If you are looking for a tutorial on Mi Create, please view the documentation at https://ooflet.github.io/docs. If you have any further questions that are not covered by the documentation, feel free to ask on the [discussions](https://github.com/ooflet/Mi-Create/discussions) tab. Otherwise, if there is a bug or issue with Mi Create, submit an [issue](https://github.com/ooflet/Mi-Create/issues) report.
 
