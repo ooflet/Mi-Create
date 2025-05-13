@@ -274,12 +274,13 @@ class FprjConverter:
         if not (self.fprj_info["conf_file"] and self.fprj_info["images"]):
             QMessageBox.critical(None, "fprjConverter", "Invalid project!")
             return False
-        mkdir(self.dst_dir)
-        shutil.copytree(os.path.join(self.src_dir, "images"), os.path.join(self.dst_dir, "images"))
+        dir = os.path.join(self.dst_dir, str.split(os.path.basename(self.fprj_info["conf_file"]), ".")[0])
+        os.mkdir(dir)
+        shutil.copytree(os.path.join(self.src_dir, "images"), os.path.join(dir, "images"))
         if os.path.isdir(os.path.join(self.src_dir, "AOD", "images")):
-            shutil.copytree(os.path.join(self.src_dir, "AOD", "images"), os.path.join(self.dst_dir, "images_aod"))
+            shutil.copytree(os.path.join(self.src_dir, "AOD", "images"), os.path.join(dir, "images_aod"))
         else:
-            mkdir(os.path.join(self.dst_dir, "images_aod"))
-        with open(os.path.join(self.dst_dir, "wfDef.json"), 'w', encoding='utf-8') as f:
+            mkdir(os.path.join(dir, "images_aod"))
+        with open(os.path.join(dir, "wfDef.json"), 'w', encoding='utf-8') as f:
             json.dump(self.parse_fprj_conf_file(), f, indent=4, ensure_ascii=False)
         return True
