@@ -31,10 +31,10 @@ msgid "Settings"
 msgstr "设置"
 
 msgid "Build..."
-msgstr "建立..."
+msgstr "构建..."
 
 msgid "Build"
-msgstr "构建"
+msgstr "开始构建"
 
 msgid "Explorer"
 msgstr "浏览器"
@@ -82,10 +82,10 @@ msgid "Third Party Notices"
 msgstr "第三方通知"
 
 msgid "Unpack..."
-msgstr "打开包装..."
+msgstr "解包..."
 
 msgid "Cut"
-msgstr "切割"
+msgstr "剪切"
 
 msgid "Copy"
 msgstr "复制"
@@ -103,19 +103,19 @@ msgid "Image"
 msgstr "图片"
 
 msgid "Image List"
-msgstr "图像列表"
+msgstr "图像阵列"
 
 msgid "Digital Number"
 msgstr "数字编号"
 
 msgid "Analog Display"
-msgstr "模拟显示屏"
+msgstr "模拟显示"
 
 msgid "Arc Progress"
-msgstr "弧形进步"
+msgstr "弧形进度条"
 
 msgid "Documentation"
-msgstr "文件"
+msgstr "工作文档"
 
 msgid "Welcome"
 msgstr "欢迎"
@@ -133,7 +133,7 @@ msgid "Toolbar"
 msgstr "工具栏"
 
 msgid "Zoom"
-msgstr "飞涨"
+msgstr "缩放"
 
 msgid "Zoom In"
 msgstr "放大"
@@ -178,16 +178,16 @@ msgid "Watchface name"
 msgstr "表盘名称"
 
 msgid "Watchface thumbnail"
-msgstr "观看界面缩略图"
+msgstr "表盘缩略图"
 
 msgid "Build project..."
-msgstr "建设项目..."
+msgstr "构建项目..."
 
 msgid "Building project..."
-msgstr "建筑项目..."
+msgstr "正在构建项目..."
 
 msgid "Build results..."
-msgstr "建设成果..."
+msgstr "构建结果..."
 
 msgid "Select resource..."
 msgstr "选择资源..."
@@ -211,13 +211,13 @@ msgid "Bring to Front"
 msgstr "置于顶层"
 
 msgid "Bring Forwards"
-msgstr "向前推进"
+msgstr "向上一层"
 
 msgid "Send to Back"
 msgstr "置于后面"
 
 msgid "Send Backwards"
-msgstr "向后发送"
+msgstr "向下一层"
 
 msgid "Delete"
 msgstr "删除"
@@ -244,19 +244,19 @@ msgid "Device type"
 msgstr "设备类型"
 
 msgid "Watchface ID (9 digits)"
-msgstr "表界面 ID（9 位数字）"
+msgstr "表盘 ID（9 位数字）"
 
 msgid "Export..."
-msgstr "出口..."
+msgstr "导出..."
 
 msgid "Export project"
-msgstr "出口项目"
+msgstr "导出项目"
 
 msgid "Export format"
 msgstr "导出格式"
 
 msgid "Export to"
-msgstr "出口到"
+msgstr "导出到"
 
 msgid "No plugins installed"
 msgstr "未安装插件"
@@ -274,7 +274,7 @@ msgid "Reset Settings"
 msgstr "重置设置"
 
 msgid "Watchface"
-msgstr "观看界面"
+msgstr "表盘"
 
 msgid "Configure"
 msgstr "配置"
