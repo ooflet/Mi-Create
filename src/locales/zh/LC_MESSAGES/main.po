@@ -16,7 +16,7 @@ msgstr ""
 "X-Generator: Poedit 3.0.1\n"
 
 msgid "You have unsaved project(s) open. Save and quit?"
-msgstr "您打开了未保存的项目。保存并退出？"
+msgstr "您打开了未保存的项目。要保存并退出吗？"
 
 msgid "An urgent update {version} was released! The app will now update."
 msgstr "发布了紧急更新 {version}！应用程序将立即更新。"
@@ -25,7 +25,7 @@ msgid "A new update has been found ({version}). Would you like to update now?"
 msgstr "发现新的更新 ({version})。您想现在更新吗？"
 
 msgid "Widget {shape} not implemented in ObjectIcon(), please report as issue."
-msgstr "ObjectIcon() 中未实现 Widget {shape}，请作为问题报告。"
+msgstr "ObjectIcon() 中未实现 Widget {shape}，请报告问题至作者GitHub。"
 
 msgid "Failed to obtain currentItem"
 msgstr "获取 currentItem 失败"
@@ -33,7 +33,7 @@ msgstr "获取 currentItem 失败"
 msgid ""
 "No object found in widget list that has the name of currently selected "
 "graphics item: "
-msgstr "在部件列表中未发现与当前选定图形项目名称相同的对象： "
+msgstr "在组件列表中未发现与当前选定图形项目名称相同的对象： "
 
 msgid "Error occured during property update: Object not found!"
 msgstr "更新属性时发生错误： 未找到对象！"
@@ -48,7 +48,7 @@ msgid "Add Image..."
 msgstr "添加图片..."
 
 msgid "Are you sure you want to reset all dock widget positions?"
-msgstr "您确定要重置所有基座部件的位置吗？"
+msgstr "您确定要重置所有基座组件的位置吗？"
 
 msgid ""
 "Are you sure you want to create your project in the directory of this "
@@ -65,7 +65,7 @@ msgid "Failed to create a new project: "
 msgstr "创建新项目失败： "
 
 msgid "Open Project..."
-msgstr "开放项目..."
+msgstr "打开项目..."
 
 msgid "Failed to open project: "
 msgstr "打开项目失败： "
@@ -80,13 +80,13 @@ msgid "Project saved at "
 msgstr "项目保存在 "
 
 msgid "Save project before building?"
-msgstr "在建设之前保存项目？"
+msgstr "在构建之前保存项目？"
 
 msgid "Create Widget"
-msgstr "创建小部件"
+msgstr "创建小组件"
 
 msgid "Please set the watchface's name and thumbnail before building!"
-msgstr "请在制作前设置手表表面的名称和缩略图！"
+msgstr "请在构建前设置表面的名称和缩略图！"
 
 msgid ""
 "This watch does not support ID assignment, custom IDs will not be applied."
@@ -96,7 +96,7 @@ msgid "Wine was not found."
 msgstr "未找到 Wine 程序。"
 
 msgid "Building watchface..."
-msgstr "建立手表界面..."
+msgstr "构建表盘中..."
 
 msgid "Watchface built successfully at "
 msgstr "表盘构建成功于 "

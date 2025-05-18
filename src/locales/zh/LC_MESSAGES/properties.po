@@ -26,10 +26,10 @@ msgid "Check for Updates"
 msgstr "检查更新"
 
 msgid "Canvas"
-msgstr "帆布"
+msgstr "画布"
 
 msgid "Snap to Guides"
-msgstr "对齐指南"
+msgstr "磁性对齐"
 
 msgid "Clip to Device Shape"
 msgstr "裁剪至设备屏幕"
@@ -47,13 +47,13 @@ msgid "Plugins"
 msgstr "插件"
 
 msgid "General"
-msgstr "一般的"
+msgstr "常规"
 
 msgid "Widget Type"
-msgstr "小部件类型"
+msgstr "组件类型"
 
 msgid "Name"
-msgstr "姓名"
+msgstr "名称"
 
 msgid "Position"
 msgstr "位置"
@@ -65,7 +65,7 @@ msgid "Height"
 msgstr "高度"
 
 msgid "Appearance"
-msgstr "外貌"
+msgstr "样式"
 
 msgid "Opacity"
 msgstr "不透明度"
@@ -89,7 +89,7 @@ msgid "Image"
 msgstr "图像"
 
 msgid "Alignment"
-msgstr "结盟"
+msgstr "对齐"
 
 msgid "Anchor Point"
 msgstr "锚点"
