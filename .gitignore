@@ -165,3 +165,5 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+mi-create-setup-complete.txt
+.DS_Store
