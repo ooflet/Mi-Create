@@ -2125,7 +2125,6 @@ if __name__ == "__main__":
                 editor.setupDebug()
 
             if editor.settings["General"]["CheckUpdate"]["value"] == True:
-                editor.launchUpdater()
                 threading.Thread(target=editor.checkForUpdates).start()
 
             if args.filename:

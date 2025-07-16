@@ -15,6 +15,7 @@ class Updater(QDialog):
     updateProgress = pyqtSignal(int)
     def __init__(self, parent):
         super().__init__(parent)
+        self.setWindowTitle("Mi Create")
         self.installComplete = False
 
         self.setFixedSize(400, 60)
