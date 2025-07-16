@@ -15,6 +15,7 @@ themeDirectory = "themes"
 class Theme:
     def __init__(self):
         self.themes = {}
+        self.palette = None
         self.themeNames = []
         self.currentWelcomePage = ""
         
@@ -50,21 +51,19 @@ class Theme:
 
         stylesheet = os.path.join(dataFolder, "style.qss")
 
-        palette = QPalette()
+        self.palette = QPalette()
 
         scheme = themeName[1]
         for colorGroup, colors in colorSchemeJson.items():
             for colorRole, color in colors.items():
                 if colorGroup == "Disabled":
-                    palette.setColor(QPalette.ColorGroup.Disabled, getattr(QPalette.ColorRole, colorRole), QColor(color[0], color[1], color[2]))
+                    self.palette.setColor(QPalette.ColorGroup.Disabled, getattr(QPalette.ColorRole, colorRole), QColor(color[0], color[1], color[2]))
                 else:
-                    palette.setColor(getattr(QPalette.ColorRole, colorRole), QColor(color[0], color[1], color[2]))
+                    self.palette.setColor(getattr(QPalette.ColorRole, colorRole), QColor(color[0], color[1], color[2]))
         
-        app.setPalette(palette)
+        app.setPalette(self.palette)
 
-        palette = QPalette()
-
-        QIcon().setThemeSearchPaths([theme["iconFolder"]])
+        QIcon().setThemeSearchPaths(QIcon.themeSearchPaths() + [theme["iconFolder"]])
         QIcon().setThemeName(themeName[1])
                 
         if theme["baseStyle"] != "none":
