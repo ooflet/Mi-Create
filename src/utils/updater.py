@@ -13,11 +13,11 @@ from PyQt6.QtWidgets import QVBoxLayout, QDialog, QProgressBar, QLabel
 
 class Updater(QDialog):
     updateProgress = pyqtSignal(int)
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent):
+        super().__init__(parent)
         self.installComplete = False
 
-        self.setFixedSize(400, 75)
+        self.setFixedSize(400, 60)
 
         self.text = QLabel(self)
         self.progressBar = QProgressBar(self)
