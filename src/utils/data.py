@@ -285,6 +285,7 @@ class WatchData(QObject):
                 "367": "xiaomi_band_9_pro",
                 "462": "xiaomi_watch_s4",
                 "465": "redmi_watch_5",
+                "466": "xiaomi_band_10",
                 "3651": "redmi_watch_5_active",
                 "3652": "redmi_watch_5_lite"
             }
@@ -316,6 +317,7 @@ class WatchData(QObject):
                 "xiaomi_band_8_pro": "Xiaomi Band 8 Pro",
                 "xiaomi_band_9": "Xiaomi Band 9",
                 "xiaomi_band_9_pro": "Xiaomi Band 9 Pro",
+                "xiaomi_band_10": "Xiaomi Band 10",
                 "70mai_saphir": "70mai Saphir"
             }
 
@@ -380,7 +382,7 @@ class WatchData(QObject):
     def getCompilerVersion(self):
         settings = QSettings("Mi Create", "Workspace")
         if settings.value("compilerVersion") is None:
-            version = "m0tral-v4.21"
+            version = "v4.22"
         else:
             version = settings.value("compilerVersion")
         return version

@@ -119,6 +119,12 @@
         "height": 480,
         "radius": 48
     },
+    "xiaomi_band_10": {
+        "string": "Xiaomi Band 10",
+        "width": 212,
+        "height": 520,
+        "radius": 106
+    },
     "70mai_saphir": {
         "string": "70mai Saphir",
         "width": 368,
