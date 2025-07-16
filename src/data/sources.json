@@ -2678,7 +2678,7 @@
             "id_gmf": "",
             "tip": "Pedometry goal achievement rate (percentage)"
         },
-        {
+                {
             "string": "Current step (kilometer)",
             "id_fprj": "1821",
             "id_gmf": "",
@@ -6495,6 +6495,248 @@
             "id_fprj": "1051",
             "id_gmf": "",
             "tip": ""
+        }
+    ],
+    "xiaomi_band_10": [
+        {
+            "string": "None",
+            "id_fprj": "0",
+            "id_gmf": "",
+            "tip": "No data source used"
+        },
+        {
+            "string": "invalid temperature data",
+            "id_fprj": "1",
+            "id_gmf": "",
+            "tip": "A value of 1 means that the temperature data is invalid, 0 means that the temperature data is valid"
+        },
+        {
+            "string": "invalid battery data",
+            "id_fprj": "2",
+            "id_gmf": "",
+            "tip": "A value of 1 means the battery data is invalid, 0 means the battery data is valid"
+        },
+        {
+            "string": "invalid health data",
+            "id_fprj": "3",
+            "id_gmf": "",
+            "tip": "A value of 1 means that the health data is invalid, 0 means that the health data is valid"
+        },
+        {
+            "string": "invalid temperature data",
+            "id_fprj": "4",
+            "id_gmf": "",
+            "tip": "A value of 1 means that the temperature data is valid, 0 means that the temperature data is invalid"
+        },
+        {
+            "string": "valid battery data",
+            "id_fprj": "5",
+            "id_gmf": "",
+            "tip": "A value of 1 means the battery data is valid, 0 means the battery data is invalid"
+        },
+        {
+            "string": "valid health data",
+            "id_fprj": "6",
+            "id_gmf": "",
+            "tip": "A value of 1 means that the health data is valid, 0 means that the health data is invalid"
+        },
+        {
+            "string": "Hour",
+            "id_fprj": "0811",
+            "id_gmf": "",
+            "tip": "Hour value of time in 24-hour format, value range 0-23"
+        },
+        {
+            "string": "Hour Low",
+            "id_fprj": "0911",
+            "id_gmf": "",
+            "tip": "Hour value of time, low digit, value range 0..9"
+        },
+        {
+            "string": "Hour High",
+            "id_fprj": "1000911",
+            "id_gmf": "0A11",
+            "tip": "Hour value of time, high digit, value range 0..2"
+        },
+        {
+            "string": "Minute",
+            "id_fprj": "1011",
+            "id_gmf": "",
+            "tip": "Time minute value, value range 0-59"
+        },
+        {
+            "string": "Minute Low",
+            "id_fprj": "1111",
+            "id_gmf": "",
+            "tip": "Time minute value, value range 0..9"
+        },
+        {
+            "string": "Minute High",
+            "id_fprj": "1211",
+            "id_gmf": "",
+            "tip": "Time minute value, value range 0..5"
+        },
+        {
+            "string": "Second",
+            "id_fprj": "1811",
+            "id_gmf": "",
+            "tip": "Time second value, value range 0-59"
+        },
+        {
+            "string": "Second Low",
+            "id_fprj": "1911",
+            "id_gmf": "",
+            "tip": "Time second value, value range 0..9"
+        },
+        {
+            "string": "Second High",
+            "id_fprj": "1001911",
+            "id_gmf": "1A11",
+            "tip": "Time second value, value range 0..5"
+        },
+        {
+            "string": "Day",
+            "id_fprj": "1812",
+            "id_gmf": "",
+            "tip": "The value of the day in the date, the first day of the month"
+        },
+        {
+            "string": "Day Low",
+            "id_fprj": "1912",
+            "id_gmf": "",
+            "tip": "Day, low digit"
+        },
+        {
+            "string": "Day High",
+            "id_fprj": "1001912",
+            "id_gmf": "1A12",
+            "tip": "Day, high digit"
+        },
+        {
+            "string": "Week",
+            "id_fprj": "2012",
+            "id_gmf": "",
+            "tip": "The number of days in a week, 0 for Sunday, 1 for Monday, and so on"
+        },
+        {
+            "string": "Month",
+            "id_fprj": "1012",
+            "id_gmf": "",
+            "tip": "The value of the month in the date, the first month of the year"
+        },
+        {
+            "string": "Year",
+            "id_fprj": "0812",
+            "id_gmf": "",
+            "tip": "Gregorian year"
+        },
+        {
+            "string": "AM/PM",
+            "id_fprj": "0813",
+            "id_gmf": "",
+            "tip": "AM/PM"
+        },
+        {
+            "string": "Weather type (icon)",
+            "id_fprj": "3031",
+            "id_gmf": "",
+            "tip": "Weather type"
+        },
+        {
+            "string": "Weather temp (C)",
+            "id_fprj": "2031",
+            "id_gmf": "",
+            "tip": "Current temperature value in degrees Celsius"
+        },
+        {
+            "string": "Weather temp (F)",
+            "id_fprj": "40009031",
+            "id_gmf": "",
+            "tip": "Current temperature value in degrees Fahrenheit"
+        },
+        {
+            "string": "Battery percent",
+            "id_fprj": "0841",
+            "id_gmf": "",
+            "tip": "Get the current battery remaining percentage value"
+        },
+        {
+            "string": "Sleep status",
+            "id_fprj": "1841",
+            "id_gmf": "",
+            "tip": "0 - off, 1 - on"
+        },
+        {
+            "string": "BT connection status",
+            "id_fprj": "2041",
+            "id_gmf": "",
+            "tip": "0 - off, 1 - on"
+        },
+        {
+            "string": "Screen lock status",
+            "id_fprj": "3041",
+            "id_gmf": "",
+            "tip": "0 - off, 1 - on"
+        },
+        {
+            "string": "Heart rate",
+            "id_fprj": "0822",
+            "id_gmf": "",
+            "tip": "Get real-time heart rate values"
+        },
+        {
+            "string": "Interval HRM",
+            "id_fprj": "1022",
+            "id_gmf": "",
+            "tip": "The values obtained range from 1-5 . 1: indicates limit . 2: anaerobic. 3: aerobic. 4: fat burning. 5: warm-up."
+        },
+        {
+            "string": "Current step count",
+            "id_fprj": "0821",
+            "id_gmf": "",
+            "tip": "Current real-time pedometer"
+        },
+        {
+            "string": "Current step (percent)",
+            "id_fprj": "1021",
+            "id_gmf": "",
+            "tip": "Pedometry goal achievement rate (percentage)"
+        },
+        {
+            "string": "Active Calorie",
+            "id_fprj": "0823",
+            "id_gmf": "",
+            "tip": "Active Calorie"
+        },
+        {
+            "string": "Active Calorie (percent)",
+            "id_fprj": "1023",
+            "id_gmf": "",
+            "tip": "Activity calorie goal achievement rate (percentage)"
+        },
+        {
+            "string": "Stand Up value",
+            "id_fprj": "0824",
+            "id_gmf": "",
+            "tip": "Value of current standing"
+        },
+        {
+            "string": "Psychological stress",
+            "id_fprj": "0826",
+            "id_gmf": "",
+            "tip": "Psychological stress value, the value range 0~100"
+        },
+        {
+            "string": "Weather something",
+            "id_fprj": "5031",
+            "id_gmf": "",
+            "tip": "Sleep score"
+        },
+        {
+            "string": "Sleep score",
+            "id_fprj": "0828",
+            "id_gmf": "",
+            "tip": "Sleep score"
         }
     ]
 }
