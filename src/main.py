@@ -437,11 +437,8 @@ class WatchfaceEditor(QMainWindow):
     def launchUpdater(self):
         progressBar = QProgressBar()
         progressBar.setRange(0, 0)
-        text = QLabel("Downloading Update...")
-        self.statusBar().addPermanentWidget(text, 0)
-        self.statusBar().addPermanentWidget(progressBar, 1)
 
-        Updater()
+        Updater(self.coreDialog)
 
     def promptUpdate(self, ver):
         reply, dontCheck = self.showDialog("question",
@@ -2128,6 +2125,7 @@ if __name__ == "__main__":
                 editor.setupDebug()
 
             if editor.settings["General"]["CheckUpdate"]["value"] == True:
+                editor.launchUpdater()
                 threading.Thread(target=editor.checkForUpdates).start()
 
             if args.filename:
