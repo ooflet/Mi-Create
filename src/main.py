@@ -2118,6 +2118,7 @@ if __name__ == "__main__":
             print("Settings reset.")
 
         if args.setVersion:
+            global programVersion
             programVersion = args.setVersion
 
         try:
