@@ -254,10 +254,10 @@ QToolButton {
 }
 
 QToolButton#inputField-button {
-    border-radius: 5px;
+    background-color: palette(mid);
+    border: 1px solid palette(midlight);
     padding: 3px;
-    background-color: transparent;
-    border: 1px solid palette(light);
+    border-radius: 4px;
 }
 
 QToolButton:focus {
@@ -287,6 +287,10 @@ QToolButton:hover#canvasDecoration-button {
 }
 
 QToolButton:pressed {
+    background-color: palette(midlight);
+}
+
+QToolButton#inputField-button:pressed {
     background-color: palette(midlight);
 }
 
@@ -325,7 +329,7 @@ QToolBar {
 
 QToolBar::separator {
     width: 1px;
-    background-color: palette(light);
+    background-color: palette(midlight);
     margin: 2px;
 }
 
@@ -580,12 +584,12 @@ QMenuBar::item:pressed {
 QMenu {
     background-color: palette(window);
     padding: 5px 0 5px 0;
-    border: 1px solid palette(alternate-base);
+    border: 1px solid palette(midlight);
 }
 
 QMenu::separator {
     height: 1px;
-    background-color: palette(alternate-base);
+    background-color: palette(midlight);
     margin: 2px 6px 2px 6px;
 }
 
@@ -594,7 +598,7 @@ QMenu::item {
     padding-bottom: 5px;
     border-left: 10px solid transparent;
     border-right: 10px solid transparent;
-    background-color: palette(window)
+    background-color: palette(window)alternate-base
 }
 
 QMenu::item:selected {

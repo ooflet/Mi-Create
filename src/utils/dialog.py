@@ -297,7 +297,7 @@ class CoreDialog(QDialog):
         self.newProjectPage.setObjectName("contentPanel")
 
         self.watchfacePage = QFrame()
-        self.watchfacePage.setStyleSheet("background-color: transparent;")
+        #self.watchfacePage.setStyleSheet("background-color: transparent;")
         self.watchfacePage.setContentsMargins(9,6,9,9)
         self.watchfacePageLayout = QVBoxLayout()
         self.watchfacePageLayout.setSpacing(4)

@@ -1000,7 +1000,7 @@ class BaseWidget(QGraphicsRectItem):
         self.size = QPointF(sizeX, sizeY)
         self.boundingPosOverride = False
         self.boundingPos = QPointF(0, 0)
-        self.color = color
+        self.invalid = False
         self.canvas = canvas
         self.selectionPos = None
         self.selectionPath = QGraphicsPathItem()
@@ -1114,9 +1114,15 @@ class BaseWidget(QGraphicsRectItem):
 
     def paint(self, painter, option, widget=None):
         # Paint the node in the graphic view.
-        bgColor = self.scene().palette().highlight().color()
-        bgColor.setAlpha(60)
-        brush = QBrush(bgColor)
+
+        if self.invalid:
+            pen = QPen(QColor(255, 125, 0), 1)
+            brush = QBrush(QColor(255, 125, 0, 125))
+            painter.setPen(pen)
+        else:
+            bgColor = self.scene().palette().highlight().color()
+            bgColor.setAlpha(60)
+            brush = QBrush(bgColor)
 
         painter.setBrush(brush)
 
@@ -1124,13 +1130,13 @@ class BaseWidget(QGraphicsRectItem):
             if not self.selectionAnimPlayed:
                 self.selectionAnimPlayed = True
 
-            painter.drawRoundedRect(self.rect(), 4, 4)
+            painter.drawRoundedRect(self.rect(), 3, 3)
             self.selectionPath.show()
         else:
+            if self.invalid:
+                painter.drawRoundedRect(self.rect(), 3, 3)
             self.selectionAnimPlayed = False
             self.selectionPath.hide()
-
-        #painter.drawRect(self.rect())
 
 class ImageWidget(BaseWidget):
     # Widget for basic images
@@ -1142,7 +1148,7 @@ class ImageWidget(BaseWidget):
 
     def setImage(self, qPixmap, isAntialiased):
         if qPixmap.isNull():
-            self.representNoImage()
+            self.invalid = True
             return
         
         self.pixmapItem.setPixmap(qPixmap)
@@ -1150,9 +1156,6 @@ class ImageWidget(BaseWidget):
 
         if isAntialiased:
             self.pixmapItem.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
-
-    def representNoImage(self):
-        self.color = QColor(255, 0, 0, 100)
 
 class ImagelistWidget(ImageWidget):
     # Widget for imagelists and animated images
@@ -1179,7 +1182,7 @@ class ImagelistWidget(ImageWidget):
 
     def addImagelist(self, imagelist, source, previewIndex, defaultValue, isAntialiased):
         if imagelist == {}:
-            self.representNoImage()
+            self.invalid = True
             return
 
         if previewIndex != None:
@@ -1202,7 +1205,7 @@ class ImagelistWidget(ImageWidget):
             previewImage = QPixmap()
 
         if previewImage.isNull():
-            self.representNoImage()
+            self.invalid = True
         else:
             self.pixmapItem.setPixmap(previewImage)
             self.setRect(0, 0, previewImage.width(), previewImage.height())
@@ -1328,7 +1331,7 @@ class NumberWidget(BaseWidget):
 
     def addImage(self, qPixmap, posX, posY, spacing, isAntialiased):
         if qPixmap.isNull():
-            self.representNoImage()
+            self.invalid = True
             return
         
         item = QGraphicsPixmapItem(qPixmap, self)
@@ -1392,7 +1395,7 @@ class NumberWidget(BaseWidget):
                     elif alignment == "Right":
                         self.addImage(image, (image.size().width() * x) + (int(spacing) * x), 0, int(spacing), interpolationStyle)
             else:
-                self.representNoImage()
+                self.invalid = True
 
             if not previewFromSource:
                 width = ( self.initialImage.width() * len(self.imageItems) ) + ( int(spacing) * len(self.imageItems) )

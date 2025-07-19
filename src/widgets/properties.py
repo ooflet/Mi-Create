@@ -56,6 +56,7 @@ class PropertiesWidget(QStackedWidget):
     def __init__(self, parent, properties, widgetProperties=False, srcList=None, srcData=None):
         super().__init__(parent)
 
+        self.entryWidth = 145
         self.clearOnRefresh = True
         self.ignorePropertyChange = False
 
@@ -89,6 +90,7 @@ class PropertiesWidget(QStackedWidget):
         lineEdit.setDisabled(disabled)
         lineEdit.editingFinished.connect(onDeselect)
         lineEdit.setFixedHeight(lineEdit.sizeHint().height() + 4)
+        lineEdit.setFixedWidth(self.entryWidth)
         print(lineEdit.sizeHint().height())
 
         return lineEdit
@@ -98,20 +100,32 @@ class PropertiesWidget(QStackedWidget):
             if not propertySignalDisabled:
                 self.sendPropertyChangedSignal(srcProperty, spinBox.value())
 
+        def onDeselect():
+            spinBox.clearFocus()
+
+        def wheelEvent(event):
+            event.ignore() # disable wheel event completely
+
         spinBox = QSpinBox(self)
         spinBox.setDisabled(disabled)
+        spinBox.wheelEvent = wheelEvent
         spinBox.valueChanged.connect(onChange)
-        spinBox.setFixedHeight(spinBox.sizeHint().height() + 4)
+        spinBox.editingFinished.connect(onDeselect)
+        spinBox.setFixedHeight(spinBox.sizeHint().height() + 2)
+        spinBox.setFixedWidth(self.entryWidth)
               
-        if min != "none":
+        if min and min != "none":
             min = int(min)
         else:
             min = -2147483647
 
-        if max != "none":
+        if max and max != "none":
             max = int(max)
         else:
             max = 2147483647
+
+        if not text:
+            text = "0"
 
         spinBox.setRange(min, max)
         spinBox.setValue(int(text))
@@ -135,12 +149,46 @@ class PropertiesWidget(QStackedWidget):
         toggleSwitch.toggled.connect(onToggle)
 
         return toggleSwitch
+    
+    def createCombobox(self, text, list, editable, disabled, propertySignalDisabled, srcProperty=""):
+        def onChange():
+            pass
 
+        def wheelEvent(event):
+            event.ignore() # disable wheel event completely
+
+        combobox = QComboBox(self)
+        combobox.addItems(list)
+        combobox.setEditable(editable)
+        combobox.setDisabled(disabled)
+        combobox.setFixedWidth(self.entryWidth)
+        combobox.wheelEvent = wheelEvent
+
+        if text:
+            combobox.setCurrentText(text)
+        else:
+            combobox.setCurrentIndex(0)
+
+        if not propertySignalDisabled:
+            combobox.currentTextChanged.connect(onChange)
+
+        return combobox
 
     def createStrEdit(self, label, value, srcProperty, disabled):
         layout = QHBoxLayout()
         propertyLabel = QLabel(label)
         propertyEdit = self.createLineEdit(value, disabled, False, srcProperty)
+
+        layout.addWidget(propertyLabel)
+        layout.addStretch()
+        layout.addWidget(propertyEdit)
+
+        return propertyEdit, layout
+    
+    def createIntEdit(self, label, value, min, max, src, disabled):
+        layout = QHBoxLayout()
+        propertyLabel = QLabel(label)
+        propertyEdit = self.createSpinBox(value, min, max, disabled, False, src)
 
         layout.addWidget(propertyLabel)
         layout.addStretch()
@@ -153,12 +201,13 @@ class PropertiesWidget(QStackedWidget):
         propertyLabel = QLabel(label)
         
         propertyEdit = self.createSpinBox(value, min, max, disabled, False, src)
-        propertyEdit.setFixedWidth(50)
+        propertyEdit.setFixedWidth(int(self.entryWidth * 3 / 8) - 3) # take up 1/4 of space
         
         propertySlider = QSlider(Qt.Orientation.Horizontal)
         propertySlider.setRange(int(min), int(max))
         propertySlider.setTickInterval(int(max) - int(min))
         propertySlider.setValue(int(value))
+        propertySlider.setFixedWidth(int(self.entryWidth * 5 / 8) - 3) # take up 3/4 of space
 
         propertyEdit.valueChanged.connect(lambda value: propertySlider.setValue(int(value)))
         propertySlider.valueChanged.connect(lambda value: propertyEdit.setValue(int(value)))
@@ -181,6 +230,47 @@ class PropertiesWidget(QStackedWidget):
         layout.addWidget(propertyEdit)
 
         return propertyEdit, layout
+    
+    def createSrcEdit(self, label, value, src, disabled):
+        layout = QHBoxLayout()
+        propertyLabel = QLabel(label)
+
+        propertyEdit = self.createCombobox("Data Source", [], True, disabled, False, src)
+
+        layout.addWidget(propertyLabel)
+        layout.addStretch()
+        layout.addWidget(propertyEdit)
+
+        return propertyEdit, layout
+
+    def loadSrcEdit(self, combobox, value, device):
+        source_items = self.sourceData[str(device)]
+        source_list = self.sourceList[str(device)]
+        source_item = None
+        print(combobox, value, device, source_items, source_list, source_item)
+
+        if value != '':
+            for x in source_items:
+                match = False
+
+                # handle hex src values
+                if not value:
+                    match = x["id_fprj"] == value
+                elif isinstance(value, int) or value.isnumeric():
+                    match = int(x["id_fprj"]) == int(value)
+                else:
+                    match = x["id_fprj"] == value
+
+                if match:
+                    source_item = x["string"]
+                    break
+
+        combobox.addItems(source_list)
+
+        if source_item:
+            combobox.setCurrentText(source_item)
+        else:
+            combobox.setCurrentIndex(0)
 
     def createButton(self, text, disabled, property):
         def onClick():
@@ -191,102 +281,6 @@ class PropertiesWidget(QStackedWidget):
         button.setDisabled(disabled)
         button.clicked.connect(onClick)
         return button
-    
-    def createIntEdit(self, header, value, caption, min, max, srcProperty, disabled):
-        layout = QVBoxLayout()
-
-        propertyHeader = QLabel(header)
-        propertyHeader.setObjectName("propertyHeader")
-
-        propertyFrame = QFrame()
-        propertyFrame.setObjectName("propertyContainer")
-        propertyLayout = QHBoxLayout()
-
-        propertyEdit = self.createSpinBox(value, disabled, False, srcProperty, min, max)
-        propertyCaption = QLabel(caption)
-        propertyCaption.setObjectName("propertyCaption")
-
-        propertyFrame.setLayout(propertyLayout)
-        propertyLayout.addWidget(propertyEdit, 1)
-        propertyLayout.addWidget(propertyCaption, 0)
-        
-        layout.addWidget(propertyHeader)
-        layout.addWidget(propertyFrame)
-
-    def createDualIntEdit(self, header, int1, int2, int1Caption, int2Caption, min, max, src1, src2, disabled):
-        layout = QVBoxLayout()
-        propertyHeader = QLabel(header)
-        propertyHeader.setObjectName("propertyHeader")
-
-        inputLayout = QHBoxLayout()
-        inputLayout.setContentsMargins(0,0,0,0)
-        
-        intEdit1Frame = QFrame()
-        intEdit1Frame.setObjectName("propertyContainer")
-        intEdit1Layout = QHBoxLayout()
-        intEdit1Layout.setContentsMargins(0,0,0,0)
-
-        intEdit1 = self.createSpinBox(int1, disabled, False, src1, min, max)
-        intEdit1Caption = QLabel(int1Caption)
-        intEdit1Caption.setObjectName("propertyCaption")
-
-        intEdit1Frame.setLayout(intEdit1Layout)
-        intEdit1Layout.addWidget(intEdit1, 1)
-        intEdit1Layout.addWidget(intEdit1Caption, 0)
-
-        intEdit2Frame = QFrame()
-        intEdit2Frame.setObjectName("propertyContainer")
-        intEdit2Layout = QHBoxLayout()
-        
-        intEdit2 = self.createSpinBox(int2, disabled, False, src2, min, max)
-        intEdit2Caption = QLabel(int2Caption)
-        intEdit2Caption.setObjectName("propertyCaption")
-
-        intEdit2Frame.setLayout(intEdit2Layout)
-        intEdit2Layout.addWidget(intEdit2, 1)
-        intEdit2Layout.addWidget(intEdit2Caption, 0)
-
-        inputLayout.addWidget(intEdit1Frame)
-        inputLayout.addWidget(intEdit2Frame)
-
-        layout.addWidget(propertyHeader)
-        layout.addLayout(inputLayout)
-
-        return layout
-    
-    def createComboBox(self, items, selected, srcProperty, editable):
-        def onChanged():
-            comboBox.clearFocus()
-            self.sendPropertyChangedSignal(srcProperty, comboBox.currentText())
-
-        def wheelEvent(event):
-            if comboBox.hasFocus():
-                return QComboBox.wheelEvent(comboBox, event)
-            else:
-                event.ignore()
-
-        comboBox = QComboBox(self)
-        comboBox.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-        comboBox.addItems(items)
-        comboBox.wheelEvent = wheelEvent
-
-        if editable:
-            comboBox.setEditable(True)
-        else:
-            comboBox.setCursor(Qt.CursorShape.PointingHandCursor)
-            
-        if selected:
-            if isinstance(selected, int) or selected.isnumeric():
-                comboBox.setCurrentIndex(int(selected))
-            else:
-                if selected in items:
-                    comboBox.setCurrentIndex(items.index(selected))
-
-        comboBox.activated.connect(onChanged)
-        return comboBox
-    
-    def createAlignmentWidget(self, selected, srcProperty):
-        frame = QFrame()
 
     def createCheckBox(self, checked, disabled, srcProperty, propertySignalDisabled=False):
         def onChecked():
@@ -353,13 +347,13 @@ class PropertiesWidget(QStackedWidget):
                 elif property["type"] == "numlist":
                     propertyWidget, propertyLayout = self.createStrEdit(property["string"], propertyValue, key, propertyDisabled)
                 elif property["type"] == "int":
-                    propertyWidget, propertyLayout = self.createStrEdit(property["string"], propertyValue, key, propertyDisabled)
+                    propertyWidget, propertyLayout = self.createIntEdit(property["string"], propertyValue, property.get("min"), property.get("max"), key, propertyDisabled)
                 elif property["type"] == "bool":
                     propertyWidget, propertyLayout = self.createBoolEdit(property["string"], propertyValue, key, propertyDisabled)
                 elif property["type"] == "src":
-                    propertyWidget, propertyLayout = self.createStrEdit(property["string"], propertyValue, propertyDisabled, False)
+                    propertyWidget, propertyLayout = self.createSrcEdit(property["string"], propertyValue, propertyDisabled, False)
 
-                propertiesList[key] = propertyWidget
+                propertiesList[key] = {"type": property["type"], "widget": propertyWidget}
                 parent.addLayout(propertyLayout)
 
     def setupProperties(self, properties: dict, usingWidgetProperties: bool):
@@ -401,11 +395,13 @@ class PropertiesWidget(QStackedWidget):
             else:
                 property["widget"].setVisible(False)
 
-    def loadProperties(self, category, values=None, widget=None):
-        if category == None:
+    def loadProperties(self, category, values=None, widget=None, project=None):
+        if not category:
+            print("none!")
             self.changePropertiesPage("none")
             return
 
+        print("not none!", category)
         self.changePropertiesPage(category)
         for property, propertyWidget in self.properties[category]["propertyWidgets"].items():
             if widget != None:
@@ -413,20 +409,29 @@ class PropertiesWidget(QStackedWidget):
             else:
                 value = values.get(property)
 
-            if value == None:
-                continue
+            print(property, value)
 
-            if isinstance(propertyWidget, QLineEdit):
-                propertyWidget.setText(value)
-            elif isinstance(propertyWidget, SwitchControl):
+            # if value == None:
+            #     continue
+
+            if propertyWidget["type"] == "str":
+                propertyWidget["widget"].setText(value)
+            elif propertyWidget["type"] == "bool":
                 try:
-                    propertyWidget.setChecked(bool(int(value)))
+                    propertyWidget["widget"].setChecked(bool(int(value)))
                 except (ValueError, TypeError):
-                    propertyWidget.setChecked(False)
-                propertyWidget.update_circle_position(propertyWidget.isChecked())
-
+                    propertyWidget["widget"].setChecked(False)
+                propertyWidget["widget"].update_circle_position(propertyWidget["widget"].isChecked())
+            elif propertyWidget["type"] == "int":
+                propertyWidget["widget"].setValue(int(value))
+                print("OK!")
+            elif propertyWidget["type"] == "src":
+                print(project.getDeviceType())
+                self.loadSrcEdit(propertyWidget["widget"], value, project.getDeviceType())
+                print("SRC LOAD OK!")
 
     def clearProperties(self):
+        print("clear!")
         self.changePropertiesPage("none")
 
 class LegacyPropertiesWidget(QWidget):

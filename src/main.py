@@ -836,7 +836,8 @@ class WatchfaceEditor(QMainWindow):
             source = raw.read()
             self.propertiesGMFJson = json.loads(source)
 
-        self.propertiesWidget = PropertiesWidget(self, self.propertiesFprjJson, True)
+        self.propertiesWidget = PropertiesWidget(self, self.propertiesFprjJson, True, self.WatchData.modelSourceList,
+                                                    self.WatchData.modelSourceData)
         self.propertiesWidget.propertyChanged.connect(lambda *args: setProperty(args))
         self.ui.propertiesWidget.setWidget(self.propertiesWidget)
 
@@ -844,22 +845,18 @@ class WatchfaceEditor(QMainWindow):
         currentProject = self.getCurrentProject()
         if item and currentProject["project"].getWidget(item) != None:
             widget = currentProject["project"].getWidget(item)
-            if self.propertiesWidget.clearOnRefresh:
-                if isinstance(currentProject["project"], FprjProject):
-                    split = widget.getProperty("widget_name").split("_")
-                    if split[0].lower() == "lineprogress" and itemType == "widget_arc":
-                        self.propertiesWidget.loadProperties(self.propertiesFprjJson["widget_line"], currentProject["project"], item,
-                                                            self.resourceImages, currentProject["project"].getDeviceType())
-                    else:
-                        self.propertiesWidget.loadProperties(itemType, widget=widget)
-                elif isinstance(currentProject["project"], GMFProject):
-                    self.propertiesWidget.loadProperties(self.propertiesGMFJson[itemType], currentProject["project"], item,
+            if isinstance(currentProject["project"], FprjProject):
+                split = widget.getProperty("widget_name").split("_")
+                if split[0].lower() == "lineprogress" and itemType == "widget_arc":
+                    self.propertiesWidget.loadProperties(self.propertiesFprjJson["widget_line"], currentProject["project"], item,
                                                         self.resourceImages, currentProject["project"].getDeviceType())
-            else:
-                self.propertiesWidget.clearOnRefresh = True
+                else:
+                    self.propertiesWidget.loadProperties(itemType, widget=widget, project=currentProject["project"])
+            elif isinstance(currentProject["project"], GMFProject):
+                self.propertiesWidget.loadProperties(self.propertiesGMFJson[itemType], currentProject["project"], item,
+                                                        self.resourceImages, currentProject["project"].getDeviceType())
         else:
-            if self.propertiesWidget.clearOnRefresh:
-                self.propertiesWidget.clearProperties()
+            self.propertiesWidget.clearProperties()
 
     def setupDialogs(self):
         def closeEvent():
