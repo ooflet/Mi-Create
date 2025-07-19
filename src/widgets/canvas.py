@@ -372,18 +372,29 @@ class Canvas(QGraphicsView):
         if self.getSelectedObjects() == []:
             return
 
+        moveInterval = 1
+
+        if event.modifiers() & Qt.KeyboardModifier.ControlModifier:
+            moveInterval = 10
+
+        if event.modifiers() & Qt.KeyboardModifier.AltModifier:
+            moveInterval = 5
+
+        if event.modifiers() & Qt.KeyboardModifier.ShiftModifier:
+            moveInterval = 20
+
         if event.key() == Qt.Key.Key_Left:
             for object in self.getSelectedObjects():
-                object.setX(object.x() - 1)
+                object.setX(object.x() - moveInterval)
         elif event.key() == Qt.Key.Key_Up:
             for object in self.getSelectedObjects():
-                object.setY(object.y() - 1)
+                object.setY(object.y() - moveInterval)
         elif event.key() == Qt.Key.Key_Right:
             for object in self.getSelectedObjects():
-                object.setX(object.x() + 1)
+                object.setX(object.x() + moveInterval)
         elif event.key() == Qt.Key.Key_Down:
             for object in self.getSelectedObjects():
-                object.setY(object.y() + 1)
+                object.setY(object.y() + moveInterval)
 
         self.fireObjectPositionChanged()
         # return super().keyPressEvent(event)

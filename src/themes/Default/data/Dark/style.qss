@@ -520,7 +520,7 @@ QTreeView {
 }
 
 QTreeView::item {
-    height: 22px;
+    height: 26px;
 }
 
 QTreeView#propertiesList::item {
@@ -607,6 +607,7 @@ QMenu::item:selected {
 
 QLabel#propertyHeader {
     font-size: 8pt;
+    color: palette(light);
 }
 
 QLineEdit#propertyInput {

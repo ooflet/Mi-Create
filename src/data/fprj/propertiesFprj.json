@@ -3,12 +3,6 @@
         "Shape": "AnalogDisplay",
         "properties": {
             "General": {
-                "WidgetType": {
-                    "string": "Widget Type",
-                    "type": "str",
-                    "disabled": "true",
-                    "value": "AnalogDisplay"
-                },
                 "widget_name": {
                     "string": "Name",
                     "type": "str",
@@ -175,12 +169,6 @@
         "Shape": "CircleProgress",
         "properties": {
             "General": {
-                "WidgetType": {
-                    "string": "Widget Type",
-                    "type": "str",
-                    "disabled": "true",
-                    "value": "CircleProgress"
-                },
                 "widget_name": {
                     "string": "Name",
                     "type": "str",
@@ -346,12 +334,6 @@
         "Shape": "LineProgress",
         "properties": {
             "General": {
-                "WidgetType": {
-                    "string": "Widget Type",
-                    "type": "str",
-                    "disabled": "true",
-                    "value": "LineProgress"
-                },
                 "widget_name": {
                     "string": "Name",
                     "type": "str",
@@ -510,12 +492,6 @@
         "Shape": "Image",
         "properties": {
             "General": {
-                "WidgetType": {
-                    "string": "Widget Type",
-                    "type": "str",
-                    "disabled": "true",
-                    "value": "Image"
-                },
                 "widget_name": {
                     "string": "Name",
                     "type": "str",
@@ -583,12 +559,6 @@
         "Shape": "ImageList",
         "properties": {
             "General": {
-                "WidgetType": {
-                    "string": "Widget Type",
-                    "type": "str",
-                    "disabled": "true",
-                    "value": "ImageList"
-                },
                 "widget_name": {
                     "string": "Name",
                     "type": "str",
@@ -670,12 +640,6 @@
         "Shape": "Container",
         "properties": {
             "General": {
-                "WidgetType": {
-                    "string": "Widget Type",
-                    "type": "str",
-                    "disabled": "true",
-                    "value": "Container"
-                },
                 "widget_name": {
                     "string": "Name",
                     "type": "str",
@@ -727,12 +691,6 @@
         "Shape": "DigitalNumber",
         "properties": {
             "General": {
-                "WidgetType": {
-                    "string": "Widget Type",
-                    "type": "str",
-                    "disabled": "true",
-                    "value": "DigitalNumber"
-                },
                 "widget_name": {
                     "string": "Name",
                     "type": "str",

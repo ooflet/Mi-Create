@@ -1245,7 +1245,7 @@ class WatchfaceEditor(QMainWindow):
             currentCanvasSelected.append(item.data(0))
 
         for item in self.Explorer.selectedItems():
-            currentExplorerSelected.append(item.data(0, 101))
+            currentExplorerSelected.append(item.data(101))
 
         # if set(currentCanvasSelected) == set(currentExplorerSelected):
         #     print("same set")
@@ -1268,7 +1268,7 @@ class WatchfaceEditor(QMainWindow):
 
             if len(currentCanvasSelected) == 1:
                 self.updateProperties(currentCanvasSelected[0],
-                                      self.Explorer.items[currentCanvasSelected[0]].data(0, 100))
+                                      self.Explorer.items[currentCanvasSelected[0]].data(100))
             else:
                 self.updateProperties(False)
 
@@ -1287,7 +1287,7 @@ class WatchfaceEditor(QMainWindow):
 
             if len(currentExplorerSelected) == 1:
                 self.updateProperties(currentExplorerSelected[0],
-                                      self.Explorer.items[currentExplorerSelected[0]].data(0, 100))
+                                      self.Explorer.items[currentExplorerSelected[0]].data(100))
             else:
                 self.updateProperties(False)
 

@@ -735,6 +735,7 @@ class FprjWidget:
             return self.data.get(property)
 
     def setProperty(self, property, value):
+        print(property)
         property = [k for k, v in self.project.propertyIds.items() if v == property][0]
         if property == "@BitmapList":
             for index, item in enumerate(value):
