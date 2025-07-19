@@ -20,9 +20,10 @@ from utils.project import FprjWidget, GMFWidget
 from PyQt6.QtCore import pyqtSignal, QPoint, QPointF, QSize, QRect, QRectF, QLineF, QTimer, Qt, QModelIndex
 from PyQt6.QtGui import QPainter, QPainterPath, QPen, QColor, QPixmap, QIcon, QBrush, QImage, QStandardItemModel
 from PyQt6.QtWidgets import (QApplication, QGraphicsPathItem, QGraphicsScene, QGraphicsSceneMouseEvent, QGraphicsView, QGraphicsItem, QGraphicsRectItem, QGraphicsLineItem,
-                            QToolButton, QGraphicsPixmapItem, QGraphicsEllipseItem, QMessageBox, QRubberBand, QGraphicsDropShadowEffect, QHBoxLayout, QVBoxLayout)
+                            QToolButton, QGraphicsPixmapItem, QGraphicsEllipseItem, QMessageBox, QGraphicsDropShadowEffect, QHBoxLayout, QVBoxLayout)
 
 from utils.menu import ContextMenu
+from widgets.rubberband import RubberBand
 
 class ObjectIcon:
     def __init__(self):
@@ -256,8 +257,9 @@ class Canvas(QGraphicsView):
         self.widgets = {}
 
         self.itemDragPreview = None
+        self.resizeEnded = True
 
-        self.rubberBand = QRubberBand(QRubberBand.Shape.Rectangle, self)
+        self.rubberBand = RubberBand(self)
 
         self.setTransformationAnchor(QGraphicsView.ViewportAnchor.AnchorUnderMouse) # positions scene to zoom under mouse
 
@@ -282,21 +284,25 @@ class Canvas(QGraphicsView):
             if event.button() == Qt.MouseButton.LeftButton:
                 self.rubberBandOrigin = event.pos()
                 self.rubberBand.setGeometry(QRect(self.rubberBandOrigin, QSize()))
+                self.rubberBand.stopFadeOut()
                 self.rubberBand.show()
+                self.resizeEnded = False
+
         return super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event):
-        if not self.rubberBand.isHidden():
+        if not self.resizeEnded:
             self.rubberBand.setGeometry(QRect(self.rubberBandOrigin, event.pos()).normalized())
 
         return super().mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event):
-        self.rubberBand.hide()
+        self.resizeEnded = True
+        self.rubberBand.startFadeOut()
         for item in self.items(self.rubberBand.geometry()):
             if isinstance(item, BaseWidget):
                 item.setSelected(True)
-        self.rubberBand.setGeometry(QRect(0,0,0,0))
+        #self.rubberBand.setGeometry(QRect(0,0,0,0))
         return super().mouseReleaseEvent(event)
 
     def dragEnterEvent(self, event):
@@ -998,6 +1004,7 @@ class BaseWidget(QGraphicsRectItem):
         self.canvas = canvas
         self.selectionPos = None
         self.selectionPath = QGraphicsPathItem()
+        self.selectionAnimPlayed = False
         self.selectionPainterPath = QPainterPath()
         self.highlightThickness = 2
         self.highlightRadius = 3
@@ -1027,7 +1034,7 @@ class BaseWidget(QGraphicsRectItem):
             self.selectionPath.setPath(self.selectionPainterPath)
             pen = QPen(self.scene().palette().highlight(), 2, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin)
             self.selectionPath.setPen(pen)
-
+            
         return self.rect()
     
         # hack to get rid of bounding box ghosting
@@ -1107,16 +1114,23 @@ class BaseWidget(QGraphicsRectItem):
 
     def paint(self, painter, option, widget=None):
         # Paint the node in the graphic view.
+        bgColor = self.scene().palette().highlight().color()
+        bgColor.setAlpha(60)
+        brush = QBrush(bgColor)
 
-        painter.setBrush(QBrush(self.color))
-        painter.setPen(self.pen())
+        painter.setBrush(brush)
 
         if self.isSelected():
+            if not self.selectionAnimPlayed:
+                self.selectionAnimPlayed = True
+
+            painter.drawRoundedRect(self.rect(), 4, 4)
             self.selectionPath.show()
         else:
+            self.selectionAnimPlayed = False
             self.selectionPath.hide()
 
-        painter.drawRect(self.rect())
+        #painter.drawRect(self.rect())
 
 class ImageWidget(BaseWidget):
     # Widget for basic images

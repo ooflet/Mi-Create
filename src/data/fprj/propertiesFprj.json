@@ -48,7 +48,7 @@
             "Appearance": {
                 "widget_alpha": {
                     "string": "Opacity",
-                    "type": "int",
+                    "type": "slider",
                     "value": "255",
                     "min": "0",
                     "max": "255"
@@ -220,7 +220,7 @@
             "Appearance": {
                 "widget_alpha": {
                     "string": "Opacity",
-                    "type": "int",
+                    "type": "slider",
                     "value": "255",
                     "min": "0",
                     "max": "255"
@@ -391,7 +391,7 @@
             "Appearance": {
                 "widget_alpha": {
                     "string": "Opacity",
-                    "type": "int",
+                    "type": "slider",
                     "value": "255",
                     "min": "0",
                     "max": "255"
@@ -553,7 +553,7 @@
             "Appearance": {
                 "widget_alpha": {
                     "string": "Opacity",
-                    "type": "int",
+                    "type": "slider",
                     "value": "255",
                     "min": "0",
                     "max": "255"
@@ -626,7 +626,7 @@
             "Appearance": {
                 "widget_alpha": {
                     "string": "Opacity",
-                    "type": "int",
+                    "type": "slider",
                     "value": "255",
                     "min": "0",
                     "max": "255"
@@ -715,7 +715,7 @@
             "Appearance": {
                 "widget_alpha": {
                     "string": "Opacity",
-                    "type": "int",
+                    "type": "slider",
                     "value": "255",
                     "min": "0",
                     "max": "255"
@@ -780,7 +780,7 @@
             "Appearance": {
                 "widget_alpha": {
                     "string": "Opacity",
-                    "type": "int",
+                    "type": "slider",
                     "value": "255",
                     "min": "0",
                     "max": "255"

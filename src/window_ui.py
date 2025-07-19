@@ -104,7 +104,7 @@ class Ui_MainWindow(object):
         self.dockWidgetContents_3 = QtWidgets.QWidget()
         self.dockWidgetContents_3.setObjectName("dockWidgetContents_3")
         self.gridLayout_3 = QtWidgets.QGridLayout(self.dockWidgetContents_3)
-        self.gridLayout_3.setContentsMargins(2, 2, 2, 2)
+        self.gridLayout_3.setContentsMargins(6, 6, 6, 6)
         self.gridLayout_3.setHorizontalSpacing(0)
         self.gridLayout_3.setVerticalSpacing(2)
         self.gridLayout_3.setObjectName("gridLayout_3")

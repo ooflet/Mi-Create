@@ -57,9 +57,9 @@ class Theme:
         for colorGroup, colors in colorSchemeJson.items():
             for colorRole, color in colors.items():
                 if colorGroup == "Disabled":
-                    self.palette.setColor(QPalette.ColorGroup.Disabled, getattr(QPalette.ColorRole, colorRole), QColor(color[0], color[1], color[2]))
+                    self.palette.setColor(QPalette.ColorGroup.Disabled, getattr(QPalette.ColorRole, colorRole), QColor(*color))
                 else:
-                    self.palette.setColor(getattr(QPalette.ColorRole, colorRole), QColor(color[0], color[1], color[2]))
+                    self.palette.setColor(getattr(QPalette.ColorRole, colorRole), QColor(*color))
         
         app.setPalette(self.palette)
 

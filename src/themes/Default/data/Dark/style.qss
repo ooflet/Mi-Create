@@ -109,12 +109,16 @@ QMenu::indicator {
 }
 
 QPushButton {
-    background-color: transparent;
+    background-color: palette(mid);
+    border: 1px solid palette(midlight);
     min-width: 3.5em;
     padding: 5px 8px;
     border-radius: 4px;
-    border: 1px solid palette(light);
     font-weight: normal
+}
+
+QPushButton:pressed {
+    background-color: palette(midlight)
 }
 
 QPushButton:default {
@@ -124,6 +128,7 @@ QPushButton:default {
 
 QPushButton:focus {
     outline: none;
+    border-color: palette(highlight);
 }
 
 QPushButton:checked {
@@ -141,42 +146,58 @@ QPushButton:flat {
 
 QLineEdit {
     padding: 4px;
-    background-color: transparent;
-    border: 1px solid palette(light);
+    background-color: palette(mid);
+    border: 1px solid palette(midlight);
     border-radius: 4px;
     placeholder-text-color: palette(light)
 }
 
 QLineEdit:focus {
+    background-color: palette(link-visited);
     border-color: palette(highlight);
 }
 
 QSpinBox {
     padding: 4px;
-    background-color: transparent;
-    border: 1px solid palette(light);
+    background-color: palette(mid);
+    border: 1px solid palette(midlight);
     border-radius: 4px;
-    placeholder-text-color: palette(light)
+    placeholder-text-color: palette(light);
 }
 
 QSpinBox:focus {
+    background-color: palette(link-visited);
     border-color: palette(highlight);
 }
 
 QSpinBox::up-button {
-    background-color: transparent;
-    width: 0px;
+    border-top-right-radius: 3px;
+    background: palette(mid);
+    width: 16px;
+}
+
+QSpinBox::up-arrow {
+    image: url(:/Icons/up-arrow.png);
+    width: 7px;
+    height: 8px;
 }
 
 QSpinBox::down-button {
-    background-color: transparent;
-    width: 0px;
+    border-bottom-right-radius: 3px;
+    background: palette(mid);
+    width: 16px;
+}
+
+QSpinBox::down-arrow {
+    image: url(:/Icons/down-arrow.png);
+    width: 7px;
+    height: 8px;
 }
 
 QComboBox {
     padding: 4px;
-    background-color: transparent;
-    border: 1px solid palette(light);
+    background-color: palette(mid);
+    border: 1px solid palette(midlight);
     border-radius: 4px;
 }
 
@@ -185,15 +206,43 @@ QComboBox:!editable {
 }
 
 QComboBox::drop-down {
-    width: 20px;
+    background: palette(mid);
+    border-radius: 3px;
+    border-left-color: palette(midlight);
+    border-top-left-radius: 0px;
+    border-bottom-left-radius: 0px;
+    width: 16px;
 }
+
+QComboBox::down-arrow {
+    image: url(:/Icons/down-arrow.png);
+    width: 7px;
+    height: 7px;
+}
+
 
 QComboBox:focus {
     border-color: palette(highlight);
 }
 
+QComboBox:editable:focus {
+    background-color: palette(link-visited);
+}
+
 QComboBox::item {
     selection-background-color: palette(highlight);
+}
+
+QFrame#rubberBand {
+    background-color: rgba(42, 130, 218, 60);
+    border: 2px solid palette(highlight);
+    border-radius: 4px;
+}
+
+QFrame[frameShape="4"] { /* QFrame.Shape.HLine = 4 */
+    background-color: palette(midlight);
+    max-height: 1px;
+    border: none;
 }
 
 QToolButton {
@@ -230,7 +279,7 @@ QToolButton::menu-indicator#canvasDecoration-button {
 }
 
 QToolButton:hover{
-    background-color: palette(button);
+    background-color: palette(mid);
 }
 
 QToolButton:hover#canvasDecoration-button {
@@ -238,7 +287,7 @@ QToolButton:hover#canvasDecoration-button {
 }
 
 QToolButton:pressed {
-    background-color: palette(link-visited);
+    background-color: palette(midlight);
 }
 
 QToolButton:pressed#canvasDecoration-button {
@@ -346,21 +395,25 @@ QTabBar::close-button:hover {
 
 QScrollBar:vertical {
   background: transparent;
-  width: 8px;
+  width: 6px;
   margin: 0px;
 }
 
+QScrollBar::handle {
+    border-radius: 3px;
+}
+
 QScrollBar::handle:vertical {
-  background-color: palette(alternate-base);
+  background-color: palette(midlight);
   min-height: 20px;
 }
 
 QScrollBar::handle:vertical:hover, QScrollBar::handle:horizontal:hover {
-  background-color:palette(link-visited);
+  background-color:palette(alternate-base);
 }
 
 QScrollBar::handle:vertical:pressed, QScrollBar::handle:horizontal:pressed {
-  background-color:palette(highlight);
+  background-color:palette(light);
 }
 
 QScrollBar::add-line:vertical {
@@ -379,12 +432,12 @@ QScrollBar::sub-line:vertical {
 
 QScrollBar:horizontal{
   background: transparent;
-  height: 8px;
+  height: 4px;
   margin: 0px;
 }
 
 QScrollBar::handle:horizontal {
-  background-color: palette(button);
+  background-color: palette(alternate-base);
   min-width: 8px;
 }
 
@@ -424,23 +477,33 @@ QScrollArea {
 /*
  * QSlider
  */
-
-QSlider::handle:horizontal {
-  border-radius: 4px;
-  background-color: palette(light);
-  max-height: 20px;
+QSlider {
+    min-height: 22px;
 }
 
-QSlider::add-page:horizontal {
-  background: palette(base);
+QSlider::groove:horizontal {
+    border: none;
+    height: 6px;
+    background: palette(midlight);
+    border-radius: 3px;
 }
 
 QSlider::sub-page:horizontal {
-  background: palette(highlight);
+    background: palette(highlight);
+    border-radius: 3px;
 }
 
-QSlider::sub-page:horizontal:disabled {
-  background-color: palette(midlight);
+QSlider::add-page:horizontal {
+    background: palette(midlight);
+    border-radius: 3px;
+}
+
+QSlider::handle:horizontal {
+    background: palette(text);
+    width: 14px;
+    height: 14px;
+    margin: -4px 0;
+    border-radius: 7px;
 }
 
 QTableView {
@@ -538,24 +601,8 @@ QMenu::item:selected {
     background-color: palette(highlight);
 }
 
-QFrame#propertyContainer {
-    padding: 4px;
-    background-color: transparent;
-    border: 1px solid palette(light);
-    border-radius: 4px;
-}
-
-QFrame#propertyContainer[focused="true"] {
-    border-color: palette(highlight)
-}
-
 QLabel#propertyHeader {
     font-size: 8pt;
-}
-
-QLabel#propertyCaption {
-    font-size: 8pt;
-    color: palette(light);
 }
 
 QLineEdit#propertyInput {

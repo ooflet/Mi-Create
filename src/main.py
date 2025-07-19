@@ -275,7 +275,7 @@ class WatchfaceEditor(QMainWindow):
 
                     projectName.setText(name)
                     projectLocation.setText(location)
-                    projectLocation.setStyleSheet("color: palette(midlight)")
+                    projectLocation.setStyleSheet("color: palette(light)")
                     projectIcon.setPixmap(QPixmap(icon.pixmap(QSize(32, 32))))
 
                     textLayout.setSpacing(0)
@@ -704,12 +704,10 @@ class WatchfaceEditor(QMainWindow):
 
         self.statusBar().setContentsMargins(4, 4, 4, 4)
         
-        self.ui.workspace.tabBar().setMinimumWidth(99999) # hack to not get tab bars clipped
-                                                    # i dont know the consequences of my actions and i dont want to know
-                                                    # (this is a joke if you know please tell me thx)
         self.ui.workspace.tabBar().setExpanding(False)
         
         #self.ui.resourceList.setItemDelegate(ResourcesDelegate(self.ui.resourceList))
+        #self.ui.resourceList.setStyleSheet("QListView::item {border-top: 1px solid palette(midlight); padding: 24px;}")
         self.ui.resourceList.startDrag = startDrag
         self.ui.resourceSearch.textChanged.connect(search)
         self.ui.reloadResource.clicked.connect(reloadResource)

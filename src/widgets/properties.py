@@ -16,11 +16,12 @@ from utils.project import FprjProject, XiaomiProject
 
 from PyQt6.QtWidgets import (QStackedWidget, QStyledItemDelegate, QWidget, QFileDialog, QTreeWidget, QFrame, QHeaderView, QPushButton,
                                QHBoxLayout, QVBoxLayout, QScrollArea, QTreeWidgetItem, QLineEdit, QSizePolicy,
-                               QSpinBox, QComboBox, QLabel, QCheckBox, QMessageBox, QAbstractItemView, QApplication)
+                               QSpinBox, QComboBox, QLabel, QCheckBox, QMessageBox, QAbstractItemView, QApplication, QSlider)
 from PyQt6.QtCore import Qt, pyqtSignal, QPoint, QSize, QModelIndex
 from PyQt6.QtGui import QColor, QPen, QIntValidator, QIcon, QPalette, QStandardItemModel
 from pprint import pprint
 
+from widgets.switch import SwitchControl
 from translate import Translator
 
 _ = gettext.gettext
@@ -85,32 +86,99 @@ class PropertiesWidget(QStackedWidget):
 
         lineEdit = QLineEdit(self)
         lineEdit.setText(str(text))
-        lineEdit.setObjectName("propertyInput")
         lineEdit.setDisabled(disabled)
         lineEdit.editingFinished.connect(onDeselect)
+        lineEdit.setFixedHeight(lineEdit.sizeHint().height() + 4)
+        print(lineEdit.sizeHint().height())
 
         return lineEdit
+    
+    def createSpinBox(self, text, min, max, disabled, propertySignalDisabled, srcProperty=""):
+        def onChange():
+            if not propertySignalDisabled:
+                self.sendPropertyChangedSignal(srcProperty, spinBox.value())
 
-    def createStrEdit(self, header, value, caption, srcProperty, disabled):
-        layout = QVBoxLayout()
-        propertyHeader = QLabel(header)
-        propertyHeader.setObjectName("propertyHeader")
+        spinBox = QSpinBox(self)
+        spinBox.setDisabled(disabled)
+        spinBox.valueChanged.connect(onChange)
+        spinBox.setFixedHeight(spinBox.sizeHint().height() + 4)
+              
+        if min != "none":
+            min = int(min)
+        else:
+            min = -2147483647
 
-        propertyFrame = QFrame()
-        propertyFrame.setObjectName("propertyContainer")
-        propertyLayout = QHBoxLayout()
-        propertyLayout.setContentsMargins(0,0,0,0)
+        if max != "none":
+            max = int(max)
+        else:
+            max = 2147483647
 
+        spinBox.setRange(min, max)
+        spinBox.setValue(int(text))
+        print(spinBox.sizeHint().height())
+
+        return spinBox
+    
+    def createToggleSwitch(self, toggled, disabled, propertySignalDisabled, srcProperty=""):
+        def onToggle():
+            if not propertySignalDisabled:
+                self.sendPropertyChangedSignal(srcProperty, str(int(toggleSwitch.isChecked())))
+
+        toggleSwitch = SwitchControl(self)
+
+        try:
+            toggleSwitch.setChecked(bool(int(toggled)))
+        except (ValueError, TypeError):
+            toggleSwitch.setChecked(False)
+
+        toggleSwitch.setDisabled(disabled)
+        toggleSwitch.toggled.connect(onToggle)
+
+        return toggleSwitch
+
+
+    def createStrEdit(self, label, value, srcProperty, disabled):
+        layout = QHBoxLayout()
+        propertyLabel = QLabel(label)
         propertyEdit = self.createLineEdit(value, disabled, False, srcProperty)
-        propertyCaption = QLabel(caption)
-        propertyCaption.setObjectName("propertyCaption")
 
-        propertyFrame.setLayout(propertyLayout)
-        propertyLayout.addWidget(propertyEdit, 1)
-        propertyLayout.addWidget(propertyCaption, 0)
+        layout.addWidget(propertyLabel)
+        layout.addStretch()
+        layout.addWidget(propertyEdit)
+
+        return propertyEdit, layout
+
+    def createSlider(self, label, value, min, max, src, disabled):
+        layout = QHBoxLayout()
+        propertyLabel = QLabel(label)
         
-        layout.addWidget(propertyHeader)
-        layout.addWidget(propertyFrame)
+        propertyEdit = self.createSpinBox(value, min, max, disabled, False, src)
+        propertyEdit.setFixedWidth(50)
+        
+        propertySlider = QSlider(Qt.Orientation.Horizontal)
+        propertySlider.setRange(int(min), int(max))
+        propertySlider.setTickInterval(int(max) - int(min))
+        propertySlider.setValue(int(value))
+
+        propertyEdit.valueChanged.connect(lambda value: propertySlider.setValue(int(value)))
+        propertySlider.valueChanged.connect(lambda value: propertyEdit.setValue(int(value)))
+
+        layout.addWidget(propertyLabel)
+        layout.addStretch()
+        layout.addWidget(propertySlider)
+        layout.addWidget(propertyEdit)
+
+        return propertyEdit, layout
+    
+    def createBoolEdit(self, label, value, srcProperty, disabled):
+        layout = QHBoxLayout()
+        layout.setContentsMargins(0,4,0,4)
+        propertyLabel = QLabel(label)
+        propertyEdit = self.createToggleSwitch(value, disabled, False, srcProperty)
+
+        layout.addWidget(propertyLabel)
+        layout.addStretch()
+        layout.addWidget(propertyEdit)
 
         return propertyEdit, layout
 
@@ -123,39 +191,6 @@ class PropertiesWidget(QStackedWidget):
         button.setDisabled(disabled)
         button.clicked.connect(onClick)
         return button
-    
-    def createSpinBox(self, text, disabled, propertySignalDisabled, srcProperty, minVal=-9999, maxVal=9999):
-        def onChanged():
-            if not propertySignalDisabled:
-                self.sendPropertyChangedSignal(srcProperty, spinBox.text())
-
-        def onDeselect():
-            spinBox.clearFocus()
-
-        validator = QIntValidator()
-
-        spinBox = QLineEdit(self)
-        spinBox.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-        spinBox.setValidator(validator)
-
-        if minVal != "none":
-            validator.setBottom(int(minVal))
-        else:
-            validator.setBottom(-2147483647) # max int32 signed integer
-
-        if maxVal != "none":
-            validator.setTop(int(maxVal))
-        else:
-            validator.setTop(2147483647)
-
-        if text == None:
-            text = "0"
-
-        spinBox.setText(int(text))
-        spinBox.setDisabled(disabled)
-        spinBox.textChanged.connect(onChanged)
-        spinBox.editingFinished.connect(onDeselect)
-        return spinBox
     
     def createIntEdit(self, header, value, caption, min, max, srcProperty, disabled):
         layout = QVBoxLayout()
@@ -275,7 +310,8 @@ class PropertiesWidget(QStackedWidget):
             line.setFrameShadow(QFrame.Shadow.Sunken)
             layout.addWidget(line)
 
-        category = QLabel(name)
+        category = QLabel(name.upper())
+        category.setObjectName("propertyHeader")
         layout.addWidget(category)
 
         return layout
@@ -303,24 +339,25 @@ class PropertiesWidget(QStackedWidget):
                     propertyDisabled = True
 
                 if property["type"] == "str":
-                    propertyWidget, propertyLayout = self.createStrEdit(property["string"], propertyValue, "str", key, propertyDisabled)
+                    propertyWidget, propertyLayout = self.createStrEdit(property["string"], propertyValue, key, propertyDisabled)
                 elif property["type"] == "btn":
                     propertyWidget, propertyLayout = self.createButton(propertyValue, propertyDisabled, key)
                 elif property["type"] == "img":
-                    propertyWidget, propertyLayout = self.createStrEdit(property["string"], propertyValue, "img", key, propertyDisabled)
+                    propertyWidget, propertyLayout = self.createStrEdit(property["string"], propertyValue, key, propertyDisabled)
+                elif property["type"] == "slider":
+                    propertyWidget, propertyLayout = self.createSlider(property["string"], propertyValue, property["min"], property["max"], key, propertyDisabled)
                 elif property["type"] == "list":
-                    propertyWidget, propertyLayout = self.createStrEdit(property["string"], propertyValue, "list", key, propertyDisabled)
+                    propertyWidget, propertyLayout = self.createStrEdit(property["string"], propertyValue, key, propertyDisabled)
                 elif property["type"] == "imglist":
-                    propertyWidget, propertyLayout = self.createStrEdit(property["string"], propertyValue, "imglist", key, propertyDisabled)
+                    propertyWidget, propertyLayout = self.createStrEdit(property["string"], propertyValue, key, propertyDisabled)
                 elif property["type"] == "numlist":
-                    propertyWidget, propertyLayout = self.createStrEdit(property["string"], propertyValue, "numlist", key, propertyDisabled)
+                    propertyWidget, propertyLayout = self.createStrEdit(property["string"], propertyValue, key, propertyDisabled)
                 elif property["type"] == "int":
-                    propertyWidget, propertyLayout = self.createStrEdit(property["string"], propertyValue, "int", key, propertyDisabled)
+                    propertyWidget, propertyLayout = self.createStrEdit(property["string"], propertyValue, key, propertyDisabled)
                 elif property["type"] == "bool":
-                    #propertyLayout = self.createCheckBox(propertyValue, propertyDisabled, key, False)
-                    continue
+                    propertyWidget, propertyLayout = self.createBoolEdit(property["string"], propertyValue, key, propertyDisabled)
                 elif property["type"] == "src":
-                    propertyWidget, propertyLayout = self.createStrEdit(property["string"], propertyValue, "src", propertyDisabled, False)
+                    propertyWidget, propertyLayout = self.createStrEdit(property["string"], propertyValue, propertyDisabled, False)
 
                 propertiesList[key] = propertyWidget
                 parent.addLayout(propertyLayout)
@@ -381,6 +418,12 @@ class PropertiesWidget(QStackedWidget):
 
             if isinstance(propertyWidget, QLineEdit):
                 propertyWidget.setText(value)
+            elif isinstance(propertyWidget, SwitchControl):
+                try:
+                    propertyWidget.setChecked(bool(int(value)))
+                except (ValueError, TypeError):
+                    propertyWidget.setChecked(False)
+                propertyWidget.update_circle_position(propertyWidget.isChecked())
 
 
     def clearProperties(self):
