@@ -315,7 +315,7 @@ class Canvas(QGraphicsView):
             self.itemDragPreview = QGraphicsPixmapItem()
             self.scene().addItem(self.itemDragPreview)
             self.itemDragPreview.setOpacity(0.5)
-            self.itemDragPreview.setPixmap(QPixmap(os.path.join(self.imageFolder, model.item(0, 0).data(0))))
+            self.itemDragPreview.setPixmap(QPixmap(os.path.join(self.imageFolder, model.item(0, 0).data(100))))
 
     def dragMoveEvent(self, event):
         if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
@@ -341,7 +341,7 @@ class Canvas(QGraphicsView):
 
         if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
             position = self.mapToScene(int(event.position().x()), int(event.position().y()))
-            self.onObjectAdded.emit(model.item(0, 0).data(0), int(position.x()), int(position.y()))
+            self.onObjectAdded.emit(model.item(0, 0).data(100), int(position.x()), int(position.y()))
 
 
     def contextMenuEvent(self, event):

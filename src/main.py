@@ -58,6 +58,7 @@ from utils.history import History, CommandAddWidget, CommandDeleteWidget, Comman
     CommandModifyProperty, CommandModifyPosition, CommandModifyAlignment, CommandChangeTheme
 from utils.exporter import FprjConverter
 from utils.plugin import PluginLoader
+from widgets.items import HoverableFileItem
 from widgets.canvas import Canvas, ObjectIcon, ImageWidget, NumberWidget, AnalogWidget, ImagelistWidget
 from widgets.explorer import Explorer
 from widgets.properties import PropertiesWidget, LegacyPropertiesWidget
@@ -74,7 +75,7 @@ workspaceSettings = QSettings("Mi Create", "Workspace")
     
 _ = gettext.gettext
 
-programVersion = 'v1.1.1'
+programVersion = 'v1.2'
 
 class WatchfaceEditor(QMainWindow):
     updateFound = pyqtSignal(str)
@@ -500,12 +501,13 @@ class WatchfaceEditor(QMainWindow):
                 file = os.path.join(imageFolder, filename)
                 if os.path.isfile(file):
                     logging.info("Creating file entry for " + os.path.basename(file))
-                    item = QListWidgetItem(QIcon(file), os.path.basename(file))
-                    item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-                    item.setData(0, os.path.basename(file))
-                    item.setSizeHint(QSize(14, 64))
+                    item = QListWidgetItem(self.ui.resourceList)
+                    item.setData(100, os.path.basename(file))
+                    item_widget = HoverableFileItem(os.path.basename(file), QPixmap(file), self.ui.resourceList)
+                    item.setSizeHint(item_widget.sizeHint())
 
                     self.resourceImages.append(os.path.basename(file))
+                    self.ui.resourceList.setItemWidget(item, item_widget)
                     self.ui.resourceList.addItem(item)
 
     def setIconState(self, disabled):
@@ -616,8 +618,9 @@ class WatchfaceEditor(QMainWindow):
                 self.selectionDebounce = False
                 self.Explorer.updateExplorer(currentProject["project"])
                 logging.info("Explorer updated")
-                thread = threading.Thread(target=lambda: self.reloadImages(currentProject["project"].getImageFolder()))
-                thread.start()
+                self.reloadImages(currentProject["project"].getImageFolder())
+                # thread = threading.Thread(target=lambda: self.reloadImages(currentProject["project"].getImageFolder()))
+                # thread.start()
             else:
                 self.setIconState(True)
                 self.clearExplorer()
@@ -646,7 +649,7 @@ class WatchfaceEditor(QMainWindow):
             visible_items = []
             for x in range(self.ui.resourceList.count()):
                 item = self.ui.resourceList.item(x)
-                if filter_text.lower() in item.text().lower():
+                if filter_text.lower() in item.data(100).lower():
                     item.setHidden(False)
                     visible_items.append(x)
                 else:
@@ -1264,7 +1267,7 @@ class WatchfaceEditor(QMainWindow):
                 self.Explorer.setCurrentItem(None)
                 self.Explorer.items[currentCanvasSelected[0]].setSelected(True) # setCurrentItem stramgely toggles in this situation
             else:
-                self.Explorer.setCurrentItem(None)
+                self.Explorer.clearSelection()
 
             if len(currentCanvasSelected) == 1:
                 self.updateProperties(currentCanvasSelected[0],
@@ -1459,8 +1462,9 @@ class WatchfaceEditor(QMainWindow):
             if currentProject["canvas"].isPreviewPlaying:
                 self.playAllPreviews(currentProject["canvas"])
 
-            thread = threading.Thread(target=lambda: self.reloadImages(currentProject["project"].getImageFolder()))
-            thread.start()
+            self.reloadImages(currentProject["project"].getImageFolder())
+            #thread = threading.Thread(target=lambda: self.reloadImages(currentProject["project"].getImageFolder()))
+            #thread.start()
 
             if theme == "aod":
                 aodButton.setChecked(True)
@@ -1565,8 +1569,9 @@ class WatchfaceEditor(QMainWindow):
                 self.selectionDebounce = False
                 self.Explorer.updateExplorer(project)
                 logging.info("Explorer updated")
-                thread = threading.Thread(target=lambda: self.reloadImages(project.getImageFolder()))
-                thread.start()
+                self.reloadImages(project.getImageFolder())
+                # thread = threading.Thread(target=lambda: self.reloadImages(project.getImageFolder()))
+                # thread.start()
                 self.show()
 
             self.coreDialog.close()

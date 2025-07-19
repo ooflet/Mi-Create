@@ -610,6 +610,12 @@ QLabel#propertyHeader {
     color: palette(light);
 }
 
+QLabel#imageFrame {
+    background-color: palette(mid);
+    border: 1px solid palette(midlight);
+    border-radius: 4px;
+}
+
 QLineEdit#propertyInput {
     margin: 0px;
     padding: 0px;
