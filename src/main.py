@@ -694,6 +694,13 @@ class WatchfaceEditor(QMainWindow):
             if filter_text != "" and visible_items != []:
                 self.ui.resourceList.setCurrentRow(visible_items[0])
 
+        def insertSelectedResource():
+            selectedResource = self.ui.resourceList.currentItem()
+            resource = selectedResource.data(100)
+
+            self.createWatchfaceWidget("widget", properties={"widget_bitmap": resource})
+
+
         self.statusBar().setContentsMargins(4, 4, 4, 4)
         
         self.ui.workspace.tabBar().setExpanding(False)
@@ -701,6 +708,7 @@ class WatchfaceEditor(QMainWindow):
         #self.ui.resourceList.setItemDelegate(ResourcesDelegate(self.ui.resourceList))
         #self.ui.resourceList.setStyleSheet("QListView::item {border-top: 1px solid palette(midlight); padding: 24px;}")
         self.ui.resourceList.startDrag = startDrag
+        self.ui.resourceList.doubleClicked.connect(insertSelectedResource)
         self.ui.resourceSearch.textChanged.connect(search)
         self.ui.reloadResource.clicked.connect(self.reloadResource)
         self.ui.addResource.clicked.connect(self.addResource)

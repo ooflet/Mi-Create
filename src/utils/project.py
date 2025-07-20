@@ -551,9 +551,12 @@ class FprjProject:
 
         destFile = os.path.join(self.themes[self.currentTheme]["imageFolder"], os.path.basename(file))
         if os.path.isfile(destFile):
-            QMessageBox.information(None, "Resource Importer", f"File {destFile} already exists!")
-        else:
-            shutil.copyfile(file, destFile)
+            result = QMessageBox.question(None, "Resource Importer", f"A resource named '{os.path.basename(destFile)}' already exists. Overwrite?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+            if result == QMessageBox.StandardButton.Yes:
+                os.remove(destFile)
+            else:
+                return
+        shutil.copyfile(file, destFile)
 
     def addResources(self, files):
         if self.currentTheme == "aod" and os.path.isdir(self.themes["aod"]["imageFolder"]) is not True:
@@ -1107,9 +1110,12 @@ class GMFProject:
         for file in files:
             destFile = os.path.join(self.themes[self.currentTheme]["imageFolder"], os.path.basename(file))
             if os.path.isfile(destFile):
-                QMessageBox.information(None, "Resource Importer", f"File {destFile} already exists!")
-            else:
-                shutil.copyfile(file, destFile)
+                result = QMessageBox.question(None, "Resource Importer", f"Overwrite {destFile}?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+                if result == QMessageBox.StandardButton.Yes:
+                    os.remove(destFile)
+                else:
+                    return
+            shutil.copyfile(file, destFile)
     
     def getId(self):
         return self.themes[self.currentTheme]["data"].get("@Id") or "167210065"

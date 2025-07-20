@@ -436,13 +436,13 @@ QScrollBar::sub-line:vertical {
 
 QScrollBar:horizontal{
   background: transparent;
-  height: 4px;
+  height: 6px;
   margin: 0px;
 }
 
 QScrollBar::handle:horizontal {
   background-color: palette(alternate-base);
-  min-width: 8px;
+  min-width: 20px;
 }
 
 
@@ -618,7 +618,7 @@ QFrame#contentPanel{
 QFrame#fileEntry {
     background-color: palette(window);
     border: 1px solid palette(mid);
-    border-radius: 4px;
+    border-radius: 6px;
 }
 
 QFrame#imageEntry {
