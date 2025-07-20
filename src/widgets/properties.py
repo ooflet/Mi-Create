@@ -15,10 +15,10 @@ from typing import Any
 from utils.project import FprjProject, XiaomiProject
 
 from PyQt6.QtWidgets import (QStackedWidget, QStyledItemDelegate, QWidget, QFileDialog, QTreeWidget, QFrame, QHeaderView, QPushButton,
-                               QHBoxLayout, QVBoxLayout, QScrollArea, QTreeWidgetItem, QLineEdit, QSizePolicy,
+                               QHBoxLayout, QVBoxLayout, QScrollArea, QTreeWidgetItem, QLineEdit, QSizePolicy, QToolButton,
                                QSpinBox, QComboBox, QLabel, QCheckBox, QMessageBox, QAbstractItemView, QApplication, QSlider)
 from PyQt6.QtCore import Qt, pyqtSignal, QPoint, QSize, QModelIndex
-from PyQt6.QtGui import QColor, QPen, QIntValidator, QIcon, QPalette, QStandardItemModel
+from PyQt6.QtGui import QColor, QPen, QPixmap, QIcon, QPalette, QStandardItemModel, QFontMetrics
 from pprint import pprint
 
 from widgets.switch import SwitchControl
@@ -51,11 +51,131 @@ class TreeWidgetDelegate(QStyledItemDelegate):
         # Call the base class paint method to paint the item
         super().paint(painter, option, index)
 
+class PropertiesFileEntry(QStackedWidget):
+    def __init__(self, src, changeSignal, parent=None):
+        super().__init__(parent)
+        self.setAcceptDrops(True)
+        self.setObjectName("imageEntry")
+
+        self.src = src
+        self.propertyChanged = changeSignal
+
+        # no image set
+        
+        self.placeholderWidget = QFrame()
+        self.placeholderWidget.mousePressEvent
+        self.placeholderWidget.setAcceptDrops(True) 
+        self.placeholderWidget.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.placeholderLayout = QVBoxLayout(self.placeholderWidget)
+        self.placeholderLayout.setSpacing(2)
+
+        self.placeholderIcon = QLabel()
+        self.placeholderIcon.setPixmap(QIcon().fromTheme("insert-image").pixmap(24, 24))
+        self.placeholderIcon.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.placeholderText = QLabel("Select image")
+        self.placeholderText.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.placeholderLayout.addStretch()
+        self.placeholderLayout.addWidget(self.placeholderIcon)
+        self.placeholderLayout.addWidget(self.placeholderText)
+        self.placeholderLayout.addStretch()
+
+        # image preview
+
+        self.itemWidget = QWidget()
+        self.itemLayout = QHBoxLayout(self.itemWidget)
+        #self.itemLayout.setContentsMargins(0, 0, 0, 0)
+        self.itemLayout.setSpacing(10)
+
+        self.icon = QLabel()
+        self.icon.setObjectName("imageFrame")
+        self.icon.setFixedSize(48, 48)
+
+        self.labelLayout = QVBoxLayout()
+        self.labelLayout.setSpacing(2)
+        self.label = QLabel("Image")
+        self.sizeLabel = QLabel("0x0")
+        self.sizeLabel.setStyleSheet("color: palette(light)")
+        
+        self.labelLayout.addStretch()
+        self.labelLayout.addWidget(self.label)
+        self.labelLayout.addWidget(self.sizeLabel)
+        self.labelLayout.addStretch()
+
+        self.deleteBtn = QToolButton()
+        self.deleteBtn.setIcon(QIcon.fromTheme("edit-delete"))
+        self.deleteBtn.setToolTip("Delete")
+        self.deleteBtn.clicked.connect(self.removeImage)
+
+        self.itemLayout.addWidget(self.icon)
+        self.itemLayout.addLayout(self.labelLayout)
+        self.itemLayout.addStretch()
+        self.itemLayout.addWidget(self.deleteBtn)
+
+        self.addWidget(self.placeholderWidget)
+        self.addWidget(self.itemWidget)
+
+        self.setCurrentWidget(self.placeholderWidget)
+
+        self.setFixedHeight(self.itemLayout.sizeHint().height())
+
+    def sendPropertyChangedSignal(self, property, value):
+        self.propertyChanged.emit(property, value)
+
+    def removeImage(self):
+        self.sendPropertyChangedSignal(self.src, "")
+
+    def loadImage(self, name, pixmap):
+        if name:
+            self.setCurrentWidget(self.itemWidget)
+            self.label.setText(name)
+            self.icon.setPixmap(pixmap.scaled(48, 48, Qt.AspectRatioMode.KeepAspectRatioByExpanding, Qt.TransformationMode.SmoothTransformation))
+            self.sizeLabel.setText(f"{pixmap.width()}x{pixmap.height()}")
+        else:
+            self.setCurrentWidget(self.placeholderWidget)
+
+    def updateStyle(self):
+        self.style().unpolish(self)
+        self.style().polish(self)
+
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
+            self.setProperty("selected", True)
+            self.updateStyle()
+            event.acceptProposedAction()
+
+    def dragMoveEvent(self, event):
+        if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
+            self.setProperty("selected", True)
+            self.updateStyle()
+            event.acceptProposedAction()
+
+    def dragLeaveEvent(self, event):
+        self.setProperty("selected", False)
+        self.updateStyle()
+
+    def dropEvent(self, event):
+        model = QStandardItemModel()
+        model.dropMimeData(event.mimeData(), Qt.DropAction.CopyAction, 0, 0, QModelIndex())
+        self.setProperty("selected", False)
+        self.updateStyle()
+
+        image = model.item(0, 0).data(100)
+
+        self.sendPropertyChangedSignal(self.src, image)
+
+        event.acceptProposedAction()
+
 class PropertiesWidget(QStackedWidget):
     propertyChanged = pyqtSignal(object, object)
     def __init__(self, parent, properties, widgetProperties=False, srcList=None, srcData=None):
         super().__init__(parent)
 
+        metrics = QFontMetrics(self.font())
+        height_px = metrics.height()
+
+        self.entryHeight = height_px + 12
         self.entryWidth = 145
         self.clearOnRefresh = True
         self.ignorePropertyChange = False
@@ -87,7 +207,7 @@ class PropertiesWidget(QStackedWidget):
         lineEdit.setText(str(text))
         lineEdit.setDisabled(disabled)
         lineEdit.editingFinished.connect(onDeselect)
-        lineEdit.setFixedHeight(lineEdit.sizeHint().height() + 4)
+        lineEdit.setFixedHeight(self.entryHeight)
         lineEdit.setFixedWidth(self.entryWidth)
 
         return lineEdit
@@ -108,7 +228,7 @@ class PropertiesWidget(QStackedWidget):
         spinBox.wheelEvent = wheelEvent
         spinBox.valueChanged.connect(onChange)
         spinBox.editingFinished.connect(onDeselect)
-        spinBox.setFixedHeight(spinBox.sizeHint().height() + 2)
+        spinBox.setFixedHeight(self.entryHeight)
         spinBox.setFixedWidth(self.entryWidth)
               
         if min and min != "none":
@@ -159,6 +279,7 @@ class PropertiesWidget(QStackedWidget):
         combobox.addItems(list)
         combobox.setEditable(editable)
         combobox.setDisabled(disabled)
+        combobox.setFixedHeight(self.entryHeight)
         combobox.setFixedWidth(self.entryWidth)
         combobox.wheelEvent = wheelEvent
         combobox.activated.connect(onChange)
@@ -281,6 +402,14 @@ class PropertiesWidget(QStackedWidget):
         layout.addWidget(propertyEdit)
 
         return propertyEdit, layout
+    
+    def createImgEdit(self, src, disabled):
+        layout = QVBoxLayout()
+        propertyEdit = PropertiesFileEntry(src, self.propertyChanged)
+
+        layout.addWidget(propertyEdit)
+
+        return propertyEdit, layout
 
     def createButton(self, text, disabled, property):
         def onClick():
@@ -346,7 +475,7 @@ class PropertiesWidget(QStackedWidget):
                 elif property["type"] == "btn":
                     propertyWidget, propertyLayout = self.createButton(propertyValue, propertyDisabled, key)
                 elif property["type"] == "img":
-                    propertyWidget, propertyLayout = self.createStrEdit(property["string"], propertyValue, key, propertyDisabled)
+                    propertyWidget, propertyLayout = self.createImgEdit(key, propertyDisabled)
                 elif property["type"] == "slider":
                     propertyWidget, propertyLayout = self.createSlider(property["string"], propertyValue, property["min"], property["max"], key, propertyDisabled)
                 elif property["type"] == "list":
@@ -422,18 +551,26 @@ class PropertiesWidget(QStackedWidget):
 
             if propertyWidget["type"] == "str":
                 propertyWidget["widget"].setText(value)
+
             elif propertyWidget["type"] == "bool":
                 try:
                     propertyWidget["widget"].setChecked(bool(int(value)))
                 except (ValueError, TypeError):
                     propertyWidget["widget"].setChecked(False)
                 propertyWidget["widget"].update_circle_position(propertyWidget["widget"].isChecked())
+
             elif propertyWidget["type"] == "list":
                 propertyWidget["widget"].setCurrentText(str(value))
+
             elif propertyWidget["type"] == "int":
                 propertyWidget["widget"].setValue(int(value))
+
             elif propertyWidget["type"] == "src":
                 self.loadSrcEdit(propertyWidget["widget"], value, project.getDeviceType())
+                
+            elif propertyWidget["type"] == "img":
+                propertyWidget["widget"].loadImage(value, QPixmap(os.path.join(project.getImageFolder(), value)))
+
         self.ignorePropertyChange = False
 
     def clearProperties(self):

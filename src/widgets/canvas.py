@@ -265,8 +265,7 @@ class Canvas(QGraphicsView):
 
         self.deviceOutlineVisible = deviceOutlineVisible
         self.origin = None
-        self.setAcceptDrops(True) # just in case item implement image drag & drop
-
+        self.setAcceptDrops(True)
         self.zoomValue = 0
 
         self.graphicsScene = Scene()

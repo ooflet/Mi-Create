@@ -140,14 +140,14 @@ class WatchfaceEditor(QMainWindow):
                 )
                 self.languageNames.append(config.get('config', 'language'))
 
-        logging.info("Initializing Watch Properties")
-        self.setupProperties()
-
         logging.info("Initializing Settings")
 
         self.setupThemes()
         self.loadSettings()
         self.loadTheme()
+
+        logging.info("Initializing Watch Properties")
+        self.setupProperties()
 
         self.settingsWidget = LegacyPropertiesWidget(self, self.settings)
         self.settingsWidget.propertyChanged.connect(lambda property, value: self.setSetting(property, value))
@@ -780,11 +780,12 @@ class WatchfaceEditor(QMainWindow):
                     pixmap.load(os.path.join(currentProject["project"].getImageFolder(), value))
 
                     # set widget size to image size
-                    if isinstance(currentItem, FprjWidget):
+                    if not pixmap.isNull() and isinstance(currentItem, FprjWidget):
                         currentItem.setProperty("widget_size_width", pixmap.width())
-                        self.propertiesWidget.propertyItems["widget_size_width"].setText(str(pixmap.width()))
                         currentItem.setProperty("widget_size_height", pixmap.height())
-                        self.propertiesWidget.propertyItems["widget_size_height"].setText(str(pixmap.width()))
+                    else:
+                        currentItem.setProperty("widget_size_width", 48)
+                        currentItem.setProperty("widget_size_height", 48)
 
                     currentItem.setProperty(property, value)
 

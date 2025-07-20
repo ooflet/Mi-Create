@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QToolButton
+from PyQt6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QFrame, QToolButton, QStackedWidget
 from PyQt6.QtGui import QIcon, QPixmap
 from PyQt6.QtCore import Qt
 
@@ -42,3 +42,4 @@ class HoverableFileItem(QWidget):
     def leaveEvent(self, event):
         self.moreBtn.setVisible(False)
         super().leaveEvent(event)
+

@@ -610,6 +610,18 @@ QLabel#propertyHeader {
     color: palette(light);
 }
 
+QFrame#imageEntry {
+    background-color: palette(mid);
+    border: 1px solid palette(midlight);
+    border-radius: 4px;
+}
+
+QFrame#imageEntry[selected="true"] {
+    background-color: palette(link-visited);
+    border: 1px solid palette(highlight);
+    border-radius: 4px;
+}
+
 QLabel#imageFrame {
     background-color: palette(mid);
     border: 1px solid palette(midlight);
