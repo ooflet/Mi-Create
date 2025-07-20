@@ -610,15 +610,38 @@ QLabel#propertyHeader {
     color: palette(light);
 }
 
+
+QFrame#contentPanel{
+    background-color: palette(base)
+}
+
+QFrame#fileEntry {
+    background-color: palette(window);
+    border: 1px solid palette(mid);
+    border-radius: 4px;
+}
+
 QFrame#imageEntry {
     background-color: palette(mid);
     border: 1px solid palette(midlight);
     border-radius: 4px;
 }
 
+QFrame#fileEntry[selected="true"] {
+    background-color: palette(link-visited);
+    border: 1px solid palette(highlight);
+    border-radius: 4px;
+}
+
 QFrame#imageEntry[selected="true"] {
     background-color: palette(link-visited);
     border: 1px solid palette(highlight);
+    border-radius: 4px;
+}
+
+QLabel#darkFrame {
+    background-color: palette(window);
+    border: 1px solid palette(midlight);
     border-radius: 4px;
 }
 

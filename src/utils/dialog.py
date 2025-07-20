@@ -18,9 +18,11 @@ from PyQt6.QtCore import Qt, QObject, QSize, pyqtSignal, QUrl, QMetaMethod
 from PyQt6.QtGui import QIcon, QPixmap, QMovie, QIntValidator
 from PyQt6.QtWidgets import (QDialog, QLabel, QLineEdit, QComboBox, QToolButton, QSpinBox, QVBoxLayout, 
                              QHBoxLayout, QSizePolicy, QWidget, QDialogButtonBox, QFileDialog, QFrame,
-                             QPushButton, QCheckBox, QListWidget, QListWidgetItem, QMenu, QMessageBox)
+                             QPushButton, QCheckBox, QScrollArea, QListWidget, QListWidgetItem, QMenu, QMessageBox)
 from PyQt6.QtMultimedia import QSoundEffect
 from widgets.stackedwidget import QStackedWidget, loadJsonStyle
+from widgets.layouts import FlowLayout
+from widgets.items import RecentProjectItem
 
 from translate import Translator
 
@@ -33,6 +35,7 @@ class CoreDialog(QDialog):
     resetSettings = pyqtSignal()
 
     newProjectCreated = pyqtSignal()
+    projectOpened = pyqtSignal(str)
 
     projectConfigSaved = pyqtSignal()
 
@@ -234,9 +237,22 @@ class CoreDialog(QDialog):
 
         # contentsPanel
 
-        self.welcomePage = QListWidget()
-        self.welcomePage.setStyleSheet("background-color: transparent;")
-        self.welcomePage.setObjectName("contentPanel")
+        self.welcomePage = QScrollArea()
+        self.welcomePage.setWidgetResizable(True)
+        self.welcomePage.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.welcomePage.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+
+        self.welcomeFrame = QFrame()
+        self.welcomeFrame.setContentsMargins(8, 8, 8, 8)
+        self.welcomeFrame.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Preferred)
+        self.welcomeFrame.setFixedWidth(self.welcomePage.viewport().width())
+        self.welcomePage.viewport().resizeEvent = lambda event: self.welcomeFrame.setFixedWidth(event.size().width())
+
+        self.welcomeFrameLayout = FlowLayout(self.welcomeFrame)
+        self.welcomeFrameLayout.setSpacing(8)
+        self.welcomeFrame.setObjectName("contentPanel")
+
+        self.welcomePage.setWidget(self.welcomeFrame)
 
         # add to main layout
 
@@ -246,6 +262,27 @@ class CoreDialog(QDialog):
         # setup interactive things
         self.welcomeSidebarNewProject.clicked.connect(lambda: self.showNewProjectPage(self.showWelcomePage, True))
         self.welcomeSidebarSettings.clicked.connect(lambda: self.showSettingsPage(self.showWelcomePage, True))
+
+    def openProject(self, file):
+        self.projectOpened.emit(file)
+
+    def loadRecentProjects(self, projectList):
+        self.welcomeFrameLayout.clear()
+        for name, location in projectList:
+            if os.path.isfile(location):
+
+                print(location)
+                
+                previewLocation = os.path.join(os.path.dirname(location), "preview_default_large.png")
+                item = RecentProjectItem(name, QPixmap(previewLocation), location, self.openProject)
+                self.welcomeFrameLayout.addWidget(item)
+                self.welcomeFrame.adjustSize()
+                print(self.welcomeFrameLayout.sizeHint())
+
+            else:
+                print(f"Project {name, location} not found")
+                projectList.pop(projectList.index([name, location]))
+        
 
     def setupNewProjectPage(self, deviceList):
         # sidebar

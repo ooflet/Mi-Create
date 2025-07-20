@@ -52,7 +52,7 @@ class TreeWidgetDelegate(QStyledItemDelegate):
         super().paint(painter, option, index)
 
 class PropertiesFileEntry(QStackedWidget):
-    def __init__(self, src, changeSignal, parent=None):
+    def __init__(self, src, changeSignal, imageUploadFunction, parent=None):
         super().__init__(parent)
         self.setAcceptDrops(True)
         self.setObjectName("imageEntry")
@@ -61,11 +61,16 @@ class PropertiesFileEntry(QStackedWidget):
         self.propertyChanged = changeSignal
 
         # no image set
+
+        def mousePress(event):
+            imageUploadFunction()
+            return QFrame.mousePressEvent(self.placeholderWidget, event)
         
         self.placeholderWidget = QFrame()
-        self.placeholderWidget.mousePressEvent
+        self.placeholderWidget.mousePressEvent = mousePress
         self.placeholderWidget.setAcceptDrops(True) 
         self.placeholderWidget.setCursor(Qt.CursorShape.PointingHandCursor)
+
         self.placeholderLayout = QVBoxLayout(self.placeholderWidget)
         self.placeholderLayout.setSpacing(2)
 
@@ -90,6 +95,7 @@ class PropertiesFileEntry(QStackedWidget):
 
         self.icon = QLabel()
         self.icon.setObjectName("imageFrame")
+        self.icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.icon.setFixedSize(48, 48)
 
         self.labelLayout = QVBoxLayout()
@@ -104,8 +110,8 @@ class PropertiesFileEntry(QStackedWidget):
         self.labelLayout.addStretch()
 
         self.deleteBtn = QToolButton()
-        self.deleteBtn.setIcon(QIcon.fromTheme("edit-delete"))
-        self.deleteBtn.setToolTip("Delete")
+        self.deleteBtn.setIcon(QIcon.fromTheme("application-close"))
+        self.deleteBtn.setToolTip("Remove")
         self.deleteBtn.clicked.connect(self.removeImage)
 
         self.itemLayout.addWidget(self.icon)
@@ -130,7 +136,7 @@ class PropertiesFileEntry(QStackedWidget):
         if name:
             self.setCurrentWidget(self.itemWidget)
             self.label.setText(name)
-            self.icon.setPixmap(pixmap.scaled(48, 48, Qt.AspectRatioMode.KeepAspectRatioByExpanding, Qt.TransformationMode.SmoothTransformation))
+            self.icon.setPixmap(pixmap.scaled(48, 48, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
             self.sizeLabel.setText(f"{pixmap.width()}x{pixmap.height()}")
         else:
             self.setCurrentWidget(self.placeholderWidget)
@@ -169,7 +175,7 @@ class PropertiesFileEntry(QStackedWidget):
 
 class PropertiesWidget(QStackedWidget):
     propertyChanged = pyqtSignal(object, object)
-    def __init__(self, parent, properties, widgetProperties=False, srcList=None, srcData=None):
+    def __init__(self, parent, properties, widgetProperties=False, imageUploadFunction=None, srcList=None, srcData=None):
         super().__init__(parent)
 
         metrics = QFontMetrics(self.font())
@@ -181,6 +187,8 @@ class PropertiesWidget(QStackedWidget):
         self.ignorePropertyChange = False
 
         self.properties = {}
+
+        self.imageUploadFunction = imageUploadFunction
 
         self.sourceList = srcList
         self.sourceData = srcData
@@ -292,7 +300,9 @@ class PropertiesWidget(QStackedWidget):
         return combobox
 
     def createStrEdit(self, label, value, srcProperty, disabled):
-        layout = QHBoxLayout()
+        widget = QWidget()
+        layout = QHBoxLayout(widget)
+        layout.setContentsMargins(0, 0, 0, 0)
         propertyLabel = QLabel(label)
         propertyEdit = self.createLineEdit(value, disabled, False, srcProperty)
 
@@ -300,10 +310,12 @@ class PropertiesWidget(QStackedWidget):
         layout.addStretch()
         layout.addWidget(propertyEdit)
 
-        return propertyEdit, layout
+        return propertyEdit, widget
     
     def createIntEdit(self, label, value, min, max, src, disabled):
-        layout = QHBoxLayout()
+        widget = QWidget()
+        layout = QHBoxLayout(widget)
+        layout.setContentsMargins(0, 0, 0, 0)
         propertyLabel = QLabel(label)
         propertyEdit = self.createSpinBox(value, min, max, disabled, False, src)
 
@@ -311,10 +323,12 @@ class PropertiesWidget(QStackedWidget):
         layout.addStretch()
         layout.addWidget(propertyEdit)
 
-        return propertyEdit, layout
+        return propertyEdit, widget
 
     def createSlider(self, label, value, min, max, src, disabled):
-        layout = QHBoxLayout()
+        widget = QWidget()
+        layout = QHBoxLayout(widget)
+        layout.setContentsMargins(0, 0, 0, 0)
         propertyLabel = QLabel(label)
         
         propertyEdit = self.createSpinBox(value, min, max, disabled, False, src)
@@ -338,10 +352,12 @@ class PropertiesWidget(QStackedWidget):
         layout.addWidget(propertySlider)
         layout.addWidget(propertyEdit)
 
-        return propertyEdit, layout
+        return propertyEdit, widget
     
     def createBoolEdit(self, label, value, srcProperty, disabled):
-        layout = QHBoxLayout()
+        widget = QWidget()
+        layout = QHBoxLayout(widget)
+        layout.setContentsMargins(0, 0, 0, 0)
         layout.setContentsMargins(0,4,0,4)
         propertyLabel = QLabel(label)
         propertyEdit = self.createToggleSwitch(value, disabled, False, srcProperty)
@@ -350,10 +366,12 @@ class PropertiesWidget(QStackedWidget):
         layout.addStretch()
         layout.addWidget(propertyEdit)
 
-        return propertyEdit, layout
+        return propertyEdit, widget
     
     def createSrcEdit(self, label, value, src, disabled):
-        layout = QHBoxLayout()
+        widget = QWidget()
+        layout = QHBoxLayout(widget)
+        layout.setContentsMargins(0, 0, 0, 0)
         propertyLabel = QLabel(label)
 
         propertyEdit = self.createCombobox("Data Source", [], True, disabled, False, src)
@@ -362,7 +380,7 @@ class PropertiesWidget(QStackedWidget):
         layout.addStretch()
         layout.addWidget(propertyEdit)
 
-        return propertyEdit, layout
+        return propertyEdit, widget
 
     def loadSrcEdit(self, combobox, value, device):
         source_items = self.sourceData[str(device)]
@@ -393,7 +411,9 @@ class PropertiesWidget(QStackedWidget):
             combobox.setCurrentIndex(0)
 
     def createListEdit(self, label, value, options, src, disabled):
-        layout = QHBoxLayout()
+        widget = QWidget()
+        layout = QHBoxLayout(widget)
+        layout.setContentsMargins(0, 0, 0, 0)
         propertyLabel = QLabel(label)
         propertyEdit = self.createCombobox(value, options, False, disabled, False, src)
 
@@ -401,15 +421,23 @@ class PropertiesWidget(QStackedWidget):
         layout.addStretch()
         layout.addWidget(propertyEdit)
 
-        return propertyEdit, layout
+        return propertyEdit, widget
     
-    def createImgEdit(self, src, disabled):
-        layout = QVBoxLayout()
-        propertyEdit = PropertiesFileEntry(src, self.propertyChanged)
+    def createImgEdit(self, src, imageUploadFunction):
+        def addImgResource():
+            image = imageUploadFunction(True)
+            if image:
+                print(image)
+                self.sendPropertyChangedSignal(src, image)
+
+        widget = QWidget()
+        layout = QHBoxLayout(widget)
+        layout.setContentsMargins(0, 0, 0, 0)
+        propertyEdit = PropertiesFileEntry(src, self.propertyChanged, addImgResource)
 
         layout.addWidget(propertyEdit)
 
-        return propertyEdit, layout
+        return propertyEdit, widget
 
     def createButton(self, text, disabled, property):
         def onClick():
@@ -475,7 +503,7 @@ class PropertiesWidget(QStackedWidget):
                 elif property["type"] == "btn":
                     propertyWidget, propertyLayout = self.createButton(propertyValue, propertyDisabled, key)
                 elif property["type"] == "img":
-                    propertyWidget, propertyLayout = self.createImgEdit(key, propertyDisabled)
+                    propertyWidget, propertyLayout = self.createImgEdit(key, self.imageUploadFunction)
                 elif property["type"] == "slider":
                     propertyWidget, propertyLayout = self.createSlider(property["string"], propertyValue, property["min"], property["max"], key, propertyDisabled)
                 elif property["type"] == "list":
@@ -491,8 +519,14 @@ class PropertiesWidget(QStackedWidget):
                 elif property["type"] == "src":
                     propertyWidget, propertyLayout = self.createSrcEdit(property["string"], propertyValue, key, propertyDisabled)
 
-                propertiesList[key] = {"type": property["type"], "widget": propertyWidget}
-                parent.addLayout(propertyLayout)
+                propertiesList[key] = {
+                    "property_data": property, 
+                    "type": property["type"], 
+                    "layout": propertyLayout,
+                    "widget": propertyWidget
+                }
+
+                parent.addWidget(propertyLayout)
 
     def setupProperties(self, properties: dict, usingWidgetProperties: bool):
         emptyPage = QWidget()
@@ -546,8 +580,19 @@ class PropertiesWidget(QStackedWidget):
             else:
                 value = values.get(property)
 
-            # if value == None:
-            #     continue
+            currentDevice = project.getDeviceType()
+
+            # handle visibleOn property
+
+            if propertyWidget["property_data"].get("visibleOn"):
+                print(propertyWidget["property_data"].get("visibleOn"))
+                if currentDevice not in propertyWidget["property_data"]["visibleOn"]:
+                    print("nope!")
+                    propertyWidget["layout"].setVisible(False)
+                else:
+                    propertyWidget["layout"].setVisible(True)
+
+            # set value
 
             if propertyWidget["type"] == "str":
                 propertyWidget["widget"].setText(value)
@@ -566,7 +611,7 @@ class PropertiesWidget(QStackedWidget):
                 propertyWidget["widget"].setValue(int(value))
 
             elif propertyWidget["type"] == "src":
-                self.loadSrcEdit(propertyWidget["widget"], value, project.getDeviceType())
+                self.loadSrcEdit(propertyWidget["widget"], value, currentDevice)
                 
             elif propertyWidget["type"] == "img":
                 propertyWidget["widget"].loadImage(value, QPixmap(os.path.join(project.getImageFolder(), value)))

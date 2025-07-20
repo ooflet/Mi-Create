@@ -259,46 +259,10 @@ class WatchfaceEditor(QMainWindow):
             self.showFullScreen()
 
     def showWelcome(self):
-        self.coreDialog.welcomePage.clear()
-
         if storedSettings.value("recentProjects") != None:
             projectList = storedSettings.value("recentProjects")
             projectList.reverse()
-            for name, location in projectList:
-                if os.path.isfile(location):
-                    listWidget = QWidget()
-                    textLayout = QVBoxLayout()
-                    widgetLayout = QHBoxLayout()
-                    projectName = QLabel()
-                    projectLocation = QLabel()
-                    projectIcon = QLabel()
-                    icon = QIcon().fromTheme("project-icon")
-
-                    projectName.setText(name)
-                    projectLocation.setText(location)
-                    projectLocation.setStyleSheet("color: palette(light)")
-                    projectIcon.setPixmap(QPixmap(icon.pixmap(QSize(32, 32))))
-
-                    textLayout.setSpacing(0)
-                    textLayout.addWidget(projectName)
-                    textLayout.addWidget(projectLocation)
-
-                    widgetLayout.setSpacing(8)
-                    widgetLayout.setContentsMargins(12, 8, 12, 8)
-                    widgetLayout.addWidget(projectIcon, 0)
-                    widgetLayout.addLayout(textLayout, 1)
-
-                    listWidget.setLayout(widgetLayout)
-
-                    # item
-                    listItem = QListWidgetItem(self.coreDialog.welcomePage)
-                    listItem.setToolTip(location)
-                    listItem.setSizeHint(listWidget.sizeHint())
-                    self.coreDialog.welcomePage.setItemWidget(listItem, listWidget)
-                else:
-                    print(f"Project {name, location} not found")
-                    projectList.pop(projectList.index([name, location]))
-            
+            self.coreDialog.loadRecentProjects(projectList)
             projectList.reverse()
             storedSettings.setValue("recentProjects", projectList)
 
@@ -492,8 +456,9 @@ class WatchfaceEditor(QMainWindow):
                             f"An error occured while loading the theme {themeName}. Theme settings have been reset.")
 
     def reloadImages(self, imageFolder):
+        listPosition = self.ui.resourceList.verticalScrollBar().value()
         self.ui.resourceList.clear()
-        if imageFolder != None:
+        if imageFolder:
             self.resourceImages.clear()
             directory = os.listdir(imageFolder)
             directory.sort()
@@ -504,11 +469,13 @@ class WatchfaceEditor(QMainWindow):
                     item = QListWidgetItem(self.ui.resourceList)
                     item.setData(100, os.path.basename(file))
                     item_widget = HoverableFileItem(os.path.basename(file), QPixmap(file), self.ui.resourceList)
+                    item_widget.deleteBtn.clicked.connect(lambda event, file=os.path.basename(file): self.deleteResource(file))
                     item.setSizeHint(item_widget.sizeHint())
 
                     self.resourceImages.append(os.path.basename(file))
                     self.ui.resourceList.setItemWidget(item, item_widget)
                     self.ui.resourceList.addItem(item)
+        self.ui.resourceList.verticalScrollBar().setValue(listPosition)
 
     def setIconState(self, disabled):
         self.ui.actionSave.setDisabled(disabled)
@@ -595,6 +562,75 @@ class WatchfaceEditor(QMainWindow):
             self.hide()
             self.showWelcome()
 
+    def openResourceFolder(self):
+        currentProject = self.getCurrentProject()
+
+        if currentProject == None or not currentProject.get("project"):
+            return
+
+        self.openFolder(currentProject["project"].getImageFolder())
+
+    def addResource(self, ignoreCanvasReload=False):
+        currentProject = self.getCurrentProject()
+
+        if currentProject == None or not currentProject.get("project"):
+            return False
+
+        files = QFileDialog.getOpenFileNames(self, _("Add Image..."), "%userprofile%\\",
+                                                "Image File (*.png *.jpeg *.jpg)")
+
+        if not files[0]:
+            return False
+
+        currentProject["project"].addResources(files[0])
+        self.reloadImages(currentProject["project"].getImageFolder())
+
+        if not ignoreCanvasReload:
+            currentProject["canvas"].loadObjects(currentProject["project"],
+                                                            self.settings["Canvas"]["Snap"]["value"],
+                                                        self.settings["Canvas"]["Interpolation"]["value"],
+                                                        self.settings["Canvas"]["ClipDeviceShape"]["value"],
+                                                        self.settings["Canvas"]["ShowDeviceOutline"]["value"])
+            if currentProject["canvas"].isPreviewPlaying:
+                self.playAllPreviews(currentProject["canvas"])
+
+        return os.path.basename(files[0][0])
+    
+    def deleteResource(self, file, ignoreCanvasReload=False):
+        currentProject = self.getCurrentProject()
+
+        if currentProject == None or not currentProject.get("project"):
+            return False
+        
+        currentProject["project"].removeResource(file)
+
+        self.reloadImages(currentProject["project"].getImageFolder())
+
+        if not ignoreCanvasReload:
+            currentProject["canvas"].loadObjects(currentProject["project"],
+                                                            self.settings["Canvas"]["Snap"]["value"],
+                                                        self.settings["Canvas"]["Interpolation"]["value"],
+                                                        self.settings["Canvas"]["ClipDeviceShape"]["value"],
+                                                        self.settings["Canvas"]["ShowDeviceOutline"]["value"])
+            if currentProject["canvas"].isPreviewPlaying:
+                self.playAllPreviews(currentProject["canvas"])
+
+    def reloadResource(self):
+        currentProject = self.getCurrentProject()
+
+        if currentProject == None or not currentProject.get("project"):
+            return
+
+        self.reloadImages(currentProject["project"].getImageFolder())
+
+        currentProject["canvas"].loadObjects(currentProject["project"], self.settings["Canvas"]["Snap"]["value"],
+                                            self.settings["Canvas"]["Interpolation"]["value"],
+                                            self.settings["Canvas"]["ClipDeviceShape"]["value"],
+                                            self.settings["Canvas"]["ShowDeviceOutline"]["value"])
+        
+        if currentProject["canvas"].isPreviewPlaying:
+            self.playAllPreviews(currentProject["canvas"])
+
     def setupWorkspace(self):
         def handleTabChange(index):
             # Fires when tab changes
@@ -658,53 +694,6 @@ class WatchfaceEditor(QMainWindow):
             if filter_text != "" and visible_items != []:
                 self.ui.resourceList.setCurrentRow(visible_items[0])
 
-        def openResourceFolder():
-            currentProject = self.getCurrentProject()
-
-            if currentProject == None or not currentProject.get("project"):
-                return
-
-            self.openFolder(currentProject["project"].getImageFolder())
-
-        def addResource():
-            currentProject = self.getCurrentProject()
-
-            if currentProject == None or not currentProject.get("project"):
-                return
-
-            files = QFileDialog.getOpenFileNames(self, _("Add Image..."), "%userprofile%\\",
-                                                 "Image File (*.png *.jpeg *.jpg)")
-
-            if not files[0]:
-                return
-
-            currentProject["project"].addResources(files[0])
-
-            self.reloadImages(currentProject["project"].getImageFolder())
-            currentProject["canvas"].loadObjects(currentProject["project"],
-                                                         self.settings["Canvas"]["Snap"]["value"],
-                                                        self.settings["Canvas"]["Interpolation"]["value"],
-                                                        self.settings["Canvas"]["ClipDeviceShape"]["value"],
-                                                        self.settings["Canvas"]["ShowDeviceOutline"]["value"])
-            if currentProject["canvas"].isPreviewPlaying:
-                self.playAllPreviews(currentProject["canvas"])
-
-        def reloadResource():
-            currentProject = self.getCurrentProject()
-
-            if currentProject == None or not currentProject.get("project"):
-                return
-
-            self.reloadImages(currentProject["project"].getImageFolder())
-
-            currentProject["canvas"].loadObjects(currentProject["project"], self.settings["Canvas"]["Snap"]["value"],
-                                                self.settings["Canvas"]["Interpolation"]["value"],
-                                                self.settings["Canvas"]["ClipDeviceShape"]["value"],
-                                                self.settings["Canvas"]["ShowDeviceOutline"]["value"])
-            
-            if currentProject["canvas"].isPreviewPlaying:
-                self.playAllPreviews(currentProject["canvas"])
-
         self.statusBar().setContentsMargins(4, 4, 4, 4)
         
         self.ui.workspace.tabBar().setExpanding(False)
@@ -713,9 +702,9 @@ class WatchfaceEditor(QMainWindow):
         #self.ui.resourceList.setStyleSheet("QListView::item {border-top: 1px solid palette(midlight); padding: 24px;}")
         self.ui.resourceList.startDrag = startDrag
         self.ui.resourceSearch.textChanged.connect(search)
-        self.ui.reloadResource.clicked.connect(reloadResource)
-        self.ui.addResource.clicked.connect(addResource)
-        self.ui.openResourceFolder.clicked.connect(openResourceFolder)
+        self.ui.reloadResource.clicked.connect(self.reloadResource)
+        self.ui.addResource.clicked.connect(self.addResource)
+        self.ui.openResourceFolder.clicked.connect(self.openResourceFolder)
 
         # Connect tab changes
         self.ui.workspace.tabCloseRequested.connect(self.closeTab)
@@ -840,7 +829,7 @@ class WatchfaceEditor(QMainWindow):
             source = raw.read()
             self.propertiesGMFJson = json.loads(source)
 
-        self.propertiesWidget = PropertiesWidget(self, self.propertiesFprjJson, True, self.WatchData.modelSourceList,
+        self.propertiesWidget = PropertiesWidget(self, self.propertiesFprjJson, True, self.addResource, self.WatchData.modelSourceList,
                                                     self.WatchData.modelSourceData)
         self.propertiesWidget.propertyChanged.connect(lambda *args: setProperty(args))
         self.ui.propertiesWidget.setWidget(self.propertiesWidget)
@@ -910,13 +899,15 @@ class WatchfaceEditor(QMainWindow):
         self.coreDialog.newProjectCreated.connect(
             lambda: self.newProject(locationField.text(), nameField.text(), deviceField.currentText()))
 
+        self.coreDialog.projectOpened.connect(lambda file: self.openProject(projectLocation=file))
+
         def projectListOpen():
             if len(self.coreDialog.welcomePage.selectedItems()) == 1:
                 listItem = self.coreDialog.welcomePage.selectedItems()[0]
                 QApplication.instance().processEvents()
                 self.openProject(projectLocation=listItem.toolTip())
 
-        self.coreDialog.welcomePage.itemClicked.connect(projectListOpen)
+        #self.coreDialog.welcomePage.itemClicked.connect(projectListOpen)
 
     def changeSelectionInExplorer(self, name):
         if isinstance(name, str):
