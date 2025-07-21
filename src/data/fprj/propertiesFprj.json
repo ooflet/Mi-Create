@@ -69,99 +69,70 @@
                     "value": "0"
                 }
             },
-            "Analog Properties": {
-                "Background": {
-                    "widget_background_bitmap": {
-                        "string": "Image",
-                        "type": "img",
-                        "value": ""
-                    },
-                    "Anchor Point": {
-                        "analog_bg_anchor_x": {
-                            "string": "X",
-                            "type": "int",
-                            "value": "",
-                            "min": "0",
-                            "max": "999"
-                        },
-                        "analog_bg_anchor_y": {
-                            "string": "Y",
-                            "type": "int",
-                            "value": "",
-                            "min": "0",
-                            "max": "999"
-                        }
-                    }
+            "Hour Hand": {
+                "analog_hour_image": {
+                    "string": "Image",
+                    "type": "img",
+                    "value": ""
                 },
-                "Hour Hand": {
-                    "analog_hour_image": {
-                        "string": "Image",
-                        "type": "img",
-                        "value": ""
-                    },
-                    "Anchor Point": {
-                        "analog_hour_anchor_x": {
-                            "string": "X",
-                            "type": "int",
-                            "value": "",
-                            "min": "0",
-                            "max": "999"
-                        },
-                        "analog_hour_anchor_y": {
-                            "string": "Y",
-                            "type": "int",
-                            "value": "",
-                            "min": "0",
-                            "max": "999"
-                        }
-                    }
+                "analog_hour_anchor_x": {
+                    "string": "X",
+                    "type": "int",
+                    "value": "",
+                    "min": "0",
+                    "max": "999"
                 },
-                "Minute Hand": {
-                    "analog_minute_image": {
-                        "string": "Image",
-                        "type": "img",
-                        "value": ""
-                    },
-                    "Anchor Point": {
-                        "analog_minute_anchor_x": {
-                            "string": "X",
-                            "type": "int",
-                            "value": "",
-                            "min": "0",
-                            "max": "999"
-                        },
-                        "analog_minute_anchor_y": {
-                            "string": "Y",
-                            "type": "int",
-                            "value": "",
-                            "min": "0",
-                            "max": "999"
-                        }
-                    }
-                },
-                "Second Hand": {
-                    "analog_second_image": {
-                        "string": "Image",
-                        "type": "img",
-                        "value": ""
-                    },
-                    "Anchor Point": {
-                        "analog_second_anchor_x": {
-                            "string": "X",
-                            "type": "int",
-                            "value": "",
-                            "min": "0",
-                            "max": "999"
-                        },
-                        "analog_second_anchor_y": {
-                            "string": "Y",
-                            "type": "int",
-                            "value": "",
-                            "min": "0",
-                            "max": "999"
-                        }
-                    }
+                "analog_hour_anchor_y": {
+                    "string": "Y",
+                    "type": "int",
+                    "value": "",
+                    "min": "0",
+                    "max": "999"
                 }
+            },
+            "Minute Hand": {
+                "analog_minute_image": {
+                    "string": "Image",
+                    "type": "img",
+                    "value": ""
+                },
+                "analog_minute_anchor_x": {
+                    "string": "X",
+                    "type": "int",
+                    "value": "",
+                    "min": "0",
+                    "max": "999"
+                },
+                "analog_minute_anchor_y": {
+                    "string": "Y",
+                    "type": "int",
+                    "value": "",
+                    "min": "0",
+                    "max": "999"
+                }
+                
+            },
+            "Second Hand": {
+                "analog_second_image": {
+                    "string": "Image",
+                    "type": "img",
+                    "value": ""
+                },
+                "analog_second_anchor_x": {
+                    "string": "X",
+                    "type": "int",
+                    "value": "",
+                    "min": "0",
+                    "max": "999"
+                },
+                "analog_second_anchor_y": {
+                    "string": "Y",
+                    "type": "int",
+                    "value": "",
+                    "min": "0",
+                    "max": "999"
+                }
+                
             }
         }
     },
@@ -327,6 +298,7 @@
                     "type": "img",
                     "value": ""
                 }
+            
             }
         }
     },

@@ -26,6 +26,7 @@ import requests
 import subprocess
 import platform
 import gettext
+from datetime import datetime
 
 from PyQt6.QtWidgets import (QInputDialog, QMessageBox, QApplication, QProgressBar,
                              QDialogButtonBox, QFileDialog, QWidget, QVBoxLayout, QMenu,
@@ -64,11 +65,11 @@ from widgets.explorer import Explorer
 from widgets.properties import PropertiesWidget, LegacyPropertiesWidget
 from widgets.delegates import ResourcesDelegate
 from widgets.editor import Editor, XMLLexer, JsonLexer
-from translate import Translator
+from utils.translate import Translator
 
 import resources.resources_rc  # resource import required because it sets up the icons
 
-from window_ui import Ui_MainWindow
+from widgets.window import MainWindow
 
 storedSettings = QSettings("Mi Create", "Settings")
 workspaceSettings = QSettings("Mi Create", "Workspace")
@@ -98,11 +99,11 @@ class WatchfaceEditor(QMainWindow):
 
         # Setup Main Window
         logging.info("Initializing MainWindow")
-        self.ui = Ui_MainWindow()
+        self.ui = MainWindow()
         self.ui.setupUi(self)
 
         # if platform.system() == "Windows":
-        self.titleBar.layout().insertWidget(0, self.ui.menubar, 0, Qt.AlignmentFlag.AlignLeft)
+        self.titleBar.layout().insertWidget(0, self.ui.menuBar, 0, Qt.AlignmentFlag.AlignLeft)
         self.titleBar.layout().insertStretch(1, 1)
         self.setMenuWidget(self.titleBar)
 
@@ -265,6 +266,8 @@ class WatchfaceEditor(QMainWindow):
             self.coreDialog.loadRecentProjects(projectList)
             projectList.reverse()
             storedSettings.setValue("recentProjects", projectList)
+        else:
+            self.coreDialog.loadRecentProjects(None)
 
         self.coreDialog.showWelcomePage()
         self.coreDialog.exec()
@@ -278,7 +281,7 @@ class WatchfaceEditor(QMainWindow):
 
         decompileAction.triggered.connect(self.decompileProject)
 
-        self.ui.menubar.addMenu(debugMenu)
+        self.ui.menuBar.addMenu(debugMenu)
 
     def getCurrentProject(self) -> dict:
         # tab paths are stored in the tabToolTip string
@@ -570,17 +573,25 @@ class WatchfaceEditor(QMainWindow):
 
         self.openFolder(currentProject["project"].getImageFolder())
 
-    def addResource(self, ignoreCanvasReload=False):
+    def addResource(self, ignoreCanvasReload=False, openInResourceFolder=False):
         currentProject = self.getCurrentProject()
 
         if currentProject == None or not currentProject.get("project"):
             return False
 
-        files = QFileDialog.getOpenFileNames(self, _("Add Image..."), "%userprofile%\\",
+        if openInResourceFolder:
+            folder = currentProject["project"].getImageFolder()
+        else:
+            folder = "%userprofile%\\"
+
+        files = QFileDialog.getOpenFileNames(self, _("Add Image..."), folder,
                                                 "Image File (*.png *.jpeg *.jpg)")
 
         if not files[0]:
             return False
+
+        if os.path.dirname(files[0][0]) == currentProject["project"].getImageFolder():
+            return os.path.basename(files[0][0])
 
         currentProject["project"].addResources(files[0])
         self.reloadImages(currentProject["project"].getImageFolder())
@@ -708,6 +719,7 @@ class WatchfaceEditor(QMainWindow):
         #self.ui.resourceList.setItemDelegate(ResourcesDelegate(self.ui.resourceList))
         #self.ui.resourceList.setStyleSheet("QListView::item {border-top: 1px solid palette(midlight); padding: 24px;}")
         self.ui.resourceList.startDrag = startDrag
+        self.ui.resourceList
         self.ui.resourceList.doubleClicked.connect(insertSelectedResource)
         self.ui.resourceSearch.textChanged.connect(search)
         self.ui.reloadResource.clicked.connect(self.reloadResource)
@@ -849,8 +861,7 @@ class WatchfaceEditor(QMainWindow):
             if isinstance(currentProject["project"], FprjProject):
                 split = widget.getProperty("widget_name").split("_")
                 if split[0].lower() == "lineprogress" and itemType == "widget_arc":
-                    self.propertiesWidget.loadProperties(self.propertiesFprjJson["widget_line"], currentProject["project"], item,
-                                                        self.resourceImages, currentProject["project"].getDeviceType())
+                    self.propertiesWidget.loadProperties("widget_line", widget=widget, project=currentProject["project"])
                 else:
                     self.propertiesWidget.loadProperties(itemType, widget=widget, project=currentProject["project"])
             elif isinstance(currentProject["project"], GMFProject):
@@ -908,6 +919,7 @@ class WatchfaceEditor(QMainWindow):
             lambda: self.newProject(locationField.text(), nameField.text(), deviceField.currentText()))
 
         self.coreDialog.projectOpened.connect(lambda file: self.openProject(projectLocation=file))
+        self.coreDialog.projectRemoved.connect(lambda file: self.removeRecentProject(file))
 
         def projectListOpen():
             if len(self.coreDialog.welcomePage.selectedItems()) == 1:
@@ -1697,12 +1709,50 @@ class WatchfaceEditor(QMainWindow):
         self.coreDialog.showNewProjectPage()
         self.coreDialog.exec()
 
+    def addProjectToRecents(self, project, projectLocation):
+        recentProjectList = storedSettings.value("recentProjects")
+
+        if recentProjectList == None:
+            recentProjectList = []
+
+        path = os.path.normpath(projectLocation)
+
+        if isinstance(project, FprjProject):
+            projectListing = [os.path.basename(path), path, datetime.now().isoformat()]
+        elif isinstance(project, GMFProject):
+            projectListing = [project.getTitle(), path, datetime.now().isoformat()]
+
+        for index, recentProject in enumerate(recentProjectList):
+            if recentProject[1] == path:
+                recentProjectList.pop(index)
+
+        # if projectListing in recentProjectList:
+        #     recentProjectList.pop(recentProjectList.index(projectListing))
+
+        recentProjectList.append(projectListing)
+
+        storedSettings.setValue("recentProjects", recentProjectList)
+
+    def removeRecentProject(self, path):
+        print("remove")
+        recentProjectList = storedSettings.value("recentProjects")
+
+        for index, recentProject in enumerate(recentProjectList):
+            if recentProject[1] == path:
+                recentProjectList.pop(index)
+
+        storedSettings.setValue("recentProjects", recentProjectList)
+        self.coreDialog.loadRecentProjects(storedSettings.value("recentProjects"))
+
     def newProject(self, file, projectName, watchModel):
         # Check if file was selected
         if file:
             if os.path.isdir(os.path.join(file, projectName)):
-                self.showDialog("warning", _("Project already exists here, try a different path."))
-                return
+                result = self.showDialog("question", f"A project already exists here. Overwrite?", buttons=QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+                if result == QMessageBox.StandardButton.Yes:
+                    shutil.rmtree(os.path.join(file, projectName))
+                else:
+                    return
 
             newProject = FprjProject()
             create = newProject.createBlank(file, self.WatchData.modelID[str(watchModel)], projectName)
@@ -1755,24 +1805,7 @@ class WatchfaceEditor(QMainWindow):
         if load[0]:
             try:
                 self.createNewWorkspace(project)
-                recentProjectList = storedSettings.value("recentProjects")
-
-                if recentProjectList == None:
-                    recentProjectList = []
-
-                path = os.path.normpath(projectLocation)
-
-                if isinstance(project, FprjProject):
-                    projectListing = [os.path.basename(path), path]
-                elif isinstance(project, GMFProject):
-                    projectListing = [project.getTitle(), path]
-
-                if projectListing in recentProjectList:
-                    recentProjectList.pop(recentProjectList.index(projectListing))
-
-                recentProjectList.append(projectListing)
-
-                storedSettings.setValue("recentProjects", recentProjectList)
+                self.addProjectToRecents(project, projectLocation)
             except Exception as e:
                 self.showDialog("error", _("Failed to open project: ") + str(e), traceback.format_exc())
                 return False
@@ -1794,47 +1827,43 @@ class WatchfaceEditor(QMainWindow):
         self.coreDialog.showManageProjectPage()
         self.coreDialog.exec()
 
+    def saveProject(self, project):
+        if project.get("project"):
+            success, message, debugMessage = project["project"].save()
+            if success:
+                self.statusBar().showMessage(_("Project saved at ") + project["project"].getPath(), 2000)
+                self.addProjectToRecents(project["project"], project["project"].getPath())
+                self.fileChanged = False
+                self.Explorer.clearSelection()
+                self.markCurrentProjectChanged(False)
+                project["canvas"].createPreview()
+                if project["canvas"].isPreviewPlaying:
+                    self.playAllPreviews(project["canvas"])
+            else:
+                self.statusBar().showMessage(_("Failed to save: ") + str(message), 10000)
+                self.showDialog("error", _("Failed to save project: ") + str(message), debugMessage)
+        elif project.get("editor"):
+            try:
+                with open(project["path"], "w", encoding="utf8") as file:
+                    file.write(project["editor"].text())
+                self.markCurrentProjectChanged(False)
+                self.statusBar().showMessage(_("Project saved at ") + project["path"], 2000)
+            except Exception as e:
+                self.statusBar().showMessage(_("Failed to save: ") + str(e), 10000)
+                self.showDialog("error", _("Failed to save project: ") + str(e), debugMessage)
+
     def saveProjects(self, projectsToSave):
         if projectsToSave == "all":
             for index, project in enumerate(self.projects.items()):
                 project = project[1]
                 if project["hasFileChanged"]:
-                    if not project.get("project"):
-                        return
-                    success, message, debugMessage = project["project"].save()
-                    if success:
-                        self.Explorer.clearSelection()
-                        project["hasFileChanged"] = False
-                        project["canvas"].createPreview()
-                    else:
-                        self.showDialog("error", _("Failed to save project: ") + str(message), debugMessage)
+                    self.saveProject(project)
 
         elif projectsToSave == "current":
             currentIndex = self.ui.workspace.currentIndex()
             currentProject = self.getCurrentProject()
 
-            if currentProject.get("project"):
-                success, message, debugMessage = currentProject["project"].save()
-                if success:
-                    self.statusBar().showMessage(_("Project saved at ") + currentProject["project"].getPath(), 2000)
-                    self.fileChanged = False
-                    self.Explorer.clearSelection()
-                    self.markCurrentProjectChanged(False)
-                    currentProject["canvas"].createPreview()
-                    if currentProject["canvas"].isPreviewPlaying:
-                        self.playAllPreviews(currentProject["canvas"])
-                else:
-                    self.statusBar().showMessage(_("Failed to save: ") + str(message), 10000)
-                    self.showDialog("error", _("Failed to save project: ") + str(message), debugMessage)
-            elif currentProject.get("editor"):
-                try:
-                    with open(currentProject["path"], "w", encoding="utf8") as file:
-                        file.write(currentProject["editor"].text())
-                    self.markCurrentProjectChanged(False)
-                    self.statusBar().showMessage(_("Project saved at ") + currentProject["path"], 2000)
-                except Exception as e:
-                    self.statusBar().showMessage(_("Failed to save: ") + str(e), 10000)
-                    self.showDialog("error", _("Failed to save project: ") + str(e), debugMessage)
+            self.saveProject(currentProject)
 
     def exportCurrentProject(self):
         currentProject = self.getCurrentProject()

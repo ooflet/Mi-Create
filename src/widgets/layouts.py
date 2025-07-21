@@ -83,5 +83,5 @@ class FlowLayout(QLayout):
             item = self.takeAt(0)
             widget = item.widget()
             if widget is not None:
-                del widget
+                widget.setParent(None)
 

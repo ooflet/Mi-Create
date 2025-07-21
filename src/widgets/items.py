@@ -1,6 +1,35 @@
 from PyQt6.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QFrame, QToolButton, QStackedWidget
 from PyQt6.QtGui import QIcon, QPixmap
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, pyqtSignal
+
+from datetime import datetime, timedelta
+
+def getTimestamp(past, now=None):
+    if not past:
+        return "some time ago"
+
+    now = now or datetime.now()
+    diff = now - past
+
+    seconds = diff.total_seconds()
+    minutes = seconds // 60
+    hours = minutes // 60
+    days = diff.days
+    months = days // 30
+    years = days // 365
+
+    if seconds < 60:
+        return "just now"
+    elif minutes < 60:
+        return f"{int(minutes)} minute(s) ago"
+    elif hours < 24:
+        return f"{int(hours)} hour(s) ago"
+    elif days < 30:
+        return f"{int(days)} day(s) ago"
+    elif days < 365:
+        return f"{int(months)} month(s) ago"
+    else:
+        return f"{int(years)} year(s) ago"
 
 class HoverableFileItem(QWidget):
     def __init__(self, name, pixmap, parent=None):
@@ -18,6 +47,8 @@ class HoverableFileItem(QWidget):
         self.labelLayout = QVBoxLayout()
         self.labelLayout.setSpacing(2)
         self.label = QLabel(name)
+        self.label.setMaximumWidth(200)
+        self.label.setToolTip(name)
         self.sizeLabel = QLabel(f"{pixmap.width()}x{pixmap.height()}")
         self.sizeLabel.setStyleSheet("color: palette(light)")
         
@@ -45,11 +76,13 @@ class HoverableFileItem(QWidget):
         super().leaveEvent(event)
 
 class RecentProjectItem(QFrame):
-    def __init__(self, name, pixmap, path, openProject, parent=None):
+    opened = pyqtSignal(str)
+    removed = pyqtSignal(str)
+
+    def __init__(self, name, pixmap, path, lastOpened=None, parent=None):
         super().__init__(parent)
 
         self.path = path
-        self.openProjectFunction = openProject
 
         self.setObjectName("fileEntry")
         self.setFixedSize(172, 220)
@@ -62,28 +95,55 @@ class RecentProjectItem(QFrame):
         self.icon.setObjectName("imageFrame")
         self.icon.setFixedSize(155, 155)
         self.icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.icon.setPixmap(pixmap.scaled(135, 135, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+        if pixmap.isNull():
+            self.icon.setPixmap(QIcon.fromTheme("widget-image").pixmap(135, 135))
+        else:
+            self.icon.setPixmap(pixmap.scaled(135, 135, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
 
         self.label = QLabel(name)
-        self.sizeLabel = QLabel(f"{pixmap.width()}x{pixmap.height()}")
-        self.sizeLabel.setStyleSheet("color: palette(light)")
+        self.label.setMaximumWidth(160)
+        self.label.setToolTip(name)
+
+        if lastOpened:
+            lastOpened = datetime.fromisoformat(lastOpened)
+
+        self.timestampLabel = QLabel(f"Opened {getTimestamp(lastOpened)}")
+        self.timestampLabel.setStyleSheet("color: palette(light)")
 
         self.itemLayout.addWidget(self.icon)
         self.itemLayout.addStretch()
         self.itemLayout.addWidget(self.label)
-        self.itemLayout.addWidget(self.sizeLabel)
+        self.itemLayout.addWidget(self.timestampLabel)
+
+        self.removeButton = QToolButton(self)
+        self.removeButton.setIcon(QIcon.fromTheme("application-close"))  # Replace with your desired icon
+        self.removeButton.setAutoRaise(True)
+        self.removeButton.resize(30, 30)
+        self.removeButton.move(self.width() - self.removeButton.width() - 9, 10)
+        self.removeButton.clicked.connect(lambda: self.removed.emit(path))
+        self.removeButton.hide()
 
     def updateStyle(self):
         self.style().unpolish(self)
         self.style().polish(self)
 
+    def enterEvent(self, event):
+        self.removeButton.show()
+        super().enterEvent(event)
+
+    def leaveEvent(self, event):
+        self.removeButton.hide()
+        super().leaveEvent(event)
+
     def mousePressEvent(self, a0):
         self.setProperty("selected", True)
         self.updateStyle()
-        QApplication.instance().processEvents()
-        self.openProjectFunction(self.path)
-        self.setProperty("selected", False)
-        self.updateStyle()
         return super().mousePressEvent(a0)
 
+    def mouseReleaseEvent(self, a0):
+        self.setProperty("selected", False)
+        self.updateStyle()
+        QApplication.instance().processEvents()
+        self.opened.emit(self.path)
+        return super().mouseReleaseEvent(a0)
     

@@ -24,7 +24,7 @@ from widgets.stackedwidget import QStackedWidget, loadJsonStyle
 from widgets.layouts import FlowLayout
 from widgets.items import RecentProjectItem
 
-from translate import Translator
+from utils.translate import Translator
 
 class CoreDialog(QDialog):
     # Core dialog contains welcome screen, new project screen and compile project screen
@@ -36,6 +36,7 @@ class CoreDialog(QDialog):
 
     newProjectCreated = pyqtSignal()
     projectOpened = pyqtSignal(str)
+    projectRemoved = pyqtSignal(str)
 
     projectConfigSaved = pyqtSignal()
 
@@ -132,7 +133,7 @@ class CoreDialog(QDialog):
 
         self.settingsSidebarList.setCurrentRow(currentRow)
 
-    def getSignal (self, oObject : QObject, strSignalName : str):
+    def getSignal(self, oObject : QObject, strSignalName : str):
         oMetaObj = oObject.metaObject()
         for i in range (oMetaObj.methodCount()):
             oMetaMethod = oMetaObj.method(i)
@@ -175,6 +176,8 @@ class CoreDialog(QDialog):
 
     def setupWelcomePage(self, versionString):
         # sidebar
+
+        self.noRecents = True
 
         self.hertaGif = QMovie(":/Herta/herta.gif")
         self.hertaGif.frameChanged.connect(lambda: self.welcomeSidebarLogo.setIcon(QIcon(self.hertaGif.currentPixmap())))
@@ -237,6 +240,20 @@ class CoreDialog(QDialog):
 
         # contentsPanel
 
+        self.onboardingPage = QFrame()
+        self.onboardingPageLayout = QVBoxLayout(self.onboardingPage)
+
+        self.welcomeHeader = QLabel("<h1><b>Welcome to Mi Create</b></h1>")
+        self.welcomeHeader.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.welcomeText = QLabel("This is where recent projects will show.\nCreate or open a project to get started.")
+        self.welcomeText.setStyleSheet("color: palette(light)")
+        self.welcomeText.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.onboardingPageLayout.addStretch()
+        self.onboardingPageLayout.addWidget(self.welcomeHeader)
+        self.onboardingPageLayout.addWidget(self.welcomeText)
+        self.onboardingPageLayout.addStretch()
+
         self.welcomePage = QScrollArea()
         self.welcomePage.setWidgetResizable(True)
         self.welcomePage.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
@@ -258,6 +275,7 @@ class CoreDialog(QDialog):
 
         self.sidebar.addWidget(self.welcomeSidebar)
         self.contentPanel.addWidget(self.welcomePage)
+        self.contentPanel.addWidget(self.onboardingPage)
 
         # setup interactive things
         self.welcomeSidebarNewProject.clicked.connect(lambda: self.showNewProjectPage(self.showWelcomePage, True))
@@ -266,15 +284,34 @@ class CoreDialog(QDialog):
     def openProject(self, file):
         self.projectOpened.emit(file)
 
+    def removeProject(self, file):
+        self.projectRemoved.emit(file)
+
     def loadRecentProjects(self, projectList):
         self.welcomeFrameLayout.clear()
-        for name, location in projectList:
+        print("recent", projectList)
+
+        if not projectList:
+            print("none")
+            self.noRecents = True
+            self.contentPanel.setCurrentWidget(self.onboardingPage)
+            return
+        else:
+            self.noRecents = False
+        
+        for item in projectList:
+            name = item[0]
+            location = item[1]
+            timestamp = item[2] if len(item) > 2 else None
+
             if os.path.isfile(location):
 
                 print(location)
                 
                 previewLocation = os.path.join(os.path.dirname(location), "preview_default_large.png")
-                item = RecentProjectItem(name, QPixmap(previewLocation), location, self.openProject)
+                item = RecentProjectItem(name, QPixmap(previewLocation), location, timestamp)
+                item.opened.connect(self.openProject)
+                item.removed.connect(self.removeProject)
                 self.welcomeFrameLayout.addWidget(item)
                 self.welcomeFrame.adjustSize()
                 print(self.welcomeFrameLayout.sizeHint())
@@ -710,7 +747,10 @@ class CoreDialog(QDialog):
         self.sidebar.setSlideTransition(animate)
         self.sidebar.setCurrentWidget(self.welcomeSidebar)
 
-        self.contentPanel.setCurrentWidget(self.welcomePage)
+        if self.noRecents:
+            self.contentPanel.setCurrentWidget(self.onboardingPage)
+        else:
+            self.contentPanel.setCurrentWidget(self.welcomePage)
 
         self.hertaGif.stop()
         self.welcomeSidebarNewProject.setFocus()

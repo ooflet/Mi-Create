@@ -10,7 +10,7 @@ from PyQt6.QtCore import QSize
 
 sys.path.append("..")
 
-from translate import Translator
+from utils.translate import Translator
 
 # Context Menu System notes:
 #

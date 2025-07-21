@@ -22,7 +22,7 @@ from PyQt6.QtGui import QColor, QPen, QPixmap, QIcon, QPalette, QStandardItemMod
 from pprint import pprint
 
 from widgets.switch import SwitchControl
-from translate import Translator
+from utils.translate import Translator
 
 _ = gettext.gettext
 
@@ -52,7 +52,7 @@ class TreeWidgetDelegate(QStyledItemDelegate):
         super().paint(painter, option, index)
 
 class PropertiesFileEntry(QStackedWidget):
-    def __init__(self, src, changeSignal, imageUploadFunction, parent=None):
+    def __init__(self, src, changeSignal, imageUploadFunction, propertyName=None, parent=None):
         super().__init__(parent)
         self.setAcceptDrops(True)
         self.setObjectName("imageEntry")
@@ -78,7 +78,11 @@ class PropertiesFileEntry(QStackedWidget):
         self.placeholderIcon.setPixmap(QIcon().fromTheme("insert-image").pixmap(24, 24))
         self.placeholderIcon.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.placeholderText = QLabel("Select image")
+        if propertyName and propertyName != "Image":
+            self.placeholderText = QLabel(f'Set {propertyName} Image')
+        else:
+            self.placeholderText = QLabel(f'Set Image')
+
         self.placeholderText.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.placeholderLayout.addStretch()
@@ -101,6 +105,8 @@ class PropertiesFileEntry(QStackedWidget):
         self.labelLayout = QVBoxLayout()
         self.labelLayout.setSpacing(2)
         self.label = QLabel("Image")
+        #self.label.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        self.label.setMaximumWidth(160)
         self.sizeLabel = QLabel("0x0")
         self.sizeLabel.setStyleSheet("color: palette(light)")
         
@@ -125,6 +131,7 @@ class PropertiesFileEntry(QStackedWidget):
         self.setCurrentWidget(self.placeholderWidget)
 
         self.setFixedHeight(self.itemLayout.sizeHint().height())
+        self.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
 
     def sendPropertyChangedSignal(self, property, value):
         self.propertyChanged.emit(property, value)
@@ -136,6 +143,7 @@ class PropertiesFileEntry(QStackedWidget):
         if name:
             self.setCurrentWidget(self.itemWidget)
             self.label.setText(name)
+            self.label.setToolTip(name)
             self.icon.setPixmap(pixmap.scaled(48, 48, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
             self.sizeLabel.setText(f"{pixmap.width()}x{pixmap.height()}")
         else:
@@ -423,21 +431,24 @@ class PropertiesWidget(QStackedWidget):
 
         return propertyEdit, widget
     
-    def createImgEdit(self, src, imageUploadFunction):
+    def createImgEdit(self, label, src, imageUploadFunction):
         def addImgResource():
-            image = imageUploadFunction(True)
+            image = imageUploadFunction(ignoreCanvasReload=True, openInResourceFolder=True)
             if image:
                 print(image)
                 self.sendPropertyChangedSignal(src, image)
 
         widget = QWidget()
-        layout = QHBoxLayout(widget)
+        layout = QVBoxLayout(widget)
         layout.setContentsMargins(0, 0, 0, 0)
-        propertyEdit = PropertiesFileEntry(src, self.propertyChanged, addImgResource)
+        propertyEdit = PropertiesFileEntry(src, self.propertyChanged, addImgResource, label)
 
         layout.addWidget(propertyEdit)
 
         return propertyEdit, widget
+
+    #def createNumEdit(self, src, imageUploadFunction):
+
 
     def createButton(self, text, disabled, property):
         def onClick():
@@ -503,7 +514,7 @@ class PropertiesWidget(QStackedWidget):
                 elif property["type"] == "btn":
                     propertyWidget, propertyLayout = self.createButton(propertyValue, propertyDisabled, key)
                 elif property["type"] == "img":
-                    propertyWidget, propertyLayout = self.createImgEdit(key, self.imageUploadFunction)
+                    propertyWidget, propertyLayout = self.createImgEdit(property["string"], key, self.imageUploadFunction)
                 elif property["type"] == "slider":
                     propertyWidget, propertyLayout = self.createSlider(property["string"], propertyValue, property["min"], property["max"], key, propertyDisabled)
                 elif property["type"] == "list":
@@ -539,6 +550,7 @@ class PropertiesWidget(QStackedWidget):
         if usingWidgetProperties:
             for widget, widgetProperties in properties.items():
                 scroll = QScrollArea()
+                scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
                 scroll.setWidgetResizable(True)
                 propertiesWidget = QWidget()
                 propertiesLayout = QVBoxLayout()
@@ -562,6 +574,7 @@ class PropertiesWidget(QStackedWidget):
     def changePropertiesPage(self, category):
         self.setCurrentWidget(self.properties[category]["widget"])
         for key, property in self.properties.items():
+            print(category)
             if key == category:
                 property["widget"].setVisible(True)
             else:

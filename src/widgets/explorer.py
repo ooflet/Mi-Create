@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import (QListWidget, QListWidgetItem, QWidget, QFrame, QHBo
 from PyQt6.QtGui import QContextMenuEvent, QIcon
 from PyQt6.QtCore import Qt, QSize, pyqtSignal
 
-from translate import Translator
+from utils.translate import Translator
 from utils.menu import ContextMenu
 
 class Explorer(QListWidget):

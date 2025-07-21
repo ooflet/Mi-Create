@@ -30,7 +30,7 @@ from PyQt6.QtWidgets import QMessageBox, QInputDialog
 
 from utils.data import WatchData
 from utils.binary import WatchfaceBinary
-from translate import Translator
+from utils.translate import Translator
 
 supportedOneFileVersion = "1.0"
 logging.basicConfig(level=logging.DEBUG)
