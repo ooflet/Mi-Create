@@ -18,7 +18,7 @@ from PyQt6.QtWidgets import (QStackedWidget, QStyledItemDelegate, QWidget, QFile
                                QHBoxLayout, QVBoxLayout, QScrollArea, QTreeWidgetItem, QLineEdit, QSizePolicy, QToolButton,
                                QSpinBox, QComboBox, QLabel, QCheckBox, QMessageBox, QAbstractItemView, QApplication, QSlider)
 from PyQt6.QtCore import Qt, pyqtSignal, QPoint, QSize, QModelIndex
-from PyQt6.QtGui import QColor, QPen, QPixmap, QIcon, QPalette, QStandardItemModel, QFontMetrics
+from PyQt6.QtGui import QColor, QPen, QPixmap, QIcon, QPalette, QStandardItemModel, QFontMetrics, QPainter
 from pprint import pprint
 
 from widgets.switch import SwitchControl
@@ -195,8 +195,9 @@ class PropertiesFileEntry(QStackedWidget):
         event.acceptProposedAction()
 
 class PropertiesMultiFileItem(QFrame):
-    dropped = pyqtSignal(str)
-    def __init__(self, label, entryHeight=24, editable=True, propertyName=None, parent=None):
+    dropped = pyqtSignal(object)
+    removed = pyqtSignal()
+    def __init__(self, label, editable=True, propertyName=None, parent=None):
         super().__init__(parent)
         self.setFixedWidth(65)
         self.setObjectName("imageEntry")
@@ -204,6 +205,7 @@ class PropertiesMultiFileItem(QFrame):
 
         self.set = False
         self.pixmap = None
+        self.editable = editable
 
         self.itemLayout = QVBoxLayout(self)
         self.itemLayout.setContentsMargins(4, 4, 4, 4)
@@ -212,9 +214,9 @@ class PropertiesMultiFileItem(QFrame):
         self.image.setFixedSize(55, 55)
         self.image.setObjectName("imageFrame")
         self.image.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        if editable:
+        if self.editable:
             self.label = QSpinBox()
-            self.label.setFixedHeight(entryHeight)
+            self.label.setStyleSheet("background: transparent; border: none; padding: 0px;")
             self.label.setRange(-2147483647, 2147483647) # max numbers
             self.label.setValue(int(label))
             self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -233,10 +235,16 @@ class PropertiesMultiFileItem(QFrame):
         self.removeButton.setAutoRaise(True)
         self.removeButton.resize(30, 30)
         self.removeButton.move(int(self.width() / 2 - self.removeButton.width() / 2), int(self.image.height() / 2 - self.removeButton.height() / 2 + 4))
+        self.removeButton.clicked.connect(self.removeClicked)
         self.removeButton.hide()
 
-    def loadImage(self, pixmap):
-        if pixmap:
+    def removeClicked(self):
+        self.removed.emit()
+        self.set = False
+        self.removeButton.hide()
+
+    def loadImage(self, path):
+        if path:
             self.unsetCursor()
             self.set = True
         else:
@@ -248,24 +256,40 @@ class PropertiesMultiFileItem(QFrame):
             self.updateStyle()
             return
 
+        pixmap = QPixmap(path).scaled(55, 55, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+
         if pixmap.isNull():
             print("null!!! shoudl update!!!!")
             self.setProperty("invalid", True)
         else:
             self.setProperty("invalid", False)
+
         self.updateStyle()
         self.pixmap = pixmap
+        self.imagePath = path
         self.image.setPixmap(pixmap)
 
     def updateStyle(self):
         self.style().unpolish(self)
         self.style().polish(self)
 
+    def makeTransparentPixmap(self, pixmap, opacity):
+        transparent = QPixmap(pixmap.size())
+        transparent.fill(Qt.GlobalColor.transparent)
+
+        painter = QPainter(transparent)
+        painter.setOpacity(opacity)
+        painter.drawPixmap(0, 0, pixmap)
+        painter.end()
+
+        return transparent
+
     def enterEvent(self, event):
         if self.set:
-            self.image.setPixmap(QPixmap())
+            transparentPixmap = self.makeTransparentPixmap(self.pixmap, 0.15)
+            self.image.setPixmap(transparentPixmap)
             self.removeButton.show()
-    
+
     def leaveEvent(self, event):
         if self.set:
             self.image.setPixmap(self.pixmap)
@@ -287,30 +311,78 @@ class PropertiesMultiFileItem(QFrame):
         self.setProperty("selected", False)
         self.updateStyle()
 
+    def dropEvent(self, event):
+        model = QStandardItemModel()
+        model.dropMimeData(event.mimeData(), Qt.DropAction.CopyAction, 0, 0, QModelIndex())
+        self.setProperty("selected", False)
+        self.updateStyle()
+
+        image = model.item(0, 0).data(100)
+
+        if self.editable:
+            self.dropped.emit([self.label.text(), image])
+        else:
+            self.dropped.emit(image)
+
+        event.acceptProposedAction()
+
 class PropertiesMultiFileEntry(QFrame):
-    def __init__(self, src, editable, entryHeight, propertyName=None, parent=None):
+    propertyChanged = pyqtSignal(str, list)
+    def __init__(self, src, editable, propertyName=None, parent=None):
         super().__init__(parent)
         self.itemLayout = FlowLayout(self)
+        self.src = src
+        self.data = None
         self.editable = editable
-        self.entryHeight = entryHeight
         self.fileItems = []
         
     def setItems(self, items):
         self.itemLayout.clear()
         self.fileItems.clear()
-        for item in items:
-            fileItem = PropertiesMultiFileItem(item, self.entryHeight, self.editable)
+        for index, item in enumerate(items):
+            fileItem = PropertiesMultiFileItem(item, self.editable)
+            fileItem.dropped.connect(lambda image, index=index: self.setImage(index, image))
+            fileItem.removed.connect(lambda index=index: self.removeImage(index))
             self.itemLayout.addWidget(fileItem)
             self.fileItems.append(fileItem)
 
-    def loadImages(self, images, imageFolder):
+    def loadImages(self, images, imageFolder, setData=True):
+        if setData:
+            self.data = images
+
         for index, widget in enumerate(self.fileItems):
             print(len(images), index)
             if len(images) <= index:   
                 widget.loadImage(None)
             else:
-                path = os.path.join(imageFolder, images[index])
-                widget.loadImage(QPixmap(path).scaled(55, 55, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+                if images[index]:
+                    path = os.path.join(imageFolder, images[index])
+                    widget.loadImage(path)
+                else:
+                    widget.loadImage(None)
+
+    def loadImageList(self, imageList, imageFolder):
+        self.data = imageList
+        indexes, images = zip(*imageList)
+
+        indexes = list(indexes)
+        images = list(images)
+
+        self.setItems(indexes)
+        self.loadImages(images, imageFolder, False)
+
+    def setImage(self, index, item):
+        if index < len(self.data):
+            self.data[index] = item
+        else:
+            self.data.extend([""] * (index - len(self.data)))
+            self.data.append(item)
+
+        self.propertyChanged.emit(self.src, self.data)
+
+    def removeImage(self, index):
+        self.data[index] = ""
+        self.propertyChanged.emit(self.src, self.data)
 
 class PropertiesWidget(QStackedWidget):
     propertyChanged = pyqtSignal(object, object)
@@ -582,8 +654,9 @@ class PropertiesWidget(QStackedWidget):
         widget = QWidget()
         layout = QVBoxLayout(widget)
         layout.setContentsMargins(0, 0, 0, 0)
-        propertyEdit = PropertiesMultiFileEntry(src, False, self.entryHeight)
+        propertyEdit = PropertiesMultiFileEntry(src, False)
         propertyEdit.setItems([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, "Minus"])
+        propertyEdit.propertyChanged.connect(self.sendPropertyChangedSignal)
 
         layout.addWidget(propertyEdit)
 
@@ -593,7 +666,8 @@ class PropertiesWidget(QStackedWidget):
         widget = QWidget()
         layout = QVBoxLayout(widget)
         layout.setContentsMargins(0, 0, 0, 0)
-        propertyEdit = PropertiesMultiFileEntry(src, True, self.entryHeight)
+        propertyEdit = PropertiesMultiFileEntry(src, True)
+        propertyEdit.propertyChanged.connect(self.sendPropertyChangedSignal)
 
         layout.addWidget(propertyEdit)
 
@@ -793,14 +867,7 @@ class PropertiesWidget(QStackedWidget):
                 propertyWidget["widget"].loadImages(value, project.getImageFolder())
 
             elif propertyWidget["type"] == "imglist":
-                indexes, images = zip(*value)
-
-                indexes = list(indexes)
-                images = list(images)
-
-                propertyWidget["widget"].setItems(indexes)
-                print(images)
-                propertyWidget["widget"].loadImages(images, project.getImageFolder())
+                propertyWidget["widget"].loadImageList(value, project.getImageFolder())
 
 
         self.ignorePropertyChange = False
