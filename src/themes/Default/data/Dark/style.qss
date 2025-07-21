@@ -250,6 +250,7 @@ QToolButton {
     padding: 4px;
     background-color: transparent;
     qproperty-iconSize: 18px;
+    font-weight: normal;
     border: none;
 }
 
@@ -268,11 +269,16 @@ QToolButton:focus#inputField-button {
     border-color: palette(highlight);
 }
 
+QFrame#canvasDecoration {
+    background-color: palette(window);
+    border-radius: 5px;
+}
+
 QToolButton#canvasDecoration-button {
+    
     background-color: palette(window);
     padding: 0px;
 }
-
 
 QToolButton::menu-indicator#canvasDecoration-button {
     image: none;
@@ -621,34 +627,36 @@ QFrame#fileEntry {
     border-radius: 6px;
 }
 
+QFrame#fileEntry[selected="true"] {
+    background-color: palette(link-visited);
+    border: 1px solid palette(highlight);
+}
+
 QFrame#imageEntry {
     background-color: palette(mid);
     border: 1px solid palette(midlight);
     border-radius: 4px;
 }
 
-QFrame#fileEntry[selected="true"] {
-    background-color: palette(link-visited);
-    border: 1px solid palette(highlight);
-    border-radius: 4px;
-}
-
 QFrame#imageEntry[selected="true"] {
     background-color: palette(link-visited);
     border: 1px solid palette(highlight);
-    border-radius: 4px;
 }
 
-QLabel#darkFrame {
-    background-color: palette(window);
-    border: 1px solid palette(midlight);
-    border-radius: 4px;
+QFrame#imageEntry[invalid="true"] {
+    background-color: rgba(255, 125, 0, 60);
+    border: 1px solid rgb(255, 125, 0);
 }
 
 QLabel#imageFrame {
     background-color: palette(mid);
     border: 1px solid palette(midlight);
     border-radius: 4px;
+}
+
+QLabel#imageFrame[invalid="true"] {
+    background-color: rgba(255, 125, 0, 125);
+    border: 1px solid rgb(255, 125, 0);
 }
 
 QLineEdit#propertyInput {

@@ -246,6 +246,7 @@ class Canvas(QGraphicsView):
     onObjectAdded = pyqtSignal(str, int, int)
     onObjectChange = pyqtSignal(str, str, object) # hate hacky workarounds, just support any type already Qt
     onObjectPosChange = pyqtSignal()
+    onZoomEvent = pyqtSignal(str)
 
     def __init__(self, antialiasingEnabled: bool, deviceOutlineVisible: bool, ui: object, parent=None):
         super().__init__(parent)
@@ -403,8 +404,8 @@ class Canvas(QGraphicsView):
 
         if modifiers == Qt.KeyboardModifier.ControlModifier:
             delta = event.angleDelta().y()
-            zoom_factor = 1.25 if delta > 0 else 1 / 1.25
-            self.scale(zoom_factor, zoom_factor)
+            zoom_factor = "in" if delta > 0 else "out"
+            self.onZoomEvent.emit(zoom_factor)
         elif modifiers == Qt.KeyboardModifier.AltModifier:
             scroll_delta = event.angleDelta().x()
             scroll_value = self.horizontalScrollBar().value() - scroll_delta
@@ -604,7 +605,7 @@ class Canvas(QGraphicsView):
                 if len(image) >= 2:
                     imageList[int(image[0])] = QPixmap(os.path.join(self.imageFolder, image[1]))
                 else:
-                    widget.representNoImage()
+                    widget.invalid = True
                     break
 
             widget.addImagelist(imageList, source, previewIndex, defaultValue, interpolationStyle)
@@ -639,7 +640,7 @@ class Canvas(QGraphicsView):
         if len(numList) >= 10:
             widget.addNumbers(previewNumber, source, numList, digits, spacing, alignment, hideZeros, interpolationStyle)
         else:
-            widget.representNoImage()
+            widget.invalid = True
                 
         return widget
 
@@ -1296,10 +1297,6 @@ class ImagelistWidget(ImageWidget):
             else:
                 self.pixmapItem.setPixmap(self.imagelist[next(iter(self.imagelist))])
 
-    def representNoImage(self):
-        self.color = QColor(255, 0, 0, 100)
-            
-
 class NumberWidget(BaseWidget):
     # Displays numbers
 
@@ -1482,9 +1479,6 @@ class NumberWidget(BaseWidget):
             if isinstance(x, str) is not True:
                 self.scene().removeItem(x)
         self.imageItems.clear()
-
-    def representNoImage(self):
-        self.color = QColor(255, 0, 0, 100)
 
 class AnalogWidget(BaseWidget):
     # Widget for handling AnalogDisplays

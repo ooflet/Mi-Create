@@ -22,6 +22,7 @@ from PyQt6.QtGui import QColor, QPen, QPixmap, QIcon, QPalette, QStandardItemMod
 from pprint import pprint
 
 from widgets.switch import SwitchControl
+from widgets.layouts import FlowLayout
 from utils.translate import Translator
 
 _ = gettext.gettext
@@ -137,7 +138,9 @@ class PropertiesFileEntry(QStackedWidget):
         self.propertyChanged.emit(property, value)
 
     def removeImage(self):
+        self.setProperty("invalid", False)
         self.sendPropertyChangedSignal(self.src, "")
+        self.updateStyle()
 
     def loadImage(self, name, pixmap):
         if name:
@@ -145,6 +148,12 @@ class PropertiesFileEntry(QStackedWidget):
             self.label.setText(name)
             self.label.setToolTip(name)
             self.icon.setPixmap(pixmap.scaled(48, 48, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+            if pixmap.isNull():
+                print("null!!! shoudl update!!!!")
+                self.setProperty("invalid", True)
+            else:
+                self.setProperty("invalid", False)
+            self.updateStyle()
             self.sizeLabel.setText(f"{pixmap.width()}x{pixmap.height()}")
         else:
             self.setCurrentWidget(self.placeholderWidget)
@@ -152,6 +161,10 @@ class PropertiesFileEntry(QStackedWidget):
     def updateStyle(self):
         self.style().unpolish(self)
         self.style().polish(self)
+
+    def updateIconStyle(self):
+        self.icon.style().unpolish(self.icon)
+        self.icon.style().polish(self.icon)
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
@@ -180,6 +193,124 @@ class PropertiesFileEntry(QStackedWidget):
         self.sendPropertyChangedSignal(self.src, image)
 
         event.acceptProposedAction()
+
+class PropertiesMultiFileItem(QFrame):
+    dropped = pyqtSignal(str)
+    def __init__(self, label, entryHeight=24, editable=True, propertyName=None, parent=None):
+        super().__init__(parent)
+        self.setFixedWidth(65)
+        self.setObjectName("imageEntry")
+        self.setAcceptDrops(True)
+
+        self.set = False
+        self.pixmap = None
+
+        self.itemLayout = QVBoxLayout(self)
+        self.itemLayout.setContentsMargins(4, 4, 4, 4)
+        self.itemLayout.setSpacing(4)
+        self.image = QLabel()
+        self.image.setFixedSize(55, 55)
+        self.image.setObjectName("imageFrame")
+        self.image.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        if editable:
+            self.label = QSpinBox()
+            self.label.setFixedHeight(entryHeight)
+            self.label.setRange(-2147483647, 2147483647) # max numbers
+            self.label.setValue(int(label))
+            self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.label.wheelEvent = lambda event: event.ignore()
+        else:
+            self.label = QLabel(str(label))
+            self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.itemLayout.addWidget(self.image)
+        self.itemLayout.addWidget(self.label)
+        self.itemLayout.addStretch()
+
+        self.setFixedHeight(self.sizeHint().height())
+
+        self.removeButton = QToolButton(self)
+        self.removeButton.setIcon(QIcon.fromTheme("application-close"))  # Replace with your desired icon
+        self.removeButton.setAutoRaise(True)
+        self.removeButton.resize(30, 30)
+        self.removeButton.move(int(self.width() / 2 - self.removeButton.width() / 2), int(self.image.height() / 2 - self.removeButton.height() / 2 + 4))
+        self.removeButton.hide()
+
+    def loadImage(self, pixmap):
+        if pixmap:
+            self.unsetCursor()
+            self.set = True
+        else:
+            self.pixmap = None
+            self.setCursor(Qt.CursorShape.PointingHandCursor)
+            self.set = False
+            self.image.setPixmap(QIcon().fromTheme("insert-image").pixmap(24, 24))
+            self.setProperty("invalid", False)
+            self.updateStyle()
+            return
+
+        if pixmap.isNull():
+            print("null!!! shoudl update!!!!")
+            self.setProperty("invalid", True)
+        else:
+            self.setProperty("invalid", False)
+        self.updateStyle()
+        self.pixmap = pixmap
+        self.image.setPixmap(pixmap)
+
+    def updateStyle(self):
+        self.style().unpolish(self)
+        self.style().polish(self)
+
+    def enterEvent(self, event):
+        if self.set:
+            self.image.setPixmap(QPixmap())
+            self.removeButton.show()
+    
+    def leaveEvent(self, event):
+        if self.set:
+            self.image.setPixmap(self.pixmap)
+        self.removeButton.hide()
+
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
+            self.setProperty("selected", True)
+            self.updateStyle()
+            event.acceptProposedAction()
+
+    def dragMoveEvent(self, event):
+        if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
+            self.setProperty("selected", True)
+            self.updateStyle()
+            event.acceptProposedAction()
+
+    def dragLeaveEvent(self, event):
+        self.setProperty("selected", False)
+        self.updateStyle()
+
+class PropertiesMultiFileEntry(QFrame):
+    def __init__(self, src, editable, entryHeight, propertyName=None, parent=None):
+        super().__init__(parent)
+        self.itemLayout = FlowLayout(self)
+        self.editable = editable
+        self.entryHeight = entryHeight
+        self.fileItems = []
+        
+    def setItems(self, items):
+        self.itemLayout.clear()
+        self.fileItems.clear()
+        for item in items:
+            fileItem = PropertiesMultiFileItem(item, self.entryHeight, self.editable)
+            self.itemLayout.addWidget(fileItem)
+            self.fileItems.append(fileItem)
+
+    def loadImages(self, images, imageFolder):
+        for index, widget in enumerate(self.fileItems):
+            print(len(images), index)
+            if len(images) <= index:   
+                widget.loadImage(None)
+            else:
+                path = os.path.join(imageFolder, images[index])
+                widget.loadImage(QPixmap(path).scaled(55, 55, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
 
 class PropertiesWidget(QStackedWidget):
     propertyChanged = pyqtSignal(object, object)
@@ -447,8 +578,26 @@ class PropertiesWidget(QStackedWidget):
 
         return propertyEdit, widget
 
-    #def createNumEdit(self, src, imageUploadFunction):
+    def createNumEdit(self, src, imageUploadFunction):
+        widget = QWidget()
+        layout = QVBoxLayout(widget)
+        layout.setContentsMargins(0, 0, 0, 0)
+        propertyEdit = PropertiesMultiFileEntry(src, False, self.entryHeight)
+        propertyEdit.setItems([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, "Minus"])
 
+        layout.addWidget(propertyEdit)
+
+        return propertyEdit, widget
+    
+    def createImgListEdit(self, src, imageUploadFunction):
+        widget = QWidget()
+        layout = QVBoxLayout(widget)
+        layout.setContentsMargins(0, 0, 0, 0)
+        propertyEdit = PropertiesMultiFileEntry(src, True, self.entryHeight)
+
+        layout.addWidget(propertyEdit)
+
+        return propertyEdit, widget
 
     def createButton(self, text, disabled, property):
         def onClick():
@@ -520,9 +669,9 @@ class PropertiesWidget(QStackedWidget):
                 elif property["type"] == "list":
                     propertyWidget, propertyLayout = self.createListEdit(property["string"], propertyValue, property["options"], key, propertyDisabled)
                 elif property["type"] == "imglist":
-                    propertyWidget, propertyLayout = self.createStrEdit(property["string"], propertyValue, key, propertyDisabled)
+                    propertyWidget, propertyLayout = self.createImgListEdit(key, None)
                 elif property["type"] == "numlist":
-                    propertyWidget, propertyLayout = self.createStrEdit(property["string"], propertyValue, key, propertyDisabled)
+                    propertyWidget, propertyLayout = self.createNumEdit(key, None)
                 elif property["type"] == "int":
                     propertyWidget, propertyLayout = self.createIntEdit(property["string"], propertyValue, property.get("min"), property.get("max"), key, propertyDisabled)
                 elif property["type"] == "bool":
@@ -543,6 +692,7 @@ class PropertiesWidget(QStackedWidget):
         emptyPage = QWidget()
         self.properties["none"] = {
             "widget": emptyPage,
+            "widgetContainer": emptyPage,
             "propertyWidgets": {}
         }
         self.addWidget(emptyPage)
@@ -552,17 +702,27 @@ class PropertiesWidget(QStackedWidget):
                 scroll = QScrollArea()
                 scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
                 scroll.setWidgetResizable(True)
+
                 propertiesWidget = QWidget()
                 propertiesLayout = QVBoxLayout()
                 propertiesWidget.setLayout(propertiesLayout)
+
+                # Prevent it from expanding beyond its parent
+                propertiesWidget.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Maximum)
+                scroll.setWidget(propertiesWidget)
+
+                print()
+
                 self.properties[widget] = {
                     "widget": scroll,
+                    "widgetContainer": propertiesWidget,
                     "propertyWidgets": {}
                 }
-                scroll.setWidget(propertiesWidget)
+
                 self.addProperties(self.properties[widget]["propertyWidgets"], propertiesLayout, widgetProperties["properties"])
                 propertiesLayout.addStretch()
                 self.addWidget(scroll)
+
         else:
             propertiesWidget = QWidget()
             propertiesLayout = QVBoxLayout()
@@ -629,10 +789,31 @@ class PropertiesWidget(QStackedWidget):
             elif propertyWidget["type"] == "img":
                 propertyWidget["widget"].loadImage(value, QPixmap(os.path.join(project.getImageFolder(), value)))
 
+            elif propertyWidget["type"] == "numlist":
+                propertyWidget["widget"].loadImages(value, project.getImageFolder())
+
+            elif propertyWidget["type"] == "imglist":
+                indexes, images = zip(*value)
+
+                indexes = list(indexes)
+                images = list(images)
+
+                propertyWidget["widget"].setItems(indexes)
+                print(images)
+                propertyWidget["widget"].loadImages(images, project.getImageFolder())
+
+
         self.ignorePropertyChange = False
 
     def clearProperties(self):
         self.changePropertiesPage("none")
+
+    def resizeEvent(self, a0):
+        for widget in self.properties.values():
+            print(widget)
+            widget["widgetContainer"].setMaximumWidth(self.width())
+        print(self.width())
+        return super().resizeEvent(a0)
 
 class LegacyPropertiesWidget(QWidget):
     propertyChanged = pyqtSignal(object, object)

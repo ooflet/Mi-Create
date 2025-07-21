@@ -29,10 +29,10 @@ import gettext
 from datetime import datetime
 
 from PyQt6.QtWidgets import (QInputDialog, QMessageBox, QApplication, QProgressBar,
-                             QDialogButtonBox, QFileDialog, QWidget, QVBoxLayout, QMenu,
+                             QDialogButtonBox, QFileDialog, QWidget, QVBoxLayout, QMenu, QComboBox,
                              QFrame, QColorDialog, QFontDialog, QLabel, QListWidgetItem, QToolButton,
                              QAbstractItemView, QSplashScreen, QDialog, QUndoView, QCheckBox, QHBoxLayout)
-from PyQt6.QtGui import QIcon, QPixmap, QDesktopServices, QDrag, QImage, QPainter, QFontDatabase, QFont
+from PyQt6.QtGui import QIcon, QPixmap, QDesktopServices, QDrag, QImage, QPainter, QFontDatabase, QFont, QIntValidator
 from PyQt6.QtCore import Qt, QSettings, QSize, QUrl, pyqtSignal
 from window import FramelessDialog
 
@@ -115,6 +115,7 @@ class WatchfaceEditor(QMainWindow):
         logging.info("Initializing Application Widgets")
         self.setupWidgets()
         logging.info("Initializing Workspace")
+        self.zoomLevels = [10, 25, 50, 75, 100, 125, 150, 175, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
         self.setupWorkspace()
         logging.info("Initializing Explorer")
         self.setupExplorer()
@@ -1235,18 +1236,34 @@ class WatchfaceEditor(QMainWindow):
         command = CommandModifyAlignment(objectPosList, changeType, objectNameList, commandFunc, f"Align objects {changeType}")
         self.History.undoStack.push(command)
 
-    def zoomCanvas(self, zoom):
+    def setZoomPercent(self, percent):
         currentProject = self.getCurrentProject()
-
         if not currentProject.get("canvas"):
             return
 
-        if zoom == "in":
-            zoom_factor = 1.25
-            currentProject["canvas"].scale(zoom_factor, zoom_factor)
-        elif zoom == "out":
-            zoom_factor = 1 / 1.25
-            currentProject["canvas"].scale(zoom_factor, zoom_factor)
+        zoomFactor = percent / 100.0
+        currentProject["canvas"].resetTransform()
+        currentProject["canvas"].scale(zoomFactor, zoomFactor)
+
+        self.zoomButton.setText(f"{percent}%")
+
+    def zoomCanvas(self, direction):
+        try:
+            currentPercent = int(self.zoomButton.text().strip('%'))
+        except ValueError:
+            currentPercent = 100
+
+        idx = self.zoomLevels.index(currentPercent)
+
+        if direction == "in" and idx < len(self.zoomLevels) - 1:
+            newPercent = self.zoomLevels[idx + 1]
+        elif direction == "out" and idx > 0:
+            newPercent = self.zoomLevels[idx - 1]
+        else:
+            return  # No change
+
+        self.setZoomPercent(newPercent)
+
 
     def updateProjectSelections(self, subject):
         currentProject = self.getCurrentProject()
@@ -1434,6 +1451,7 @@ class WatchfaceEditor(QMainWindow):
         canvas.onObjectAdded.connect(objectAdd)
         canvas.onObjectChange.connect(propertyChange)
         canvas.onObjectPosChange.connect(posChange)
+        canvas.onZoomEvent.connect(lambda direction: self.zoomCanvas(direction))
 
         canvasLayout = QVBoxLayout(canvas)
         canvasLayout.setContentsMargins(20, 18, 20, 20)
@@ -1521,6 +1539,36 @@ class WatchfaceEditor(QMainWindow):
         aodButton.setIcon(QIcon().fromTheme("watchface-aod"))
         aodButton.clicked.connect(aodToggle)
 
+        zoomFrame = QFrame(self)
+        zoomFrame.setObjectName("canvasDecoration")
+        zoomFrame.setFixedSize(100, 25)
+
+        zoomLayout = QHBoxLayout(zoomFrame)
+        zoomLayout.setContentsMargins(0, 0, 0, 0)
+        zoomLayout.setSpacing(0)
+
+        zoomInButton = QToolButton(self)
+        zoomInButton.setObjectName("canvasDecoration-button")
+        zoomInButton.setFixedSize(25, 25)
+        zoomInButton.setIcon(QIcon().fromTheme("zoom-in"))
+        zoomInButton.pressed.connect(lambda: self.zoomCanvas("in"))
+
+        self.zoomButton = QToolButton(self)
+        self.zoomButton.setObjectName("canvasDecoration-button")
+        self.zoomButton.setFixedSize(50, 25)
+        self.zoomButton.setText("100%")  # Initial zoom display
+        self.zoomButton.clicked.connect(lambda: self.setZoomPercent(100))
+
+        zoomOutButton = QToolButton(self)
+        zoomOutButton.setObjectName("canvasDecoration-button")
+        zoomOutButton.setFixedSize(25, 25)
+        zoomOutButton.setIcon(QIcon().fromTheme("zoom-out"))
+        zoomOutButton.pressed.connect(lambda: self.zoomCanvas("out"))
+
+        zoomLayout.addWidget(zoomInButton)
+        zoomLayout.addWidget(self.zoomButton)
+        zoomLayout.addWidget(zoomOutButton)
+
         previewButton = QToolButton(self)
         previewButton.setObjectName("canvasDecoration-button")
         previewButton.setCheckable(True)
@@ -1528,11 +1576,11 @@ class WatchfaceEditor(QMainWindow):
         previewButton.setIcon(QIcon().fromTheme("media-playback-start"))
         previewButton.clicked.connect(previewToggle)
 
-        # menuButton = QToolButton(self)
-        # menuButton.setObjectName("canvasDecoration-button")
-        # menuButton.setCheckable(True)
-        # menuButton.setFixedSize(25, 25)
-        # menuButton.setIcon(QIcon().fromTheme("view-more"))
+        menuButton = QToolButton(self)
+        menuButton.setObjectName("canvasDecoration-button")
+        menuButton.setCheckable(True)
+        menuButton.setFixedSize(25, 25)
+        menuButton.setIcon(QIcon().fromTheme("application-more"))
 
         canvasLayout.addLayout(toolButtonLayout)
         canvasLayout.addStretch()
@@ -1540,8 +1588,9 @@ class WatchfaceEditor(QMainWindow):
         toolButtonLayout.addWidget(insertButton)
         toolButtonLayout.addWidget(aodButton)
         toolButtonLayout.addStretch()
+        toolButtonLayout.addWidget(zoomFrame)
         toolButtonLayout.addWidget(previewButton)
-        #toolButtonLayout.addWidget(menuButton)
+        toolButtonLayout.addWidget(menuButton)
 
         # Add Icons
         icon = QIcon().fromTheme("project-icon")
