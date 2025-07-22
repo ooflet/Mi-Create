@@ -18,5 +18,6 @@
     "xiaomi_band_8": [122, 310],
     "xiaomi_band_8_pro": [230, 328],
     "xiaomi_band_9": [122, 310],
-    "xiaomi_band_9_pro": [230, 328]
+    "xiaomi_band_9_pro": [230, 328],
+    "xiaomi_band_10": [212, 520]
 }
