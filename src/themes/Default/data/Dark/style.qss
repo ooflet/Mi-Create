@@ -557,6 +557,10 @@ QListView::item:selected{
     background-color: palette(highlight);
 }
 
+QListView#resourceList{
+    background-color: transparent;
+}
+
 QStackedWidget#contentPanel {
     background-color: palette(base)
 }
@@ -657,6 +661,12 @@ QLabel#imageFrame {
 QLabel#imageFrame[invalid="true"] {
     background-color: rgba(255, 125, 0, 125);
     border: 1px solid rgb(255, 125, 0);
+}
+
+QStackedWidget[selected=true] {
+    border: 1px solid palette(highlight);
+    border-radius: 4px;
+    background-color: palette(link-visited);
 }
 
 QLineEdit#propertyInput {

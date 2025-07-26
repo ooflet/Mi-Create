@@ -197,6 +197,7 @@ class PropertiesFileEntry(QStackedWidget):
 class PropertiesMultiFileItem(QFrame):
     dropped = pyqtSignal(object)
     removed = pyqtSignal()
+    indexChanged = pyqtSignal(object)
     def __init__(self, label, editable=True, propertyName=None, parent=None):
         super().__init__(parent)
         self.setFixedWidth(65)
@@ -207,6 +208,7 @@ class PropertiesMultiFileItem(QFrame):
         self.pixmap = None
         self.editable = editable
 
+        self.imagePath = ""
         self.itemLayout = QVBoxLayout(self)
         self.itemLayout.setContentsMargins(4, 4, 4, 4)
         self.itemLayout.setSpacing(4)
@@ -221,6 +223,7 @@ class PropertiesMultiFileItem(QFrame):
             self.label.setValue(int(label))
             self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
             self.label.wheelEvent = lambda event: event.ignore()
+            self.label.editingFinished.connect(lambda: self.indexChanged.emit([self.label.value(), self.imagePath]))
         else:
             self.label = QLabel(str(label))
             self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -320,7 +323,7 @@ class PropertiesMultiFileItem(QFrame):
         image = model.item(0, 0).data(100)
 
         if self.editable:
-            self.dropped.emit([self.label.text(), image])
+            self.dropped.emit([self.label.value(), image])
         else:
             self.dropped.emit(image)
 
@@ -328,13 +331,26 @@ class PropertiesMultiFileItem(QFrame):
 
 class PropertiesMultiFileEntry(QFrame):
     propertyChanged = pyqtSignal(str, list)
-    def __init__(self, src, editable, propertyName=None, parent=None):
+    def __init__(self, src, editable, amountWidget=None, propertyName=None, parent=None):
         super().__init__(parent)
+        self.widgetName = None
         self.itemLayout = FlowLayout(self)
+        self.imageFolder = None
+        self.amountWidget = amountWidget
         self.src = src
         self.data = None
         self.editable = editable
         self.fileItems = []
+
+    def setImageAmount(self, amount):
+        if amount > len(self.data):
+            self.data += [[i, ""] for i in range(len(self.data), amount)]
+        elif amount < len(self.data):
+            for _ in range(len(self.data) - amount):
+                if self.data:
+                    self.data.pop()
+
+        self.loadImageList(self.data, self.imageFolder)
         
     def setItems(self, items):
         self.itemLayout.clear()
@@ -343,6 +359,7 @@ class PropertiesMultiFileEntry(QFrame):
             fileItem = PropertiesMultiFileItem(item, self.editable)
             fileItem.dropped.connect(lambda image, index=index: self.setImage(index, image))
             fileItem.removed.connect(lambda index=index: self.removeImage(index))
+            fileItem.indexChanged.connect(lambda image, index=index: self.setImage(index, image))
             self.itemLayout.addWidget(fileItem)
             self.fileItems.append(fileItem)
 
@@ -351,7 +368,6 @@ class PropertiesMultiFileEntry(QFrame):
             self.data = images
 
         for index, widget in enumerate(self.fileItems):
-            print(len(images), index)
             if len(images) <= index:   
                 widget.loadImage(None)
             else:
@@ -361,15 +377,24 @@ class PropertiesMultiFileEntry(QFrame):
                 else:
                     widget.loadImage(None)
 
-    def loadImageList(self, imageList, imageFolder):
+    def loadImageList(self, imageList, imageFolder, amount=None):
         self.data = imageList
-        indexes, images = zip(*imageList)
+        self.imageFolder = imageFolder
+        
+        if imageList:
+            indexes, images = zip(*imageList)
 
-        indexes = list(indexes)
-        images = list(images)
+            indexes = list(indexes)
+            images = list(images)
 
-        self.setItems(indexes)
-        self.loadImages(images, imageFolder, False)
+            self.setItems(indexes)
+            self.amountWidget.setValue(len(indexes))
+            self.loadImages(images, imageFolder, False)
+        else:
+            self.setImageAmount(1)
+
+        if amount:
+            self.setImageAmount(amount)
 
     def setImage(self, index, item):
         if index < len(self.data):
@@ -398,6 +423,8 @@ class PropertiesWidget(QStackedWidget):
         self.ignorePropertyChange = False
 
         self.properties = {}
+
+        self.imgListAmount = {}
 
         self.imageUploadFunction = imageUploadFunction
 
@@ -523,12 +550,12 @@ class PropertiesWidget(QStackedWidget):
 
         return propertyEdit, widget
     
-    def createIntEdit(self, label, value, min, max, src, disabled):
+    def createIntEdit(self, label, value, min, max, src, disabled, signalDisabled=False):
         widget = QWidget()
         layout = QHBoxLayout(widget)
         layout.setContentsMargins(0, 0, 0, 0)
         propertyLabel = QLabel(label)
-        propertyEdit = self.createSpinBox(value, min, max, disabled, False, src)
+        propertyEdit = self.createSpinBox(value, min, max, disabled, signalDisabled, src)
 
         layout.addWidget(propertyLabel)
         layout.addStretch()
@@ -638,7 +665,6 @@ class PropertiesWidget(QStackedWidget):
         def addImgResource():
             image = imageUploadFunction(ignoreCanvasReload=True, openInResourceFolder=True)
             if image:
-                print(image)
                 self.sendPropertyChangedSignal(src, image)
 
         widget = QWidget()
@@ -666,9 +692,18 @@ class PropertiesWidget(QStackedWidget):
         widget = QWidget()
         layout = QVBoxLayout(widget)
         layout.setContentsMargins(0, 0, 0, 0)
-        propertyEdit = PropertiesMultiFileEntry(src, True)
+        
+        def setAmount():
+            self.imgListAmount[propertyEdit.widgetName] = amountWidget.value()
+            propertyEdit.setImageAmount(amountWidget.value())
+        
+        amountWidget, amountLayout = self.createIntEdit("Image Count", 0, 1, 999, "image_count", False, True)
+        amountWidget.editingFinished.connect(setAmount)
+        
+        propertyEdit = PropertiesMultiFileEntry(src, True, amountWidget)
         propertyEdit.propertyChanged.connect(self.sendPropertyChangedSignal)
-
+        
+        layout.addWidget(amountLayout)
         layout.addWidget(propertyEdit)
 
         return propertyEdit, widget
@@ -785,8 +820,6 @@ class PropertiesWidget(QStackedWidget):
                 propertiesWidget.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Maximum)
                 scroll.setWidget(propertiesWidget)
 
-                print()
-
                 self.properties[widget] = {
                     "widget": scroll,
                     "widgetContainer": propertiesWidget,
@@ -808,7 +841,6 @@ class PropertiesWidget(QStackedWidget):
     def changePropertiesPage(self, category):
         self.setCurrentWidget(self.properties[category]["widget"])
         for key, property in self.properties.items():
-            print(category)
             if key == category:
                 property["widget"].setVisible(True)
             else:
@@ -832,7 +864,6 @@ class PropertiesWidget(QStackedWidget):
             # handle visibleOn property
 
             if propertyWidget["property_data"].get("visibleOn"):
-                print(propertyWidget["property_data"].get("visibleOn"))
                 if currentDevice not in propertyWidget["property_data"]["visibleOn"]:
                     print("nope!")
                     propertyWidget["layout"].setVisible(False)
@@ -867,7 +898,9 @@ class PropertiesWidget(QStackedWidget):
                 propertyWidget["widget"].loadImages(value, project.getImageFolder())
 
             elif propertyWidget["type"] == "imglist":
-                propertyWidget["widget"].loadImageList(value, project.getImageFolder())
+                widgetName = widget.getProperty("widget_name")
+                propertyWidget["widget"].widgetName = widgetName
+                propertyWidget["widget"].loadImageList(value, project.getImageFolder(), self.imgListAmount.get(widgetName))
 
 
         self.ignorePropertyChange = False
@@ -877,9 +910,7 @@ class PropertiesWidget(QStackedWidget):
 
     def resizeEvent(self, a0):
         for widget in self.properties.values():
-            print(widget)
             widget["widgetContainer"].setMaximumWidth(self.width())
-        print(self.width())
         return super().resizeEvent(a0)
 
 class LegacyPropertiesWidget(QWidget):

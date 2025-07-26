@@ -143,7 +143,6 @@ class RecentProjectItem(QFrame):
     def mouseReleaseEvent(self, a0):
         self.setProperty("selected", False)
         self.updateStyle()
-        QApplication.instance().processEvents()
         self.opened.emit(self.path)
         return super().mouseReleaseEvent(a0)
     

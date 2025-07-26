@@ -6,13 +6,16 @@
 # Uses QScintilla bindings provided by Riverbank Computing's PyQt project
 
 from PyQt6.QtWidgets import QFrame
-from PyQt6.QtGui import QColor, QFont, QPalette
+from PyQt6.QtGui import QColor, QFontDatabase, QFont, QPalette
 from PyQt6.Qsci import QsciScintilla, QsciLexerXML, QsciLexerJSON
+
+monospace = QFontDatabase.systemFont(QFontDatabase.SystemFont.FixedFont)
+monospace.setPointSize(10)
 
 class XMLLexer(QsciLexerXML):
     def __init__(self, parent):
         super().__init__(parent)
-        self.setFont(QFont("Courier New", 10))
+        self.setFont(monospace)
         self.setColor(QColor(255,255,255), 0)
         self.setColor(QColor(78, 140, 191), 1)
         self.setColor(QColor(22, 195, 222), 2)
@@ -31,7 +34,7 @@ class XMLLexer(QsciLexerXML):
 class JsonLexer(QsciLexerJSON):
     def __init__(self, parent):
         super().__init__(parent)
-        self.setFont(QFont("Courier New", 10))
+        self.setFont(monospace)
         self.setColor(QColor(255,255,255), 0)
         self.setColor(QColor(78, 140, 191), 1)
         self.setColor(QColor(22, 195, 222), 2)
@@ -53,10 +56,10 @@ class Editor(QsciScintilla):
         super().__init__(parent)
 
         self.setFrameShape(QFrame.Shape.NoFrame)
+        self.setScrollWidthTracking(True)
 
         self.setLexer(lexer(self))
-        self.setFont(QFont("Courier New", 10))
-
+        
         # End of Line
         self.setEolMode(QsciScintilla.EolMode.EolWindows)
         self.setEolVisibility(False)
@@ -64,7 +67,7 @@ class Editor(QsciScintilla):
         # Caret
         self.setCaretLineVisible(True)
         self.setCaretForegroundColor(palette.color(QPalette.ColorRole.Text))
-        self.setCaretLineBackgroundColor(palette.color(QPalette.ColorRole.AlternateBase))
+        self.setCaretLineBackgroundColor(palette.color(QPalette.ColorRole.Mid))
 
         # Indentation
         self.setIndentationsUseTabs(False)
@@ -75,6 +78,6 @@ class Editor(QsciScintilla):
 
         # Line num margin
         self.setMarginType(0, QsciScintilla.MarginType.NumberMargin)
-        self.setMarginWidth(0, "0000")
+        self.setMarginWidth(0, "00000")
         self.setMarginsBackgroundColor(palette.color(QPalette.ColorRole.Dark))
         self.setMarginsForegroundColor(palette.color(QPalette.ColorRole.Text))

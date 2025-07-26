@@ -1039,10 +1039,10 @@
             "tip": "Psychological stress value, the value range 0~100"
         },
         {
-            "string": "Weather something",
+            "string": "Current AQI",
             "id_fprj": "5031",
             "id_gmf": "",
-            "tip": "Sleep score"
+            "tip": ""
         },
         {
             "string": "Sleep score",
@@ -1275,10 +1275,10 @@
             "tip": "Psychological stress value, the value range 0~100"
         },
         {
-            "string": "Weather something",
+            "string": "Current AQI",
             "id_fprj": "5031",
             "id_gmf": "",
-            "tip": "Sleep score"
+            "tip": ""
         },
         {
             "string": "Sleep score",
@@ -1511,10 +1511,10 @@
             "tip": "Psychological stress value, the value range 0~100"
         },
         {
-            "string": "Weather something",
+            "string": "Current AQI",
             "id_fprj": "5031",
             "id_gmf": "",
-            "tip": "Sleep score"
+            "tip": ""
         },
         {
             "string": "Sleep score",
@@ -1747,10 +1747,10 @@
             "tip": "Psychological stress value, the value range 0~100"
         },
         {
-            "string": "Weather something",
+            "string": "Current AQI",
             "id_fprj": "5031",
             "id_gmf": "",
-            "tip": "Sleep score"
+            "tip": ""
         },
         {
             "string": "Sleep score",
@@ -1983,10 +1983,10 @@
             "tip": "Psychological stress value, the value range 0~100"
         },
         {
-            "string": "Weather something",
+            "string": "Current AQI",
             "id_fprj": "5031",
             "id_gmf": "",
-            "tip": "Sleep score"
+            "tip": ""
         },
         {
             "string": "Sleep score",
@@ -2219,10 +2219,10 @@
             "tip": "Psychological stress value, the value range 0~100"
         },
         {
-            "string": "Weather something",
+            "string": "Current AQI",
             "id_fprj": "5031",
             "id_gmf": "",
-            "tip": "Sleep score"
+            "tip": ""
         },
         {
             "string": "Sleep score",
@@ -2461,10 +2461,10 @@
             "tip": "Psychological stress value, the value range 0~100"
         },
         {
-            "string": "Weather something",
+            "string": "Current AQI",
             "id_fprj": "5031",
             "id_gmf": "",
-            "tip": "Sleep score"
+            "tip": ""
         },
         {
             "string": "Sleep score",
@@ -2709,10 +2709,10 @@
             "tip": "Psychological stress value, the value range 0~100"
         },
         {
-            "string": "Weather something",
+            "string": "Current AQI",
             "id_fprj": "5031",
             "id_gmf": "",
-            "tip": "Sleep score"
+            "tip": ""
         },
         {
             "string": "Sleep score",
@@ -3427,10 +3427,10 @@
             "tip": "Psychological stress value, the value range 0~100"
         },
         {
-            "string": "Weather something",
+            "string": "Current AQI",
             "id_fprj": "5031",
             "id_gmf": "",
-            "tip": "Sleep score"
+            "tip": ""
         },
         {
             "string": "Sleep score",
@@ -4821,10 +4821,10 @@
             "tip": "Psychological stress value, the value range 0~100"
         },
         {
-            "string": "Weather something",
+            "string": "Current AQI",
             "id_fprj": "5031",
             "id_gmf": "",
-            "tip": "Sleep score"
+            "tip": ""
         },
         {
             "string": "Sleep score",
@@ -5087,10 +5087,10 @@
             "tip": "Psychological stress value, the value range 0~100"
         },
         {
-            "string": "Weather something",
+            "string": "Current AQI",
             "id_fprj": "5031",
             "id_gmf": "",
-            "tip": "Sleep score"
+            "tip": ""
         },
         {
             "string": "Sleep score",
@@ -6727,10 +6727,10 @@
             "tip": "Psychological stress value, the value range 0~100"
         },
         {
-            "string": "Weather something",
+            "string": "Current AQI",
             "id_fprj": "5031",
             "id_gmf": "",
-            "tip": "Sleep score"
+            "tip": ""
         },
         {
             "string": "Sleep score",

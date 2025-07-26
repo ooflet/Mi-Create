@@ -97,29 +97,6 @@ class WatchfaceEditor(QMainWindow):
         # Setup projects (tabs)
         self.projects = {}
 
-        # Setup Main Window
-        logging.info("Initializing MainWindow")
-        self.ui = MainWindow()
-        self.ui.setupUi(self)
-
-        # if platform.system() == "Windows":
-        self.titleBar.layout().insertWidget(0, self.ui.menuBar, 0, Qt.AlignmentFlag.AlignLeft)
-        self.titleBar.layout().insertStretch(1, 1)
-        self.setMenuWidget(self.titleBar)
-
-        # Setup WatchData
-        logging.info("Initializing WatchData")
-        self.WatchData = WatchData()
-        self.WatchData.restart.connect(self.restartWindow)
-
-        logging.info("Initializing Application Widgets")
-        self.setupWidgets()
-        logging.info("Initializing Workspace")
-        self.zoomLevels = [10, 25, 50, 75, 100, 125, 150, 175, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
-        self.setupWorkspace()
-        logging.info("Initializing Explorer")
-        self.setupExplorer()
-
         # Setup Language
 
         self.languages = []
@@ -147,6 +124,29 @@ class WatchfaceEditor(QMainWindow):
         self.setupThemes()
         self.loadSettings()
         self.loadTheme()
+
+        # Setup Main Window
+        logging.info("Initializing MainWindow")
+        self.ui = MainWindow()
+        self.ui.setupUi(self)
+
+        # if platform.system() == "Windows":
+        self.titleBar.layout().insertWidget(0, self.ui.menuBar, 0, Qt.AlignmentFlag.AlignLeft)
+        self.titleBar.layout().insertStretch(1, 1)
+        self.setMenuWidget(self.titleBar)
+
+        # Setup WatchData
+        logging.info("Initializing WatchData")
+        self.WatchData = WatchData()
+        self.WatchData.restart.connect(self.restartWindow)
+
+        logging.info("Initializing Application Widgets")
+        self.setupWidgets()
+        logging.info("Initializing Workspace")
+        self.zoomLevels = [10, 25, 50, 75, 100, 125, 150, 175, 200, 300, 400, 500, 600, 700, 800, 900]
+        self.setupWorkspace()
+        logging.info("Initializing Explorer")
+        self.setupExplorer()
 
         logging.info("Initializing Watch Properties")
         self.setupProperties()
@@ -465,20 +465,27 @@ class WatchfaceEditor(QMainWindow):
         if imageFolder:
             self.resourceImages.clear()
             directory = os.listdir(imageFolder)
-            directory.sort()
-            for filename in directory:
-                file = os.path.join(imageFolder, filename)
-                if os.path.isfile(file):
-                    logging.info("Creating file entry for " + os.path.basename(file))
-                    item = QListWidgetItem(self.ui.resourceList)
-                    item.setData(100, os.path.basename(file))
-                    item_widget = HoverableFileItem(os.path.basename(file), QPixmap(file), self.ui.resourceList)
-                    item_widget.deleteBtn.clicked.connect(lambda event, file=os.path.basename(file): self.deleteResource(file))
-                    item.setSizeHint(item_widget.sizeHint())
+            if directory:
+                directory.sort()
+                self.ui.resourceWidgetContents.setCurrentWidget(self.ui.resourceList)
+                self.ui.resourceList.show()
+                for filename in directory:
+                    file = os.path.join(imageFolder, filename)
+                    if os.path.isfile(file):
+                        logging.info("Creating file entry for " + os.path.basename(file))
+                        item = QListWidgetItem(self.ui.resourceList)
+                        item.setData(100, os.path.basename(file))
+                        item_widget = HoverableFileItem(os.path.basename(file), QPixmap(file), self.ui.resourceList)
+                        item_widget.deleteBtn.clicked.connect(lambda event, file=os.path.basename(file): self.deleteResource(file))
+                        item.setSizeHint(item_widget.sizeHint())
 
-                    self.resourceImages.append(os.path.basename(file))
-                    self.ui.resourceList.setItemWidget(item, item_widget)
-                    self.ui.resourceList.addItem(item)
+                        self.resourceImages.append(os.path.basename(file))
+                        self.ui.resourceList.setItemWidget(item, item_widget)
+                        self.ui.resourceList.addItem(item)
+            else:
+                self.ui.resourceWidgetContents.setCurrentWidget(self.ui.resourceListPlaceholder)
+        else:
+            self.ui.resourceWidgetContents.setCurrentWidget(self.ui.resourceWidgetNoPage)
         self.ui.resourceList.verticalScrollBar().setValue(listPosition)
 
     def setIconState(self, disabled):
@@ -574,7 +581,7 @@ class WatchfaceEditor(QMainWindow):
 
         self.openFolder(currentProject["project"].getImageFolder())
 
-    def addResource(self, ignoreCanvasReload=False, openInResourceFolder=False):
+    def addResource(self, resources=None, ignoreCanvasReload=False, openInResourceFolder=False):
         currentProject = self.getCurrentProject()
 
         if currentProject == None or not currentProject.get("project"):
@@ -585,16 +592,19 @@ class WatchfaceEditor(QMainWindow):
         else:
             folder = "%userprofile%\\"
 
-        files = QFileDialog.getOpenFileNames(self, _("Add Image..."), folder,
+        if resources is None:
+            files = QFileDialog.getOpenFileNames(self, _("Add Image..."), folder,
                                                 "Image File (*.png *.jpeg *.jpg)")
+            print(files[0])
+            if files[0]:
+                resources = files[0]
+            else:
+                return False
 
-        if not files[0]:
-            return False
+        if os.path.dirname(resources[0]) == currentProject["project"].getImageFolder():
+            return os.path.basename(resources[0])
 
-        if os.path.dirname(files[0][0]) == currentProject["project"].getImageFolder():
-            return os.path.basename(files[0][0])
-
-        currentProject["project"].addResources(files[0])
+        currentProject["project"].addResources(resources)
         self.reloadImages(currentProject["project"].getImageFolder())
 
         if not ignoreCanvasReload:
@@ -606,7 +616,7 @@ class WatchfaceEditor(QMainWindow):
             if currentProject["canvas"].isPreviewPlaying:
                 self.playAllPreviews(currentProject["canvas"])
 
-        return os.path.basename(files[0][0])
+        return os.path.basename(resources[0])
     
     def deleteResource(self, file, ignoreCanvasReload=False):
         currentProject = self.getCurrentProject()
@@ -691,6 +701,31 @@ class WatchfaceEditor(QMainWindow):
                     defaultDropAction = Qt.DropAction.CopyAction
                 dragQDrag.exec(supportedActions, defaultDropAction)
 
+        def updateResourceListStyle():
+            self.ui.resourceWidgetContents.style().polish(self.ui.resourceWidgetContents)
+
+        def dragEnterEvent(event):
+            if event.mimeData().hasUrls():
+                event.acceptProposedAction()
+                self.ui.resourceWidgetContents.setProperty("selected", True)
+                updateResourceListStyle()
+            else:
+                event.ignore()
+
+        def dragLeaveEvent(event):
+            self.ui.resourceWidgetContents.setProperty("selected", False)
+            updateResourceListStyle()
+
+        def dropEvent(event):
+            self.ui.resourceWidgetContents.setProperty("selected", False)
+            updateResourceListStyle()
+
+            if event.mimeData().hasUrls():
+                filepaths = [url.toLocalFile() for url in event.mimeData().urls() if url.isLocalFile()]
+                self.addResource(filepaths)
+
+            event.acceptProposedAction()
+
         def search():
             # search resourceList
             filter_text = self.ui.resourceSearch.text()
@@ -719,12 +754,15 @@ class WatchfaceEditor(QMainWindow):
         
         #self.ui.resourceList.setItemDelegate(ResourcesDelegate(self.ui.resourceList))
         #self.ui.resourceList.setStyleSheet("QListView::item {border-top: 1px solid palette(midlight); padding: 24px;}")
+        self.ui.resourceWidgetContents.dragEnterEvent = dragEnterEvent
+        self.ui.resourceWidgetContents.dragLeaveEvent = dragLeaveEvent
+        self.ui.resourceWidgetContents.dropEvent = dropEvent
         self.ui.resourceList.startDrag = startDrag
         self.ui.resourceList
         self.ui.resourceList.doubleClicked.connect(insertSelectedResource)
         self.ui.resourceSearch.textChanged.connect(search)
         self.ui.reloadResource.clicked.connect(self.reloadResource)
-        self.ui.addResource.clicked.connect(self.addResource)
+        self.ui.addResource.clicked.connect(lambda: self.addResource()) # prevent args passing to function
         self.ui.openResourceFolder.clicked.connect(self.openResourceFolder)
 
         # Connect tab changes
@@ -866,8 +904,7 @@ class WatchfaceEditor(QMainWindow):
                 else:
                     self.propertiesWidget.loadProperties(itemType, widget=widget, project=currentProject["project"])
             elif isinstance(currentProject["project"], GMFProject):
-                self.propertiesWidget.loadProperties(self.propertiesGMFJson[itemType], currentProject["project"], item,
-                                                        self.resourceImages, currentProject["project"].getDeviceType())
+                self.propertiesWidget.loadProperties(itemType, widget=widget, project=currentProject["project"])
         else:
             self.propertiesWidget.clearProperties()
 
@@ -1541,7 +1578,7 @@ class WatchfaceEditor(QMainWindow):
 
         zoomFrame = QFrame(self)
         zoomFrame.setObjectName("canvasDecoration")
-        zoomFrame.setFixedSize(100, 25)
+        zoomFrame.setFixedSize(90, 25)
 
         zoomLayout = QHBoxLayout(zoomFrame)
         zoomLayout.setContentsMargins(0, 0, 0, 0)
@@ -1555,7 +1592,7 @@ class WatchfaceEditor(QMainWindow):
 
         self.zoomButton = QToolButton(self)
         self.zoomButton.setObjectName("canvasDecoration-button")
-        self.zoomButton.setFixedSize(50, 25)
+        self.zoomButton.setFixedSize(40, 25)
         self.zoomButton.setText("100%")  # Initial zoom display
         self.zoomButton.clicked.connect(lambda: self.setZoomPercent(100))
 
@@ -1791,7 +1828,9 @@ class WatchfaceEditor(QMainWindow):
                 recentProjectList.pop(index)
 
         storedSettings.setValue("recentProjects", recentProjectList)
-        self.coreDialog.loadRecentProjects(storedSettings.value("recentProjects"))
+        projectList = storedSettings.value("recentProjects")
+        projectList.reverse()
+        self.coreDialog.loadRecentProjects(projectList)
 
     def newProject(self, file, projectName, watchModel):
         # Check if file was selected
@@ -1881,7 +1920,8 @@ class WatchfaceEditor(QMainWindow):
             success, message, debugMessage = project["project"].save()
             if success:
                 self.statusBar().showMessage(_("Project saved at ") + project["project"].getPath(), 2000)
-                self.addProjectToRecents(project["project"], project["project"].getPath())
+                if project["project"].currentTheme == "default":
+                    self.addProjectToRecents(project["project"], project["project"].getPath())
                 self.fileChanged = False
                 self.Explorer.clearSelection()
                 self.markCurrentProjectChanged(False)
