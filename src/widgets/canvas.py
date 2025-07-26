@@ -256,13 +256,16 @@ class Canvas(QGraphicsView):
 
         self.mainWindowUI = ui # used for ContextMenu, it needs window UI to access QActions
         self.widgets = {}
+        self.widgetSettings = {}
+
+        self.project = None
 
         self.itemDragPreview = None
         self.resizeEnded = True
 
         self.rubberBand = RubberBand(self)
 
-        self.setTransformationAnchor(QGraphicsView.ViewportAnchor.AnchorUnderMouse) # positions scene to zoom under mouse
+        #self.setTransformationAnchor(QGraphicsView.ViewportAnchor.AnchorUnderMouse) # positions scene to zoom under mouse
 
         self.deviceOutlineVisible = deviceOutlineVisible
         self.origin = None
@@ -279,8 +282,44 @@ class Canvas(QGraphicsView):
         self.scene().updatePosMap()
         self.onObjectPosChange.emit()
 
+    def toggleObjectVisibility(self, name, project):
+        widgetSettings = self.widgetSettings[project.currentTheme][name]
+
+        if widgetSettings["hidden"]:
+            widgetSettings["hidden"] = False
+            self.getObject(name).setSelected(True)
+            self.getObject(name).show()
+        else:
+            widgetSettings["hidden"] = True
+            self.getObject(name).selectionPath.hide()
+            self.getObject(name).hide()
+
+    def toggleObjectLocked(self, name, project):
+        widgetSettings = self.widgetSettings[project.currentTheme][name]
+
+        if widgetSettings["locked"]:
+            widgetSettings["locked"] = False
+            self.getObject(name).setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsSelectable, True)
+            self.getObject(name).setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsMovable, True)
+            self.getObject(name).setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsFocusable, True)
+        else:
+            widgetSettings["locked"] = True
+            self.getObject(name).setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsSelectable, False)
+            self.getObject(name).setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsMovable, False)
+            self.getObject(name).setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsFocusable, False)
+
     def mousePressEvent(self, event):
-        if not any(isinstance(item, BaseWidget) for item in self.items(event.pos())):
+        noItems = True
+
+        for item in self.items(event.pos()):
+            if isinstance(item, BaseWidget):
+                if self.widgetSettings[self.project.currentTheme][item.data(0)]["locked"]:
+                    noItems = True
+                else:
+                    noItems = False
+                    break # if any basewidgets present, break
+
+        if noItems:
             if event.button() == Qt.MouseButton.LeftButton:
                 self.rubberBandOrigin = event.pos()
                 self.rubberBand.setGeometry(QRect(self.rubberBandOrigin, QSize()))
@@ -411,9 +450,13 @@ class Canvas(QGraphicsView):
             scroll_value = self.horizontalScrollBar().value() - scroll_delta
             self.horizontalScrollBar().setValue(scroll_value)
         else:
-            scroll_delta = event.angleDelta().y()
-            scroll_value = self.verticalScrollBar().value() - scroll_delta
-            self.verticalScrollBar().setValue(scroll_value)
+            delta = event.angleDelta()
+            if delta.x() != 0:
+                self.horizontalScrollBar().setValue(self.horizontalScrollBar().value() - delta.x())
+            elif delta.y() != 0:
+                self.verticalScrollBar().setValue(self.verticalScrollBar().value() - delta.y())
+            else:
+                super().wheelEvent(event)
 
     def handleObjectSelectionChange(self):
         selected_object = self.getSelectedObject()
@@ -884,6 +927,13 @@ class Canvas(QGraphicsView):
 
             # add widget into widget list
             self.widgets[item.getProperty("widget_name")] = widget
+
+            widgetSetting = self.widgetSettings[item.project.currentTheme].get(item.getProperty("widget_name"))
+            if widgetSetting is None:
+                self.widgetSettings[item.project.currentTheme][item.getProperty("widget_name")] = {
+                    "hidden": False,
+                    "locked": False
+                }
             return True, "Success", ""
         except Exception:
             # status, user facing message, debug info
@@ -935,6 +985,9 @@ class Canvas(QGraphicsView):
         self.scene().originPositons = {}
 
         widgets = project.getAllWidgets()
+
+        if not self.widgetSettings.get(project.currentTheme):
+            self.widgetSettings[project.currentTheme] = {}
 
         for index, widget in enumerate(widgets):    
             result, userFacingReason, debugReason = self.createWidgetFromData(index, widget, snap, interpolation)
@@ -1024,11 +1077,19 @@ class BaseWidget(QGraphicsRectItem):
         self.setAcceptHoverEvents(True)
         self.setOpacity(int(transparency) / 255)
         self.setData(0, name)
+        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemClipsChildrenToShape, True)
+
+        settings = canvas.widgetSettings[canvas.project.currentTheme].get(name)
+        print(settings)
+        if settings:
+            if settings.get("hidden"):
+                self.hide()
+            if settings.get("locked") == True:
+                return
+            
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsMovable, True)
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsSelectable, True)
-        #self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemSendsGeometryChanges, True)
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsFocusable, True)
-        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemClipsChildrenToShape, True)
 
     def boundingRect(self):
         # Create outline

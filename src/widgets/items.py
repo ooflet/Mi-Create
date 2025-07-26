@@ -146,3 +146,56 @@ class RecentProjectItem(QFrame):
         self.opened.emit(self.path)
         return super().mouseReleaseEvent(a0)
     
+class ExplorerItem(QWidget):
+    def __init__(self, widget_name, icon, hidden, locked, parent = None):
+        super().__init__(parent)
+        self.itemlayout = QHBoxLayout(self)
+        self.itemlayout.setContentsMargins(30, 4, 4, 4)
+
+        self.hidden = hidden
+        self.locked = locked
+
+        self.iconLabel = QLabel()
+        #listItemIcon.setPixmap(QIcon.fromTheme(self.objectIcon.icon[widget_type]).pixmap(18, 18))
+        self.iconLabel.setPixmap(icon)
+        self.itemLabel = QLabel(widget_name)
+
+        self.visibleIcon = QToolButton()
+        if hidden:
+            self.visibleIcon.setIcon(QIcon.fromTheme("edit-hide"))
+        else:
+            self.visibleIcon.setIcon(QIcon.fromTheme("edit-show"))
+        self.visibleIcon.setStyleSheet("padding: 1px")
+
+        self.lockIcon = QToolButton()
+        if locked:
+            self.lockIcon.setIcon(QIcon.fromTheme("edit-lock"))
+        else:
+            self.lockIcon.setIcon(QIcon.fromTheme("edit-unlock"))
+        self.lockIcon.setStyleSheet("padding: 1px")
+
+        self.itemlayout.addWidget(self.iconLabel)
+        self.itemlayout.addWidget(self.itemLabel)
+        self.itemlayout.addStretch()
+        self.itemlayout.addWidget(self.visibleIcon)
+        self.itemlayout.addWidget(self.lockIcon)
+
+        if self.hidden is False:
+            self.visibleIcon.setVisible(False)
+        
+        if self.locked is False:
+            self.lockIcon.setVisible(False)
+
+    def enterEvent(self, event):
+        self.visibleIcon.setVisible(True)
+        self.lockIcon.setVisible(True)
+        super().enterEvent(event)
+
+    def leaveEvent(self, event):
+        if self.hidden is False:
+            self.visibleIcon.setVisible(False)
+        
+        if self.locked is False:
+            self.lockIcon.setVisible(False)
+
+        super().leaveEvent(event)

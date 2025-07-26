@@ -198,7 +198,7 @@ class PropertiesMultiFileItem(QFrame):
     dropped = pyqtSignal(object)
     removed = pyqtSignal()
     indexChanged = pyqtSignal(object)
-    def __init__(self, label, editable=True, propertyName=None, parent=None):
+    def __init__(self, label, imageUploadFunction, editable=True, propertyName=None, parent=None):
         super().__init__(parent)
         self.setFixedWidth(65)
         self.setObjectName("imageEntry")
@@ -207,6 +207,8 @@ class PropertiesMultiFileItem(QFrame):
         self.set = False
         self.pixmap = None
         self.editable = editable
+
+        self.imageUploadFunction = imageUploadFunction
 
         self.imagePath = ""
         self.itemLayout = QVBoxLayout(self)
@@ -286,6 +288,9 @@ class PropertiesMultiFileItem(QFrame):
         painter.end()
 
         return transparent
+    
+    def mousePress(self, event):
+        self.imageUploadFunction()
 
     def enterEvent(self, event):
         if self.set:
@@ -331,12 +336,13 @@ class PropertiesMultiFileItem(QFrame):
 
 class PropertiesMultiFileEntry(QFrame):
     propertyChanged = pyqtSignal(str, list)
-    def __init__(self, src, editable, amountWidget=None, propertyName=None, parent=None):
+    def __init__(self, src, editable, imageUploadFunction, amountWidget=None, propertyName=None, parent=None):
         super().__init__(parent)
         self.widgetName = None
         self.itemLayout = FlowLayout(self)
         self.imageFolder = None
         self.amountWidget = amountWidget
+        self.imageUploadFunction = imageUploadFunction
         self.src = src
         self.data = None
         self.editable = editable
@@ -353,10 +359,12 @@ class PropertiesMultiFileEntry(QFrame):
         self.loadImageList(self.data, self.imageFolder)
         
     def setItems(self, items):
+        print("clear")
         self.itemLayout.clear()
         self.fileItems.clear()
         for index, item in enumerate(items):
-            fileItem = PropertiesMultiFileItem(item, self.editable)
+            print(item)
+            fileItem = PropertiesMultiFileItem(item, self.imageUploadFunction, self.editable, parent=self)
             fileItem.dropped.connect(lambda image, index=index: self.setImage(index, image))
             fileItem.removed.connect(lambda index=index: self.removeImage(index))
             fileItem.indexChanged.connect(lambda image, index=index: self.setImage(index, image))

@@ -674,7 +674,7 @@ class WatchfaceEditor(QMainWindow):
             elif currentProject.get("canvas") is not None:
                 self.setIconState(False)
                 self.selectionDebounce = False
-                self.Explorer.updateExplorer(currentProject["project"])
+                self.Explorer.updateExplorer(currentProject["project"], currentProject["canvas"])
                 logging.info("Explorer updated")
                 self.reloadImages(currentProject["project"].getImageFolder())
                 # thread = threading.Thread(target=lambda: self.reloadImages(currentProject["project"].getImageFolder()))
@@ -770,10 +770,24 @@ class WatchfaceEditor(QMainWindow):
         self.ui.workspace.currentChanged.connect(handleTabChange)
 
     def setupExplorer(self):
+        def toggleHidden(name):
+            currentProject = self.getCurrentProject()
+            canvas = self.getCurrentProject()["canvas"]
+            canvas.toggleObjectVisibility(name, currentProject["project"])
+            #self.Explorer.updateExplorer(currentProject["project"], currentProject["canvas"])
+
+        def toggleLocked(name):
+            currentProject = self.getCurrentProject()
+            canvas = self.getCurrentProject()["canvas"]
+            canvas.toggleObjectLocked(name, currentProject["project"])
+            #self.Explorer.updateExplorer(currentProject["project"], currentProject["canvas"])
+
         self.Explorer = Explorer(self, ObjectIcon(), self.ui)
         self.ui.explorerWidget.setWidget(self.Explorer)
         self.Explorer.itemSelectionChanged.connect(lambda: self.updateProjectSelections("explorer"))
         self.Explorer.itemReordered.connect(lambda row: self.changeSelectedWatchfaceWidgetLayer(row))
+        self.Explorer.itemHiddenToggled.connect(lambda name: toggleHidden(name))
+        self.Explorer.itemLockedToggled.connect(lambda name: toggleLocked(name))
 
     def clearExplorer(self):
         self.Explorer.clear()
@@ -848,7 +862,7 @@ class WatchfaceEditor(QMainWindow):
 
                 if property == "widget_name":
                     self.propertiesWidget.clearOnRefresh = True
-                    self.Explorer.updateExplorer(currentProject["project"])
+                    self.Explorer.updateExplorer(currentProject["project"], currentProject["canvas"])
                     currentProject["canvas"].loadObjects(currentProject["project"],
                                                          self.settings["Canvas"]["Snap"]["value"],
                                                         self.settings["Canvas"]["Interpolation"]["value"],
@@ -1006,7 +1020,7 @@ class WatchfaceEditor(QMainWindow):
                 if currentProject["canvas"].isPreviewPlaying:
                         self.playAllPreviews(currentProject["canvas"])
 
-                self.Explorer.updateExplorer(currentProject["project"])
+                self.Explorer.updateExplorer(currentProject["project"], currentProject["canvas"])
 
                 if not success:
                     self.showDialog("error", userFacingMessage, debugMessage)
@@ -1064,7 +1078,7 @@ class WatchfaceEditor(QMainWindow):
             if currentProject["canvas"].isPreviewPlaying:
                 self.playAllPreviews(currentProject["canvas"])
 
-            self.Explorer.updateExplorer(currentProject["project"])
+            self.Explorer.updateExplorer(currentProject["project"], currentProject["canvas"])
             for widget in widgets:
                 currentProject["canvas"].selectObject(widget[0].getProperty("widget_name"), False)
 
@@ -1102,7 +1116,7 @@ class WatchfaceEditor(QMainWindow):
                 if currentProject["canvas"].isPreviewPlaying:
                     self.playAllPreviews(currentProject["canvas"])
 
-                self.Explorer.updateExplorer(currentProject["project"])
+                self.Explorer.updateExplorer(currentProject["project"], currentProject["canvas"])
 
             widgetList = []
             for item in itemList:
@@ -1220,7 +1234,7 @@ class WatchfaceEditor(QMainWindow):
                 self.playAllPreviews(currentProject["canvas"])
 
             self.reloadImages(currentProject["project"].getImageFolder())
-            self.Explorer.updateExplorer(currentProject["project"])
+            self.Explorer.updateExplorer(currentProject["project"], currentProject["canvas"])
 
             # select objects pasted in
             if type == "redo":
@@ -1391,7 +1405,7 @@ class WatchfaceEditor(QMainWindow):
                 elif isinstance(item, NumberWidget) or isinstance(item, AnalogWidget):
                     item.startPreview()
 
-    def createNewWorkspace(self, project: FprjProject):
+    def createNewWorkspace(self, project: FprjProject, widgetSettings=None):
         # projects are technically "tabs"
         self.previousSelected = None
         if self.projects.get(project.getDirectory()):
@@ -1482,6 +1496,9 @@ class WatchfaceEditor(QMainWindow):
         canvas = Canvas(self.settings["Canvas"]["Antialiasing"]["value"],
                         self.settings["Canvas"]["ClipDeviceShape"]["value"], self.ui, self)
 
+        if widgetSettings is not None:
+            canvas.widgetSettings = widgetSettings
+
         # Create the project
         canvas.setAcceptDrops(True)
         canvas.scene().selectionChanged.connect(lambda: self.updateProjectSelections("canvas"))
@@ -1518,7 +1535,7 @@ class WatchfaceEditor(QMainWindow):
             
             self.updateProperties(False)
             self.selectionDebounce = False
-            self.Explorer.updateExplorer(currentProject["project"])
+            self.Explorer.updateExplorer(currentProject["project"], currentProject["canvas"])
             logging.info("Explorer updated")
             currentProject["canvas"].loadObjects(currentProject["project"],
                                         self.settings["Canvas"]["Snap"]["value"],
@@ -1665,7 +1682,7 @@ class WatchfaceEditor(QMainWindow):
             if self.ui.workspace.count() == 1:  # new tab from empty workspace does not refresh
                 self.setIconState(False)
                 self.selectionDebounce = False
-                self.Explorer.updateExplorer(project)
+                self.Explorer.updateExplorer(project, canvas)
                 logging.info("Explorer updated")
                 self.reloadImages(project.getImageFolder())
                 # thread = threading.Thread(target=lambda: self.reloadImages(project.getImageFolder()))
@@ -1892,7 +1909,12 @@ class WatchfaceEditor(QMainWindow):
         load = project.load(projectLocation)
         if load[0]:
             try:
-                self.createNewWorkspace(project)
+                editorSettings = os.path.join(os.path.dirname(projectLocation), "editor_settings.json")
+                if os.path.isfile(editorSettings):
+                    with open(editorSettings, "r") as f:
+                        self.createNewWorkspace(project, json.load(f))
+                else:
+                    self.createNewWorkspace(project)
                 self.addProjectToRecents(project, projectLocation)
             except Exception as e:
                 self.showDialog("error", _("Failed to open project: ") + str(e), traceback.format_exc())
@@ -1920,6 +1942,10 @@ class WatchfaceEditor(QMainWindow):
             success, message, debugMessage = project["project"].save()
             if success:
                 self.statusBar().showMessage(_("Project saved at ") + project["project"].getPath(), 2000)
+                
+                with open(os.path.join(project["project"].getDirectory(), "editor_settings.json"), "w") as f:
+                    f.write(json.dumps(project["canvas"].widgetSettings, indent=4))
+
                 if project["project"].currentTheme == "default":
                     self.addProjectToRecents(project["project"], project["project"].getPath())
                 self.fileChanged = False
