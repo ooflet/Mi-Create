@@ -920,7 +920,7 @@ class WatchfaceEditor(QMainWindow):
             elif isinstance(currentProject["project"], GMFProject):
                 self.propertiesWidget.loadProperties(itemType, widget=widget, project=currentProject["project"])
         else:
-            self.propertiesWidget.clearProperties()
+            self.propertiesWidget.loadProperties("preview")
 
     def setupDialogs(self):
         def closeEvent():
@@ -1630,11 +1630,11 @@ class WatchfaceEditor(QMainWindow):
         previewButton.setIcon(QIcon().fromTheme("media-playback-start"))
         previewButton.clicked.connect(previewToggle)
 
-        menuButton = QToolButton(self)
-        menuButton.setObjectName("canvasDecoration-button")
-        menuButton.setCheckable(True)
-        menuButton.setFixedSize(25, 25)
-        menuButton.setIcon(QIcon().fromTheme("application-more"))
+        # menuButton = QToolButton(self)
+        # menuButton.setObjectName("canvasDecoration-button")
+        # menuButton.setCheckable(True)
+        # menuButton.setFixedSize(25, 25)
+        # menuButton.setIcon(QIcon().fromTheme("application-more"))
 
         canvasLayout.addLayout(toolButtonLayout)
         canvasLayout.addStretch()
@@ -1644,7 +1644,7 @@ class WatchfaceEditor(QMainWindow):
         toolButtonLayout.addStretch()
         toolButtonLayout.addWidget(zoomFrame)
         toolButtonLayout.addWidget(previewButton)
-        toolButtonLayout.addWidget(menuButton)
+        #toolButtonLayout.addWidget(menuButton)
 
         # Add Icons
         icon = QIcon().fromTheme("project-icon")

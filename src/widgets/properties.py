@@ -196,9 +196,10 @@ class PropertiesFileEntry(QStackedWidget):
 
 class PropertiesMultiFileItem(QFrame):
     dropped = pyqtSignal(object)
-    removed = pyqtSignal()
+    removed = pyqtSignal(str)
     indexChanged = pyqtSignal(object)
-    def __init__(self, label, imageUploadFunction, editable=True, propertyName=None, parent=None):
+    clicked = pyqtSignal(str)
+    def __init__(self, label, editable=True, propertyName=None, parent=None):
         super().__init__(parent)
         self.setFixedWidth(65)
         self.setObjectName("imageEntry")
@@ -207,8 +208,6 @@ class PropertiesMultiFileItem(QFrame):
         self.set = False
         self.pixmap = None
         self.editable = editable
-
-        self.imageUploadFunction = imageUploadFunction
 
         self.imagePath = ""
         self.itemLayout = QVBoxLayout(self)
@@ -288,9 +287,6 @@ class PropertiesMultiFileItem(QFrame):
         painter.end()
 
         return transparent
-    
-    def mousePress(self, event):
-        self.imageUploadFunction()
 
     def enterEvent(self, event):
         if self.set:
@@ -302,6 +298,10 @@ class PropertiesMultiFileItem(QFrame):
         if self.set:
             self.image.setPixmap(self.pixmap)
         self.removeButton.hide()
+
+    def mousePressEvent(self, a0):
+        self.clicked.emit(self.label.text())
+        return super().mousePressEvent(a0)
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
@@ -364,10 +364,11 @@ class PropertiesMultiFileEntry(QFrame):
         self.fileItems.clear()
         for index, item in enumerate(items):
             print(item)
-            fileItem = PropertiesMultiFileItem(item, self.imageUploadFunction, self.editable, parent=self)
+            fileItem = PropertiesMultiFileItem(item, self.editable, parent=self)
             fileItem.dropped.connect(lambda image, index=index: self.setImage(index, image))
-            fileItem.removed.connect(lambda index=index: self.removeImage(index))
+            fileItem.removed.connect(lambda itemIndex, index=index: self.removeImage(index, itemIndex))
             fileItem.indexChanged.connect(lambda image, index=index: self.setImage(index, image))
+            fileItem.clicked.connect(lambda itemIndex, index=index: self.imageUploadFunction(index, itemIndex))
             self.itemLayout.addWidget(fileItem)
             self.fileItems.append(fileItem)
 
@@ -413,8 +414,11 @@ class PropertiesMultiFileEntry(QFrame):
 
         self.propertyChanged.emit(self.src, self.data)
 
-    def removeImage(self, index):
-        self.data[index] = ""
+    def removeImage(self, index, itemIndex):
+        if self.editable:
+            self.data[index] = [index, ""]
+        else:
+            self.data[index] = ""
         self.propertyChanged.emit(self.src, self.data)
 
 class PropertiesWidget(QStackedWidget):
@@ -514,6 +518,8 @@ class PropertiesWidget(QStackedWidget):
             toggleSwitch.setChecked(bool(int(toggled)))
         except (ValueError, TypeError):
             toggleSwitch.setChecked(False)
+
+        toggleSwitch.update_circle_position(toggleSwitch.isChecked())
 
         toggleSwitch.setDisabled(disabled)
         toggleSwitch.toggled.connect(onToggle)
@@ -685,10 +691,14 @@ class PropertiesWidget(QStackedWidget):
         return propertyEdit, widget
 
     def createNumEdit(self, src, imageUploadFunction):
+        def addImgResource(index, itemIndex):
+            image = imageUploadFunction(ignoreCanvasReload=True, openInResourceFolder=True)
+            if image:
+                propertyEdit.setImage(index, image)
         widget = QWidget()
         layout = QVBoxLayout(widget)
         layout.setContentsMargins(0, 0, 0, 0)
-        propertyEdit = PropertiesMultiFileEntry(src, False)
+        propertyEdit = PropertiesMultiFileEntry(src, False, addImgResource)
         propertyEdit.setItems([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, "Minus"])
         propertyEdit.propertyChanged.connect(self.sendPropertyChangedSignal)
 
@@ -697,6 +707,11 @@ class PropertiesWidget(QStackedWidget):
         return propertyEdit, widget
     
     def createImgListEdit(self, src, imageUploadFunction):
+        def addImgResource(index, itemIndex):
+            image = imageUploadFunction(ignoreCanvasReload=True, openInResourceFolder=True)
+            if image:
+                propertyEdit.setImage(index, [itemIndex, image])
+
         widget = QWidget()
         layout = QVBoxLayout(widget)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -708,7 +723,7 @@ class PropertiesWidget(QStackedWidget):
         amountWidget, amountLayout = self.createIntEdit("Image Count", 0, 1, 999, "image_count", False, True)
         amountWidget.editingFinished.connect(setAmount)
         
-        propertyEdit = PropertiesMultiFileEntry(src, True, amountWidget)
+        propertyEdit = PropertiesMultiFileEntry(src, True, addImgResource, amountWidget)
         propertyEdit.propertyChanged.connect(self.sendPropertyChangedSignal)
         
         layout.addWidget(amountLayout)
@@ -724,7 +739,7 @@ class PropertiesWidget(QStackedWidget):
         button.setText(text)
         button.setDisabled(disabled)
         button.clicked.connect(onClick)
-        return button
+        return button, button
 
     def createCheckBox(self, checked, disabled, srcProperty, propertySignalDisabled=False):
         def onChecked():
@@ -778,7 +793,7 @@ class PropertiesWidget(QStackedWidget):
                 if property["type"] == "str":
                     propertyWidget, propertyLayout = self.createStrEdit(property["string"], propertyValue, key, propertyDisabled)
                 elif property["type"] == "btn":
-                    propertyWidget, propertyLayout = self.createButton(propertyValue, propertyDisabled, key)
+                    propertyWidget, propertyLayout = self.createButton(property["string"], propertyDisabled, key)
                 elif property["type"] == "img":
                     propertyWidget, propertyLayout = self.createImgEdit(property["string"], key, self.imageUploadFunction)
                 elif property["type"] == "slider":
@@ -786,9 +801,9 @@ class PropertiesWidget(QStackedWidget):
                 elif property["type"] == "list":
                     propertyWidget, propertyLayout = self.createListEdit(property["string"], propertyValue, property["options"], key, propertyDisabled)
                 elif property["type"] == "imglist":
-                    propertyWidget, propertyLayout = self.createImgListEdit(key, None)
+                    propertyWidget, propertyLayout = self.createImgListEdit(key, self.imageUploadFunction)
                 elif property["type"] == "numlist":
-                    propertyWidget, propertyLayout = self.createNumEdit(key, None)
+                    propertyWidget, propertyLayout = self.createNumEdit(key, self.imageUploadFunction)
                 elif property["type"] == "int":
                     propertyWidget, propertyLayout = self.createIntEdit(property["string"], propertyValue, property.get("min"), property.get("max"), key, propertyDisabled)
                 elif property["type"] == "bool":
@@ -857,6 +872,10 @@ class PropertiesWidget(QStackedWidget):
     def loadProperties(self, category, values=None, widget=None, project=None):
         if not category:
             self.changePropertiesPage("none")
+            return
+        
+        if category == "preview":
+            self.changePropertiesPage(category)
             return
 
         self.ignorePropertyChange = True

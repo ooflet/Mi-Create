@@ -1,4 +1,26 @@
 {
+    "preview": {
+        "Shape": "none",
+        "properties": {
+            "Preview": {
+                "preview_randomise": {
+                    "string": "Randomise Preview",
+                    "type": "bool",
+                    "value": false
+                },
+                "preview_crop_to_shape": {
+                    "string": "Crop To Watch Shape",
+                    "type": "bool",
+                    "value": true
+                },
+                "preview_screenshot": {
+                    "string": "Take Preview Screenshot",
+                    "type": "btn",
+                    "value": ""
+                }
+            }
+        }
+    },
     "widget_analog": {
         "Shape": "AnalogDisplay",
         "properties": {
