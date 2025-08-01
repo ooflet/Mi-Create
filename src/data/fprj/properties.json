@@ -9,7 +9,7 @@
                     "value": false
                 },
                 "preview_crop_to_shape": {
-                    "string": "Crop To Watch Shape",
+                    "string": "Clip To Device Shape",
                     "type": "bool",
                     "value": true
                 },

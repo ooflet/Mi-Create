@@ -263,7 +263,7 @@ class CoreDialog(QDialog):
         self.welcomeFrame.setContentsMargins(8, 8, 8, 8)
         self.welcomeFrame.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Preferred)
         self.welcomeFrame.setFixedWidth(self.welcomePage.viewport().width())
-        self.welcomePage.viewport().resizeEvent = lambda event: self.welcomeFrame.setFixedWidth(event.size().width())
+        self.welcomePage.resizeEvent = lambda event: self.welcomeFrame.setFixedWidth(event.size().width())
 
         self.welcomeFrameLayout = FlowLayout(self.welcomeFrame)
         self.welcomeFrameLayout.setSpacing(8)

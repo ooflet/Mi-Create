@@ -47,194 +47,10 @@ class FprjProject:
         self.currentTheme = "default"
         self.themes = {}
 
-        self.deviceIds = {
-            "0": "xiaomi_color",
-            "1": "xiaomi_color_sport",
-            "2": "70mai_saphir",
-            "3": "xiaomi_color_2/s1/s2",
-            "4": "xiaomi_watch_s1_pro",
-            "5": "redmi/poco_watch",
-            "6": "xiaomi_band_7_pro",
-            "7": "redmi_watch_3",
-            "8": "redmi_band_pro",
-            "9": "xiaomi_band_8",
-            "10": "redmi_watch_2_lite",
-            "11": "xiaomi_band_8_pro",
-            "12": "redmi_watch_3_active",
-            "362": "xiaomi_watch_s3",
-            "365": "redmi_watch_4",
-            "366": "xiaomi_band_9",
-            "367": "xiaomi_band_9_pro",
-            "462": "xiaomi_watch_s4",
-            "465": "redmi_watch_5",
-            "466": "xiaomi_band_10",
-            "3651": "redmi_watch_5_active",
-            "3652": "redmi_watch_5_lite"
-        }
-
-        self.widgetIds = {
-            "27": "widget_analog",
-            "29": "widget_arc",
-            "30": "widget",
-            "31": "widget_imagelist",
-            "32": "widget_num",
-            "34": "widget_container",
-            "42": "widget_arc" # progress arc plus, prefer using this
-        }
-
-        self.propertyIds = {
-            "@Alignment": "num_alignment",
-            "@Alpha": "widget_alpha",
-            "@Background_ImageName": "widget_background_bitmap",
-            "@BgImage_rotate_xc": "analog_bg_anchor_x",
-            "@BgImage_rotate_yc": "analog_bg_anchor_y",
-            "@Bitmap": "widget_bitmap",
-            "@BitmapList": "widget_bitmaplist",
-            "@Blanking": "num_toggle_zeros",
-            "@Butt_cap_ending_style_En": "arc_flat_caps",
-            "@DefaultIndex": "imagelist_default_index",
-            "@Digits": "num_digits",
-            "@EndAngle": "arc_end_angle",
-            "@Foreground_ImageName": "arc_image",
-            "@Height": "widget_size_height",
-            "@HourHand_ImageName": "analog_hour_image",
-            "@HourImage_rotate_xc": "analog_hour_anchor_x",
-            "@HourImage_rotate_yc": "analog_hour_anchor_y",
-            "@HourHandCorrection_En": "analog_hour_smooth_motion",
-            "@Index_Src": "imagelist_source",
-            "@Line_Width": "arc_thickness",
-            "@MinuteHand_Image": "analog_minute_image",
-            "@MinuteImage_rotate_xc": "analog_minute_anchor_x",
-            "@MinuteImage_rotate_yc": "analog_minute_anchor_y",
-            "@MinuteHandCorrection_En": "analog_minute_smooth_motion",
-            "@Name": "widget_name",
-            "@Radius": "arc_radius",
-            "@Range_Max": "arc_max_value",
-            "@Range_Max_Src": "arc_max_value_source",
-            "@Range_Min": "arc_min_value",
-            "@Range_MinStep": "arc_min_step_value",
-            "@Range_Step": "arc_step_value",
-            "@Range_Val_Src": "arc_source",
-            "@Rotate_xc": "arc_pos_x",
-            "@Rotate_yc": "arc_pos_y",
-            "@SecondHand_Image": "analog_second_image",
-            "@SecondImage_rotate_xc": "analog_second_anchor_x",
-            "@SecondImage_rotate_yc": "analog_second_anchor_y",
-            "@Shape": "widget_type",
-            "@Spacing": "num_spacing",
-            "@StartAngle": "arc_start_angle",
-            "@Value_Src": "num_source",
-            "@Visible_Src": "widget_visiblity_source",
-            "@Width": "widget_size_width",
-            "@X": "widget_pos_x",
-            "@Y": "widget_pos_y",
-            "WidgetType": "WidgetType"
-        }
-
-        self.defaultItems = {
-            "widget_analog": {
-                "@Shape":"27",
-                "@Name":"",
-                "@X":"",
-                "@Y":"",
-                "@Width":"100",
-                "@Height":"100",
-                "@Alpha":"255",
-                "@Visible_Src":"0",
-                "@HourHandCorrection_En":"0",
-                "@MinuteHandCorrection_En":"0",
-                "@Background_ImageName":"",
-                "@BgImage_rotate_xc":"0", 
-                "@BgImage_rotate_yc":"0",
-                "@HourHand_ImageName":"",
-                "@HourImage_rotate_xc":"0",
-                "@HourImage_rotate_yc":"0",
-                "@MinuteHand_Image":"",
-                "@MinuteImage_rotate_xc":"0",
-                "@MinuteImage_rotate_yc":"0",
-                "@SecondHand_Image":"",
-                "@SecondImage_rotate_xc":"0",
-                "@SecondImage_rotate_yc":"0"
-            },
-            "widget": {
-                "@Shape":"30",
-                "@Name":"",
-                "@Bitmap":"",
-                "@X":"",
-                "@Y":"",
-                "@Width":"48",
-                "@Height":"48",
-                "@Alpha":"255",
-                "@Visible_Src":"0"
-            },
-            "widget_imagelist": {
-                "@Shape":"31",
-                "@Name":"",
-                "@BitmapList":"",
-                "@X":"",
-                "@Y":"",
-                "@Width":"48",
-                "@Height":"48",
-                "@Alpha":"255",
-                "@Alignment":"0",
-                "@DefaultIndex":"0",
-                "@Value_Src":"0",
-                "@Spacing":"0",
-                "@Blanking":"0",
-                "@Visible_Src":"0"
-            },
-            "widget_num": {
-                "@Shape":"32",
-                "@Name":"",
-                "@BitmapList":"",
-                "@X":"",
-                "@Y":"",
-                "@Width":"48",
-                "@Height":"48",
-                "@Alpha":"255",
-                "@Visible_Src":"0",
-                "@Digits":"1",
-                "@Alignment":"0",
-                "@Value_Src":"0",
-                "@Spacing":"0",
-                "@Blanking":"0"
-            },
-            "widget_container": {
-                "@Shape":"34",
-                "@Name":"",
-                "@X":"0",
-                "@Y":"0",
-                "@Width":"50",
-                "@Height":"50",
-                "@Alpha":"255",
-                "@Visible_Src":"0"
-            },
-            "widget_arc": {
-                "@Shape":"42",
-                "@Name":"",
-                "@X":"0",
-                "@Y":"0",
-                "@Width":"200",
-                "@Height":"200",
-                "@Alpha":"255",
-                "@Visible_Src":"0",
-                "@Rotate_xc":"100",
-                "@Rotate_yc":"100",
-                "@Radius":"75",
-                "@Line_Width":"30",
-                "@Butt_cap_ending_style_En":"0",
-                "@StartAngle":"-120",
-                "@EndAngle":"120",
-                "@Range_Min":"0",
-                "@Range_Max":"100",
-                "@Range_MinStep":"0",
-                "@Range_Step":"0",
-                "@Background_ImageName":"",
-                "@Foreground_ImageName":"",
-                "@Range_Max_Src":"0",
-                "@Range_Val_Src":"0"
-            }
-        }
+        self.deviceIds = {}
+        self.widgetIds = {}
+        self.propertyIds = {}
+        self.defaultItems = {}
 
         self.watchFileBlank = {
             "FaceProject": {
@@ -247,6 +63,18 @@ class FprjProject:
                 }
             }
         }
+
+        with open("data/fprj/default_items.json", "r") as defaultItemsFile:
+            self.defaultItems = json.load(defaultItemsFile)
+
+        with open("data/fprj/device_ids.json", "r") as deviceIdsFile:
+            self.deviceIds = json.load(deviceIdsFile)
+
+        with open("data/fprj/property_ids.json", "r") as propertyIdsFile:
+            self.propertyIds = json.load(propertyIdsFile)
+
+        with open("data/fprj/widget_ids.json", "r") as widgetIdsFile:
+            self.widgetIds = json.load(widgetIdsFile)
 
     def createBlank(self, path, device, name, theme="default") -> tuple[bool, str, Optional[str]]:
         """

@@ -894,11 +894,11 @@ class WatchfaceEditor(QMainWindow):
                 self.ignoreHistoryInvoke = False
 
         # Setup properties widget
-        with open("data/fprj/propertiesFprj.json", encoding="utf8") as raw:
+        with open("data/fprj/properties.json", encoding="utf8") as raw:
             source = raw.read()
             self.propertiesFprjJson = json.loads(source)
         
-        with open("data/gmf/propertiesGMF.json", encoding="utf8") as raw:
+        with open("data/gmf/properties.json", encoding="utf8") as raw:
             source = raw.read()
             self.propertiesGMFJson = json.loads(source)
 
