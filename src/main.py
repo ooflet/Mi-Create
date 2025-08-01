@@ -151,7 +151,8 @@ class WatchfaceEditor(QMainWindow):
         logging.info("Initializing Watch Properties")
         self.setupProperties()
 
-        self.settingsWidget = LegacyPropertiesWidget(self, self.settings)
+        self.settingsWidget = PropertiesWidget(self, self.settings, itemStyle="settings")
+        self.settingsWidget.entryWidth = 250
         self.settingsWidget.propertyChanged.connect(lambda property, value: self.setSetting(property, value))
 
         self.pluginLoader = PluginLoader(self)
@@ -329,7 +330,7 @@ class WatchfaceEditor(QMainWindow):
                 self.loadTheme()
             if setting == "Language":
                 self.loadLanguage(True)
-                self.settingsWidget.loadProperties(self.settings["General"])
+                self.settingsWidget.loadProperties("General", self.settingsWidget.getValuesFromProperties("General", self.settings))
 
     def saveSettings(self, retranslate, loadSettings=True):
         for property, value in self.stagedChanges:

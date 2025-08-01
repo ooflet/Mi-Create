@@ -224,7 +224,11 @@ class PropertiesMultiFileItem(QFrame):
             self.label.setValue(int(label))
             self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
             self.label.wheelEvent = lambda event: event.ignore()
-            self.label.editingFinished.connect(lambda: self.indexChanged.emit([self.label.value(), self.imagePath]))
+
+            def textChanged():
+                self.indexChanged.emit([self.label.value(), self.imagePath])
+
+            self.label.editingFinished.connect(textChanged)
         else:
             self.label = QLabel(str(label))
             self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -389,7 +393,7 @@ class PropertiesMultiFileEntry(QFrame):
     def loadImageList(self, imageList, imageFolder, amount=None):
         self.data = imageList
         self.imageFolder = imageFolder
-        
+
         if imageList:
             indexes, images = zip(*imageList)
 
@@ -423,7 +427,7 @@ class PropertiesMultiFileEntry(QFrame):
 
 class PropertiesWidget(QStackedWidget):
     propertyChanged = pyqtSignal(object, object)
-    def __init__(self, parent, properties, widgetProperties=False, imageUploadFunction=None, srcList=None, srcData=None):
+    def __init__(self, parent, properties, widgetProperties=False, imageUploadFunction=None, srcList=None, srcData=None, itemStyle=None):
         super().__init__(parent)
 
         metrics = QFontMetrics(self.font())
@@ -433,6 +437,11 @@ class PropertiesWidget(QStackedWidget):
         self.entryWidth = 145
         self.clearOnRefresh = True
         self.ignorePropertyChange = False
+        
+        self.itemStyle = itemStyle
+
+        if itemStyle == "settings":
+            self.setObjectName("contentPanel")
 
         self.properties = {}
 
@@ -471,12 +480,10 @@ class PropertiesWidget(QStackedWidget):
         return lineEdit
     
     def createSpinBox(self, text, min, max, disabled, propertySignalDisabled, srcProperty=""):
-        def onChange():
-            if not propertySignalDisabled:
-                self.sendPropertyChangedSignal(srcProperty, spinBox.value())
-
         def onDeselect():
             spinBox.clearFocus()
+            if not propertySignalDisabled:
+                self.sendPropertyChangedSignal(srcProperty, spinBox.value())
 
         def wheelEvent(event):
             event.ignore() # disable wheel event completely
@@ -484,7 +491,7 @@ class PropertiesWidget(QStackedWidget):
         spinBox = QSpinBox(self)
         spinBox.setDisabled(disabled)
         spinBox.wheelEvent = wheelEvent
-        spinBox.valueChanged.connect(onChange)
+        #spinBox.valueChanged.connect(onChange)
         spinBox.editingFinished.connect(onDeselect)
         spinBox.setFixedHeight(self.entryHeight)
         spinBox.setFixedWidth(self.entryWidth)
@@ -510,7 +517,8 @@ class PropertiesWidget(QStackedWidget):
     def createToggleSwitch(self, toggled, disabled, propertySignalDisabled, srcProperty=""):
         def onToggle():
             if not propertySignalDisabled:
-                self.sendPropertyChangedSignal(srcProperty, str(int(toggleSwitch.isChecked())))
+                #self.sendPropertyChangedSignal(srcProperty, str(int(toggleSwitch.isChecked())))
+                self.sendPropertyChangedSignal(srcProperty, toggleSwitch.isChecked())
 
         toggleSwitch = SwitchControl(self)
 
@@ -550,37 +558,38 @@ class PropertiesWidget(QStackedWidget):
             combobox.setCurrentIndex(0)
 
         return combobox
+    
+    def createInputFrame(self, label, *widgets, contentMargins=(0, 0, 0, 0)):
+        frame = QFrame()
+        if self.itemStyle == "settings":
+            frame.setObjectName("fileEntry")
+            frame.setContentsMargins(12, 8, 8, 8)
+        layout = QHBoxLayout(frame)
+        layout.setContentsMargins(contentMargins[0], contentMargins[1], contentMargins[2], contentMargins[3])
+        
+        layout.addWidget(label)
+        layout.addStretch()
+        
+        for widget in widgets:
+            layout.addWidget(widget)
+
+        return frame
 
     def createStrEdit(self, label, value, srcProperty, disabled):
-        widget = QWidget()
-        layout = QHBoxLayout(widget)
-        layout.setContentsMargins(0, 0, 0, 0)
         propertyLabel = QLabel(label)
         propertyEdit = self.createLineEdit(value, disabled, False, srcProperty)
+        frame = self.createInputFrame(propertyLabel, propertyEdit)
 
-        layout.addWidget(propertyLabel)
-        layout.addStretch()
-        layout.addWidget(propertyEdit)
-
-        return propertyEdit, widget
+        return propertyEdit, frame
     
     def createIntEdit(self, label, value, min, max, src, disabled, signalDisabled=False):
-        widget = QWidget()
-        layout = QHBoxLayout(widget)
-        layout.setContentsMargins(0, 0, 0, 0)
         propertyLabel = QLabel(label)
         propertyEdit = self.createSpinBox(value, min, max, disabled, signalDisabled, src)
+        frame = self.createInputFrame(propertyLabel, propertyEdit)
 
-        layout.addWidget(propertyLabel)
-        layout.addStretch()
-        layout.addWidget(propertyEdit)
-
-        return propertyEdit, widget
+        return propertyEdit, frame
 
     def createSlider(self, label, value, min, max, src, disabled):
-        widget = QWidget()
-        layout = QHBoxLayout(widget)
-        layout.setContentsMargins(0, 0, 0, 0)
         propertyLabel = QLabel(label)
         
         propertyEdit = self.createSpinBox(value, min, max, disabled, False, src)
@@ -599,40 +608,25 @@ class PropertiesWidget(QStackedWidget):
         propertyEdit.valueChanged.connect(lambda value: propertySlider.setValue(int(value)))
         propertySlider.valueChanged.connect(lambda value: propertyEdit.setValue(int(value)))
 
-        layout.addWidget(propertyLabel)
-        layout.addStretch()
-        layout.addWidget(propertySlider)
-        layout.addWidget(propertyEdit)
+        frame = self.createInputFrame(propertyLabel, propertySlider, propertyEdit)
 
-        return propertyEdit, widget
+        return propertyEdit, frame
     
     def createBoolEdit(self, label, value, srcProperty, disabled):
-        widget = QWidget()
-        layout = QHBoxLayout(widget)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setContentsMargins(0,4,0,4)
         propertyLabel = QLabel(label)
         propertyEdit = self.createToggleSwitch(value, disabled, False, srcProperty)
 
-        layout.addWidget(propertyLabel)
-        layout.addStretch()
-        layout.addWidget(propertyEdit)
+        frame = self.createInputFrame(propertyLabel, propertyEdit, contentMargins=(0, 4, 0, 4))
 
-        return propertyEdit, widget
+        return propertyEdit, frame
     
     def createSrcEdit(self, label, value, src, disabled):
-        widget = QWidget()
-        layout = QHBoxLayout(widget)
-        layout.setContentsMargins(0, 0, 0, 0)
         propertyLabel = QLabel(label)
-
         propertyEdit = self.createCombobox("Data Source", [], True, disabled, False, src)
 
-        layout.addWidget(propertyLabel)
-        layout.addStretch()
-        layout.addWidget(propertyEdit)
+        frame = self.createInputFrame(propertyLabel, propertyEdit)
 
-        return propertyEdit, widget
+        return propertyEdit, frame
 
     def loadSrcEdit(self, combobox, value, device):
         source_items = self.sourceData[str(device)]
@@ -663,17 +657,12 @@ class PropertiesWidget(QStackedWidget):
             combobox.setCurrentIndex(0)
 
     def createListEdit(self, label, value, options, src, disabled):
-        widget = QWidget()
-        layout = QHBoxLayout(widget)
-        layout.setContentsMargins(0, 0, 0, 0)
         propertyLabel = QLabel(label)
         propertyEdit = self.createCombobox(value, options, False, disabled, False, src)
 
-        layout.addWidget(propertyLabel)
-        layout.addStretch()
-        layout.addWidget(propertyEdit)
+        frame = self.createInputFrame(propertyLabel, propertyEdit)
 
-        return propertyEdit, widget
+        return propertyEdit, frame
     
     def createImgEdit(self, label, src, imageUploadFunction):
         def addImgResource():
@@ -820,6 +809,32 @@ class PropertiesWidget(QStackedWidget):
 
                 parent.addWidget(propertyLayout)
 
+    def createPage(self, widget, widgetProperties):
+        scroll = QScrollArea()
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        scroll.setWidgetResizable(True)
+        scroll.setStyleSheet("QScrollArea { background-color: transparent }")
+
+        propertiesWidget = QWidget()
+        propertiesWidget.setObjectName("propertiesWidget")
+        propertiesWidget.setStyleSheet("QWidget#propertiesWidget { background-color: transparent }")
+        propertiesLayout = QVBoxLayout()
+        propertiesWidget.setLayout(propertiesLayout)
+
+        # Prevent it from expanding beyond its parent
+        propertiesWidget.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Maximum)
+        scroll.setWidget(propertiesWidget)
+
+        self.properties[widget] = {
+            "widget": scroll,
+            "widgetContainer": propertiesWidget,
+            "propertyWidgets": {}
+        }
+
+        self.addProperties(self.properties[widget]["propertyWidgets"], propertiesLayout, widgetProperties)
+        propertiesLayout.addStretch()
+        self.addWidget(scroll)
+
     def setupProperties(self, properties: dict, usingWidgetProperties: bool):
         emptyPage = QWidget()
         self.properties["none"] = {
@@ -831,35 +846,10 @@ class PropertiesWidget(QStackedWidget):
 
         if usingWidgetProperties:
             for widget, widgetProperties in properties.items():
-                scroll = QScrollArea()
-                scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-                scroll.setWidgetResizable(True)
-
-                propertiesWidget = QWidget()
-                propertiesLayout = QVBoxLayout()
-                propertiesWidget.setLayout(propertiesLayout)
-
-                # Prevent it from expanding beyond its parent
-                propertiesWidget.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Maximum)
-                scroll.setWidget(propertiesWidget)
-
-                self.properties[widget] = {
-                    "widget": scroll,
-                    "widgetContainer": propertiesWidget,
-                    "propertyWidgets": {}
-                }
-
-                self.addProperties(self.properties[widget]["propertyWidgets"], propertiesLayout, widgetProperties["properties"])
-                propertiesLayout.addStretch()
-                self.addWidget(scroll)
-
+                self.createPage(widget, widgetProperties["properties"])
         else:
-            propertiesWidget = QWidget()
-            propertiesLayout = QVBoxLayout()
-            propertiesWidget.setLayout(propertiesLayout)
-            self.properties = {}
-            self.addProperties(self.properties, propertiesLayout, properties)
-            self.addWidget(propertiesWidget)
+            for widget, widgetProperties in properties.items():
+                self.createPage(widget, widgetProperties)
 
     def changePropertiesPage(self, category):
         self.setCurrentWidget(self.properties[category]["widget"])
@@ -868,6 +858,12 @@ class PropertiesWidget(QStackedWidget):
                 property["widget"].setVisible(True)
             else:
                 property["widget"].setVisible(False)
+
+    def getValuesFromProperties(self, category, properties):
+        values = {}
+        for key, property in properties[category].items():
+            values[key] = property["value"]
+        return values
 
     def loadProperties(self, category, values=None, widget=None, project=None):
         if not category:
@@ -878,15 +874,20 @@ class PropertiesWidget(QStackedWidget):
             self.changePropertiesPage(category)
             return
 
+        print(values)
+
         self.ignorePropertyChange = True
         self.changePropertiesPage(category)
         for property, propertyWidget in self.properties[category]["propertyWidgets"].items():
             if widget != None:
                 value = widget.getProperty(property)
-            else:
+            elif values != None:
                 value = values.get(property)
+            else:
+                value = propertyWidget["property_data"]["value"]
 
-            currentDevice = project.getDeviceType()
+            if project != None:
+                currentDevice = project.getDeviceType()
 
             # handle visibleOn property
 
@@ -903,10 +904,14 @@ class PropertiesWidget(QStackedWidget):
                 propertyWidget["widget"].setText(value)
 
             elif propertyWidget["type"] == "bool":
-                try:
-                    propertyWidget["widget"].setChecked(bool(int(value)))
-                except (ValueError, TypeError):
-                    propertyWidget["widget"].setChecked(False)
+                if value == "0":
+                    value = False
+                elif value == "1":
+                    value = True
+
+                print(propertyWidget["property_data"]["string"], value)
+
+                propertyWidget["widget"].setChecked(value)
                 propertyWidget["widget"].update_circle_position(propertyWidget["widget"].isChecked())
 
             elif propertyWidget["type"] == "list":

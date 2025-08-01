@@ -609,7 +609,7 @@ class CoreDialog(QDialog):
 
                 pluginName.setText(plugin["name"])
                 pluginLocation.setText(f"{plugin['author']} • {plugin['version']}")
-                pluginLocation.setStyleSheet("color: palette(midlight)")
+                pluginLocation.setStyleSheet("color: palette(light)")
                 pluginDescription.setText(plugin["description"])
                 pluginDescription.setWordWrap(True)
                 pluginIcon.setFixedSize(48, 48)
@@ -684,7 +684,8 @@ class CoreDialog(QDialog):
             else:
                 self.reloadSettings.emit()
                 self.contentPanel.setCurrentWidget(self.settingsPage)
-                self.settingsWidget.loadProperties(self.settings[self.settingsSidebarList.currentItem().data(101)])
+                category = self.settingsSidebarList.currentItem().data(101)
+                self.settingsWidget.loadProperties(category, self.settingsWidget.getValuesFromProperties(category, self.settings))
 
         self.installPluginAction.triggered.connect(install)
         self.pluginFolderAction.triggered.connect(showFolder)
@@ -724,7 +725,7 @@ class CoreDialog(QDialog):
         self.settingsSidebarList.currentItemChanged.connect(loadCategory)
 
         self.settingsPage = self.settingsWidget
-        self.settingsWidget.setStyleSheet("background-color: transparent;")
+        #self.settingsWidget.setStyleSheet("background-color: transparent;")
 
         self.pluginsPage = QListWidget()
         self.pluginsPage.setStyleSheet("background-color: transparent;")
@@ -810,7 +811,8 @@ class CoreDialog(QDialog):
 
         self.sidebar.setSlideTransition(animate)
         self.sidebar.setCurrentWidget(self.settingsSidebar)
-        self.settingsWidget.loadProperties(self.settings[self.settingsSidebarList.currentItem().data(101)])
+        category = self.settingsSidebarList.currentItem().data(101)
+        self.settingsWidget.loadProperties(category, self.settingsWidget.getValuesFromProperties("General", self.settings))
         self.contentPanel.setCurrentWidget(self.settingsPage)
 
         if self.settingsSidebarBack.isSignalConnected(self.getSignal(self.settingsSidebarBack, "clicked")):

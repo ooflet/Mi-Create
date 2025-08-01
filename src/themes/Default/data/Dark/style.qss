@@ -620,7 +620,6 @@ QLabel#propertyHeader {
     color: palette(light);
 }
 
-
 QFrame#contentPanel{
     background-color: palette(base)
 }
