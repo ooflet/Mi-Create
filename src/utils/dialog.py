@@ -6,6 +6,7 @@
 
 import os
 import sys
+import random
 import platform
 import subprocess
 import gettext
@@ -14,7 +15,7 @@ from pathlib import Path
 
 sys.path.append("..")
 
-from PyQt6.QtCore import Qt, QObject, QSize, pyqtSignal, QUrl, QMetaMethod
+from PyQt6.QtCore import Qt, QObject, QSize, pyqtSignal, QUrl, QMetaMethod, QPropertyAnimation, QEasingCurve, QPoint
 from PyQt6.QtGui import QIcon, QPixmap, QMovie, QIntValidator
 from PyQt6.QtWidgets import (QDialog, QLabel, QLineEdit, QComboBox, QToolButton, QSpinBox, QVBoxLayout, 
                              QHBoxLayout, QSizePolicy, QWidget, QDialogButtonBox, QFileDialog, QFrame,
@@ -180,15 +181,37 @@ class CoreDialog(QDialog):
         self.noRecents = True
 
         self.hertaGif = QMovie(":/Herta/herta.gif")
-        self.hertaGif.frameChanged.connect(lambda: self.welcomeSidebarLogo.setIcon(QIcon(self.hertaGif.currentPixmap())))
+        self.hertaAnims = []
+        
         hertaSound = QSoundEffect()
         hertaSound.setSource(QUrl("qrc:/Herta/herta.wav"))
         
         def playHerta():
-            # kuru kuru~
-            self.welcomeSidebarLogo.setIconSize(QSize(100, 100))
+            herta = QLabel(self)
+            size = random.randint(100, 300)
+            herta.setGeometry(0, self.height() - 200, size, size)
+            herta.show()
+
+            anim = QPropertyAnimation(herta, b"pos")
+            anim.setDuration(random.randint(750, 1250))
+            anim.setStartValue(QPoint(-size, self.height() - size))
+            anim.setEndValue(QPoint(self.width(), self.height() - size))
+            anim.setEasingCurve(QEasingCurve.Type.Linear)
+
+            # Store references to prevent GC
+            self.hertaAnims.append(anim)
+
+            def cleanup():
+                herta.setParent(None)
+                self.hertaAnims.remove(anim)
+
+            anim.finished.connect(cleanup)
+            anim.start()
+
+            self.hertaGif.frameChanged.connect(lambda: herta.setPixmap(self.hertaGif.currentPixmap().scaled(size, size, transformMode=Qt.TransformationMode.SmoothTransformation)))
             self.hertaGif.start()
             hertaSound.play()
+
             
         self.welcomeSidebar = QFrame(self.sidebar)
         self.welcomeSidebarLayout = QVBoxLayout(self.welcomeSidebar)
