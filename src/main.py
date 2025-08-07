@@ -1913,7 +1913,13 @@ class WatchfaceEditor(QMainWindow):
                 editorSettings = os.path.join(os.path.dirname(projectLocation), "editor_settings.json")
                 if os.path.isfile(editorSettings):
                     with open(editorSettings, "r") as f:
-                        self.createNewWorkspace(project, json.load(f))
+                        try:
+                            self.createNewWorkspace(project, json.load(f))
+                        except json.decoder.JSONDecodeError:
+                            f.close()
+                            logging.info("Error while loading editor_settings.json, has been deleted")
+                            os.remove(editorSettings)
+                            self.createNewWorkspace(project)
                 else:
                     self.createNewWorkspace(project)
                 self.addProjectToRecents(project, projectLocation)
@@ -2076,7 +2082,7 @@ class WatchfaceEditor(QMainWindow):
                     self.showDialog("error", _("Failed to build watchface! ") + extracted_error)
                 return
 
-            fileLocation = currentProject["project"].getTitle() + ".face"
+            fileLocation = currentProject["project"].getTitle() + ".bin"
 
             if currentProject["project"].getDeviceType() != "redmi_watch_3_active":
                 binary = WatchfaceBinary(os.path.join(compileDirectory, fileLocation))

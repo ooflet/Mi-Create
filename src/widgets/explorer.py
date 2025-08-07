@@ -60,8 +60,12 @@ class Explorer(QListWidget):
             listItem.setData(101, widget_name)
 
             icon = QIcon.fromTheme(self.objectIcon.icon[widget_type]).pixmap(18, 18)
-            hidden = canvas.widgetSettings[item.project.currentTheme][widget_name]["hidden"]
-            locked = canvas.widgetSettings[item.project.currentTheme][widget_name]["locked"]
+            if canvas.widgetSettings.get(item.project.currentTheme):
+                hidden = canvas.widgetSettings[item.project.currentTheme][widget_name]["hidden"]
+                locked = canvas.widgetSettings[item.project.currentTheme][widget_name]["locked"]
+            else:
+                hidden = False
+                locked = False
 
             listItemWidget = ExplorerItem(widget_name, icon, hidden, locked)
 
