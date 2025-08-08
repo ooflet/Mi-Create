@@ -783,10 +783,45 @@ class WatchfaceEditor(QMainWindow):
             canvas.toggleObjectLocked(name, currentProject["project"])
             #self.Explorer.updateExplorer(currentProject["project"], currentProject["canvas"])
 
+        def setName(prevName, newName):
+            currentProject = self.getCurrentProject()
+            item = currentProject["project"].getWidget(prevName)
+            if prevName == newName:
+                self.Explorer.updateExplorer(currentProject["project"], currentProject["canvas"])
+                currentProject["canvas"].selectObject(newName)
+                return
+            elif currentProject["canvas"].getObject(newName):
+                self.showDialog("info", "Another widget has this name! Please change it to something else.")
+                return
+            else:
+                item.setProperty("widget_name", newName)
+
+            print(prevName)
+
+            print(currentProject["canvas"].widgetSettings.get(prevName))
+
+            widgetSettings = currentProject["canvas"].widgetSettings[item.project.currentTheme]
+
+            if widgetSettings.get(prevName):
+                widgetSettings[newName] = widgetSettings[prevName]
+                widgetSettings.pop(prevName)
+
+            self.propertiesWidget.clearOnRefresh = True
+            self.Explorer.updateExplorer(currentProject["project"], currentProject["canvas"])
+            currentProject["canvas"].loadObjects(currentProject["project"],
+                                                    self.settings["Canvas"]["Snap"]["value"],
+                                                self.settings["Canvas"]["Interpolation"]["value"],
+                                                self.settings["Canvas"]["ClipDeviceShape"]["value"],
+                                                self.settings["Canvas"]["ShowDeviceOutline"]["value"])
+            currentProject["canvas"].selectObject(newName)
+            if currentProject["canvas"].isPreviewPlaying:
+                self.playAllPreviews(currentProject["canvas"])
+
         self.Explorer = Explorer(self, ObjectIcon(), self.ui)
         self.ui.explorerWidget.setWidget(self.Explorer)
         self.Explorer.itemSelectionChanged.connect(lambda: self.updateProjectSelections("explorer"))
         self.Explorer.itemReordered.connect(lambda row: self.changeSelectedWatchfaceWidgetLayer(row))
+        self.Explorer.itemNameChanged.connect(setName)
         self.Explorer.itemHiddenToggled.connect(lambda name: toggleHidden(name))
         self.Explorer.itemLockedToggled.connect(lambda name: toggleLocked(name))
 
@@ -795,9 +830,18 @@ class WatchfaceEditor(QMainWindow):
 
     def setupProperties(self):
         def setProperty(args):
+            # check if property set links to a setting
+            if args[0].startswith("settings_"):
+                setting = args[0].split("_")[1]
+                self.setSetting(setting, args[1])
+                return
+            elif args[0].startswith("preview_"):
+                return
+            
             currentProject = self.getCurrentProject()
             if currentProject == None or not currentProject.get("project") or currentProject["canvas"].getSelectedObjects() == []:
                 return
+
             currentSelected = currentProject["canvas"].getSelectedObjects()[0]
 
             # search for item by name, and if available set as currentItem
@@ -921,7 +965,7 @@ class WatchfaceEditor(QMainWindow):
             elif isinstance(currentProject["project"], GMFProject):
                 self.propertiesWidget.loadProperties(itemType, widget=widget, project=currentProject["project"])
         else:
-            self.propertiesWidget.loadProperties("preview")
+            self.propertiesWidget.loadProperties("preview", self.settingsWidget.getValuesFromProperties("General", self.settings))
 
     def setupDialogs(self):
         def closeEvent():

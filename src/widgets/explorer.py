@@ -12,6 +12,7 @@ from widgets.items import ExplorerItem
 
 class Explorer(QListWidget):
     itemReordered = pyqtSignal(int)
+    itemNameChanged = pyqtSignal(str, str)
     itemHiddenToggled = pyqtSignal(str)
     itemLockedToggled = pyqtSignal(str)
     
@@ -44,6 +45,7 @@ class Explorer(QListWidget):
             menu.exec(globalPos)
 
     def updateExplorer(self, project, canvas):
+        listPosition = self.verticalScrollBar().value()
         self.clear()
         self.items = {}
 
@@ -89,6 +91,7 @@ class Explorer(QListWidget):
 
             listItemWidget.visibleIcon.clicked.connect(lambda args, name=widget_name: visibleToggle(name))
             listItemWidget.lockIcon.clicked.connect(lambda args, name=widget_name: lockedToggle(name))
+            listItemWidget.itemEdit.editingFinished.connect(lambda: self.itemNameChanged.emit(listItemWidget.itemLabel.text(), listItemWidget.itemEdit.text()))
 
             listItem.setSizeHint(listItemWidget.sizeHint())
 
@@ -100,3 +103,5 @@ class Explorer(QListWidget):
         if widgets:
             for x in widgets:
                 createItem(x)
+
+        self.verticalScrollBar().setValue(listPosition)

@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QFrame, QToolButton, QStackedWidget
+from PyQt6.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QLineEdit, QFrame, QToolButton, QStackedWidget
 from PyQt6.QtGui import QIcon, QPixmap
 from PyQt6.QtCore import Qt, pyqtSignal
 
@@ -145,9 +145,9 @@ class RecentProjectItem(QFrame):
         self.updateStyle()
         self.opened.emit(self.path)
         return super().mouseReleaseEvent(a0)
-    
+
 class ExplorerItem(QWidget):
-    def __init__(self, widget_name, icon, hidden, locked, parent = None):
+    def __init__(self, widget_name, icon, hidden, locked, parent=None):
         super().__init__(parent)
         self.itemlayout = QHBoxLayout(self)
         self.itemlayout.setContentsMargins(30, 4, 4, 4)
@@ -156,34 +156,32 @@ class ExplorerItem(QWidget):
         self.locked = locked
 
         self.iconLabel = QLabel()
-        #listItemIcon.setPixmap(QIcon.fromTheme(self.objectIcon.icon[widget_type]).pixmap(18, 18))
         self.iconLabel.setPixmap(icon)
+        
         self.itemLabel = QLabel(widget_name)
+        self.itemEdit = QLineEdit(widget_name)
+        self.itemEdit.hide()
+        self.itemEdit.setStyleSheet("background: palette(window); border: 0px; padding: 0px;")
+        self.itemEdit.setMaximumWidth(200)
 
         self.visibleIcon = QToolButton()
-        if hidden:
-            self.visibleIcon.setIcon(QIcon.fromTheme("edit-hide"))
-        else:
-            self.visibleIcon.setIcon(QIcon.fromTheme("edit-show"))
+        self.visibleIcon.setIcon(QIcon.fromTheme("edit-hide" if hidden else "edit-show"))
         self.visibleIcon.setStyleSheet("padding: 1px")
 
         self.lockIcon = QToolButton()
-        if locked:
-            self.lockIcon.setIcon(QIcon.fromTheme("edit-lock"))
-        else:
-            self.lockIcon.setIcon(QIcon.fromTheme("edit-unlock"))
+        self.lockIcon.setIcon(QIcon.fromTheme("edit-lock" if locked else "edit-unlock"))
         self.lockIcon.setStyleSheet("padding: 1px")
 
         self.itemlayout.addWidget(self.iconLabel)
         self.itemlayout.addWidget(self.itemLabel)
+        self.itemlayout.addWidget(self.itemEdit)
         self.itemlayout.addStretch()
         self.itemlayout.addWidget(self.visibleIcon)
         self.itemlayout.addWidget(self.lockIcon)
 
-        if self.hidden is False:
+        if not self.hidden:
             self.visibleIcon.setVisible(False)
-        
-        if self.locked is False:
+        if not self.locked:
             self.lockIcon.setVisible(False)
 
     def enterEvent(self, event):
@@ -192,10 +190,20 @@ class ExplorerItem(QWidget):
         super().enterEvent(event)
 
     def leaveEvent(self, event):
-        if self.hidden is False:
+        if not self.hidden:
             self.visibleIcon.setVisible(False)
-        
-        if self.locked is False:
+        if not self.locked:
             self.lockIcon.setVisible(False)
-
         super().leaveEvent(event)
+
+    def mouseDoubleClickEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.startEditing()
+        super().mouseDoubleClickEvent(event)
+
+    def startEditing(self):
+        self.itemLabel.hide()
+        self.itemEdit.setText(self.itemLabel.text())
+        self.itemEdit.show()
+        self.itemEdit.setFocus()
+        self.itemEdit.selectAll()

@@ -18,7 +18,7 @@ from PyQt6.QtWidgets import (QStackedWidget, QStyledItemDelegate, QWidget, QFile
                                QHBoxLayout, QVBoxLayout, QScrollArea, QTreeWidgetItem, QLineEdit, QSizePolicy, QToolButton,
                                QSpinBox, QComboBox, QLabel, QCheckBox, QMessageBox, QAbstractItemView, QApplication, QSlider)
 from PyQt6.QtCore import Qt, pyqtSignal, QPoint, QSize, QModelIndex
-from PyQt6.QtGui import QColor, QPen, QPixmap, QIcon, QPalette, QStandardItemModel, QFontMetrics, QPainter
+from PyQt6.QtGui import QColor, QPen, QPixmap, QIcon, QPalette, QStandardItemModel, QFontMetrics, QPainter, QIntValidator
 from pprint import pprint
 
 from widgets.switch import SwitchControl
@@ -401,7 +401,7 @@ class PropertiesMultiFileEntry(QFrame):
             images = list(images)
 
             self.setItems(indexes)
-            self.amountWidget.setValue(len(indexes))
+            self.amountWidget.setText(str(len(indexes)))
             self.loadImages(images, imageFolder, False)
         else:
             self.setImageAmount(1)
@@ -425,6 +425,18 @@ class PropertiesMultiFileEntry(QFrame):
             self.data[index] = ""
         self.propertyChanged.emit(self.src, self.data)
 
+class PrefixedLineEdit(QLineEdit):
+    def __init__(self, parent, prefix, *args, **kwargs):
+        super().__init__(parent, *args, **kwargs)
+        self.prefix = prefix
+        self.setTextMargins(18, 0, 0, 0)  # space for prefix
+
+    def paintEvent(self, event):
+        super().paintEvent(event)
+        painter = QPainter(self)
+        painter.setPen(self.palette().light().color())
+        painter.drawText(8, (self.height() + painter.fontMetrics().ascent()) // 2 - 2, self.prefix)
+
 class PropertiesWidget(QStackedWidget):
     propertyChanged = pyqtSignal(object, object)
     def __init__(self, parent, properties, widgetProperties=False, imageUploadFunction=None, srcList=None, srcData=None, itemStyle=None):
@@ -434,7 +446,7 @@ class PropertiesWidget(QStackedWidget):
         height_px = metrics.height()
 
         self.entryHeight = height_px + 12
-        self.entryWidth = 145
+        self.entryWidth = 150
         self.clearOnRefresh = True
         self.ignorePropertyChange = False
         
@@ -464,13 +476,16 @@ class PropertiesWidget(QStackedWidget):
         if not self.ignorePropertyChange:
             self.propertyChanged.emit(property, value)
 
-    def createLineEdit(self, text, disabled, propertySignalDisabled, srcProperty=""):
+    def createLineEdit(self, text, disabled, propertySignalDisabled, srcProperty="", prefix=None):
         def onDeselect():
             lineEdit.clearFocus()
             if not propertySignalDisabled:
                 self.sendPropertyChangedSignal(srcProperty, lineEdit.text())
 
-        lineEdit = QLineEdit(self)
+        if prefix:
+            lineEdit = PrefixedLineEdit(self, prefix)
+        else:
+            lineEdit = QLineEdit(self)
         lineEdit.setText(str(text))
         lineEdit.setDisabled(disabled)
         lineEdit.editingFinished.connect(onDeselect)
@@ -571,7 +586,12 @@ class PropertiesWidget(QStackedWidget):
         layout.addStretch()
         
         for widget in widgets:
-            layout.addWidget(widget)
+            # deal with fieldWidgets
+            if isinstance(widget, list):
+                for fieldWidget in widget:
+                    layout.addWidget(fieldWidget)
+            else:
+                layout.addWidget(widget)
 
         return frame
 
@@ -582,12 +602,71 @@ class PropertiesWidget(QStackedWidget):
 
         return propertyEdit, frame
     
+    # def createIntEdit(self, label, value, min, max, src, disabled, signalDisabled=False):
+    #     propertyLabel = QLabel(label)
+    #     propertyEdit = self.createSpinBox(value, min, max, disabled, signalDisabled, src)
+    #     frame = self.createInputFrame(propertyLabel, propertyEdit)
+
+    #     return propertyEdit, frame
+
     def createIntEdit(self, label, value, min, max, src, disabled, signalDisabled=False):
         propertyLabel = QLabel(label)
-        propertyEdit = self.createSpinBox(value, min, max, disabled, signalDisabled, src)
+        propertyEdit = self.createLineEdit(value, disabled, signalDisabled, src)
+        intValidator = QIntValidator()
+
+        if min and min != "none":
+            min = int(min)
+        else:
+            min = -2147483647
+
+        if max and max != "none":
+            max = int(max)
+        else:
+            max = 2147483647
+
+        intValidator.setRange(min, max)
+        propertyEdit.setValidator(intValidator)
         frame = self.createInputFrame(propertyLabel, propertyEdit)
 
         return propertyEdit, frame
+    
+    def createMultiEdit(self, label, fields, signalDisabled=False):
+        propertyLabel = QLabel(label)
+
+        fieldWidth = 72
+        fieldWidgets = []
+        fieldData = []
+
+        for src, field in fields.items():
+            widget = self.createLineEdit(field["value"], False, False, src, field["string"])
+            widget.setFixedWidth(int(fieldWidth))
+            intValidator = QIntValidator()
+
+            min = field["min"]
+            max = field["max"]
+
+            if min and min != "none":
+                min = int(min)
+            else:
+                min = -2147483647
+
+            if max and max != "none":
+                max = int(max)
+            else:
+                max = 2147483647
+            
+            widget.setValidator(intValidator)
+            fieldWidgets.append(widget)
+            fieldData.append({
+                "key": src,
+                "property_data": field,
+                "type": "int",
+                "widget": widget
+            })
+
+        frame = self.createInputFrame(propertyLabel, fieldWidgets)
+
+        return fieldData, frame
 
     def createSlider(self, label, value, min, max, src, disabled):
         propertyLabel = QLabel(label)
@@ -773,7 +852,7 @@ class PropertiesWidget(QStackedWidget):
                 parent.addLayout(category)
                 self.addProperties(propertiesList, category, property)
             else:
-                propertyValue = property["value"]
+                propertyValue = property.get("value")
                 propertyDisabled = False
 
                 if property.get("disabled") and property["disabled"] == "true":
@@ -795,17 +874,30 @@ class PropertiesWidget(QStackedWidget):
                     propertyWidget, propertyLayout = self.createNumEdit(key, self.imageUploadFunction)
                 elif property["type"] == "int":
                     propertyWidget, propertyLayout = self.createIntEdit(property["string"], propertyValue, property.get("min"), property.get("max"), key, propertyDisabled)
+                elif property["type"] == "multi":
+                    fieldWidgets, propertyLayout = self.createMultiEdit(property["string"], property["fields"])
+                    for widget in fieldWidgets:
+                        propertiesList[widget["key"]] = {
+                            "property_data": widget["property_data"], 
+                            "type": widget["type"], 
+                            "layout": propertyLayout,
+                            "widget": widget["widget"]
+                        }
                 elif property["type"] == "bool":
                     propertyWidget, propertyLayout = self.createBoolEdit(property["string"], propertyValue, key, propertyDisabled)
                 elif property["type"] == "src":
                     propertyWidget, propertyLayout = self.createSrcEdit(property["string"], propertyValue, key, propertyDisabled)
+                else:
+                    logging.warning(f"No property type found for {property["type"]}")
+                    continue
 
-                propertiesList[key] = {
-                    "property_data": property, 
-                    "type": property["type"], 
-                    "layout": propertyLayout,
-                    "widget": propertyWidget
-                }
+                if property["type"] != "multi":
+                    propertiesList[key] = {
+                        "property_data": property, 
+                        "type": property["type"], 
+                        "layout": propertyLayout,
+                        "widget": propertyWidget
+                    }
 
                 parent.addWidget(propertyLayout)
 
@@ -918,7 +1010,7 @@ class PropertiesWidget(QStackedWidget):
                 propertyWidget["widget"].setCurrentText(str(value))
 
             elif propertyWidget["type"] == "int":
-                propertyWidget["widget"].setValue(int(value))
+                propertyWidget["widget"].setText(str(value))
 
             elif propertyWidget["type"] == "src":
                 self.loadSrcEdit(propertyWidget["widget"], value, currentDevice)

@@ -3,20 +3,38 @@
         "Shape": "none",
         "properties": {
             "Preview": {
-                "preview_randomise": {
+                "settings_PreviewRandomise": {
                     "string": "Randomise Preview",
                     "type": "bool",
                     "value": false
                 },
-                "preview_crop_to_shape": {
-                    "string": "Clip To Device Shape",
+                "settings_ClipDeviceShape": {
+                    "string": "Clip to Device Shape",
                     "type": "bool",
                     "value": true
                 },
-                "preview_screenshot": {
+                "settings_ShowDeviceOutline": {
+                    "string": "Show Device Outline",
+                    "type": "bool",
+                    "value": false,
+                    "changeState": ["ClipDeviceShape", "disabled", false]
+                },
+                "preview_Screenshot": {
                     "string": "Take Preview Screenshot",
                     "type": "btn",
                     "value": ""
+                }
+            },
+            "Canvas": {
+                "settings_Snap": {
+                    "string": "Snap to Guides",
+                    "type": "bool",
+                    "value": true
+                },
+                "settings_Antialiasing": {
+                    "string": "Antialiasing",
+                    "type": "bool",
+                    "value": true
                 }
             }
         }
@@ -32,19 +50,27 @@
                 }
             },
             "Position": {
-                "widget_pos_x": {
-                    "string": "X",
-                    "type": "int",
-                    "value": "",
-                    "min": "-999",
-                    "max": "999"
+                "alignment": {
+                    "string": "Alignment",
+                    "type": "align"
                 },
-                "widget_pos_y": {
-                    "string": "Y",
-                    "type": "int",
-                    "value": "",
-                    "min": "-999",
-                    "max": "999"
+                "position": {
+                    "string": "Position",
+                    "type": "multi",
+                    "fields": {
+                        "widget_pos_x": {
+                            "string": "X",
+                            "value": "",
+                            "min": "-999",
+                            "max": "999"
+                        },
+                        "widget_pos_y": {
+                            "string": "Y",
+                            "value": "",
+                            "min": "-999",
+                            "max": "999"
+                        }
+                    }
                 },
                 "widget_size_width": {
                     "string": "Width",
@@ -169,19 +195,23 @@
                 }
             },
             "Position": {
-                "widget_pos_x": {
-                    "string": "X",
-                    "type": "int",
-                    "value": "",
-                    "min": "-999",
-                    "max": "999"
-                },
-                "widget_pos_y": {
-                    "string": "Y",
-                    "type": "int",
-                    "value": "",
-                    "min": "-999",
-                    "max": "999"
+                "position": {
+                    "string": "Position",
+                    "type": "multi",
+                    "fields": {
+                        "widget_pos_x": {
+                            "string": "X",
+                            "value": "",
+                            "min": "-999",
+                            "max": "999"
+                        },
+                        "widget_pos_y": {
+                            "string": "Y",
+                            "value": "",
+                            "min": "-999",
+                            "max": "999"
+                        }
+                    }
                 },
                 "widget_size_width": {
                     "string": "Width",
@@ -335,19 +365,23 @@
                 }
             },
             "Position": {
-                "widget_pos_x": {
-                    "string": "X",
-                    "type": "int",
-                    "value": "",
-                    "min": "-999",
-                    "max": "999"
-                },
-                "widget_pos_y": {
-                    "string": "Y",
-                    "type": "int",
-                    "value": "",
-                    "min": "-999",
-                    "max": "999"
+                "position": {
+                    "string": "Position",
+                    "type": "multi",
+                    "fields": {
+                        "widget_pos_x": {
+                            "string": "X",
+                            "value": "",
+                            "min": "-999",
+                            "max": "999"
+                        },
+                        "widget_pos_y": {
+                            "string": "Y",
+                            "value": "",
+                            "min": "-999",
+                            "max": "999"
+                        }
+                    }
                 },
                 "widget_size_width": {
                     "string": "Width",
@@ -493,19 +527,23 @@
                 }
             },
             "Position": {
-                "widget_pos_x": {
-                    "string": "X",
-                    "type": "int",
-                    "value": "",
-                    "min": "-999",
-                    "max": "999"
-                },
-                "widget_pos_y": {
-                    "string": "Y",
-                    "type": "int",
-                    "value": "",
-                    "min": "-999",
-                    "max": "999"
+                "position": {
+                    "string": "Position",
+                    "type": "multi",
+                    "fields": {
+                        "widget_pos_x": {
+                            "string": "X",
+                            "value": "",
+                            "min": "-999",
+                            "max": "999"
+                        },
+                        "widget_pos_y": {
+                            "string": "Y",
+                            "value": "",
+                            "min": "-999",
+                            "max": "999"
+                        }
+                    }
                 },
                 "widget_size_width": {
                     "string": "Width",
@@ -560,19 +598,23 @@
                 }
             },
             "Position": {
-                "widget_pos_x": {
-                    "string": "X",
-                    "type": "int",
-                    "value": "",
-                    "min": "-999",
-                    "max": "999"
-                },
-                "widget_pos_y": {
-                    "string": "Y",
-                    "type": "int",
-                    "value": "",
-                    "min": "-999",
-                    "max": "999"
+                "position": {
+                    "string": "Position",
+                    "type": "multi",
+                    "fields": {
+                        "widget_pos_x": {
+                            "string": "X",
+                            "value": "",
+                            "min": "-999",
+                            "max": "999"
+                        },
+                        "widget_pos_y": {
+                            "string": "Y",
+                            "value": "",
+                            "min": "-999",
+                            "max": "999"
+                        }
+                    }
                 },
                 "widget_size_width": {
                     "string": "Width",
@@ -641,19 +683,23 @@
                 }
             },
             "Position": {
-                "widget_pos_x": {
-                    "string": "X",
-                    "type": "int",
-                    "value": "",
-                    "min": "-999",
-                    "max": "999"
-                },
-                "widget_pos_y": {
-                    "string": "Y",
-                    "type": "int",
-                    "value": "",
-                    "min": "-999",
-                    "max": "999"
+                "position": {
+                    "string": "Position",
+                    "type": "multi",
+                    "fields": {
+                        "widget_pos_x": {
+                            "string": "X",
+                            "value": "",
+                            "min": "-999",
+                            "max": "999"
+                        },
+                        "widget_pos_y": {
+                            "string": "Y",
+                            "value": "",
+                            "min": "-999",
+                            "max": "999"
+                        }
+                    }
                 },
                 "widget_size_width": {
                     "string": "Width",
@@ -692,19 +738,23 @@
                 }
             },
             "Position": {
-                "widget_pos_x": {
-                    "string": "X",
-                    "type": "int",
-                    "value": "",
-                    "min": "-999",
-                    "max": "999"
-                },
-                "widget_pos_y": {
-                    "string": "Y",
-                    "type": "int",
-                    "value": "",
-                    "min": "-999",
-                    "max": "999"
+                "position": {
+                    "string": "Position",
+                    "type": "multi",
+                    "fields": {
+                        "widget_pos_x": {
+                            "string": "X",
+                            "value": "",
+                            "min": "-999",
+                            "max": "999"
+                        },
+                        "widget_pos_y": {
+                            "string": "Y",
+                            "value": "",
+                            "min": "-999",
+                            "max": "999"
+                        }
+                    }
                 },
                 "widget_size_width": {
                     "string": "Width",
