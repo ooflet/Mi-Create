@@ -58,4 +58,4 @@ Compiling for different platforms must be done using Nuitka, there are some spec
 
 ## Licensing:
 Mi Create is licensed under the GPL-3 licence. [View what you can and can't do](https://gist.github.com/kn9ts/cbe95340d29fc1aaeaa5dd5c059d2e60)   
-Please note that the compiler is made by a third party and is **NOT** open source.
+Please note that the compiler is made by a third party and is **NOT** open source. However, you may use C#/.net decompilers like dnspy and dotPeek to see how it works.

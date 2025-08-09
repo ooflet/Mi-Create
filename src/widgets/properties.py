@@ -638,24 +638,31 @@ class PropertiesWidget(QStackedWidget):
         fieldData = []
 
         for src, field in fields.items():
-            widget = self.createLineEdit(field["value"], False, False, src, field["string"])
+            propertyDisabled = False
+
+            if field.get("disabled") and field["disabled"] == "true":
+                propertyDisabled = True
+
+            widget = self.createLineEdit(field["value"], propertyDisabled, False, src, field["string"])
             widget.setFixedWidth(int(fieldWidth))
             intValidator = QIntValidator()
 
-            min = field["min"]
-            max = field["max"]
+            if propertyDisabled is not True:
+                min = field["min"]
+                max = field["max"]
 
-            if min and min != "none":
-                min = int(min)
-            else:
-                min = -2147483647
+                if min and min != "none":
+                    min = int(min)
+                else:
+                    min = -2147483647
 
-            if max and max != "none":
-                max = int(max)
-            else:
-                max = 2147483647
-            
+                if max and max != "none":
+                    max = int(max)
+                else:
+                    max = 2147483647
+                
             widget.setValidator(intValidator)
+
             fieldWidgets.append(widget)
             fieldData.append({
                 "key": src,

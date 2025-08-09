@@ -72,19 +72,25 @@
                         }
                     }
                 },
-                "widget_size_width": {
-                    "string": "Width",
-                    "type": "int",
-                    "value": "48",
-                    "min": "0",
-                    "max": "999"
-                },
-                "widget_size_height": {
-                    "string": "Height",
-                    "type": "int",
-                    "value": "48",
-                    "min": "0",
-                    "max": "999"
+                "size": {
+                    "string": "Size",
+                    "type": "multi",
+                    "fields": {
+                        "widget_size_width": {
+                            "string": "W",
+                            "type": "int",
+                            "value": "48",
+                            "min": "0",
+                            "max": "999"
+                        },
+                        "widget_size_height": {
+                            "string": "H",
+                            "type": "int",
+                            "value": "48",
+                            "min": "0",
+                            "max": "999"
+                        }
+                    }
                 }
             },
             "Appearance": {
@@ -123,20 +129,27 @@
                     "type": "img",
                     "value": ""
                 },
-                "analog_hour_anchor_x": {
-                    "string": "X",
-                    "type": "int",
-                    "value": "",
-                    "min": "0",
-                    "max": "999"
-                },
-                "analog_hour_anchor_y": {
-                    "string": "Y",
-                    "type": "int",
-                    "value": "",
-                    "min": "0",
-                    "max": "999"
+                "anchor_point": {
+                    "string": "Anchor Point",
+                    "type": "multi",
+                    "fields": {
+                        "analog_hour_anchor_x": {
+                            "string": "X",
+                            "type": "int",
+                            "value": "",
+                            "min": "0",
+                            "max": "999"
+                        },
+                        "analog_hour_anchor_y": {
+                            "string": "Y",
+                            "type": "int",
+                            "value": "",
+                            "min": "0",
+                            "max": "999"
+                        }
+                    }
                 }
+                
             },
             "Minute Hand": {
                 "analog_minute_image": {
@@ -144,21 +157,26 @@
                     "type": "img",
                     "value": ""
                 },
-                "analog_minute_anchor_x": {
-                    "string": "X",
-                    "type": "int",
-                    "value": "",
-                    "min": "0",
-                    "max": "999"
-                },
-                "analog_minute_anchor_y": {
-                    "string": "Y",
-                    "type": "int",
-                    "value": "",
-                    "min": "0",
-                    "max": "999"
+                "anchor_point": {
+                    "string": "Anchor Point",
+                    "type": "multi",
+                    "fields": {       
+                        "analog_minute_anchor_x": {
+                            "string": "X",
+                            "type": "int",
+                            "value": "",
+                            "min": "0",
+                            "max": "999"
+                        },
+                        "analog_minute_anchor_y": {
+                            "string": "Y",
+                            "type": "int",
+                            "value": "",
+                            "min": "0",
+                            "max": "999"
+                        }
+                    }
                 }
-                
             },
             "Second Hand": {
                 "analog_second_image": {
@@ -166,21 +184,26 @@
                     "type": "img",
                     "value": ""
                 },
-                "analog_second_anchor_x": {
-                    "string": "X",
-                    "type": "int",
-                    "value": "",
-                    "min": "0",
-                    "max": "999"
-                },
-                "analog_second_anchor_y": {
-                    "string": "Y",
-                    "type": "int",
-                    "value": "",
-                    "min": "0",
-                    "max": "999"
+                "anchor_point": {
+                    "string": "Anchor Point",
+                    "type": "multi",
+                    "fields": {
+                        "analog_second_anchor_x": {
+                            "string": "X",
+                            "type": "int",
+                            "value": "",
+                            "min": "0",
+                            "max": "999"
+                        },
+                        "analog_second_anchor_y": {
+                            "string": "Y",
+                            "type": "int",
+                            "value": "",
+                            "min": "0",
+                            "max": "999"
+                        }
+                    }
                 }
-                
             }
         }
     },
@@ -545,17 +568,23 @@
                         }
                     }
                 },
-                "widget_size_width": {
-                    "string": "Width",
-                    "type": "int",
-                    "disabled": "true",
-                    "value": "48"
-                },
-                "widget_size_height": {
-                    "string": "Height",
-                    "type": "int",
-                    "disabled": "true",
-                    "value": "48"
+                "size": {
+                    "string": "Size",
+                    "type": "multi",
+                    "fields": {
+                        "widget_size_width": {
+                            "string": "W",
+                            "type": "int",
+                            "disabled": "true",
+                            "value": "48"
+                        },
+                        "widget_size_height": {
+                            "string": "H",
+                            "type": "int",
+                            "disabled": "true",
+                            "value": "48"
+                        }
+                    }
                 }
             },
             "Appearance": {
@@ -616,17 +645,23 @@
                         }
                     }
                 },
-                "widget_size_width": {
-                    "string": "Width",
-                    "type": "int",
-                    "disabled": "true",
-                    "value": "48"
-                },
-                "widget_size_height": {
-                    "string": "Height",
-                    "type": "int",
-                    "disabled": "true",
-                    "value": "48"
+                "size": {
+                    "string": "Size",
+                    "type": "multi",
+                    "fields": {
+                        "widget_size_width": {
+                            "string": "W",
+                            "type": "int",
+                            "disabled": "true",
+                            "value": "48"
+                        },
+                        "widget_size_height": {
+                            "string": "H",
+                            "type": "int",
+                            "disabled": "true",
+                            "value": "48"
+                        }
+                    }
                 }
             },
             "Appearance": {
@@ -701,19 +736,25 @@
                         }
                     }
                 },
-                "widget_size_width": {
-                    "string": "Width",
-                    "type": "int",
-                    "value": "48",
-                    "min": "0",
-                    "max": "999"
-                },
-                "widget_size_height": {
-                    "string": "Height",
-                    "type": "int",
-                    "value": "48",
-                    "min": "0",
-                    "max": "999"
+                "size": {
+                    "string": "Size",
+                    "type": "multi",
+                    "fields": {
+                        "widget_size_width": {
+                            "string": "W",
+                            "type": "int",
+                            "value": "48",
+                            "min": "0",
+                            "max": "999"
+                        },
+                        "widget_size_height": {
+                            "string": "H",
+                            "type": "int",
+                            "value": "48",
+                            "min": "0",
+                            "max": "999"
+                        }
+                    }
                 }
             },
             "Appearance": {
@@ -756,17 +797,23 @@
                         }
                     }
                 },
-                "widget_size_width": {
-                    "string": "Width",
-                    "type": "int",
-                    "disabled": "true",
-                    "value": ""
-                },
-                "widget_size_height": {
-                    "string": "Height",
-                    "type": "int",
-                    "disabled": "true",
-                    "value": ""
+                "size": {
+                    "string": "Size",
+                    "type": "multi",
+                    "fields": {
+                        "widget_size_width": {
+                            "string": "W",
+                            "type": "int",
+                            "disabled": "true",
+                            "value": "48"
+                        },
+                        "widget_size_height": {
+                            "string": "H",
+                            "type": "int",
+                            "disabled": "true",
+                            "value": "48"
+                        }
+                    }
                 },
                 "num_alignment": {
                     "string": "Alignment",
