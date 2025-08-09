@@ -792,8 +792,8 @@ class PropertiesWidget(QStackedWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         
         def setAmount():
-            self.imgListAmount[propertyEdit.widgetName] = amountWidget.value()
-            propertyEdit.setImageAmount(amountWidget.value())
+            self.imgListAmount[propertyEdit.widgetName] = int(amountWidget.text())
+            propertyEdit.setImageAmount(int(amountWidget.text()))
         
         amountWidget, amountLayout = self.createIntEdit("Image Count", 0, 1, 999, "image_count", False, True)
         amountWidget.editingFinished.connect(setAmount)
