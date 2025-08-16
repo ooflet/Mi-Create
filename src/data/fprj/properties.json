@@ -817,13 +817,8 @@
                 },
                 "num_alignment": {
                     "string": "Alignment",
-                    "type": "list",
-                    "value": "",
-                    "options": [
-                        "Left",
-                        "Center",
-                        "Right"
-                    ]
+                    "type": "align",
+                    "value": ""
                 }
             },
             "Appearance": {

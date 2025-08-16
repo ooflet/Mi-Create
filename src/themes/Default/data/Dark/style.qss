@@ -275,8 +275,13 @@ QFrame#canvasDecoration {
 }
 
 QToolButton#canvasDecoration-button {
-    
     background-color: palette(window);
+    padding: 0px;
+}
+
+QToolButton#selector-button {
+    border-radius: 4px;
+    background-color: palette(mid);
     padding: 0px;
 }
 
@@ -300,11 +305,19 @@ QToolButton#inputField-button:pressed {
     background-color: palette(midlight);
 }
 
+QToolButton:pressed#selector-button {
+    background-color: palette(midlight)
+}
+
 QToolButton:pressed#canvasDecoration-button {
     background-color: palette(highlight)
 }
 
 QToolButton:checked#canvasDecoration-button {
+    background-color: palette(highlight)   
+}
+
+QToolButton:checked#selector-button {
     background-color: palette(highlight)   
 }
 

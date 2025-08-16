@@ -425,6 +425,45 @@ class PropertiesMultiFileEntry(QFrame):
             self.data[index] = ""
         self.propertyChanged.emit(self.src, self.data)
 
+class TabSelectorWidget(QFrame):
+    selectionChanged = pyqtSignal(str)
+    def __init__(self, parent, width, height, items):
+        super().__init__(parent)
+        self.setObjectName("imageEntry")
+        self.selectorItems = []
+        self.items = items
+        self.setFixedSize(width, height)
+        self.selectorLayout = QHBoxLayout(self)
+        self.selectorLayout.setContentsMargins(0, 0, 0, 0)
+        self.selectorLayout.setSpacing(0)
+        print(items)
+        for index, item in enumerate(items):
+            print(index)
+            selectorItem = QToolButton()
+            selectorItem.setCheckable(True)
+            selectorItem.setObjectName("selector-button")
+            #selectorItem.setFixedWidth(50)
+            selectorItem.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+            selectorItem.setFixedHeight(height - 2)
+            selectorItem.setIcon(QIcon.fromTheme(item["icon"]))
+            selectorItem.clicked.connect(lambda args, index=index: self.setSelected(index))
+            self.selectorLayout.addWidget(selectorItem)
+            self.selectorItems.append(selectorItem)
+
+    def setSelected(self, index, emit=True):
+        if isinstance(index, str):
+            index = int(index)
+        print(index, self.items[index], self.items[index]["value"])
+        if emit:
+            print(self.items[index]["value"])
+            self.selectionChanged.emit(self.items[index]["value"])
+
+        for i, widget in enumerate(self.selectorItems):
+            if i == index:
+                widget.setChecked(True)
+            else:
+                widget.setChecked(False)
+
 class PrefixedLineEdit(QLineEdit):
     def __init__(self, parent, prefix, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
@@ -626,6 +665,22 @@ class PropertiesWidget(QStackedWidget):
 
         intValidator.setRange(min, max)
         propertyEdit.setValidator(intValidator)
+        frame = self.createInputFrame(propertyLabel, propertyEdit)
+
+        return propertyEdit, frame
+    
+    def createAlignEdit(self, label, value, src):
+        def selectionChanged(index):
+            print(index)
+            self.sendPropertyChangedSignal(src, index)
+
+        propertyLabel = QLabel(label)
+        alignmentItems = [{"value":"Left", "icon": "format-left"}, 
+                          {"value":"Center", "icon": "format-center"}, 
+                          {"value":"Right", "icon": "format-right"}]
+        propertyEdit = TabSelectorWidget(self, self.entryWidth, self.entryHeight, alignmentItems)
+        propertyEdit.selectionChanged.connect(selectionChanged)
+
         frame = self.createInputFrame(propertyLabel, propertyEdit)
 
         return propertyEdit, frame
@@ -881,6 +936,8 @@ class PropertiesWidget(QStackedWidget):
                     propertyWidget, propertyLayout = self.createNumEdit(key, self.imageUploadFunction)
                 elif property["type"] == "int":
                     propertyWidget, propertyLayout = self.createIntEdit(property["string"], propertyValue, property.get("min"), property.get("max"), key, propertyDisabled)
+                elif property["type"] == "align":
+                    propertyWidget, propertyLayout = self.createAlignEdit(property["string"], propertyValue, key)
                 elif property["type"] == "multi":
                     fieldWidgets, propertyLayout = self.createMultiEdit(property["string"], property["fields"])
                     for widget in fieldWidgets:
@@ -1033,6 +1090,10 @@ class PropertiesWidget(QStackedWidget):
                 propertyWidget["widget"].widgetName = widgetName
                 propertyWidget["widget"].loadImageList(value, project.getImageFolder(), self.imgListAmount.get(widgetName))
 
+            elif propertyWidget["type"] == "align":
+                print(propertyWidget["widget"], value)
+                alignment = ["Left", "Center", "Right"]
+                propertyWidget["widget"].setSelected(alignment.index(value), emit=False)
 
         self.ignorePropertyChange = False
 
