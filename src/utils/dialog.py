@@ -106,8 +106,8 @@ class CoreDialog(QDialog):
         self.watchfacePageDeviceTitle.setText(Translator.translate("", "Select device"))
         self.watchfacePageProjectTitle.setText(Translator.translate("", "Project name"))
         self.watchfacePageDirectoryTitle.setText(Translator.translate("", "Project location"))
-        self.installPluginAction.setText(Translator.translate("", "Install Plugin from File"))
-        self.pluginFolderAction.setText(Translator.translate("", "Open Plugins Folder"))
+        self.pluginsInstallButton.setText(Translator.translate("", "Install Plugin from File"))
+        self.pluginsFolderButton.setText(Translator.translate("", "Open Plugins Folder"))
         self.updateAction.setText(Translator.translate("", "Update Compiler from EasyFace"))
         self.resetAction.setText(Translator.translate("", "Reset Settings"))
 
@@ -571,8 +571,8 @@ class CoreDialog(QDialog):
         self.settingsSidebarLayout.setContentsMargins(0,0,0,0)
 
         self.settingsMenu = QMenu()
-        self.installPluginAction = self.settingsMenu.addAction("Install Plugin from File")
-        self.pluginFolderAction = self.settingsMenu.addAction("Open Plugins Folder")
+        #self.installPluginAction = self.settingsMenu.addAction("Install Plugin from File")
+        #self.pluginFolderAction = self.settingsMenu.addAction("Open Plugins Folder")
         self.settingsMenu.addSeparator()
         self.updateAction = self.settingsMenu.addAction("Update Compiler from EasyFace")
         self.settingsMenu.addSeparator()
@@ -604,20 +604,22 @@ class CoreDialog(QDialog):
         self.widgetEntries = {}
 
         def loadPlugins():
-            self.pluginsPage.clear()
+            for i in reversed(range(self.pluginsPageLayout.count())): 
+                self.pluginsPageLayout.itemAt(i).widget().setParent(None)
+
             self.pluginsPage.setDisabled(False)
             if pluginLoader.plugins == {}:
-                listItem = QListWidgetItem(self.pluginsPage)
+                listItem = QLabel(self.pluginsPage)
                 listItem.setText(Translator.translate("", "No plugins installed"))
-                listItem.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-                listItem.setSizeHint(QSize(24, 24))
-                self.pluginsPage.setDisabled(True)
+                listItem.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                listItem.setDisabled(True)
+                self.pluginsPageLayout.addWidget(listItem)
                 return
 
             for plugin in pluginLoader.plugins.values():
-                listItem = QListWidgetItem(self.pluginsPage)
-
-                listWidget = QWidget()
+                listWidget = QFrame()
+                listWidget.setObjectName("fileEntry")
+                listWidget.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
                 textLayout = QVBoxLayout()
                 buttonLayout = QHBoxLayout()
                 widgetLayout = QHBoxLayout()
@@ -628,6 +630,8 @@ class CoreDialog(QDialog):
                 pluginIcon = QLabel()
 
                 pluginDisable = QPushButton()
+                pluginDisable.setDefault(False)
+                pluginDisable.setAutoDefault(False)
                 pluginDelete = QToolButton()
 
                 pluginName.setText(plugin["name"])
@@ -693,9 +697,7 @@ class CoreDialog(QDialog):
                 widgetLayout.addLayout(textLayout, 1)
 
                 listWidget.setLayout(widgetLayout)
-
-                listItem.setSizeHint(listWidget.sizeHint())
-                self.pluginsPage.setItemWidget(listItem, listWidget)
+                self.pluginsPageLayout.addWidget(listWidget)
 
         def loadCategory():
             if self.settingsSidebarList.currentItem() == None:
@@ -710,8 +712,8 @@ class CoreDialog(QDialog):
                 category = self.settingsSidebarList.currentItem().data(101)
                 self.settingsWidget.loadProperties(category, self.settingsWidget.getValuesFromProperties(category, self.settings))
 
-        self.installPluginAction.triggered.connect(install)
-        self.pluginFolderAction.triggered.connect(showFolder)
+        #self.installPluginAction.triggered.connect(install)
+        #self.pluginFolderAction.triggered.connect(showFolder)
         self.updateAction.triggered.connect(update)
         self.resetAction.triggered.connect(self.resetSettings.emit)
 
@@ -750,8 +752,41 @@ class CoreDialog(QDialog):
         self.settingsPage = self.settingsWidget
         #self.settingsWidget.setStyleSheet("background-color: transparent;")
 
-        self.pluginsPage = QListWidget()
-        self.pluginsPage.setStyleSheet("background-color: transparent;")
+        self.pluginsPage = QScrollArea()
+        self.pluginsPage.setWidgetResizable(True)
+        self.pluginsPage.setFrameShape(QFrame.Shape.NoFrame)
+
+        frame = QFrame()
+        frame.setObjectName("contentPanel")
+        frameLayout = QVBoxLayout(frame)
+        frameLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        frameLayout.setContentsMargins(8, 8, 8, 8)
+
+        topLayout = QHBoxLayout()
+
+        self.pluginsInstallButton = QPushButton()
+        self.pluginsInstallButton.setAutoDefault(False)
+        self.pluginsInstallButton.setIcon(QIcon.fromTheme("insert-object"))
+        self.pluginsInstallButton.clicked.connect(install)
+        
+        self.pluginsFolderButton = QPushButton()
+        self.pluginsFolderButton.setAutoDefault(False)
+        self.pluginsFolderButton.setIcon(QIcon.fromTheme("folder"))
+        self.pluginsFolderButton.clicked.connect(showFolder)
+
+        self.pluginsPageLayout = QVBoxLayout()
+        self.pluginsPageLayout.setContentsMargins(0, 0, 0, 0)
+        self.pluginsPageLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.pluginsPageLayout.setSpacing(8)  # minimal spacing
+
+        topLayout.addWidget(self.pluginsInstallButton)
+        topLayout.addWidget(self.pluginsFolderButton)
+        topLayout.addStretch()
+        frameLayout.addLayout(topLayout)
+        frameLayout.addLayout(self.pluginsPageLayout)
+
+        self.pluginsPage.setWidget(frame)
+        self.contentPanel.addWidget(self.pluginsPage)
 
         self.settingsSidebarLayout.addLayout(self.settingsSidebarHeader, 0)
         self.settingsSidebarLayout.addWidget(self.settingsSidebarHeaderLine, 0)

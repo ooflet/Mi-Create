@@ -54,7 +54,11 @@ class PluginLoader:
                 
                 install_script_path = os.path.join(plugin_folder, "install.py")
 
-                module = self.loadPlugin(plugin_name, plugin_path)
+                success, module = self.loadPlugin(plugin_name, plugin_path)
+
+                if not success:
+                    QMessageBox.warning(None, "Plugin Loader", f'Plugin "{plugin_name}" encountered an error while loading.\n\n{module}')
+                    return
                 
                 if plugin_name not in self.disabledPluginsList:
                     if hasattr(module, "register"):
@@ -82,8 +86,11 @@ class PluginLoader:
             sys.modules[plugin_name] = module
             spec.loader.exec_module(module)
             if hasattr(module, "__init__"):
-                plugin = module.Plugin()
-            return plugin
+                try:
+                    plugin = module.Plugin()
+                except Exception as e:
+                    return False, traceback.format_exc()
+            return True, plugin
         
     def installPlugin(self, plugin_path):
         plugin_zip = zipfile.ZipFile(plugin_path)
@@ -119,7 +126,9 @@ class PluginLoader:
             return
 
         plugin_folder = os.path.join(self.folder, plugin_name)
-        os.mkdir(plugin_folder)
+
+        if os.path.isdir(plugin_folder) is not True:
+            os.mkdir(plugin_folder)
 
         shutil.unpack_archive(plugin_path, plugin_folder, "zip")
 

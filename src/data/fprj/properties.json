@@ -50,10 +50,6 @@
                 }
             },
             "Position": {
-                "alignment": {
-                    "string": "Alignment",
-                    "type": "align"
-                },
                 "position": {
                     "string": "Position",
                     "type": "multi",

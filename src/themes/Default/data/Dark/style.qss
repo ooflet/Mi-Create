@@ -423,20 +423,20 @@ QScrollBar:vertical {
 }
 
 QScrollBar::handle {
+    background-color: palette(midlight);
     border-radius: 3px;
 }
 
+QScrollBar::handle:hover {
+    background-color:palette(alternate-base);
+}
+
+QScrollBar::handle:pressed {
+    background-color:palette(light);
+}
+
 QScrollBar::handle:vertical {
-  background-color: palette(midlight);
   min-height: 20px;
-}
-
-QScrollBar::handle:vertical:hover, QScrollBar::handle:horizontal:hover {
-  background-color:palette(alternate-base);
-}
-
-QScrollBar::handle:vertical:pressed, QScrollBar::handle:horizontal:pressed {
-  background-color:palette(light);
 }
 
 QScrollBar::add-line:vertical {
@@ -460,7 +460,6 @@ QScrollBar:horizontal{
 }
 
 QScrollBar::handle:horizontal {
-  background-color: palette(alternate-base);
   min-width: 20px;
 }
 
@@ -468,15 +467,11 @@ QScrollBar::handle:horizontal {
 QScrollBar::add-line:horizontal {
   background: none;
   width: 0px;
-  subcontrol-position: bottom;
-  subcontrol-origin: margin;
 }
 
 QScrollBar::sub-line:horizontal {
   background: none;
   width: 0px;
-  subcontrol-position: top;
-  subcontrol-origin: margin;
 }
 
 QProgressBar {

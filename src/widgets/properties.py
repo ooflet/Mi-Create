@@ -201,7 +201,7 @@ class PropertiesMultiFileItem(QFrame):
     clicked = pyqtSignal(str)
     def __init__(self, label, editable=True, propertyName=None, parent=None):
         super().__init__(parent)
-        self.setFixedWidth(65)
+        self.setFixedWidth(66)
         self.setObjectName("imageEntry")
         self.setAcceptDrops(True)
 
@@ -212,7 +212,7 @@ class PropertiesMultiFileItem(QFrame):
         self.imagePath = ""
         self.itemLayout = QVBoxLayout(self)
         self.itemLayout.setContentsMargins(4, 4, 4, 4)
-        self.itemLayout.setSpacing(4)
+        self.itemLayout.setSpacing(8)
         self.image = QLabel()
         self.image.setFixedSize(55, 55)
         self.image.setObjectName("imageFrame")

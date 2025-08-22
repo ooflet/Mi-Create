@@ -802,6 +802,8 @@ class WatchfaceEditor(QMainWindow):
 
             widgetSettings = currentProject["canvas"].widgetSettings[item.project.currentTheme]
 
+            print(prevName, newName)
+
             if widgetSettings.get(prevName):
                 widgetSettings[newName] = widgetSettings[prevName]
                 widgetSettings.pop(prevName)
@@ -2201,10 +2203,10 @@ class WatchfaceEditor(QMainWindow):
 
     def showAboutWindow(self):
         dialog = FramelessDialog(self)
-        dialog.setFixedSize(350, 325)
+        dialog.setFixedSize(500, 450)
         dialog.setContentsMargins(5, 60, 5, 5)
         aboutIcon = QLabel()
-        aboutIcon.setPixmap(QPixmap(":/Images/MiCreate48x48.png"))
+        aboutIcon.setPixmap(QPixmap(":/Images/MiCreate64x64.png"))
         aboutIcon.setAlignment(Qt.AlignmentFlag.AlignCenter)
         aboutText = QLabel()
         aboutText.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -2213,26 +2215,37 @@ class WatchfaceEditor(QMainWindow):
             <html>
             <head/>
             <body>
-                <p>Mi Create {programVersion}<br/>Visit the <a href="https://github.com/ooflet/Mi-Create/">Github Repo</a> to get help or contribute.</p>
-                <p>Copyright (C) 2025 ooflet<br/>
-                    This program comes with ABSOLUTELY NO WARRANTY.<br/>
-                    This is free software, and you are welcome to redistribute it<br/>
-                    under certain conditions.</p>
+                <h2>Mi Create</h2>
+                <h3>{programVersion}</h3>
+                <p>Visit the <a href="https://github.com/ooflet/Mi-Create/">Github Repo</a> to get help or contribute.</p>
             </body>
             </html>
             '''
         )
         aboutText.setOpenExternalLinks(True)
+        bodyText = QLabel()
+        bodyText.setContentsMargins(55, 0, 0, 0)
+        bodyText.setText(
+            """
+            <p>This program comes with ABSOLUTELY NO WARRANTY.<br/>
+            This is free software, and you are welcome to redistribute it<br/>
+            under certain conditions.</p>
+            """
+        )
+        devText = QLabel()
+        devText.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        devText.setText("made with ❤️ by ooflet")
         buttonBox = QDialogButtonBox()
         buttonBox.setStandardButtons(QDialogButtonBox.StandardButton.Ok)
         buttonBox.accepted.connect(dialog.close)
         dialogLayout = QVBoxLayout()
         dialogLayout.setSpacing(20)
+        dialogLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
         dialogLayout.addStretch()
         dialogLayout.addWidget(aboutIcon)
         dialogLayout.addWidget(aboutText)
-        dialogLayout.addStretch()
-        dialogLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        dialogLayout.addWidget(bodyText)
+        dialogLayout.addWidget(devText)
         dialogLayout.addStretch()
         dialogLayout.addWidget(buttonBox)
         dialog.setLayout(dialogLayout)

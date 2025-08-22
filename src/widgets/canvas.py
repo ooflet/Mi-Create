@@ -1107,12 +1107,12 @@ class BaseWidget(QGraphicsRectItem):
             pen = QPen(self.scene().palette().highlight(), 2, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin)
             self.selectionPath.setPen(pen)
             
-        return self.rect()
+        # return self.rect()
     
         # hack to get rid of bounding box ghosting
         # this is only required when using the object's outline for selection
-        # outline_width = 4
-        # return self.rect().adjusted(-outline_width, -outline_width, outline_width, outline_width)
+        outline_width = 4
+        return self.rect().adjusted(-outline_width, -outline_width, outline_width, outline_width)
     
     def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent):
         super().mouseMoveEvent(event)
