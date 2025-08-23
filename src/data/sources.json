@@ -6737,6 +6737,12 @@
             "id_fprj": "0828",
             "id_gmf": "",
             "tip": "Sleep score"
+        },
+        {
+            "string": "Current step (kilometer)",
+            "id_fprj": "1821",
+            "id_gmf": "",
+            "tip": "Pedometry goal achievement rate (kilometer)"
         }
     ]
 }

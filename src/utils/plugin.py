@@ -104,11 +104,16 @@ class PluginLoader:
             return
 
         plugin_name = config.get("config", "name")
+        plugin_folder = os.path.join(self.folder, plugin_name)
 
         dialog = QMessageBox()
 
         dialog.setWindowTitle(plugin_name)
-        dialog.setText(f"Install {plugin_name}?")
+        
+        if os.path.isdir(plugin_folder):
+            dialog.setText(f"Update {plugin_name}?")
+        else:
+            dialog.setText(f"Install {plugin_name}?")
 
         if config.get("config", "icon") != "none":
             icon = QPixmap()
@@ -125,10 +130,10 @@ class PluginLoader:
         if result == QMessageBox.StandardButton.Cancel:
             return
 
-        plugin_folder = os.path.join(self.folder, plugin_name)
-
         if os.path.isdir(plugin_folder) is not True:
             os.mkdir(plugin_folder)
+        else:
+            self.plugins[plugin_name]["module"].unregister()
 
         shutil.unpack_archive(plugin_path, plugin_folder, "zip")
 
