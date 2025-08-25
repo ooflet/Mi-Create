@@ -495,6 +495,7 @@ class PropertiesWidget(QStackedWidget):
             self.setObjectName("contentPanel")
 
         self.properties = {}
+        self.translatable = []
 
         self.imgListAmount = {}
 
@@ -510,6 +511,13 @@ class PropertiesWidget(QStackedWidget):
         translation.install()
         global _
         _ = translation.gettext
+
+        for i in self.translatable:
+            if i[1] == True:
+                print(i[2], _(i[2]), _(i[2]).upper())
+                i[0].setText(_(i[2]).upper())
+            else:
+                i[0].setText(_(i[2]))
 
     def sendPropertyChangedSignal(self, property, value):
         if not self.ignorePropertyChange:
@@ -621,6 +629,7 @@ class PropertiesWidget(QStackedWidget):
         layout = QHBoxLayout(frame)
         layout.setContentsMargins(contentMargins[0], contentMargins[1], contentMargins[2], contentMargins[3])
         
+        self.translatable.append([label, False, label.text()])
         layout.addWidget(label)
         layout.addStretch()
         
@@ -894,6 +903,7 @@ class PropertiesWidget(QStackedWidget):
             layout.addWidget(line)
 
         category = QLabel(name.upper())
+        self.translatable.append([category, True, name])
         category.setObjectName("propertyHeader")
         layout.addWidget(category)
 
@@ -916,6 +926,10 @@ class PropertiesWidget(QStackedWidget):
             else:
                 propertyValue = property.get("value")
                 propertyDisabled = False
+
+                property["string"] = _(property["string"])
+
+                print(property["string"])
 
                 if property.get("disabled") and property["disabled"] == "true":
                     propertyDisabled = True

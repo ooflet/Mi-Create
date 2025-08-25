@@ -398,6 +398,7 @@ class WatchfaceEditor(QMainWindow):
             global _  # fetch global translation variable (gettext)
             _ = mainTranslation.gettext
             Translator.loadLanguage(os.path.basename(selectedLanguage["directory"]))
+            self.settingsWidget.loadLanguage(os.path.basename(selectedLanguage["directory"]))
             self.propertiesWidget.loadLanguage(os.path.basename(selectedLanguage["directory"]))
             self.ui.retranslateUi(self)  # function on each precompiled window/dialog
             self.coreDialog.translate()
