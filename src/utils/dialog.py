@@ -50,7 +50,7 @@ class CoreDialog(QDialog):
         self.settings = settings
 
         self.setWindowTitle(Translator.translate("", "Welcome"))
-        self.setWindowIcon(QIcon(":Images/MiCreate48x48.png"))      
+        self.setWindowIcon(QIcon(":Images/MiCreate128x128.png"))      
 
         self.resize(750, 500)
         self.setMinimumSize(QSize(750, 500))  
@@ -813,8 +813,8 @@ class CoreDialog(QDialog):
 
         self.hertaGif.stop()
         self.welcomeSidebarNewProject.setFocus()
-        self.welcomeSidebarLogo.setIcon(QIcon(":/Images/MiCreate48x48.png"))
-        self.welcomeSidebarLogo.setIconSize(QSize(48, 48))
+        #self.welcomeSidebarLogo.setIcon(QIcon(":/Images/MiCreate48x48.png"))
+        #self.welcomeSidebarLogo.setIconSize(QSize(48, 48))
 
     def showNewProjectPage(self, prevPageFunc=None, animate=False):
         self.setWindowTitle(Translator.translate("", "New Project"))
