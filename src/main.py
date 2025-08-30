@@ -1,8 +1,11 @@
 # Mi Create
 # ooflet <ooflet@proton.me>
 
+programVersion = 'v1.2'
+
 import os
 import sys
+import time
 import logging
 import traceback
 
@@ -27,7 +30,12 @@ app = QApplication(sys.argv)
 splash = show_splash()
 app.processEvents()
 
-logging.info("Initializing modules")
+def showSplashMessage(message):
+    logging.info(message)
+    splash.show_message(message)
+    app.processEvents()
+
+showSplashMessage("Initializing Modules")
 
 import shutil
 import argparse
@@ -83,8 +91,6 @@ workspaceSettings = QSettings("Mi Create", "Workspace")
     
 _ = gettext.gettext
 
-programVersion = 'v1.2'
-
 class WatchfaceEditor(QMainWindow):
     updateFound = pyqtSignal(str)
 
@@ -110,7 +116,8 @@ class WatchfaceEditor(QMainWindow):
         self.languageNames = []
 
         config = configparser.ConfigParser()
-        logging.info("Initializing Language Files")
+        showSplashMessage("Initializing Language Files")
+
         for file in os.listdir("locales"):
             languageDir = os.path.join("locales", file)
             if os.path.isdir(languageDir):
@@ -126,14 +133,14 @@ class WatchfaceEditor(QMainWindow):
                 )
                 self.languageNames.append(config.get('config', 'language'))
 
-        logging.info("Initializing Settings")
+        showSplashMessage("Initializing Settings")
 
         self.setupThemes()
         self.loadSettings()
         self.loadTheme()
 
         # Setup Main Window
-        logging.info("Initializing MainWindow")
+        showSplashMessage("Initializing Main Window")
         self.ui = MainWindow()
         self.ui.setupUi(self)
 
@@ -143,19 +150,19 @@ class WatchfaceEditor(QMainWindow):
         self.setMenuWidget(self.titleBar)
 
         # Setup WatchData
-        logging.info("Initializing WatchData")
+        showSplashMessage("Initializing WatchData")
         self.WatchData = WatchData()
         self.WatchData.restart.connect(self.restartWindow)
 
-        logging.info("Initializing Application Widgets")
+        showSplashMessage("Initializing Application Widgets")
         self.setupWidgets()
-        logging.info("Initializing Workspace")
+        showSplashMessage("Initializing Workspace")
         self.zoomLevels = [10, 25, 50, 75, 100, 125, 150, 175, 200, 300, 400, 500, 600, 700, 800, 900]
         self.setupWorkspace()
-        logging.info("Initializing Explorer")
+        showSplashMessage("Initializing Explorer")
         self.setupExplorer()
 
-        logging.info("Initializing Watch Properties")
+        showSplashMessage("Initializing Properties")
         self.setupProperties()
 
         self.settingsWidget = PropertiesWidget(self, self.settings, itemStyle="settings")
@@ -164,7 +171,7 @@ class WatchfaceEditor(QMainWindow):
 
         self.pluginLoader = PluginLoader(self)
 
-        logging.info("Initializing Dialogs")
+        showSplashMessage("Initializing Dialogs")
         self.setupDialogs()
 
         if "Language" not in storedSettings.allKeys():
@@ -200,10 +207,10 @@ class WatchfaceEditor(QMainWindow):
         self.project = None
         self.projectXML = None
 
-        logging.info("Initializing Plugins")
+        showSplashMessage("Initializing Plugins")
         self.pluginLoader.loadPlugins()
 
-        logging.info("Initializing Misc")
+        showSplashMessage("Initializing Misc")
         self.loadWindowState()
         self.updateFound.connect(self.promptUpdate)
         logging.info("Launch!!")
@@ -2307,8 +2314,6 @@ if __name__ == "__main__":
 
     def start(window=None):  
         args = parser.parse_args()
-
-        QFontDatabase.addApplicationFont(":/Fonts/Inter.ttf")
 
         def onException(exc_type, exc_value, exc_traceback):
             if exc_type == KeyboardInterrupt:
