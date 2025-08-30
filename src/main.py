@@ -1,12 +1,10 @@
 # Mi Create
 # ooflet <ooflet@proton.me>
 
+import os
+import sys
 import logging
 import traceback
-import os
-
-os.chdir(os.path.dirname(
-    os.path.realpath(__file__)))  # switch working directory to program location so that data files can be found
 
 # check if compiled and if so, logs to a file
 if "__compiled__" in globals():
@@ -15,11 +13,22 @@ if "__compiled__" in globals():
 else:
     logging.basicConfig(level=logging.DEBUG,
                         format="%(asctime)s %(module)s.py:%(lineno)d %(threadName)-10s %(levelname)s %(message)s")
-    
+
 logging.info("-- Starting Mi Create --")
+
+import resources.resources_rc  # resource import required because it sets up the icons
+from PyQt6.QtWidgets import QApplication
+from widgets.splash import show_splash
+
+os.chdir(os.path.dirname(
+    os.path.realpath(__file__)))  # switch working directory to program location so that data files can be found
+
+app = QApplication(sys.argv)
+splash = show_splash()
+app.processEvents()
+
 logging.info("Initializing modules")
 
-import sys
 import shutil
 import argparse
 import requests
@@ -28,10 +37,10 @@ import platform
 import gettext
 from datetime import datetime
 
-from PyQt6.QtWidgets import (QInputDialog, QMessageBox, QApplication, QProgressBar,
+from PyQt6.QtWidgets import (QInputDialog, QMessageBox, QProgressBar,
                              QDialogButtonBox, QFileDialog, QWidget, QVBoxLayout, QMenu, QComboBox,
                              QFrame, QColorDialog, QFontDialog, QLabel, QListWidgetItem, QToolButton,
-                             QAbstractItemView, QSplashScreen, QDialog, QUndoView, QCheckBox, QHBoxLayout)
+                             QAbstractItemView, QDialog, QUndoView, QCheckBox, QHBoxLayout)
 from PyQt6.QtGui import QIcon, QPixmap, QDesktopServices, QDrag, QImage, QPainter, QFontDatabase, QFont, QIntValidator
 from PyQt6.QtCore import Qt, QSettings, QSize, QUrl, pyqtSignal
 from window import FramelessDialog
@@ -66,8 +75,6 @@ from widgets.properties import PropertiesWidget, LegacyPropertiesWidget
 from widgets.delegates import ResourcesDelegate
 from widgets.editor import Editor, XMLLexer, JsonLexer
 from utils.translate import Translator
-
-import resources.resources_rc  # resource import required because it sets up the icons
 
 from widgets.window import MainWindow
 
@@ -2291,7 +2298,6 @@ class WatchfaceEditor(QMainWindow):
             MessageBox.exec()
 
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
     parser = argparse.ArgumentParser()
     parser.add_argument('filename', nargs='?', default=False)
     parser.add_argument('--debug', action='store_true')
@@ -2299,13 +2305,9 @@ if __name__ == "__main__":
     parser.add_argument('--reset', action='store_true')
     parser.add_argument('--setWindowSizePreview', action='store_true')
 
-    splash = QSplashScreen(QPixmap(":/Images/splash.png"))
-
     def start(window=None):  
         args = parser.parse_args()
-        
-        splash.show()
-        
+
         QFontDatabase.addApplicationFont(":/Fonts/Inter.ttf")
 
         def onException(exc_type, exc_value, exc_traceback):
