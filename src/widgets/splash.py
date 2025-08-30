@@ -5,11 +5,11 @@ from PyQt6.QtCore import Qt, QRect
 class Splash(QSplashScreen):
     def __init__(self, pixmap):
         super().__init__(pixmap)
-        QFontDatabase.addApplicationFont(":/Fonts/Inter.ttf")
+        id = QFontDatabase.addApplicationFont(":/Fonts/Inter.ttf")
+        print(QFontDatabase.applicationFontFamilies(id))
         self.text = ""
-        self.contextFont = QFont("Inter", 10)
-        self.messageFont = QFont("Inter", 12)
-        self.messageFont.setWeight(QFont.Weight.Bold)
+        self.contextFont = QFont("Inter Medium", 8)
+        self.messageFont = QFont("Inter SemiBold", 12)
         self.text_pos = (50, 340)  # position for main message
         self.context_rect = QRect(52, 170, 200, 80)  # x, y, width, height for wrapping
 
