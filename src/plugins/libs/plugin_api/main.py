@@ -4,6 +4,8 @@ import shutil
 main_window = None
 plugin_loader = None
 
+api_version = "1.0"
+
 class PluginAPI:
     def __init__(self):
         self.main_window = main_window
@@ -16,7 +18,7 @@ class PluginAPI:
         plugin_loader = loader
 
     def get_api_version(self):
-        return "1.0"
+        return api_version
 
     def get_main_window(self):
         return self.main_window

@@ -2320,7 +2320,7 @@ if __name__ == "__main__":
                 sys.exit(1)
 
             exception = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
-            errString = "An error has occured! \n\n"+exception+"\nTry disabling plugins before reporting as a bug."
+            errString = "An error has occured! \n\n"+exception+"\nPlease report this issue as a bug."
             logging.error(errString)
             QMessageBox.critical(None, 'Error', errString, QMessageBox.StandardButton.Ok)
 
@@ -2368,6 +2368,5 @@ if __name__ == "__main__":
             QMessageBox.critical(None, 'Error', error_message, QMessageBox.StandardButton.Ok)
             sys.exit(1)
 
-        app.exec()  
-
     start()
+    app.exec()
