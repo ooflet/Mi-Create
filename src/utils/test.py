@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtGui import QPalette, QColor, QIcon
 from PyQt6.QtCore import Qt
 
-from widgets.switch import SwitchControl
+#from widgets.switch import SwitchControl
 
 os.chdir(os.path.dirname(
     os.path.realpath(__file__)))  # switch working directory to program location so that data files can be found
@@ -41,7 +41,7 @@ class PaletteTester(QWidget):
             QPushButton("Button Preview"),
             QComboBox(),
             QCheckBox("CheckBox Preview"),
-            SwitchControl()
+            #SwitchControl()
         ]
         self.preview_widgets[3].addItems(["Option 1", "Option 2", "Option 3"])
 

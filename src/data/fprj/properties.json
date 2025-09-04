@@ -90,13 +90,7 @@
                 }
             },
             "Appearance": {
-                "widget_alpha": {
-                    "string": "Opacity",
-                    "type": "slider",
-                    "value": "255",
-                    "min": "0",
-                    "max": "255"
-                },
+                
                 "widget_visibility_source": {
                     "string": "Visibility Trigger",
                     "type": "src",
@@ -248,13 +242,7 @@
                 }
             },
             "Appearance": {
-                "widget_alpha": {
-                    "string": "Opacity",
-                    "type": "slider",
-                    "value": "255",
-                    "min": "0",
-                    "max": "255"
-                },
+                
                 "widget_visibility_source": {
                     "string": "Visibility Trigger",
                     "type": "src",
@@ -418,13 +406,7 @@
                 }
             },
             "Appearance": {
-                "widget_alpha": {
-                    "string": "Opacity",
-                    "type": "slider",
-                    "value": "255",
-                    "min": "0",
-                    "max": "255"
-                },
+                
                 "widget_visibility_source": {
                     "string": "Visibility Trigger",
                     "type": "src",
@@ -583,26 +565,6 @@
                     }
                 }
             },
-            "Appearance": {
-                "widget_alpha": {
-                    "string": "Opacity",
-                    "type": "slider",
-                    "value": "255",
-                    "min": "0",
-                    "max": "255"
-                },
-                "widget_visibility_source": {
-                    "string": "Visibility Trigger",
-                    "type": "src",
-                    "value": "",
-                    "visibleOn": [
-                        "xiaomi_color",
-                        "xiaomi_color_sport",
-                        "xiaomi_color_2/s1/s2",
-                        "xiaomi_watch_s1_pro"
-                    ]
-                }
-            },
             "Image": {
                 "widget_bitmap": {
                     "string": "Image",
@@ -658,26 +620,6 @@
                             "value": "48"
                         }
                     }
-                }
-            },
-            "Appearance": {
-                "widget_alpha": {
-                    "string": "Opacity",
-                    "type": "slider",
-                    "value": "255",
-                    "min": "0",
-                    "max": "255"
-                },
-                "widget_visibility_source": {
-                    "string": "Visibility Trigger",
-                    "type": "src",
-                    "value": "",
-                    "visibleOn": [
-                        "xiaomi_color",
-                        "xiaomi_color_sport",
-                        "xiaomi_color_2/s1/s2",
-                        "xiaomi_watch_s1_pro"
-                    ]
                 }
             },
             "Data": {
@@ -818,13 +760,7 @@
                 }
             },
             "Appearance": {
-                "widget_alpha": {
-                    "string": "Opacity",
-                    "type": "slider",
-                    "value": "255",
-                    "min": "0",
-                    "max": "255"
-                },
+                
                 "widget_visibility_source": {
                     "string": "Visibility Trigger",
                     "type": "src",
