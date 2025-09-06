@@ -13,6 +13,7 @@ from widgets.items import ExplorerItem
 class Explorer(QListWidget):
     itemReordered = pyqtSignal(int)
     itemNameChanged = pyqtSignal(str, str)
+    itemDisplayNameChanged = pyqtSignal(str, str)
     itemHiddenToggled = pyqtSignal(str)
     itemLockedToggled = pyqtSignal(str)
     
@@ -52,6 +53,8 @@ class Explorer(QListWidget):
         def createItem(item):
             widget_type = item.getProperty("widget_type")
             widget_name = item.getProperty("widget_name")
+            uses_display_name = False
+
             if not self.objectIcon.icon.get(widget_type):
                 return
             
@@ -59,18 +62,24 @@ class Explorer(QListWidget):
 
             listItem.setSizeHint(QSize(26, 26))
             listItem.setData(100, widget_type)
-            listItem.setData(101, widget_name)
+            listItem.setData(101, item.getProperty("widget_name"))
 
             icon = QIcon.fromTheme(self.objectIcon.icon[widget_type]).pixmap(18, 18)
-            if canvas.widgetSettings.get(item.project.currentTheme):
+            if canvas.widgetSettings.get(item.project.currentTheme).get(widget_name):
                 hidden = canvas.widgetSettings[item.project.currentTheme][widget_name]["hidden"]
                 locked = canvas.widgetSettings[item.project.currentTheme][widget_name]["locked"]
             else:
                 hidden = False
                 locked = False
 
-            listItemWidget = ExplorerItem(widget_name, icon, hidden, locked)
+            print("display name", item.getProperty("widget_display_name"))
 
+            if item.getProperty("widget_display_name"):
+                uses_display_name = True
+                listItemWidget = ExplorerItem(item.getProperty("widget_display_name"), icon, hidden, locked)
+            else:
+                listItemWidget = ExplorerItem(widget_name, icon, hidden, locked)
+            
             def visibleToggle(name):
                 self.itemHiddenToggled.emit(name)
                 if canvas.widgetSettings[item.project.currentTheme][widget_name]["hidden"]:
@@ -91,7 +100,10 @@ class Explorer(QListWidget):
 
             listItemWidget.visibleIcon.clicked.connect(lambda args, name=widget_name: visibleToggle(name))
             listItemWidget.lockIcon.clicked.connect(lambda args, name=widget_name: lockedToggle(name))
-            listItemWidget.itemEdit.editingFinished.connect(lambda: self.itemNameChanged.emit(listItemWidget.itemLabel.text(), listItemWidget.itemEdit.text()))
+            if uses_display_name:
+                listItemWidget.itemEdit.editingFinished.connect(lambda: self.itemDisplayNameChanged.emit(widget_name, listItemWidget.itemEdit.text()))
+            else:
+                listItemWidget.itemEdit.editingFinished.connect(lambda: self.itemNameChanged.emit(listItemWidget.itemLabel.text(), listItemWidget.itemEdit.text()))
 
             listItem.setSizeHint(listItemWidget.sizeHint())
 

@@ -27,7 +27,7 @@ os.chdir(os.path.dirname(
     os.path.realpath(__file__)))  # switch working directory to program location so that data files can be found
 
 app = QApplication(sys.argv)
-splash = show_splash()
+splash = show_splash(programVersion)
 app.processEvents()
 
 def showSplashMessage(message):
@@ -534,7 +534,7 @@ class WatchfaceEditor(QMainWindow):
         self.ui.actionZoom_Out.setDisabled(disabled)
 
         # compile
-        self.ui.actionBuild.setDisabled(disabled)
+        #self.ui.actionBuild.setDisabled(disabled)
         self.ui.actionUnpack.setDisabled(disabled)
 
     def openFolder(self, path):
@@ -693,6 +693,7 @@ class WatchfaceEditor(QMainWindow):
                 self.Explorer.updateExplorer(currentProject["project"], currentProject["canvas"])
                 logging.info("Explorer updated")
                 self.reloadImages(currentProject["project"].getImageFolder())
+                self.ui.deviceSelector.setCurrentText(list(self.WatchData.modelID.keys())[list(self.WatchData.modelID.values()).index(currentProject["project"].getDeviceType())])
                 # thread = threading.Thread(target=lambda: self.reloadImages(currentProject["project"].getImageFolder()))
                 # thread.start()
             else:
@@ -785,6 +786,18 @@ class WatchfaceEditor(QMainWindow):
         self.ui.workspace.tabCloseRequested.connect(self.closeTab)
         self.ui.workspace.currentChanged.connect(handleTabChange)
 
+        def setDevice():
+            currentProject = self.getCurrentProject()
+            currentProject["project"].setDevice(self.WatchData.modelID[self.ui.deviceSelector.currentText()])
+            success, userFacingMessage, debugMessage = currentProject["canvas"].loadObjects(currentProject["project"],
+                                    self.settings["Canvas"]["Snap"]["value"],
+                                    self.settings["Canvas"]["Interpolation"]["value"],
+                                    self.settings["Canvas"]["ClipDeviceShape"]["value"],
+                                    self.settings["Canvas"]["ShowDeviceOutline"]["value"])
+
+
+        self.ui.deviceSelector.activated.connect(setDevice)
+
     def setupExplorer(self):
         def toggleHidden(name):
             currentProject = self.getCurrentProject()
@@ -834,11 +847,18 @@ class WatchfaceEditor(QMainWindow):
             if currentProject["canvas"].isPreviewPlaying:
                 self.playAllPreviews(currentProject["canvas"])
 
+        def setDisplayName(widget_name, display_name):
+            currentProject = self.getCurrentProject()
+            item = currentProject["project"].getWidget(widget_name)
+            item.setProperty("widget_display_name", display_name)
+            self.Explorer.updateExplorer(currentProject["project"], currentProject["canvas"])
+
         self.Explorer = Explorer(self, ObjectIcon(), self.ui)
         self.ui.explorerWidget.setWidget(self.Explorer)
         self.Explorer.itemSelectionChanged.connect(lambda: self.updateProjectSelections("explorer"))
         self.Explorer.itemReordered.connect(lambda row: self.changeSelectedWatchfaceWidgetLayer(row))
         self.Explorer.itemNameChanged.connect(setName)
+        self.Explorer.itemDisplayNameChanged.connect(setDisplayName)
         self.Explorer.itemHiddenToggled.connect(lambda name: toggleHidden(name))
         self.Explorer.itemLockedToggled.connect(lambda name: toggleLocked(name))
 
@@ -919,10 +939,16 @@ class WatchfaceEditor(QMainWindow):
                     else:
                         value = "0"
                     currentItem.setProperty(property, value)
+                elif property == "anim_repeats" or property == "anim_frame_delay":
+                    widgetName = currentItem.setProperty(property, value)
                 else:
                     currentItem.setProperty(property, value)
+                    
 
-                if property == "widget_name":
+                if property == "widget_display_name":
+                    self.Explorer.updateExplorer(currentProject["project"], currentProject["canvas"])
+
+                if property == "widget_name" or property == "anim_repeats" or property == "anim_frame_delay":
                     self.propertiesWidget.clearOnRefresh = True
                     self.Explorer.updateExplorer(currentProject["project"], currentProject["canvas"])
                     currentProject["canvas"].loadObjects(currentProject["project"],
@@ -930,7 +956,11 @@ class WatchfaceEditor(QMainWindow):
                                                         self.settings["Canvas"]["Interpolation"]["value"],
                                                         self.settings["Canvas"]["ClipDeviceShape"]["value"],
                                                         self.settings["Canvas"]["ShowDeviceOutline"]["value"])
-                    currentProject["canvas"].selectObject(value)
+                    if property == "anim_repeats" or property == "anim_frame_delay":
+                        currentProject["canvas"].selectObject(widgetName)
+                    else:
+                        currentProject["canvas"].selectObject(value)
+
                     if currentProject["canvas"].isPreviewPlaying:
                         self.playAllPreviews(currentProject["canvas"])
                 else:
@@ -973,14 +1003,7 @@ class WatchfaceEditor(QMainWindow):
         currentProject = self.getCurrentProject()
         if item and currentProject["project"].getWidget(item) != None:
             widget = currentProject["project"].getWidget(item)
-            if isinstance(currentProject["project"], FprjProject):
-                split = widget.getProperty("widget_name").split("_")
-                if split[0].lower() == "lineprogress" and itemType == "widget_arc":
-                    self.propertiesWidget.loadProperties("widget_line", widget=widget, project=currentProject["project"])
-                else:
-                    self.propertiesWidget.loadProperties(itemType, widget=widget, project=currentProject["project"])
-            elif isinstance(currentProject["project"], GMFProject):
-                self.propertiesWidget.loadProperties(itemType, widget=widget, project=currentProject["project"])
+            self.propertiesWidget.loadProperties(itemType, widget=widget, project=currentProject["project"])
         else:
             self.propertiesWidget.loadProperties("preview", self.settingsWidget.getValuesFromProperties("General", self.settings))
 
@@ -1024,6 +1047,8 @@ class WatchfaceEditor(QMainWindow):
         self.coreDialog.resetSettings.connect(resetSettings)
         self.coreDialog.projectConfigSaved.connect(saveConfig)
         self.coreDialog.rejected.connect(closeEvent)
+
+        self.ui.deviceSelector.addItems(self.WatchData.models)
 
         deviceField = self.coreDialog.watchfacePageDeviceField
         nameField = self.coreDialog.watchfacePageProjectField
@@ -1407,6 +1432,7 @@ class WatchfaceEditor(QMainWindow):
                         self.Explorer.items[key].setSelected(False)
             elif len(currentCanvasSelected) == 1:
                 self.Explorer.setCurrentItem(None)
+                print(self.Explorer.items)
                 self.Explorer.items[currentCanvasSelected[0]].setSelected(True) # setCurrentItem stramgely toggles in this situation
             else:
                 self.Explorer.clearSelection()
@@ -1442,10 +1468,12 @@ class WatchfaceEditor(QMainWindow):
         for itemName, item in canvas.widgets.items():
             if isinstance(item, ImagelistWidget):
                 animationName = itemName.split("_")
+                currentProject = self.getCurrentProject()["project"]
+                widget = currentProject.getWidget(itemName)
 
                 if animationName[0] == "anim":
-                    repeats = animationName[1].strip("[]").split("@")[0]
-                    framesec = animationName[1].strip("[]").split("@")[1]
+                    repeats = widget.getProperty("anim_repeats")
+                    framesec = widget.getProperty("anim_frame_delay")
                     item.startPreview(framesec, repeats)
                 else:
                     item.startPreview()
@@ -1751,6 +1779,9 @@ class WatchfaceEditor(QMainWindow):
                 # thread.start()
                 self.show()
 
+            print("device", list(self.WatchData.modelID.keys())[list(self.WatchData.modelID.values()).index(project.getDeviceType())])
+            self.ui.deviceSelector.setCurrentText(list(self.WatchData.modelID.keys())[list(self.WatchData.modelID.values()).index(project.getDeviceType())])
+
             self.coreDialog.close()
 
         else:
@@ -1850,7 +1881,7 @@ class WatchfaceEditor(QMainWindow):
         self.ui.actionFull_Screen.triggered.connect(self.toggleFullscreen)
 
         # compile
-        self.ui.actionBuild.triggered.connect(self.compileProject)
+        #self.ui.actionBuild.triggered.connect(self.compileProject)
         #self.ui.actionUnpack.triggered.connect(self.decompileProject)
 
         # help
@@ -2352,7 +2383,6 @@ if __name__ == "__main__":
                     editor.showWelcome()
             elif args.setWindowSizePreview:
                 splash.close()
-                
                 editor.showWelcome()
                 editor.resize(1280, 720)
             else:

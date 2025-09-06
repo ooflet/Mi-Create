@@ -233,6 +233,10 @@ QComboBox::item {
     selection-background-color: palette(highlight);
 }
 
+QFrame#dropdown {
+    border: 1px solid palette(midlight);
+}
+
 QFrame#rubberBand {
     background-color: rgba(42, 130, 218, 60);
     border: 2px solid palette(highlight);
@@ -628,7 +632,7 @@ QLabel#propertyHeader {
     color: palette(light);
 }
 
-QFrame#contentPanel{
+QFrame#contentPanel {
     background-color: palette(base)
 }
 

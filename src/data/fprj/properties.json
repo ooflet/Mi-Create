@@ -226,77 +226,91 @@
                         }
                     }
                 },
-                "widget_size_width": {
-                    "string": "Width",
-                    "type": "int",
-                    "value": "48",
-                    "min": "0",
-                    "max": "none"
-                },
-                "widget_size_height": {
-                    "string": "Height",
-                    "type": "int",
-                    "value": "48",
-                    "min": "0",
-                    "max": "none"
-                }
-            },
-            "Appearance": {
-                
-                "widget_visibility_source": {
-                    "string": "Visibility Trigger",
-                    "type": "src",
-                    "value": "",
-                    "visibleOn": [
-                        "xiaomi_color",
-                        "xiaomi_color_sport",
-                        "xiaomi_color_2/s1/s2",
-                        "xiaomi_watch_s1_pro"
-                    ]
+                "size": {
+                    "string": "Size",
+                    "type": "multi",
+                    "fields": {
+                        "widget_size_width": {
+                            "string": "W",
+                            "type": "int",
+                            "value": "48",
+                            "min": "0",
+                            "max": "999"
+                        },
+                        "widget_size_height": {
+                            "string": "H",
+                            "type": "int",
+                            "value": "48",
+                            "min": "0",
+                            "max": "999"
+                        }
+                    }
                 }
             },
             "Progress Bar": {
-                "arc_pos_x": {
-                    "string": "X",
-                    "type": "int",
-                    "value": "0",
-                    "min": "-999",
-                    "max": "999"
+                "position": {
+                    "string": "Position",
+                    "type": "multi",
+                    "fields": {
+                        "arc_pos_x": {
+                            "string": "X",
+                            "type": "int",
+                            "value": "0",
+                            "min": "-999",
+                            "max": "999"
+                        },
+                        "arc_pos_y": {
+                            "string": "Y",
+                            "type": "int",
+                            "value": "0",
+                            "min": "-999",
+                            "max": "999"
+                        }
+                    }
                 },
-                "arc_pos_y": {
-                    "string": "Y",
-                    "type": "int",
-                    "value": "0",
-                    "min": "-999",
-                    "max": "999"
+                "style": {
+                    "string": "Style",
+                    "type": "multi",
+                    "fields": {
+                        "arc_radius": {
+                            "string": "Radius",
+                            "icon": "arc-radius",
+                            "type": "int",
+                            "value": "0",
+                            "min": "0",
+                            "max": "999"
+                        },
+                        "arc_thickness": {
+                            "string": "Thickness",
+                            "icon": "line-thickness",
+                            "type": "int",
+                            "value": "0",
+                            "min": "0",
+                            "max": "999"
+                        }
+                    }
                 },
-                "arc_radius": {
-                    "string": "Radius",
-                    "type": "int",
-                    "value": "0",
-                    "min": "0",
-                    "max": "999"
-                },
-                "arc_thickness": {
-                    "string": "Thickness",
-                    "type": "int",
-                    "value": "0",
-                    "min": "0",
-                    "max": "999"
-                },
-                "arc_start_angle": {
-                    "string": "Start Angle",
-                    "type": "int",
-                    "value": "0",
-                    "min": "-360",
-                    "max": "360"
-                },
-                "arc_end_angle": {
-                    "string": "End Angle",
-                    "type": "int",
-                    "value": "0",
-                    "min": "-360",
-                    "max": "360"
+                "angle": {
+                    "string": "Angle",
+                    "type": "multi",
+                    "fields": {
+                        "arc_start_angle": {
+                            "string": "Start Angle",
+                            "icon": "angle-start",
+                            "type": "int",
+                            "value": "0",
+                            "min": "-360",
+                            "max": "360"
+                        },
+                        "arc_end_angle": {
+                            "string": "End Angle",
+                            "icon": "angle-end",
+                            "type": "int",
+                            "value": "0",
+                            "min": "-360",
+                            "max": "360"
+                        }
+                    }
                 },
                 "arc_flat_caps": {
                     "string": "Flat Ends",
@@ -318,30 +332,11 @@
                     "value": "0",
                     "min": "0",
                     "max": "100"
-                },
-                "arc_min_step_value": {
-                    "string": "Minimum Step Value",
-                    "type": "int",
-                    "value": "0",
-                    "min": "0",
-                    "max": "100"
-                },
-                "arc_step_value": {
-                    "string": "Step Value",
-                    "type": "int",
-                    "value": "0",
-                    "min": "0",
-                    "max": "100"
                 }
             },
             "Data": {
                 "arc_source": {
                     "string": "Data Source",
-                    "type": "src",
-                    "value": ""
-                },
-                "arc_max_value_source": {
-                    "string": "Max Value Source",
                     "type": "src",
                     "value": ""
                 }
@@ -361,7 +356,7 @@
             }
         }
     },
-    "widget_line": {
+    "widget_lineprogress": {
         "Shape": "LineProgress",
         "properties": {
             "General": {
@@ -390,63 +385,67 @@
                         }
                     }
                 },
-                "widget_size_width": {
-                    "string": "Width",
-                    "type": "int",
-                    "value": "48",
-                    "min": "0",
-                    "max": "none"
-                },
-                "widget_size_height": {
-                    "string": "Height",
-                    "type": "int",
-                    "value": "48",
-                    "min": "0",
-                    "max": "none"
-                }
-            },
-            "Appearance": {
-                
-                "widget_visibility_source": {
-                    "string": "Visibility Trigger",
-                    "type": "src",
-                    "value": "",
-                    "visibleOn": [
-                        "xiaomi_color",
-                        "xiaomi_color_sport",
-                        "xiaomi_color_2/s1/s2",
-                        "xiaomi_watch_s1_pro"
-                    ]
+                "size": {
+                    "string": "Size",
+                    "type": "multi",
+                    "fields": {
+                        "widget_size_width": {
+                            "string": "W",
+                            "type": "int",
+                            "value": "48",
+                            "min": "0",
+                            "max": "999"
+                        },
+                        "widget_size_height": {
+                            "string": "H",
+                            "type": "int",
+                            "value": "48",
+                            "min": "0",
+                            "max": "999"
+                        }
+                    }
                 }
             },
             "Progress Bar": {
-                "arc_pos_x": {
-                    "string": "Start X",
-                    "type": "int",
-                    "value": "0",
-                    "min": "-999",
-                    "max": "999"
+                "start": {
+                    "string": "Start Position",
+                    "type": "multi",
+                    "fields": {
+                        "arc_pos_x": {
+                            "string": "X",
+                            "type": "int",
+                            "value": "0",
+                            "min": "-999",
+                            "max": "999"
+                        },
+                        "arc_pos_y": {
+                            "string": "Y",
+                            "type": "int",
+                            "value": "0",
+                            "min": "-999",
+                            "max": "999"
+                        }
+                    }
                 },
-                "arc_pos_y": {
-                    "string": "Start Y",
-                    "type": "int",
-                    "value": "0",
-                    "min": "-999",
-                    "max": "999"
-                },
-                "arc_start_angle": {
-                    "string": "End X",
-                    "type": "int",
-                    "value": "0",
-                    "min": "-999",
-                    "max": "999"
-                },
-                "arc_end_angle": {
-                    "string": "End Y",
-                    "type": "int",
-                    "value": "0",
-                    "min": "-999",
-                    "max": "999"
+                "end": {
+                    "string": "End Position",
+                    "type": "multi",
+                    "fields": {
+                        "arc_start_angle": {
+                            "string": "X",
+                            "type": "int",
+                            "value": "0",
+                            "min": "-999",
+                            "max": "999"
+                        },
+                        "arc_end_angle": {
+                            "string": "Y",
+                            "type": "int",
+                            "value": "0",
+                            "min": "-999",
+                            "max": "999"
+                        }
+                    }
                 },
                 "arc_thickness": {
                     "string": "Thickness",
@@ -475,30 +474,11 @@
                     "value": "0",
                     "min": "0",
                     "max": "100"
-                },
-                "arc_min_step_value": {
-                    "string": "Minimum Step Value",
-                    "type": "int",
-                    "value": "0",
-                    "min": "0",
-                    "max": "100"
-                },
-                "arc_step_value": {
-                    "string": "Step Value",
-                    "type": "int",
-                    "value": "0",
-                    "min": "0",
-                    "max": "100"
                 }
             },
             "Data": {
                 "arc_source": {
                     "string": "Data Source",
-                    "type": "src",
-                    "value": ""
-                },
-                "arc_max_value_source": {
-                    "string": "Max Value Source",
                     "type": "src",
                     "value": ""
                 }
@@ -637,6 +617,85 @@
                     "min": "none",
                     "max": "none"
                 },
+                "widget_bitmaplist": {
+                    "string": "Images",
+                    "type": "imglist",
+                    "value": ""
+                }
+            }
+        }
+    },
+    "widget_anim": {
+        "Shape": "ImageList",
+        "properties": {
+            "General": {
+                "widget_name": {
+                    "string": "Name",
+                    "type": "str",
+                    "disabled": "true",
+                    "value": ""
+                },
+                "widget_display_name": {
+                    "string": "Display Name",
+                    "type": "str",
+                    "value": ""
+                }
+            },
+            "Position": {
+                "position": {
+                    "string": "Position",
+                    "type": "multi",
+                    "fields": {
+                        "widget_pos_x": {
+                            "string": "X",
+                            "value": "",
+                            "min": "-999",
+                            "max": "999"
+                        },
+                        "widget_pos_y": {
+                            "string": "Y",
+                            "value": "",
+                            "min": "-999",
+                            "max": "999"
+                        }
+                    }
+                },
+                "size": {
+                    "string": "Size",
+                    "type": "multi",
+                    "fields": {
+                        "widget_size_width": {
+                            "string": "W",
+                            "type": "int",
+                            "disabled": "true",
+                            "value": "48"
+                        },
+                        "widget_size_height": {
+                            "string": "H",
+                            "type": "int",
+                            "disabled": "true",
+                            "value": "48"
+                        }
+                    }
+                }
+            },
+            "Appearance": {
+                "anim_repeats": {
+                    "string": "Repeats",
+                    "type": "int",
+                    "value": "1",
+                    "min": "0",
+                    "max": "99"
+                },
+                "anim_frame_delay": {
+                    "string": "Frame Time (ms)",
+                    "type": "int",
+                    "value": "30",
+                    "min": "0",
+                    "max": "1000"
+                }
+            },
+            "Image List": {
                 "widget_bitmaplist": {
                     "string": "Images",
                     "type": "imglist",

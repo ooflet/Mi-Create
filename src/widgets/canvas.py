@@ -34,8 +34,10 @@ class ObjectIcon:
             "widget" : "widget-image",
             "widget_container" : "widget-container",
             "widget_imagelist" : "widget-imagelist",
+            "widget_anim" : "widget-animation",
             "widget_num" : "widget-digitalnumber",
-            "widget_arc" : "widget-arcprogress"
+            "widget_arc" : "widget-arcprogress",
+            "widget_lineprogress" : "widget-lineprogress"
         }
 
 class DeviceRepresentation(QGraphicsPixmapItem):
@@ -635,25 +637,30 @@ class Canvas(QGraphicsView):
         widget.setData(1, "widget_imagelist") # Item ID 
         widget.snap = snap
 
-        # check if animation
+        imageList = {}
+        for image in bitmapList:
+            if len(image) >= 2:
+                imageList[int(image[0])] = QPixmap(os.path.join(self.imageFolder, image[1]))
+            else:
+                widget.invalid = True
+                break
 
-        animationName = name.split("_")
-
-        if animationName[0] == "anim":
-            animImageList = [QPixmap(os.path.join(self.imageFolder, image[1])) for image in bitmapList]
-            widget.addAnimatedImagelist(animImageList, interpolationStyle)
-        else:
-            imageList = {}
-            for image in bitmapList:
-                if len(image) >= 2:
-                    imageList[int(image[0])] = QPixmap(os.path.join(self.imageFolder, image[1]))
-                else:
-                    widget.invalid = True
-                    break
-
-            widget.addImagelist(imageList, source, previewIndex, defaultValue, interpolationStyle)
+        widget.addImagelist(imageList, source, previewIndex, defaultValue, interpolationStyle)
 
         return widget
+    
+    def createAnimation(self, transparency, name, rect, zValue, bitmapList, snap, interpolationStyle):
+        # Create widget
+        widget = ImagelistWidget(int(rect.x()), int(rect.y()), int(rect.width()), int(rect.height()), self.frame, self, QColor(255,255,255,0), transparency, name)
+        widget.setZValue(zValue)
+        widget.setData(1, "widget_imagelist") # Item ID 
+        widget.snap = snap
+
+        animImageList = [QPixmap(os.path.join(self.imageFolder, image[1])) for image in bitmapList]
+        widget.addAnimatedImagelist(animImageList, interpolationStyle)
+    
+        return widget
+    
     
     def createContainer(self, transparency, name, rect, zValue):
         # no use for it so far, just bare bones implementation
@@ -687,7 +694,7 @@ class Canvas(QGraphicsView):
                 
         return widget
 
-    def createProgressArc(self, transparency, name, rect, zValue, backgroundImage, arcImage, arcX, arcY, radius, lineWidth, startAngle, endAngle, isFlat, snap, interpolationStyle):
+    def createProgressArc(self, transparency, name, widgetType, rect, zValue, backgroundImage, arcImage, arcX, arcY, radius, lineWidth, startAngle, endAngle, isFlat, snap, interpolationStyle):
         bgImage = QPixmap()
         if backgroundImage is not None:
           bgImage.load(os.path.join(self.imageFolder, backgroundImage))
@@ -697,7 +704,7 @@ class Canvas(QGraphicsView):
 
         # the amount of arguments is horrific, might fix
         widget = ProgressWidget(rect.x(), rect.y(), rect.width(), rect.height(), self.frame, self, QColor(255,255,255,0), 
-                                transparency, name, arcX, arcY, radius, lineWidth, startAngle, endAngle, isFlat, bgImage, fgImage, 
+                                transparency, name, widgetType, arcX, arcY, radius, lineWidth, startAngle, endAngle, isFlat, bgImage, fgImage, 
                                 interpolationStyle)
         
         widget.setZValue(zValue)
@@ -783,6 +790,7 @@ class Canvas(QGraphicsView):
                 widget = self.createProgressArc(
                     item.getProperty("widget_alpha"),
                     item.getProperty("widget_name"),
+                    item.getProperty("widget_type"),
                     QRect(
                         int(item.getProperty("widget_pos_x")),
                         int(item.getProperty("widget_pos_y")),
@@ -852,6 +860,21 @@ class Canvas(QGraphicsView):
                     interpolation,
                     item.getPreviewNumber(),
                 )
+            elif item.getProperty("widget_type") == "widget_anim":
+                widget = self.createAnimation(
+                    item.getProperty("widget_alpha"),
+                    item.getProperty("widget_name"),
+                    QRect(
+                        int(item.getProperty("widget_pos_x")),
+                        int(item.getProperty("widget_pos_y")),
+                        int(item.getProperty("widget_size_width")),
+                        int(item.getProperty("widget_size_height"))
+                    ),
+                    index,
+                    item.getProperty("widget_bitmaplist"),
+                    snap,
+                    interpolation
+                )
 
             elif item.getProperty("widget_type") == "widget_container":
                 widget = self.createContainer(
@@ -902,6 +925,7 @@ class Canvas(QGraphicsView):
                 widget = self.createProgressArc(
                     item.getProperty("widget_alpha"),
                     item.getProperty("widget_name"),
+                    item.getProperty("widget_type"),
                     QRect(
                         int(item.getProperty("widget_pos_x")),
                         int(item.getProperty("widget_pos_y")),
@@ -917,6 +941,31 @@ class Canvas(QGraphicsView):
                     item.getProperty("arc_thickness"),
                     item.getProperty("arc_start_angle"),
                     item.getProperty("arc_end_angle"),
+                    item.getProperty("arc_flat_caps"),
+                    snap,
+                    interpolation
+                )
+            elif item.getProperty("widget_type") == "widget_lineprogress":
+                widget = self.createProgressArc(
+                    item.getProperty("widget_alpha"),
+                    item.getProperty("widget_name"),
+                    item.getProperty("widget_type"),
+                    QRect(
+                        int(item.getProperty("widget_pos_x")),
+                        int(item.getProperty("widget_pos_y")),
+                        int(item.getProperty("widget_size_width")),
+                        int(item.getProperty("widget_size_height"))
+                    ),
+                    index,
+                    item.getProperty("analog_background"),
+                    item.getProperty("arc_image"),
+                    item.getProperty("arc_pos_x"),
+                    item.getProperty("arc_pos_y"),
+                    item.getProperty("arc_radius"),
+                    item.getProperty("arc_thickness"),
+                    item.getProperty("arc_start_angle"),
+                    item.getProperty("arc_end_angle"),
+                    item.getProperty("arc_flat_caps"),
                     snap,
                     interpolation
                 )
@@ -1288,11 +1337,14 @@ class ImagelistWidget(ImageWidget):
     def addAnimatedImagelist(self, imagelist, isAntialiased):
         self.isAnimation = True
         self.imagelist = imagelist
-        initialFrame = imagelist[0]
+        if imagelist:
+            initialFrame = imagelist[0]
+            self.pixmapItem.setPixmap(initialFrame)
+            self.setRect(0, 0, initialFrame.width(), initialFrame.height())
+        else:
+            self.invalid = True
 
         self.animatedImageList = imagelist
-        self.pixmapItem.setPixmap(initialFrame)
-        self.setRect(0, 0, initialFrame.width(), initialFrame.height())
         
         if isAntialiased:
             self.pixmapItem.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
@@ -1690,7 +1742,7 @@ class ProgressLine(QGraphicsLineItem):
         self.setPen(pen)
 
 class ProgressWidget(BaseWidget):
-    def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name, offsetX, offsetY, radius, thickness, startAngle, endAngle, isFlat, bgImage, pathImage, isAntialiased):
+    def __init__(self, posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name, widgetType, offsetX, offsetY, radius, thickness, startAngle, endAngle, isFlat, bgImage, pathImage, isAntialiased):
         super().__init__(posX, posY, sizeX, sizeY, parent, canvas, color, transparency, name)
         self.setPos(posX, posY)
         
@@ -1708,8 +1760,7 @@ class ProgressWidget(BaseWidget):
         self.line = None
         self.arc = None
 
-        split = name.split("_")
-        if split[0].lower() == "lineprogress":
+        if widgetType == "widget_lineprogress":
             self.startX = int(offsetX)
             self.startY = int(offsetY)
             self.endX = startAngle

@@ -22,6 +22,7 @@ from PyQt6.QtWidgets import (QDialog, QLabel, QLineEdit, QComboBox, QToolButton,
                              QPushButton, QCheckBox, QScrollArea, QListWidget, QListWidgetItem, QMenu, QMessageBox)
 from PyQt6.QtMultimedia import QSoundEffect
 from widgets.stackedwidget import QStackedWidget, loadJsonStyle
+from widgets.dropdown import SearchableComboBox
 from widgets.layouts import FlowLayout
 from widgets.items import RecentProjectItem
 
@@ -286,7 +287,7 @@ class CoreDialog(QDialog):
         self.welcomeFrame.setContentsMargins(8, 8, 8, 8)
         self.welcomeFrame.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Preferred)
         self.welcomeFrame.setFixedWidth(self.welcomePage.viewport().width())
-        self.welcomePage.resizeEvent = lambda event: self.welcomeFrame.setFixedWidth(event.size().width())
+        self.welcomePage.resizeEvent = lambda event: self.welcomeFrame.setFixedWidth(event.size().width()+8)
 
         self.welcomeFrameLayout = FlowLayout(self.welcomeFrame)
         self.welcomeFrameLayout.setSpacing(8)
@@ -405,7 +406,7 @@ class CoreDialog(QDialog):
         self.watchfacePageDeviceLayout = QHBoxLayout()
 
         self.watchfacePageDeviceTitle = QLabel(self)
-        self.watchfacePageDeviceField = QComboBox(self)
+        self.watchfacePageDeviceField = SearchableComboBox(self)
         self.watchfacePageDeviceField.addItems(deviceList)
         self.watchfacePageDeviceField.setFixedWidth(175)
 

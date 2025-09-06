@@ -3,7 +3,7 @@ from PyQt6.QtGui import QPixmap, QFont, QFontDatabase, QPainter
 from PyQt6.QtCore import Qt, QRect
 
 class Splash(QSplashScreen):
-    def __init__(self, pixmap):
+    def __init__(self, pixmap, version):
         super().__init__(pixmap)
         id = QFontDatabase.addApplicationFont(":/Fonts/Inter.ttf")
         print(QFontDatabase.applicationFontFamilies(id))
@@ -14,6 +14,8 @@ class Splash(QSplashScreen):
         self.context_rect = QRect(52, 170, 200, 80)  # x, y, width, height for wrapping
 
         self.contributors = ["vonfritz", "Pranav-ONLY", "frankh93", "Zha0fusion", "neizod", "billabongbruno"]
+
+        self.context_string = f"Version {version}\n\nThank you to contributors {", ".join(self.contributors)}"
 
     def show_message(self, message):
         self.text = message
@@ -28,14 +30,14 @@ class Splash(QSplashScreen):
         painter.setFont(self.contextFont)
         painter.drawText(self.context_rect,
                          Qt.AlignmentFlag.AlignLeft | Qt.TextFlag.TextWordWrap,
-                         "Thank you to contributors " + ", ".join(self.contributors))
+                         self.context_string)
 
         # Draw main message
         if self.text:
             painter.setFont(self.messageFont)
             painter.drawText(self.text_pos[0], self.text_pos[1], self.text)
 
-def show_splash():
-    splash = Splash(QPixmap(":/Images/splash.png"))
+def show_splash(version):
+    splash = Splash(QPixmap(":/Images/splash.png"), version)
     splash.show()
     return splash

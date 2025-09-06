@@ -2,6 +2,7 @@
 # ooflet <ooflet@proton.me>
 
 from PyQt6 import QtCore, QtGui, QtWidgets
+from widgets.dropdown import SearchableComboBox
 from utils.translate import QCoreApplication
 
 class MainWindow(object):
@@ -184,10 +185,10 @@ class MainWindow(object):
         icon = QtGui.QIcon.fromTheme("preferences-system")
         self.actionPreferences.setIcon(icon)
         self.actionPreferences.setObjectName("actionPreferences")
-        self.actionBuild = QtGui.QAction(parent=MainWindow)
+        #self.actionBuild = QtGui.QAction(parent=MainWindow)
         icon = QtGui.QIcon.fromTheme("project-build")
-        self.actionBuild.setIcon(icon)
-        self.actionBuild.setObjectName("actionBuild")
+        #self.actionBuild.setIcon(icon)
+        #self.actionBuild.setObjectName("actionBuild")
         self.actionToggleExplorer = QtGui.QAction(parent=MainWindow)
         self.actionToggleExplorer.setCheckable(True)
         self.actionToggleExplorer.setChecked(True)
@@ -416,8 +417,24 @@ class MainWindow(object):
         self.toolBar.addAction(self.actionAlignBottom)
         self.toolBar.addAction(self.actionAlignHorizontal)
         self.toolBar.addAction(self.actionAlignVertical)
-        self.toolBar.addSeparator()
-        self.toolBar.addAction(self.actionBuild)
+        #self.toolBar.addSeparator()
+        #self.toolBar.addAction(self.actionBuild)
+
+        spacer = QtWidgets.QWidget()
+        spacer.setSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Preferred)
+        self.toolBar.addWidget(spacer)
+
+        self.deviceSelector = SearchableComboBox()
+        self.deviceSelector.setFixedWidth(175)
+        self.toolBar.addWidget(self.deviceSelector)
+
+        spacer = QtWidgets.QWidget()
+        spacer.setFixedWidth(4)
+        self.toolBar.addWidget(spacer)
+
+        self.export = QtWidgets.QPushButton("Export")
+        #self.export.setIcon(QtGui.QIcon.fromTheme("project-build"))  # optional icon
+        self.toolBar.addWidget(self.export)
 
         self.retranslateUi(MainWindow)
         self.workspace.setCurrentIndex(-1)
@@ -449,9 +466,9 @@ class MainWindow(object):
         self.actionAbout_MiFaceStudio.setText(_translate("MainWindow", "About Mi Create"))
         self.actionPreferences.setText(_translate("MainWindow", "Settings"))
         self.actionPreferences.setShortcut(_translate("MainWindow", "Ctrl+,"))
-        self.actionBuild.setText(_translate("MainWindow", "Build..."))
-        self.actionBuild.setToolTip(_translate("MainWindow", "Build"))
-        self.actionBuild.setShortcut(_translate("MainWindow", "Ctrl+K"))
+        #self.actionBuild.setText(_translate("MainWindow", "Build..."))
+        #self.actionBuild.setToolTip(_translate("MainWindow", "Build"))
+        #self.actionBuild.setShortcut(_translate("MainWindow", "Ctrl+K"))
         self.actionToggleExplorer.setText(_translate("MainWindow", "Explorer"))
         self.actionToggleProperties.setText(_translate("MainWindow", "Properties"))
         self.actionExit.setText(_translate("MainWindow", "Exit"))

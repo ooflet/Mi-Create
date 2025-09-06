@@ -71,12 +71,23 @@
             "icon": "widget-analogdisplay",
             "id": "widget_analog"
         },
+        "sep2": {
+            "specialType": "seperator"
+        },
         "Arc Progress": {
             "icon": "widget-arcprogress",
             "id": "widget_arc"
         },
-        "sep2": {
+        "Line Progress": {
+            "icon": "widget-lineprogress",
+            "id": "widget_lineprogress"
+        },
+        "sep3": {
             "specialType": "seperator"
+        },
+        "Animation": {
+            "icon": "widget-animation",
+            "id": "widget_anim"
         },
         "Container": {
             "icon": "widget-container",

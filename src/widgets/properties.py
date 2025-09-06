@@ -18,9 +18,10 @@ from PyQt6.QtWidgets import (QStackedWidget, QStyledItemDelegate, QWidget, QFile
                                QHBoxLayout, QVBoxLayout, QScrollArea, QTreeWidgetItem, QLineEdit, QSizePolicy, QToolButton,
                                QSpinBox, QComboBox, QLabel, QCheckBox, QMessageBox, QAbstractItemView, QApplication, QSlider)
 from PyQt6.QtCore import Qt, pyqtSignal, QPoint, QSize, QModelIndex
-from PyQt6.QtGui import QColor, QPen, QPixmap, QIcon, QPalette, QStandardItemModel, QFontMetrics, QPainter, QIntValidator
+from PyQt6.QtGui import QColor, QPen, QPixmap, QIcon, QPalette, QStandardItemModel, QFontMetrics, QPainter, QIntValidator, QImage
 from pprint import pprint
 
+from widgets.dropdown import SearchableComboBox
 from widgets.switch import SwitchControl
 from widgets.layouts import FlowLayout
 from utils.translate import Translator
@@ -221,7 +222,10 @@ class PropertiesMultiFileItem(QFrame):
             self.label = QSpinBox()
             self.label.setStyleSheet("background: transparent; border: none; padding: 0px;")
             self.label.setRange(-2147483647, 2147483647) # max numbers
-            self.label.setValue(int(label))
+            if label:
+                self.label.setValue(int(label))
+            else:
+                self.label.setValue(0)
             self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
             self.label.wheelEvent = lambda event: event.ignore()
 
@@ -465,16 +469,39 @@ class TabSelectorWidget(QFrame):
                 widget.setChecked(False)
 
 class PrefixedLineEdit(QLineEdit):
-    def __init__(self, parent, prefix, *args, **kwargs):
+    def __init__(self, parent, prefix, icon=None, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
         self.prefix = prefix
+        self.icon = icon
+        self.iconSize = QSize(16, 16)
         self.setTextMargins(18, 0, 0, 0)  # space for prefix
+
+        if icon:
+            self.setToolTip(prefix)
 
     def paintEvent(self, event):
         super().paintEvent(event)
         painter = QPainter(self)
-        painter.setPen(self.palette().light().color())
-        painter.drawText(8, (self.height() + painter.fontMetrics().ascent()) // 2 - 2, self.prefix)
+        if self.icon:
+            # Get base pixmap
+            base_pixmap = QIcon.fromTheme(self.icon).pixmap(self.iconSize)
+            img = base_pixmap.toImage().convertToFormat(QImage.Format.Format_ARGB32)
+
+            # Tint it to the text color
+            tinted = QImage(img.size(), QImage.Format.Format_ARGB32)
+            tinted.fill(Qt.GlobalColor.transparent)
+            p = QPainter(tinted)
+            p.drawImage(0, 0, img)
+            p.setCompositionMode(QPainter.CompositionMode.CompositionMode_SourceIn)
+            p.fillRect(tinted.rect(), self.palette().light().color())
+            p.end()
+
+            # Draw tinted icon
+            y = (self.height() - self.iconSize.height()) // 2
+            painter.drawImage(6, y, tinted)
+        else:
+            painter.setPen(self.palette().light().color())
+            painter.drawText(8, (self.height() + painter.fontMetrics().ascent()) // 2 - 2, self.prefix)
 
 class PropertiesWidget(QStackedWidget):
     propertyChanged = pyqtSignal(object, object)
@@ -523,14 +550,14 @@ class PropertiesWidget(QStackedWidget):
         if not self.ignorePropertyChange:
             self.propertyChanged.emit(property, value)
 
-    def createLineEdit(self, text, disabled, propertySignalDisabled, srcProperty="", prefix=None):
+    def createLineEdit(self, text, disabled, propertySignalDisabled, srcProperty="", prefix=None, icon=None):
         def onDeselect():
             lineEdit.clearFocus()
             if not propertySignalDisabled:
                 self.sendPropertyChangedSignal(srcProperty, lineEdit.text())
 
         if prefix:
-            lineEdit = PrefixedLineEdit(self, prefix)
+            lineEdit = PrefixedLineEdit(self, prefix, icon)
         else:
             lineEdit = QLineEdit(self)
         lineEdit.setText(str(text))
@@ -596,7 +623,7 @@ class PropertiesWidget(QStackedWidget):
 
         return toggleSwitch
     
-    def createCombobox(self, text, list, editable, disabled, propertySignalDisabled, srcProperty=""):
+    def createCombobox(self, text, list, editable, disabled, propertySignalDisabled, srcProperty="", searchable=False):
         def onChange():
             combobox.clearFocus()
             self.sendPropertyChangedSignal(srcProperty, combobox.currentText())
@@ -604,7 +631,11 @@ class PropertiesWidget(QStackedWidget):
         def wheelEvent(event):
             event.ignore() # disable wheel event completely
 
-        combobox = QComboBox(self)
+        if searchable:
+            combobox = SearchableComboBox(self)
+        else:
+            combobox = QComboBox(self)
+
         combobox.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         combobox.addItems(list)
         combobox.setEditable(editable)
@@ -706,8 +737,8 @@ class PropertiesWidget(QStackedWidget):
 
             if field.get("disabled") and field["disabled"] == "true":
                 propertyDisabled = True
-
-            widget = self.createLineEdit(field["value"], propertyDisabled, False, src, field["string"])
+                
+            widget = self.createLineEdit(field["value"], propertyDisabled, False, src, field["string"], field.get("icon"))
             widget.setFixedWidth(int(fieldWidth))
             intValidator = QIntValidator()
 
@@ -772,7 +803,7 @@ class PropertiesWidget(QStackedWidget):
     
     def createSrcEdit(self, label, value, src, disabled):
         propertyLabel = QLabel(label)
-        propertyEdit = self.createCombobox("Data Source", [], True, disabled, False, src)
+        propertyEdit = self.createCombobox("Data Source", [], False, disabled, False, src, True)
 
         frame = self.createInputFrame(propertyLabel, propertyEdit)
 
@@ -1044,7 +1075,7 @@ class PropertiesWidget(QStackedWidget):
             self.changePropertiesPage(category)
             return
 
-        print(values)
+        print(category)
 
         self.ignorePropertyChange = True
         self.changePropertiesPage(category)

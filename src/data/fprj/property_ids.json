@@ -10,6 +10,7 @@
     "@Butt_cap_ending_style_En": "arc_flat_caps",
     "@DefaultIndex": "imagelist_default_index",
     "@Digits": "num_digits",
+    "@DisplayName": "widget_display_name",
     "@EndAngle": "arc_end_angle",
     "@Foreground_ImageName": "arc_image",
     "@Height": "widget_size_height",

@@ -336,7 +336,10 @@ class FprjProject:
         
     def createWidget(self, id, name, posX, posY, properties):
         widget = self.defaultItems[id].copy()
-        widget["@Name"] = name
+        if id != "widget_anim":
+            widget["@Name"] = widget["@Name"] + name
+        else:
+            widget["@DisplayName"] = name
         
         if properties != None:
             for property, value in properties.items():
@@ -531,6 +534,14 @@ class FprjWidget:
         return self.previewData.get(self.getSourceName())
     
     def getProperty(self, property):
+        if property == "anim_repeats":
+            animationName = self.getProperty("widget_name").split("_")
+            return animationName[1].strip("[]").split("@")[0]
+        
+        elif property == "anim_frame_delay":
+            animationName = self.getProperty("widget_name").split("_")
+            return animationName[1].strip("[]").split("@")[1]
+
         property = [k for k, v in self.project.propertyIds.items() if v == property]
         
         if len(property) > 0:
@@ -542,6 +553,13 @@ class FprjWidget:
             return
 
         if property == "@Shape":
+            split = self.getProperty("widget_name").split("_")
+            
+            if split[0].lower() == "lineprogress":
+                return "widget_lineprogress"
+            elif split[0].lower() == "anim":
+                return "widget_anim"
+            
             return self.project.widgetIds.get(self.data.get(property))
         elif property == "@BitmapList":
             bitmapString = self.data[property]
@@ -567,6 +585,18 @@ class FprjWidget:
 
     def setProperty(self, property, value):
         print(property)
+        if property == "anim_repeats":
+            animationName = self.getProperty("widget_name").split("_")
+            name = f"anim_[{value}@{animationName[1].strip("[]").split("@")[1]}]"
+            self.setProperty("widget_name", name)
+            return name
+
+        elif property == "anim_frame_delay":
+            animationName = self.getProperty("widget_name").split("_")
+            name = f"anim_[{animationName[1].strip("[]").split("@")[0]}@{value}]"
+            self.setProperty("widget_name", name)
+            return name
+
         property = [k for k, v in self.project.propertyIds.items() if v == property][0]
         if property == "@BitmapList":
             for index, item in enumerate(value):
