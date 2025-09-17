@@ -1,9 +1,10 @@
 from PyQt6.QtWidgets import QApplication, QComboBox, QFrame, QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QLabel, QListWidget, QListWidgetItem
-from PyQt6.QtCore import Qt, QPoint
+from PyQt6.QtCore import Qt, QPoint, pyqtSignal
 
 
 class SearchableMenu(QFrame):
     MAX_HEIGHT = 450  # maximum height
+    heightChanged = pyqtSignal()
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -104,7 +105,7 @@ class SearchableMenu(QFrame):
         if final_height < 80:
             final_height = 80
         self.setFixedHeight(final_height)
-
+        self.heightChanged.emit()
 
 class SearchableComboBox(QComboBox):
     def __init__(self, parent=None):
@@ -116,6 +117,7 @@ class SearchableComboBox(QComboBox):
             self.activated.emit(self.popup.list.currentRow())
 
         self.popup = SearchableMenu(self)
+        self.popup.heightChanged.connect(self.adjustPos)
         self.popup.list.itemClicked.connect(currentItemChanged)
 
     def addItems(self, items):
@@ -132,11 +134,24 @@ class SearchableComboBox(QComboBox):
 
     def showPopup(self):
         width = max(self.width(), 200)
-        pos = self.mapToGlobal(QPoint(self.width() - width, 0))
-        self.popup.move(pos)
+        self.adjustPos()
         self.popup.setFixedWidth(width)
         self.popup.searchBox.setFocus()
         self.popup.show()
+
+    def adjustPos(self):
+        width = max(self.width(), 200)
+        pos = self.mapToGlobal(QPoint(self.width() - width, 0))
+
+        # Screen geometry
+        screen = self.screen().geometry()
+        popup_height = self.popup.height()
+
+        # If popup goes past bottom of screen, place it above instead
+        if pos.y() + popup_height > screen.bottom():
+            pos = self.mapToGlobal(QPoint(self.width() - width, -popup_height + self.height()))
+
+        self.popup.move(pos)
 
     def selectByName(self, name: str):
         index = self.findText(name, Qt.MatchFlag.MatchExactly)
