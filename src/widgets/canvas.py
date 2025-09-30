@@ -263,6 +263,7 @@ class Canvas(QGraphicsView):
         self.project = None
 
         self.itemDragPreview = None
+        self.itemDragPixmap = None
         self.resizeEnded = True
 
         self.rubberBand = RubberBand(self)
@@ -354,16 +355,17 @@ class Canvas(QGraphicsView):
             model.dropMimeData(event.mimeData(), Qt.DropAction.CopyAction, 0, 0, QModelIndex())
 
             self.itemDragPreview = QGraphicsPixmapItem()
+            self.itemDragPixmap = QPixmap(os.path.join(self.imageFolder, model.item(0, 0).data(100)))
             self.scene().addItem(self.itemDragPreview)
             self.itemDragPreview.setOpacity(0.5)
-            self.itemDragPreview.setPixmap(QPixmap(os.path.join(self.imageFolder, model.item(0, 0).data(100))))
+            self.itemDragPreview.setPixmap(self.itemDragPixmap)
 
     def dragMoveEvent(self, event):
         if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
             event.acceptProposedAction()
 
             if self.itemDragPreview != None:
-                self.itemDragPreview.setPos(self.mapToScene(int(event.position().x()), int(event.position().y())))
+                self.itemDragPreview.setPos(self.mapToScene(int(event.position().x() - (self.itemDragPixmap.size().width() / 2)), int(event.position().y() - (self.itemDragPixmap.size().height() / 2))))
 
     def dragLeaveEvent(self, event):
         if self.itemDragPreview != None:
@@ -381,7 +383,7 @@ class Canvas(QGraphicsView):
             self.itemDragPreview = None
 
         if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
-            position = self.mapToScene(int(event.position().x()), int(event.position().y()))
+            position = self.mapToScene(int(event.position().x() - (self.itemDragPixmap.size().width() / 2)), int(event.position().y() - (self.itemDragPixmap.size().height() / 2)))
             self.onObjectAdded.emit(model.item(0, 0).data(100), int(position.x()), int(position.y()))
 
 

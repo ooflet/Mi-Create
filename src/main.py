@@ -1882,6 +1882,7 @@ class WatchfaceEditor(QMainWindow):
 
         # compile
         #self.ui.actionBuild.triggered.connect(self.compileProject)
+        self.ui.export.clicked.connect(self.compileProject)
         #self.ui.actionUnpack.triggered.connect(self.decompileProject)
 
         # help

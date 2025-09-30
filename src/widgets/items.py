@@ -96,7 +96,7 @@ class RecentProjectItem(QFrame):
         self.icon.setFixedSize(155, 155)
         self.icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
         if pixmap.isNull():
-            self.icon.setPixmap(QPixmap(":/Images/placeholder_watchface.png").scaled(135, 135))
+            self.icon.setPixmap(QPixmap(":/Images/placeholder_watchface.png").scaled(135, 135, transformMode=Qt.TransformationMode.SmoothTransformation))
         else:
             self.icon.setPixmap(pixmap.scaled(135, 135, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
 
