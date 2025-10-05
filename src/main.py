@@ -2270,8 +2270,10 @@ class WatchfaceEditor(QMainWindow):
             '''
         )
         aboutText.setOpenExternalLinks(True)
+        bodyLayout = QHBoxLayout()
+        bodyLayout.setContentsMargins(0, 0, 0, 0)
         bodyText = QLabel()
-        bodyText.setContentsMargins(55, 0, 0, 0)
+        bodyText.setContentsMargins(0, 0, 0, 0)
         bodyText.setText(
             """
             <p>This program comes with ABSOLUTELY NO WARRANTY.<br/>
@@ -2279,6 +2281,9 @@ class WatchfaceEditor(QMainWindow):
             under certain conditions.</p>
             """
         )
+        bodyLayout.addStretch()
+        bodyLayout.addWidget(bodyText)
+        bodyLayout.addStretch()
         devText = QLabel()
         devText.setAlignment(Qt.AlignmentFlag.AlignCenter)
         devText.setText("made with ❤️ by ooflet")
@@ -2291,7 +2296,7 @@ class WatchfaceEditor(QMainWindow):
         dialogLayout.addStretch()
         dialogLayout.addWidget(aboutIcon)
         dialogLayout.addWidget(aboutText)
-        dialogLayout.addWidget(bodyText)
+        dialogLayout.addLayout(bodyLayout)
         dialogLayout.addWidget(devText)
         dialogLayout.addStretch()
         dialogLayout.addWidget(buttonBox)
