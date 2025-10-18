@@ -342,7 +342,9 @@ class CoreDialog(QDialog):
 
             else:
                 print(f"Project {name, location} not found")
-                projectList.pop(projectList.index([name, location]))
+                for index, item in enumerate(projectList):
+                    if item[0] == name and item[1] == location:
+                        projectList.pop(index)
         
 
     def setupNewProjectPage(self, deviceList):
