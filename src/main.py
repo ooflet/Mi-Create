@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # Mi Create
 # ooflet <ooflet@proton.me>
 
