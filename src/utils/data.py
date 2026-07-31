@@ -57,9 +57,9 @@ class WatchData(QObject):
         with open(watchDataPath, "r") as watchDataFile:
             watchData = json.load(watchDataFile)
             self.deviceId = watchData["device_id"]
-            self.deviceId = watchData["widget_id"]
-            self.deviceId = watchData["property_id"]
-            self.deviceId = watchData["source_id"]
+            self.widgetId = watchData["widget_id"]
+            self.propertyId = watchData["property_id"]
+            self.sourceId = watchData["source_id"]
 
         for deviceId, device in devices.items():
             self.models.append(device["string"])
