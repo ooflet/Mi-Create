@@ -1,0 +1,151 @@
+name: Build & Release
+
+on:
+  push:
+    branches: [ main, next ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main, next ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-linux:
+    name: Build Linux (AppImage & Tarball)
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            ccache \
+            libfuse2 \
+            patchelf \
+            libgl1-mesa-dev \
+            libxkbcommon-x11-0 \
+            libegl1
+
+      - name: Cache Nuitka and ccache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/Nuitka
+            ~/.cache/ccache
+          key: ${{ runner.os }}-nuitka-${{ hashFiles('requirements.txt') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-nuitka-${{ hashFiles('requirements.txt') }}-
+            ${{ runner.os }}-nuitka-
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install nuitka zstandard ordered-set patchelf
+
+      - name: Build Linux binaries
+        run: |
+          chmod +x tools/build_linux.sh
+          ./tools/build_linux.sh
+
+      - name: Upload Linux artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Mi-Create-Linux-x86_64
+          path: |
+            dist/Mi-Create-x86_64.AppImage
+            dist/Mi-Create-Linux-x86_64.tar.gz
+
+      - name: Attach Linux assets to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/Mi-Create-x86_64.AppImage
+            dist/Mi-Create-Linux-x86_64.tar.gz
+
+  build-windows:
+    name: Build Windows (Portable ZIP)
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Cache Nuitka
+        uses: actions/cache@v4
+        with:
+          path: ~\AppData\Local\Nuitka\Nuitka\Cache
+          key: ${{ runner.os }}-nuitka-${{ hashFiles('requirements.txt') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-nuitka-${{ hashFiles('requirements.txt') }}-
+            ${{ runner.os }}-nuitka-
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install nuitka zstandard ordered-set
+
+      - name: Build Windows executable with Nuitka
+        shell: pwsh
+        run: |
+          python -m nuitka `
+            --standalone `
+            --lto=no `
+            --enable-plugin=pyqt6 `
+            --include-package=PyQt6.Qsci `
+            --include-data-dir="src/data=data" `
+            --include-data-dir="src/themes=themes" `
+            --include-data-dir="src/locales=locales" `
+            --include-data-files="src/compiler/*=compiler/" `
+            --include-data-dir="src/resources=resources" `
+            --include-data-dir="src/plugins=plugins" `
+            --windows-icon-from-ico="src/resources/icon.ico" `
+            --output-dir="build/nuitka" `
+            --output-filename="Mi-Create.exe" `
+            --assume-yes-for-downloads `
+            --remove-output `
+            src/main.py
+
+      - name: Package Windows Portable ZIP
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "dist"
+          $distFolder = "build/nuitka/main.dist"
+          # Ensure runtime directories are fully present
+          Copy-Item -Path "src/data/*" -Destination "$distFolder/data" -Recurse -Force
+          Copy-Item -Path "src/themes/*" -Destination "$distFolder/themes" -Recurse -Force
+          Copy-Item -Path "src/locales/*" -Destination "$distFolder/locales" -Recurse -Force
+          Copy-Item -Path "src/compiler/*" -Destination "$distFolder/compiler" -Recurse -Force
+          Copy-Item -Path "src/plugins/*" -Destination "$distFolder/plugins" -Recurse -Force
+          Compress-Archive -Path "$distFolder/*" -DestinationPath "dist/Mi-Create-Windows-x64.zip" -Force
+
+      - name: Upload Windows artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Mi-Create-Windows-x64
+          path: dist/Mi-Create-Windows-x64.zip
+
+      - name: Attach Windows assets to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/Mi-Create-Windows-x64.zip

@@ -4,14 +4,34 @@
 import logging
 import traceback
 import os
+import sys
+import platform
+
+# Save caller's original working directory before chdir (especially for AppImage $OWD support)
+original_cwd = os.environ.get("OWD") or os.getcwd()
 
 os.chdir(os.path.dirname(
     os.path.realpath(__file__)))  # switch working directory to program location so that data files can be found
 
 # check if compiled and if so, logs to a file
 if "__compiled__" in globals():
-    logging.basicConfig(level=logging.DEBUG, filemode="w", filename="data/app.log",
-                        format="%(asctime)s %(module)s.py:%(lineno)d %(threadName)-10s %(levelname)s %(message)s")
+    log_format = "%(asctime)s %(module)s.py:%(lineno)d %(threadName)-10s %(levelname)s %(message)s"
+    if sys.platform == "win32":
+        log_dir = "data"
+    elif sys.platform == "darwin":
+        log_dir = os.path.expanduser("~/Library/Logs/Mi Create")
+    else:
+        # On Linux / POSIX systems, use standard ~/.local/share/Mi Create/app.log
+        xdg_data = os.environ.get("XDG_DATA_HOME") or os.path.expanduser("~/.local/share")
+        log_dir = os.path.join(xdg_data, "Mi Create")
+
+    try:
+        os.makedirs(log_dir, exist_ok=True)
+        log_file = os.path.join(log_dir, "app.log")
+        logging.basicConfig(level=logging.DEBUG, filemode="w", filename=log_file,
+                            format=log_format)
+    except OSError:
+        logging.basicConfig(level=logging.DEBUG, format=log_format)
 else:
     logging.basicConfig(level=logging.DEBUG,
                         format="%(asctime)s %(module)s.py:%(lineno)d %(threadName)-10s %(levelname)s %(message)s")
@@ -19,12 +39,10 @@ else:
 logging.info("-- Starting Mi Create --")
 logging.info("Initializing modules")
 
-import sys
 import shutil
 import argparse
 import requests
 import subprocess
-import platform
 import gettext
 
 from PyQt6.QtWidgets import (QInputDialog, QMessageBox, QApplication, QProgressBar,
@@ -2132,7 +2150,10 @@ if __name__ == "__main__":
 
             if args.filename:
                 logging.info("Opening file from argument 1")
-                result = editor.openProject(projectLocation=args.filename)
+                filepath = args.filename
+                if not os.path.isabs(filepath):
+                    filepath = os.path.join(original_cwd, filepath)
+                result = editor.openProject(projectLocation=filepath)
                 splash.close()
                 if result == False:
                     editor.showWelcome()
