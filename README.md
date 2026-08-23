@@ -24,7 +24,16 @@
 Download the latest installer from the [releases](https://github.com/ooflet/Mi-Create/releases) tab. Please note only 64-bit versions of Windows 10 (1809 or later) and Windows 11 is supported.
 
 ### Linux
-Mi Create fully supports Linux, however there are no binaries for Linux. I do plan to distribute binaries on Linux once a fully stable and feature-rich release is out. If there are any Linux app maintainers who have experience in distributing applications, I would highly appreciate your help.
+Download the latest `AppImage` or portable tarball from the [releases](https://github.com/ooflet/Mi-Create/releases) tab.
+
+Make the AppImage executable and run:
+```bash
+chmod +x Mi-Create-x86_64.AppImage
+./Mi-Create-x86_64.AppImage
+```
+
+> **Note on building watchface binaries on Linux:**
+> Designing and previewing watchfaces works out of the box. However, compiling `.face` binary packages uses the bundled compiler executable (`compile.exe`), which requires **Wine** on your system (`sudo apt install wine` or distro equivalent). If Wine is not installed, Mi Create will notify you with an informative message when building.
 
 ### MacOS
 Mi Create is not tested on MacOS. All code and libraries should support MacOS, but I make no guarantees. 
