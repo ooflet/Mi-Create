@@ -67,6 +67,10 @@
             "icon": "widget-digitalnumber",
             "id": "widget_num"
         },
+        "Text": {
+            "icon": "widget-digitalnumber",
+            "id": "widget_text"
+        },
         "Analog Display": {
             "icon": "widget-analogdisplay",
             "id": "widget_analog"

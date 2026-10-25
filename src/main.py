@@ -499,6 +499,10 @@ class WatchfaceEditor(QMainWindow):
             for filename in directory:
                 file = os.path.join(imageFolder, filename)
                 if os.path.isfile(file):
+                    # Font and resized images are generated automatically and
+                    # are not meant to be managed by hand.
+                    if filename.startswith("__mifont_") or filename.startswith("__misize_"):
+                        continue
                     logging.info("Creating file entry for " + os.path.basename(file))
                     item = QListWidgetItem(QIcon(file), os.path.basename(file))
                     item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -778,15 +782,47 @@ class WatchfaceEditor(QMainWindow):
                     pixmap = QPixmap()
                     pixmap.load(os.path.join(currentProject["project"].getImageFolder(), value))
 
-                    # set widget size to image size
+                    def updateSizeField(fieldName, fieldValue):
+                        propertyField = self.propertiesWidget.propertyItems.get(fieldName)
+                        if propertyField == None:
+                            return
+                        propertyField.blockSignals(True)
+                        if propertyField.metaObject().className() == "QSpinBox":
+                            propertyField.setValue(int(fieldValue))
+                        else:
+                            propertyField.setText(str(fieldValue))
+                        propertyField.blockSignals(False)
+
                     if isinstance(currentItem, FprjWidget):
-                        currentItem.setProperty("widget_size_width", pixmap.width())
-                        self.propertiesWidget.propertyItems["widget_size_width"].setText(str(pixmap.width()))
-                        currentItem.setProperty("widget_size_height", pixmap.height())
-                        self.propertiesWidget.propertyItems["widget_size_height"].setText(str(pixmap.width()))
+                        currentItem.setProperty("widget_scale_source", value)
+
+                        # Keep the legacy behaviour: selecting an image without
+                        # "Scale to Size" uses the image's natural dimensions.
+                        if not pixmap.isNull() and str(currentItem.getProperty("widget_scale_image") or "0") != "1":
+                            currentItem.setProperty("widget_size_width", pixmap.width())
+                            updateSizeField("widget_size_width", pixmap.width())
+                            currentItem.setProperty("widget_size_height", pixmap.height())
+                            updateSizeField("widget_size_height", pixmap.height())
 
                     currentItem.setProperty(property, value)
+                elif property in ("widget_size_width", "widget_size_height"):
+                    currentItem.setProperty(property, value)
 
+                    # Changing an image's dimensions enables scaling without
+                    # requiring the user to find another checkbox first.
+                    if isinstance(currentItem, FprjWidget) and currentItem.getProperty("widget_type") == "widget":
+                        if str(currentItem.getProperty("widget_scale_image") or "0") != "1":
+                            scaleSource = currentItem.getProperty("widget_scale_source") or currentItem.getProperty("widget_bitmap") or ""
+                            currentItem.setProperty("widget_scale_source", scaleSource)
+                            currentItem.setProperty("widget_scale_image", "1")
+                            scaleField = self.propertiesWidget.propertyItems.get("widget_scale_image")
+                            if scaleField != None:
+                                scaleField.blockSignals(True)
+                                scaleField.setChecked(True)
+                                scaleField.blockSignals(False)
+                elif property in ("num_use_font", "widget_scale_image"):
+                    enabled = value in (True, 1, "1", "True", "true")
+                    currentItem.setProperty(property, "1" if enabled else "0")
                 elif isinstance(value, bool):
                     if value == True:
                         value = "1"
@@ -818,6 +854,15 @@ class WatchfaceEditor(QMainWindow):
                             self.playWidgetPreview(currentProject["canvas"], widgetName)
                     else:
                         self.showDialog("error", userFacingReason, debugReason)
+
+                    if success and property == "num_use_font":
+                        enabled = value in (True, 1, "1", "True", "true")
+                        itemType = "widget_text" if enabled else "widget_num"
+                        explorerItem = self.Explorer.items.get(widgetName)
+                        if explorerItem != None:
+                            explorerItem.setData(0, 100, itemType)
+                        self.propertiesWidget.clearOnRefresh = True
+                        self.updateProperties(widgetName, itemType)
 
             if self.ignoreHistoryInvoke:
                 self.ignoreHistoryInvoke = False
@@ -935,12 +980,13 @@ class WatchfaceEditor(QMainWindow):
             return
 
         if name == None:
+            namePrefix = "text-" if id == "widget_text" else "widget-"
             count = 0
             for widget in currentProject["project"].getAllWidgets():
-                if "widget-" in widget.getProperty("widget_name"):
+                if namePrefix in widget.getProperty("widget_name"):
                     count += 1
 
-            name = "widget-" + str(count)
+            name = namePrefix + str(count)
     
         if self.ignoreHistoryInvoke:
             self.ignoreHistoryInvoke = False
@@ -1102,8 +1148,11 @@ class WatchfaceEditor(QMainWindow):
                     widgetData["images"].append(widgetData["widget"].getProperty("arc_image"))
                 
             elif widgetType == "widget":
-                if widgetData["widget"].getProperty("widget_bitmap") != "":
-                    widgetData["images"].append(widgetData["widget"].getProperty("widget_bitmap"))
+                image = (widgetData["widget"].getProperty("widget_scale_source")
+                         or widgetData["widget"].getProperty("widget_bitmap")
+                         or "")
+                if image != "":
+                    widgetData["images"].append(image)
 
             elif widgetType == "widget_imagelist":
                 if widgetData["widget"].getProperty("widget_bitmaplist") != []:

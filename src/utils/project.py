@@ -19,17 +19,20 @@ import json
 import shutil
 import xmltodict
 import xml
+import xml.dom.minidom
 
 from shutil import which
 from typing import List, Optional
 from pathlib import Path
 from pprint import pprint
 from copy import deepcopy
-from PyQt6.QtCore import QProcess, QSettings
+from PyQt6.QtCore import QProcess, QSettings, Qt
+from PyQt6.QtGui import QImage
 from PyQt6.QtWidgets import QMessageBox, QInputDialog
 
 from utils.data import WatchData
 from utils.binary import WatchfaceBinary
+from utils.font import render_glyphs, resource_stem
 from translate import Translator
 
 supportedOneFileVersion = "1.0"
@@ -95,6 +98,9 @@ class FprjProject:
             "@DefaultIndex": "imagelist_default_index",
             "@Digits": "num_digits",
             "@EndAngle": "arc_end_angle",
+            "@FontColor": "num_font_color",
+            "@FontFamily": "num_font_family",
+            "@FontSize": "num_font_size",
             "@Foreground_ImageName": "arc_image",
             "@Height": "widget_size_height",
             "@HourHand_ImageName": "analog_hour_image",
@@ -121,8 +127,11 @@ class FprjProject:
             "@SecondImage_rotate_xc": "analog_second_anchor_x",
             "@SecondImage_rotate_yc": "analog_second_anchor_y",
             "@Shape": "widget_type",
+            "@ScaleImage": "widget_scale_image",
+            "@ScaleSource": "widget_scale_source",
             "@Spacing": "num_spacing",
             "@StartAngle": "arc_start_angle",
+            "@UseFont": "num_use_font",
             "@Value_Src": "num_source",
             "@Visible_Src": "widget_visiblity_source",
             "@Width": "widget_size_width",
@@ -165,7 +174,9 @@ class FprjProject:
                 "@Width":"48",
                 "@Height":"48",
                 "@Alpha":"255",
-                "@Visible_Src":"0"
+                "@Visible_Src":"0",
+                "@ScaleImage":"0",
+                "@ScaleSource":""
             },
             "widget_imagelist": {
                 "@Shape":"31",
@@ -197,7 +208,31 @@ class FprjProject:
                 "@Alignment":"0",
                 "@Value_Src":"0",
                 "@Spacing":"0",
-                "@Blanking":"0"
+                "@Blanking":"0",
+                "@UseFont":"0",
+                "@FontFamily":"",
+                "@FontSize":"32",
+                "@FontColor":"#FFFFFF"
+            },
+            "widget_text": {
+                "@Shape":"32",
+                "@Name":"",
+                "@BitmapList":"",
+                "@X":"",
+                "@Y":"",
+                "@Width":"48",
+                "@Height":"48",
+                "@Alpha":"255",
+                "@Visible_Src":"0",
+                "@Digits":"2",
+                "@Alignment":"0",
+                "@Value_Src":"811",
+                "@Spacing":"0",
+                "@Blanking":"0",
+                "@UseFont":"1",
+                "@FontFamily":"",
+                "@FontSize":"32",
+                "@FontColor":"#FFFFFF"
             },
             "widget_container": {
                 "@Shape":"34",
@@ -616,11 +651,154 @@ class FprjProject:
         xml_string = dom.toprettyxml()
         return xml_string
 
+    @staticmethod
+    def _getThemeWidgets(theme) -> list:
+        widgets = theme.get("data", {}).get("FaceProject", {}).get("Screen", {}).get("Widget", [])
+        if isinstance(widgets, dict):
+            return [widgets]
+        return widgets or []
+
+    @staticmethod
+    def _getReferencedImages(widgets) -> set:
+        referenced = set()
+
+        for widget in widgets:
+            bitmap = widget.get("@Bitmap")
+            if bitmap:
+                referenced.add(os.path.basename(str(bitmap)))
+
+            bitmapList = widget.get("@BitmapList")
+            if bitmapList:
+                for entry in str(bitmapList).split("|"):
+                    if ":" in entry:
+                        entry = entry.split(":")[-1]
+                    entry = entry.strip("()")
+                    if entry:
+                        referenced.add(os.path.basename(entry))
+
+            scaleSource = widget.get("@ScaleSource")
+            if scaleSource:
+                referenced.add(os.path.basename(str(scaleSource)))
+
+        return referenced
+
+    def prepareGeneratedResources(self):
+        """
+        Render font based text to images and resize image widgets that have
+        "Scale to Size" enabled.
+
+        Fonts and resizing are editor concepts. Both the .face compiler and the
+        GMF exporter only understand plain image files, so the generated images
+        are written into the project image folder and referenced from the
+        normal Bitmap/BitmapList attributes. The exported formats therefore
+        stay exactly the same as before.
+        """
+        for theme in self.themes.values():
+            imageFolder = theme.get("imageFolder")
+            if not imageFolder or not theme.get("path"):
+                continue
+
+            widgets = self._getThemeWidgets(theme)
+            if not widgets:
+                continue
+
+            os.makedirs(imageFolder, exist_ok=True)
+
+            for widget in widgets:
+                if str(widget.get("@UseFont", "0")) == "1":
+                    family = widget.get("@FontFamily") or ""
+                    size = widget.get("@FontSize") or 32
+                    color = widget.get("@FontColor") or "#FFFFFF"
+
+                    pixmaps = render_glyphs(family, size, color)
+                    stem = resource_stem(widget.get("@Name") or "text")
+                    imageNames = []
+
+                    for index, pixmap in enumerate(pixmaps):
+                        imageName = f"__mifont_{stem}_{index}.png"
+                        imagePath = os.path.join(imageFolder, imageName)
+                        if not pixmap.save(imagePath, "PNG"):
+                            raise OSError(f"Failed to write font image: {imagePath}")
+                        imageNames.append(imageName)
+
+                    widget["@BitmapList"] = "|".join(imageNames)
+
+                    if pixmaps:
+                        try:
+                            digits = max(1, int(widget.get("@Digits") or 1))
+                        except (TypeError, ValueError):
+                            digits = 1
+                        try:
+                            spacing = int(widget.get("@Spacing") or 0)
+                        except (TypeError, ValueError):
+                            spacing = 0
+
+                        widget["@Width"] = str(pixmaps[0].width() * digits + spacing * max(0, digits - 1))
+                        widget["@Height"] = str(pixmaps[0].height())
+                else:
+                    scaleImage = str(widget.get("@ScaleImage", "0")) == "1"
+                    scaleSource = widget.get("@ScaleSource") or ""
+                    currentBitmap = str(widget.get("@Bitmap") or "")
+
+                    if scaleImage:
+                        if not scaleSource:
+                            scaleSource = currentBitmap
+                            widget["@ScaleSource"] = scaleSource
+
+                        # Skip files generated by a previous save pass to avoid
+                        # scaling an already scaled image again and again.
+                        if scaleSource and not os.path.basename(scaleSource).startswith("__misize_"):
+                            try:
+                                width = int(widget.get("@Width") or 0)
+                                height = int(widget.get("@Height") or 0)
+                            except (TypeError, ValueError):
+                                width = 0
+                                height = 0
+
+                            if width > 0 and height > 0:
+                                sourcePath = os.path.join(imageFolder, scaleSource)
+                                image = QImage(sourcePath)
+                                if image.isNull():
+                                    raise FileNotFoundError(f"Image not found: {sourcePath}")
+
+                                scaled = image.scaled(
+                                    width,
+                                    height,
+                                    Qt.AspectRatioMode.IgnoreAspectRatio,
+                                    Qt.TransformationMode.SmoothTransformation
+                                )
+                                stem = resource_stem(widget.get("@Name") or "image")
+                                imageName = f"__misize_{stem}.png"
+                                imagePath = os.path.join(imageFolder, imageName)
+                                if not scaled.save(imagePath, "PNG"):
+                                    raise OSError(f"Failed to write resized image: {imagePath}")
+
+                                widget["@Bitmap"] = imageName
+                    else:
+                        # If resizing was turned off, point back at the original
+                        # image instead of leaving a generated file behind.
+                        if scaleSource and currentBitmap.startswith("__misize_"):
+                            widget["@Bitmap"] = scaleSource
+
+            referencedImages = self._getReferencedImages(widgets)
+            for fileName in os.listdir(imageFolder):
+                if not (fileName.startswith("__mifont_") or fileName.startswith("__misize_")):
+                    continue
+                if fileName not in referencedImages:
+                    try:
+                        os.remove(os.path.join(imageFolder, fileName))
+                    except OSError:
+                        logging.warning(f"Could not remove generated resource {fileName}")
+
     def save(self):
         try:
             if self.themes["aod"]["widgets"] != [] :
                 self.createAod()
                 pprint(self.themes)
+
+            self.prepareGeneratedResources()
+
+            if self.themes["aod"]["widgets"] != [] and self.themes["aod"]["path"]:
                 raw = xmltodict.unparse(self.themes["aod"]["data"])
                 dom = xml.dom.minidom.parseString(raw)
                 aod_xml_string = dom.toprettyxml()

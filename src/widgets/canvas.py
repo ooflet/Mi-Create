@@ -16,6 +16,7 @@ sys.path.append("..")
 
 from utils.data import WatchData
 from utils.project import FprjWidget, GMFWidget
+from utils.font import render_glyphs
 
 from PyQt6.QtCore import pyqtSignal, QPoint, QPointF, QSize, QRect, QRectF, QLineF, QTimer, Qt, QModelIndex
 from PyQt6.QtGui import QPainter, QPainterPath, QPen, QColor, QPixmap, QIcon, QBrush, QImage, QStandardItemModel
@@ -553,7 +554,7 @@ class Canvas(QGraphicsView):
 
         return widget
 
-    def createImage(self, transparency, name, rect, zValue, image, snap, interpolationStyle):
+    def createImage(self, transparency, name, rect, zValue, image, snap, interpolationStyle, scaleToRect=False, originalImage=None):
         # Create widget
         widget = ImageWidget(int(rect.x()), int(rect.y()), int(rect.width()), int(rect.height()), self.frame, self, QColor(255,255,255,0), transparency, name)
         widget.setZValue(zValue)
@@ -561,10 +562,13 @@ class Canvas(QGraphicsView):
         widget.snap = snap
 
         # Add image
+        # When scaling is enabled we always read the original image so that
+        # repeated edits do not resize an already resized image.
+        imageSource = originalImage or image or ""
         pixmap = QPixmap()
-        pixmap.load(os.path.join(self.imageFolder, image))
+        pixmap.load(os.path.join(self.imageFolder, imageSource))
 
-        widget.setImage(pixmap, interpolationStyle)
+        widget.setImage(pixmap, interpolationStyle, scaleToRect)
         
         return widget
 
@@ -601,7 +605,7 @@ class Canvas(QGraphicsView):
         widget.setZValue(zValue)
         return widget
 
-    def createDigitalNumber(self, transparency, name, rect, zValue, source, numList, digits, spacing, alignment, hideZeros, snap, interpolationStyle, posRelativeToAlign, previewNumber=None):
+    def createDigitalNumber(self, transparency, name, rect, zValue, source, numList, digits, spacing, alignment, hideZeros, snap, interpolationStyle, posRelativeToAlign, previewNumber=None, font=None):
         split = name.split("_")
         angle = 0
 
@@ -617,7 +621,14 @@ class Canvas(QGraphicsView):
         widget.setData(1, "widget_imagelist") # Item ID
         widget.snap = snap
 
-        numList = [QPixmap(os.path.join(self.imageFolder, image)) for image in numList]
+        if font:
+            numList = render_glyphs(
+                font.get("family", ""),
+                font.get("size", 32),
+                font.get("color", "#FFFFFF")
+            )
+        else:
+            numList = [QPixmap(os.path.join(self.imageFolder, image)) for image in numList]
 
         # Get QPixmap from file string
         if len(numList) >= 10:
@@ -751,6 +762,9 @@ class Canvas(QGraphicsView):
                 else:
                     posRelativeToAlign = False
 
+                scaleImage = str(item.getProperty("widget_scale_image") or "0") == "1"
+                imageSource = item.getProperty("widget_scale_source") or item.getProperty("widget_bitmap") or ""
+
                 widget = self.createImage(
                     item.getProperty("widget_alpha"),
                     item.getProperty("widget_name"),
@@ -763,8 +777,21 @@ class Canvas(QGraphicsView):
                     index,
                     item.getProperty("widget_bitmap"),
                     snap,
-                    interpolation
+                    interpolation,
+                    scaleImage,
+                    imageSource
                 )
+
+                # Keep the stored dimensions in sync with the natural image
+                # size while "Scale to Size" is disabled. This makes the Width
+                # and Height fields show something meaningful.
+                if isinstance(item, FprjWidget) and not scaleImage:
+                    naturalWidth = str(int(widget.rect().width()))
+                    naturalHeight = str(int(widget.rect().height()))
+                    if item.getProperty("widget_size_width") != naturalWidth:
+                        item.setProperty("widget_size_width", naturalWidth)
+                    if item.getProperty("widget_size_height") != naturalHeight:
+                        item.setProperty("widget_size_height", naturalHeight)
 
                 split = item.getProperty("widget_name").split("[")
                 if len(split) >= 2:
@@ -816,6 +843,15 @@ class Canvas(QGraphicsView):
                 else:
                     posRelativeToAlign = False
 
+                useFont = str(item.getProperty("num_use_font") or "0") == "1"
+                font = None
+                if useFont:
+                    font = {
+                        "family": item.getProperty("num_font_family") or "",
+                        "size": item.getProperty("num_font_size") or 32,
+                        "color": item.getProperty("num_font_color") or "#FFFFFF"
+                    }
+
                 widget = self.createDigitalNumber(
                     item.getProperty("widget_alpha"),
                     item.getProperty("widget_name"),
@@ -835,7 +871,8 @@ class Canvas(QGraphicsView):
                     snap,
                     interpolation,
                     posRelativeToAlign,
-                    item.getPreviewNumber()
+                    item.getPreviewNumber(),
+                    font
                 )
 
             elif item.getProperty("widget_type") == "widget_arc":
@@ -1126,13 +1163,21 @@ class ImageWidget(BaseWidget):
         self.pixmapItem = QGraphicsPixmapItem(self)
         self.setPos(posX, posY)
 
-    def setImage(self, qPixmap, isAntialiased):
+    def setImage(self, qPixmap, isAntialiased, scaleToRect=False):
         if qPixmap.isNull():
             self.representNoImage()
             return
-        
-        self.pixmapItem.setPixmap(qPixmap)
-        self.setRect(0, 0, qPixmap.width(), qPixmap.height())
+
+        if scaleToRect:
+            width = max(1, int(self.rect().width()))
+            height = max(1, int(self.rect().height()))
+            transform = Qt.TransformationMode.SmoothTransformation if isAntialiased else Qt.TransformationMode.FastTransformation
+            qPixmap = qPixmap.scaled(width, height, Qt.AspectRatioMode.IgnoreAspectRatio, transform)
+            self.pixmapItem.setPixmap(qPixmap)
+            self.setRect(0, 0, width, height)
+        else:
+            self.pixmapItem.setPixmap(qPixmap)
+            self.setRect(0, 0, qPixmap.width(), qPixmap.height())
 
         if isAntialiased:
             self.pixmapItem.setTransformationMode(Qt.TransformationMode.SmoothTransformation)

@@ -535,13 +535,17 @@
                 },
                 "widget_size_width": {
                     "string": "Width",
-                    "type": "disabled",
-                    "value": "48"
+                    "type": "int",
+                    "value": "48",
+                    "min": "1",
+                    "max": "9999"
                 },
                 "widget_size_height": {
                     "string": "Height",
-                    "type": "disabled",
-                    "value": "48"
+                    "type": "int",
+                    "value": "48",
+                    "min": "1",
+                    "max": "9999"
                 }
             },
             "Appearance": {
@@ -565,6 +569,11 @@
                 }
             },
             "Image": {
+                "widget_scale_image": {
+                    "string": "Scale to Size",
+                    "type": "bool",
+                    "value": ""
+                },
                 "widget_bitmap": {
                     "string": "Image",
                     "type": "img",
@@ -810,11 +819,141 @@
                     "value": ""
                 }
             },
+            "Text": {
+                "num_use_font": {
+                    "string": "Use Font",
+                    "type": "bool",
+                    "value": ""
+                }
+            },
             "Images": {
                 "widget_bitmaplist": {
                     "string": "Images",
                     "type": "numlist",
                     "value": ""
+                }
+            }
+        }
+    },
+    "widget_text": {
+        "Shape": "Text",
+        "properties": {
+            "General": {
+                "WidgetType": {
+                    "string": "Widget Type",
+                    "type": "disabled",
+                    "value": "Text"
+                },
+                "widget_name": {
+                    "string": "Name",
+                    "type": "str",
+                    "value": ""
+                }
+            },
+            "Position": {
+                "widget_pos_x": {
+                    "string": "X",
+                    "type": "int",
+                    "value": "",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "widget_pos_y": {
+                    "string": "Y",
+                    "type": "int",
+                    "value": "",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "widget_size_width": {
+                    "string": "Width",
+                    "type": "disabled",
+                    "value": ""
+                },
+                "widget_size_height": {
+                    "string": "Height",
+                    "type": "disabled",
+                    "value": ""
+                },
+                "num_alignment": {
+                    "string": "Alignment",
+                    "type": "list",
+                    "value": "",
+                    "options": [
+                        "Left",
+                        "Center",
+                        "Right"
+                    ]
+                }
+            },
+            "Appearance": {
+                "widget_alpha": {
+                    "string": "Opacity",
+                    "type": "int",
+                    "value": "255",
+                    "min": "0",
+                    "max": "255"
+                },
+                "widget_visibility_source": {
+                    "string": "Visibility Trigger",
+                    "type": "src",
+                    "value": "",
+                    "visibleOn": [
+                        "xiaomi_color",
+                        "xiaomi_color_sport",
+                        "xiaomi_color_2/s1/s2",
+                        "xiaomi_watch_s1_pro"
+                    ]
+                },
+                "num_digits": {
+                    "string": "Digits",
+                    "type": "int",
+                    "value": "2",
+                    "min": "1",
+                    "max": "40"
+                },
+                "num_spacing": {
+                    "string": "Spacing",
+                    "type": "int",
+                    "value": "0",
+                    "min": "-999",
+                    "max": "999"
+                },
+                "num_toggle_zeros": {
+                    "string": "Hide Zeroes",
+                    "type": "bool",
+                    "value": ""
+                }
+            },
+            "Data": {
+                "num_source": {
+                    "string": "Data Source",
+                    "type": "src",
+                    "value": ""
+                }
+            },
+            "Text": {
+                "num_use_font": {
+                    "string": "Use Font",
+                    "type": "bool",
+                    "value": "1"
+                },
+                "num_font_family": {
+                    "string": "Font",
+                    "type": "font",
+                    "value": ""
+                },
+                "num_font_size": {
+                    "string": "Font Size",
+                    "type": "int",
+                    "value": "32",
+                    "min": "4",
+                    "max": "512"
+                },
+                "num_font_color": {
+                    "string": "Color",
+                    "type": "color",
+                    "value": "#FFFFFF"
                 }
             }
         }
