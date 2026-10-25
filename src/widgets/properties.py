@@ -16,9 +16,10 @@ from utils.project import FprjProject, XiaomiProject
 
 from PyQt6.QtWidgets import (QStyleOptionViewItem, QStyledItemDelegate, QWidget, QFileDialog, QTreeWidget, QFrame, QHeaderView, QPushButton,
                                QDialog, QDialogButtonBox, QVBoxLayout, QListWidgetItem, QTreeWidgetItem, QLineEdit, 
-                               QSpinBox, QComboBox, QStyle, QCheckBox, QMessageBox, QAbstractItemView, QApplication)
+                               QSpinBox, QComboBox, QStyle, QCheckBox, QMessageBox, QAbstractItemView, QApplication,
+                               QFontComboBox, QColorDialog)
 from PyQt6.QtCore import Qt, pyqtSignal, QPoint, QSize, QModelIndex
-from PyQt6.QtGui import QColor, QPen, QGuiApplication, QIcon, QPalette, QStandardItemModel
+from PyQt6.QtGui import QColor, QPen, QGuiApplication, QIcon, QPalette, QStandardItemModel, QFont
 from pprint import pprint
 
 from translate import Translator
@@ -271,6 +272,45 @@ class PropertiesWidget(QWidget):
 
         comboBox.activated.connect(onChanged)
         return comboBox
+
+    def createFontComboBox(self, selected, srcProperty):
+        def onChanged(font):
+            self.sendPropertyChangedSignal(srcProperty, font.family())
+
+        fontComboBox = QFontComboBox(self)
+        fontComboBox.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        fontComboBox.setObjectName("propertyField-input")
+
+        if selected:
+            fontComboBox.setCurrentFont(QFont(str(selected)))
+
+        fontComboBox.currentFontChanged.connect(onChanged)
+        return fontComboBox
+
+    def createColorButton(self, selected, srcProperty):
+        color = QColor(str(selected) if selected else "#FFFFFF")
+        if not color.isValid():
+            color = QColor("#FFFFFF")
+
+        def applyColor():
+            foreground = "black" if color.lightness() > 127 else "white"
+            colorButton.setText(color.name().upper())
+            colorButton.setStyleSheet(
+                f"background-color: {color.name()}; color: {foreground};"
+            )
+
+        def onChanged():
+            selectedColor = QColorDialog.getColor(color, self, _("Select Color"))
+            if selectedColor.isValid():
+                color.setNamedColor(selectedColor.name())
+                applyColor()
+                self.sendPropertyChangedSignal(srcProperty, color.name())
+
+        colorButton = QPushButton(self)
+        colorButton.setObjectName("propertyField-input")
+        colorButton.clicked.connect(onChanged)
+        applyColor()
+        return colorButton
     
     def createAlignmentComboBox(self, selected, srcProperty):
         items = ["Left", "Center", "Right"]
@@ -362,6 +402,10 @@ class PropertiesWidget(QWidget):
                     inputWidget = self.createResourceEdit(propertyValue, False, resourceList, False, key)
                 elif property["type"] == "list":
                     inputWidget = self.createComboBox(property["options"], propertyValue, key, False)
+                elif property["type"] == "font":
+                    inputWidget = self.createFontComboBox(propertyValue, key)
+                elif property["type"] == "color":
+                    inputWidget = self.createColorButton(propertyValue, key)
                 elif property["type"] == "imglist":
                     self.imageCategories = []
 

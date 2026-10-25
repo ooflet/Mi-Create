@@ -54,15 +54,21 @@ class Explorer(QTreeWidget):
         self.clear()
         self.items = {}
         def createItem(item):
-            if not self.objectIcon.icon.get(item.getProperty("widget_type")):
+            widgetType = item.getProperty("widget_type")
+            if not self.objectIcon.icon.get(widgetType):
                 #self.showDialogue("error", f"Widget {item['@Shape']} not implemented in self.objectIcon, please report as issue.")
                 return
+
+            itemType = widgetType
+            if widgetType == "widget_num" and str(item.getProperty("num_use_font") or "0") == "1":
+                itemType = "widget_text"
+
             object = QTreeWidgetItem(root)
             object.setText(0, item.getProperty("widget_name"))
             object.setSizeHint(0, QSize(18, 18))
-            object.setIcon(0, QIcon.fromTheme(self.objectIcon.icon[item.getProperty("widget_type")]))
+            object.setIcon(0, QIcon.fromTheme(self.objectIcon.icon[widgetType]))
             object.setFlags(object.flags() | Qt.ItemFlag.ItemIsEditable)
-            object.setData(0, 100, item.getProperty("widget_type"))
+            object.setData(0, 100, itemType)
             object.setData(0, 101, item.getProperty("widget_name"))
             self.items[item.getProperty("widget_name")] = object
         
